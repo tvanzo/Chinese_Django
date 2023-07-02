@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Your Title</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'subplayer/styles.css' %}">
+</head>
+<body>
+  <script src="{% static 'subplayer/convertForLongAudio.js' %}"></script>
+
+    <div id="podcast-cover">
+          <img src="{% static 'subplayer/cover.jpeg' %}" alt="Podcast Cover">
+    </div>
+
+    <audio id="audiofile" src="{% static 'subplayer/test2.mp3' %}"controls></audio><br>
+
+    <div id="subtitles"></div>
+
+    <button id="loop-button">Loop Mode</button>
+
+    <div id="notes">
+        <textarea id="note-input" placeholder="方法"></textarea>
+        <button id="save-button">丰富</button>
+    </div>
+
+    <script src="{% static 'subplayer/script.js' %}"></script>
+</body>
+</html>
