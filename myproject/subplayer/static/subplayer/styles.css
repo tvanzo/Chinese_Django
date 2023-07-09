@@ -10,9 +10,13 @@ body {
 
   #audiofile {
     display: block;
+    margin: 10px auto;
     width: 80%;
+  }
+  #player{
+     display: block;
+    width: 50%;
     margin: 30px auto;
-    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
   }
 
   #subtitles {

@@ -1,29 +1,42 @@
-{% load static %}
 <!DOCTYPE html>
+{% load static %}
+
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Your Title</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'subplayer/styles.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+
 </head>
+
 <body>
-  <script src="{% static 'subplayer/convertForLongAudio.js' %}"></script>
+    <script src="{% static 'subplayer/convertForLongAudio.js' %}"></script>
 
-    <div id="podcast-cover">
-          <img src="{% static 'subplayer/cover.jpeg' %}" alt="Podcast Cover">
-    </div>
+  <div id="podcast-cover">
+    <img src="{% static 'subplayer/cover.jpeg' %}" alt="Podcast Cover">
+  </div>
 
-    <audio id="audiofile" src="{% static 'subplayer/test2.mp3' %}"controls></audio><br>
+  <audio id="audiofile" src="{% static 'subplayer/test2.mp3' %}" controls="controls" type="audio/mp3"></audio><br>
 
-    <div id="subtitles"></div>
+  <div id="subtitles"></div>
 
-    <button id="loop-button">Loop Mode</button>
+  <button id="loop-button">Loop Mode</button>
 
-    <div id="notes">
-        <textarea id="note-input" placeholder="方法"></textarea>
-        <button id="save-button">丰富</button>
-    </div>
+  <div id="notes">
+    <textarea id="note-input" placeholder="方法"></textarea>
+    <button id="save-button">丰富</button>
+  </div>
 
-    <script src="{% static 'subplayer/script.js' %}"></script>
+{% include 'subtitles.html' with podcast_number=podcast_number %}
+
+  
+  <script>
+    
+     // Get the media_id from the URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const mediaId = urlParams.get('media_id');
+
+  // Set the src attribute of the audio element
+  const audioPlayer = document.getElementById('audiofile');
+  audioPlayer.src = {% static 'subplayer/${mediaId}.mp3' %}`;
+
+</script>
 </body>
-</html>
