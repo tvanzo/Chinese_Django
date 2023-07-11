@@ -20,6 +20,8 @@ from accounts import views
 from django.contrib.auth.views import LoginView
 from django.views.generic import TemplateView
 from subplayer import views as subplayer_views
+from subplayer.views import podcast_detail, video_detail
+
 
 
 
@@ -29,7 +31,11 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('subplayer/', TemplateView.as_view(template_name='subplayer.html'), name='subplayer'),
     path('podcast/', subplayer_views.podcast_view, name='podcast_view'),
-    path('video/', subplayer_views.video_view, name='video_view')
+    path('video/', subplayer_views.video_view, name='video_view'),
+    path('podcast/<str:media_id>/', podcast_detail, name='podcast_detail'),
+    path('video/<str:media_id>/', video_detail, name='video_detail'),
+
+
 
 
 

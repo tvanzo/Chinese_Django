@@ -3,18 +3,21 @@
 
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'subplayer/styles.css' %}">
 
 </head>
 
 <body>
-    <script src="{% static 'subplayer/convertForLongAudio.js' %}"></script>
 
   <div id="podcast-cover">
     <img src="{% static 'subplayer/cover.jpeg' %}" alt="Podcast Cover">
   </div>
 
-  <audio id="audiofile" src="{% static 'subplayer/test2.mp3' %}" controls="controls" type="audio/mp3"></audio><br>
+
+
+<audio id="audiofile"  controls="controls" type="audio/mp3"></audio><br>
+
+
 
   <div id="subtitles"></div>
 
@@ -25,18 +28,21 @@
     <button id="save-button">丰富</button>
   </div>
 
-{% include 'subtitles.html' with podcast_number=podcast_number %}
 
   
   <script>
-    
+     const media = JSON.parse("{{ media|escapejs }}");
+    const media_id = media.media_id;
      // Get the media_id from the URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const mediaId = urlParams.get('media_id');
+  //const urlParams = new URLSearchParams(window.location.search);
+  //const mediaId = urlParams.get('media_id');
 
   // Set the src attribute of the audio element
   const audioPlayer = document.getElementById('audiofile');
-  audioPlayer.src = {% static 'subplayer/${mediaId}.mp3' %}`;
+  audiofile.src = "{% static 'subplayer/audio/' %}" + media.media_id + ".mp3";
 
 </script>
+{% include 'subtitles.html' with media=media %}
+
+
 </body>

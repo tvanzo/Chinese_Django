@@ -1,4 +1,9 @@
-from django.shortcuts import render
+from django.http import JsonResponse
+from django.core.serializers import serialize
+from django.shortcuts import render, get_object_or_404
+import json
+from .models import Media
+
 
 def myapp_view(request):
     return render(request, 'subplayer.html')
@@ -12,3 +17,21 @@ def video_view(request):
     media_id = request.GET.get('media_id')  # Get the media_id parameter from the URL
     context = {'media_id': media_id}
     return render(request, 'video.html', context)
+
+
+def podcast_detail(request, media_id):
+    media = get_object_or_404(Media, media_id=media_id, media_type='audio')
+    media_serialized = serialize('json', [media])
+    media_dict = json.loads(media_serialized)[0]['fields']
+    media_dict['media_id'] = media.media_id
+    media_dict['model'] = str(media._meta)
+    media_json = json.dumps(media_dict)
+    
+
+    context = {'media': media_json}
+    return render(request, 'subplayer.html', context)
+
+def video_detail(request, media_id):
+    media = get_object_or_404(Media, media_id=media_id)
+    media_serialized = json.loads(serialize('json', [media]))[0]
+    return render(request, 'video.html', {'media': media_serialized})

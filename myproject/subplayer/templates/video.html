@@ -303,20 +303,7 @@ if (currentFrame.length > 0) {
 
      
 
-     function createSubtitles() {
-    subtitles.innerHTML = ""; // clear existing subtitles
-
-    if(currentSubtitleIndex < framesArray.length) {  // checking if currentSubtitleIndex is within array bounds
-        var currentFrame = framesArray[currentSubtitleIndex];
-        for (var i = 0; i < currentFrame.length; i++) {
-            var element = doc.createElement('span');
-            element.setAttribute("id", "s_" + currentSubtitleIndex + "" + i);
-            element.innerText = currentFrame[i].sentence;
-            subtitles.appendChild(element);
-        }
-        currentSubtitleIndex++;  // increment currentSubtitleIndex for the next frame
-    }
-}
+     
     
 createSubtitles();
 
