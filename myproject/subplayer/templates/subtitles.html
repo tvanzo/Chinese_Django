@@ -1,5 +1,5 @@
 {% load static %}
-
+<h1>a</h1>
 <div id="subtitles">
     <div class="subtitle">
         <span class="time"></span>
@@ -11,11 +11,11 @@
 <script src="{% static 'subplayer/convertForLongAudio.js' %}"></script>
 
 <script type="text/javascript">
-    var mediaJsonString = "{{ media|escapejs|safe }}";
-var media2 = JSON.parse(mediaJsonString);
+    var media2 = JSON.parse(document.getElementById('media').textContent);
 
 window.mediaId = media2.media_id; 
 window.test2 = media2.words;
+console.log("a");
 </script>
 <script src="{% static 'subplayer/js/subtitles.js' %}"></script>
 

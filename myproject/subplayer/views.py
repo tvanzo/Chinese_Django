@@ -32,6 +32,11 @@ def podcast_detail(request, media_id):
     return render(request, 'subplayer.html', context)
 
 def video_detail(request, media_id):
-    media = get_object_or_404(Media, media_id=media_id)
-    media_serialized = json.loads(serialize('json', [media]))[0]
-    return render(request, 'video.html', {'media': media_serialized})
+   media = get_object_or_404(Media, media_id=media_id, media_type='video')
+    media_serialized = serialize('json', [media])
+    media_dict = json.loads(media_serialized)[0]['fields']
+    media_dict['media_id'] = media.media_id
+    media_dict['model'] = str(media._meta)
+    media_json = json.dumps(media_dict)
+     context = {'media': media_json}
+    return render(request, 'subplayer.html', context)

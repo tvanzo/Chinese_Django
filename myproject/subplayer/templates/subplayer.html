@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 {% load static %}
 
@@ -16,6 +17,7 @@
 
 
 <audio id="audiofile"  controls="controls" type="audio/mp3"></audio><br>
+ <div id="player"></div>
 
 
 
@@ -30,19 +32,30 @@
 
 
   
-  <script>
-     const media = JSON.parse("{{ media|escapejs }}");
-    const media_id = media.media_id;
-     // Get the media_id from the URL
-  //const urlParams = new URLSearchParams(window.location.search);
-  //const mediaId = urlParams.get('media_id');
+   {{ media|json_script:"media" }}
 
-  // Set the src attribute of the audio element
-  const audioPlayer = document.getElementById('audiofile');
-  audiofile.src = "{% static 'subplayer/audio/' %}" + media.media_id + ".mp3";
+    <script>
+        // Get the JSON data from the HTML
+        const media = JSON.parse(document.getElementById('media').textContent);
+        const mediaType = media.media_type;
 
-</script>
-{% include 'subtitles.html' with media=media %}
+        if (mediaType === 'audio') {
+            const audioPlayer = document.getElementById('audiofile');
+            audioPlayer.src = "{% static 'subplayer/audio/' %}" + media.media_id + ".mp3";
+            console.log("1");
+        } else {
+            console.log("23434");
+            document.getElementById('audiofile').style.display = 'none';
+        }
+    </script>
 
+    <p>Media Type: {{ media.media_type }}</p>
+
+    <!-- Conditionally include one of two templates based on media.media_type -->
+    {% if media.media_type == 'audio' %}
+        {% include 'subtitles.html' with media=media %}
+    {% else %}
+        {% include 'subtitlesforvideo.html' with media=media %}
+    {% endif %}
 
 </body>

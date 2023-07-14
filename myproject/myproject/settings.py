@@ -35,13 +35,15 @@ SECRET_KEY = 'django-insecure-xrigfr!#p85sj0l%8r#7wlqp))+ov&%0+=d+-g6-%cxarh3ph2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '5442-240e-46c-1f00-1cb4-b823-17b2-5b83-61c8.ngrok-free.app']
 
 
 # Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
+        'sslserver',
+
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
