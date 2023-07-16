@@ -22,7 +22,7 @@ from django.views.generic import TemplateView
 from subplayer import views as subplayer_views
 from subplayer.views import podcast_detail, video_detail
 from django.contrib.auth import views as auth_views
-from accounts import views as accounts_views
+from accounts.views import register
 
 
 
@@ -34,9 +34,11 @@ urlpatterns = [
     path('video/', subplayer_views.video_view, name='video_view'),
     path('podcast/<str:media_id>/', podcast_detail, name='podcast_detail'),
     path('video/<str:media_id>/', video_detail, name='video_detail'),
-    path('register/', accounts_views.register, name='register'),
-    path('login/', accounts_views.user_login, name='login'),
-    path('logout/', accounts_views.user_logout, name='logout'),
+    path('register/', register, name='register'),
+    path('login/', auth_views.LoginView.as_view(template_name='accounts/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+
+
 
 
 

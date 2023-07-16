@@ -16,7 +16,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-AUTH_USER_MODEL = 'accounts.User'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
@@ -49,8 +48,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts',
     'subplayer',
+    'accounts',
+
+
+
 ]
 
 MIDDLEWARE = [
@@ -140,9 +142,11 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-LOGIN_REDIRECT_URL = 'podcast/4'
-LOGIN_URL = 'login'
+# Set the LOGIN_REDIRECT_URL to your desired URL
+LOGIN_REDIRECT_URL = '/podcast/3'
 
+# Set the LOGOUT_REDIRECT_URL to your desired URL
+LOGOUT_REDIRECT_URL = 'login'  # Replace 'login' with your desired URL
 
 
 
