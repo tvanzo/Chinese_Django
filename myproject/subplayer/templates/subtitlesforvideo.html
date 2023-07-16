@@ -1,22 +1,14 @@
 {% load static %}
 <h1>b</h1>
-<div id="subtitles">
-    <div class="subtitle">
-        <span class="time"></span>
-        <span class="text"></span>
-    </div>
-</div>
+
 <div id="audio-speed-display" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.5); color: white; padding: 20px; border-radius: 10px; font-size: 2em;"></div>
 
 <script src="{% static 'subplayer/convertForLongAudio.js' %}"></script>
 
 <script type="text/javascript">
-    var mediaJsonString = "{{ media|escapejs|safe }}";
-var media2 = JSON.parse(mediaJsonString);
-console.log("b");
-
-window.mediaId = media2.media_id; 
-window.test2 = media2.words;
+    var mediaId = '{{ media_id }}';
+  var mediaType = '{{ media_type }}';
+  
 </script>
 <script src="{% static 'subplayer/js/subtitles_video.js' %}"></script>
 

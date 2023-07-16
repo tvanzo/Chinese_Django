@@ -1,18 +1,21 @@
-
-<!DOCTYPE html>
 {% load static %}
 
+
+<!DOCTYPE html>
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="{% static 'subplayer/styles.css' %}">
 
+    <meta charset="UTF-8">
+    <title>Your Title</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'subplayer/styles.css' %}">
 </head>
-
 <body>
+  <script src="{% static 'subplayer/convertForLongAudio.js' %}"></script>
 
-  <div id="podcast-cover">
-    <img src="{% static 'subplayer/cover.jpeg' %}" alt="Podcast Cover">
-  </div>
+    <div id="podcast-cover">
+          <img src="{% static 'subplayer/cover.jpeg' %}" alt="Podcast Cover">
+    </div>
 
 
 
@@ -21,26 +24,28 @@
 
 
 
-  <div id="subtitles"></div>
+    <div id="subtitles"></div>
+<div id="audio-speed-display" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.5); color: white; padding: 20px; border-radius: 10px; font-size: 2em;"></div>
 
-  <button id="loop-button">Loop Mode</button>
+    <button id="loop-button">Loop Mode</button>
 
-  <div id="notes">
-    <textarea id="note-input" placeholder="方法"></textarea>
-    <button id="save-button">丰富</button>
-  </div>
+    <div id="notes">
+        <textarea id="note-input" placeholder="方法"></textarea>
+        <button id="save-button">丰富</button>
+    </div>
 
-
-  
-   {{ media|json_script:"media" }}
 
     <script>
         // Get the JSON data from the HTML
-        const media = JSON.parse(document.getElementById('media').textContent);
+        var media = JSON.parse('{{ media_json|escapejs }}');
+        var mediaId=media.media_id;
+
+        var test2 = "{% static 'subplayer/subtitle_json/' %}" + mediaId + ".json"        
         const mediaType = media.media_type;
+        const audioPlayer = document.getElementById('audiofile');
+
 
         if (mediaType === 'audio') {
-            const audioPlayer = document.getElementById('audiofile');
             audioPlayer.src = "{% static 'subplayer/audio/' %}" + media.media_id + ".mp3";
             console.log("1");
         } else {
@@ -49,13 +54,16 @@
         }
     </script>
 
-    <p>Media Type: {{ media.media_type }}</p>
+  <p>Media Type: {{ media.media_type }}</p>
 
-    <!-- Conditionally include one of two templates based on media.media_type -->
-    {% if media.media_type == 'audio' %}
-        {% include 'subtitles.html' with media=media %}
-    {% else %}
-        {% include 'subtitlesforvideo.html' with media=media %}
-    {% endif %}
+<!-- Conditionally include one of two templates based on media.media_type -->
+{% if media.media_type == 'audio' %}
+    {% include 'subtitles.html' with media=media %}
+        <script src="{% static 'subplayer/js/subtitles.js' %}"></script>
+
+{% else %}
+        <script src="{% static 'subplayer/js/subtitles_video.js' %}"></script>
+{% endif %}
 
 </body>
+</html>

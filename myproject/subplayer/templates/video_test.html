@@ -1,4 +1,31 @@
-     var currentSubtitleIndex = 0;
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YouTube Video Progress</title>
+        <link rel="stylesheet" type="text/css" href="{% static 'subplayer/styles.css' %}">
+        <script src="{% static 'subplayer/convertForLongAudio.js' %}"></script>
+
+</head>
+<body>
+      <div id="podcast-cover">
+        <img src="{% static 'subplayer/cover.jpeg' %}" alt="Podcast Cover">
+  </div>
+    <div id="player"></div>
+
+</br>
+  <div id="subtitles"></div>
+
+  <button id="loop-button">Loop Mode</button>
+
+  <div id="notes">
+    <textarea id="note-input" placeholder="方法"></textarea>
+    <button id="save-button">丰富</button>
+  </div>
+
+    <script>
+        var currentSubtitleIndex = 0;
         var y=0;
         var framesArray = [];
 var currentFrame = [];
@@ -34,7 +61,7 @@ createSubtitles();  // create the initial frame
 
         function updateProgress() {
     var currentTime = player.getCurrentTime();
-    console.log("current time" + currentTime);
+    
     var duration = player.getDuration();
     var progressText = formatTime(currentTime) + ' / ' + formatTime(duration);
 
@@ -152,11 +179,13 @@ createSubtitles();  // create the initial frame
 
 
     (async function(win, doc) {
+        const media_id = "{{ media_id }}"; // Replace with the actual podcast number or video number
+        const scriptURL = `/path/to/podcast/script_${media_id}.json`; // Replace with the URL to the podcast script JSON file
         // JavaScript code
-
-   
-    let transcript;
-    let syncData5 = null; // Assign an initial value to syncData5
+      const test1 = "{% static 'subplayer/test.json' %}";
+      const test2 = "{% static 'subplayer/test2.json' %}";
+    restructureJson(test1, test2);
+    let transcript, syncData5;
 
     try {
   const response = await fetch(test2);
@@ -165,12 +194,13 @@ createSubtitles();  // create the initial frame
   syncData5 = data.words;
   
 } catch (error) {
-  console.error('Erroreeeee:', error);
+  console.error('Error:', error);
 }
 
-    console.log(syncData5);
-
-    var syncData=syncData5;
+    var syncData = syncData5;
+    console.log(syncData.length);
+    console.log(transcript[0]);
+    
 
 
       var syncData2 = []; // New array to track sentences
@@ -293,7 +323,22 @@ createSubtitles();
 
 
 
+function createSubtitles() {
+    console.log(currentSubtitleIndex);
+    if(currentSubtitleIndex < framesArray.length) {  // checking if currentSubtitleIndex is within array bounds
+        var currentFrame = framesArray[currentSubtitleIndex];
+        subtitles.innerHTML = ""; // clear existing subtitles
+        for (var i = 0; i < currentFrame.length; i++) {
+            var element = document.createElement('span');
+            element.setAttribute("id", "s_" + currentSubtitleIndex + "" + i);
+            element.innerText = currentFrame[i].sentence;
+            subtitles.appendChild(element);
+        }
+        // no increment of currentSubtitleIndex here, it will be handled in the timeupdate event
+    }
+}
 
+createSubtitles();  // create the initial frame
 
 
 
@@ -415,3 +460,14 @@ subtitles.addEventListener("mouseup", function() {
     }
 });
     })(window, document);
+</script>
+
+</body>
+</html>
+
+  
+  
+</script>
+
+</body>
+</html>

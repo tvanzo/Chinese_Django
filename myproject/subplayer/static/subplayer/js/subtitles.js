@@ -1,16 +1,105 @@
-   
+     var currentSubtitleIndex = 0;
+        var y=0;
+        var framesArray = [];
+var currentFrame = [];
+var currentFrameCharCount = 0;
+        function findSubtitleIndex(time) {
+    for(let i = 0; i < framesArray.length; i++) {
+        for(let j = 0; j < framesArray[i].length; j++) {
+            const item = framesArray[i][j];
+            if(time >= parseFloat(item.startTime) && time <= parseFloat(item.endTime)) {
+                return i;
+            }
+        }
+    }
+    return -1; // Return -1 if no suitable index is found
+}
 
-    window.loadSubtitles =  function(mediaId, test2) {
-    let transcript, syncData;
+function createSubtitles() {
+    console.log(currentSubtitleIndex);
+    if(currentSubtitleIndex < framesArray.length) {  // checking if currentSubtitleIndex is within array bounds
+        var currentFrame = framesArray[currentSubtitleIndex];
+        subtitles.innerHTML = ""; // clear existing subtitles
+        for (var i = 0; i < currentFrame.length; i++) {
+            var element = document.createElement('span');
+            element.setAttribute("id", "s_" + currentSubtitleIndex + "" + i);
+            element.innerText = currentFrame[i].sentence;
+            subtitles.appendChild(element);
+        }
+        // no increment of currentSubtitleIndex here, it will be handled in the timeupdate event
+    }
+}
 
+createSubtitles();  // create the initial frame
+
+        function updateProgress() {
+    var currentTime = audioPlayer.currentTime;
+    console.log("current time" + currentTime);
+    var duration = audioPlayer.duration;
+
+    // Check if the currentSubtitleIndex is still correct, update it if necessary
+    const correctIndex = findSubtitleIndex(currentTime);
+    if (correctIndex !== -1 && correctIndex !== currentSubtitleIndex) {
+        currentSubtitleIndex = correctIndex;
+        createSubtitles();
+    }
+    if (currentSubtitleIndex < framesArray.length) {
+        let frame = framesArray[currentSubtitleIndex];
+        let isFrameDone = true;
+
+        for (let j = 0; j < frame.length; j++) {
+            const item = frame[j];
+            const sentenceElement = document.getElementById("s_" + currentSubtitleIndex + "" + j);
+
+            if (currentTime >= parseFloat(item.startTime) && currentTime <= parseFloat(item.endTime)) {
+                if (sentenceElement) {
+                    sentenceElement.style.color = '#E4E4E4';
+                    sentenceElement.style.fontWeight = 'bold';
+                }
+                isFrameDone = false;
+            } else if (sentenceElement) {
+                sentenceElement.style.color = '#595757';
+                sentenceElement.style.fontWeight = 'normal';
+            }
+        }
+
+        // Move to the next frame
+        if (isFrameDone) {
+            currentSubtitleIndex++;
+            // Clear and repopulate the subtitles with the next frame, only if not the last frame
+            if (currentSubtitleIndex < framesArray.length) {
+                createSubtitles();
+            }
+        }
+    }
+}
         
+        audioPlayer.addEventListener('timeupdate', updateProgress);
+
+        var subtitles = document.getElementById("subtitles");
+
+    (async function(win, doc) {
+        // JavaScript code
+
+   
+    let transcript;
+    let syncData5 = null; // Assign an initial value to syncData5
+
+    try {
+  const response = await fetch(test2);
+  const data = await response.json();
+  transcript = data.transcript;
+  syncData5 = data.words;
+  
+} catch (error) {
+  console.error('Erroreeeee:', error);
+}
+
+    console.log(syncData5);
+
+    var syncData=syncData5;
 
 
-
-    syncData = test2;
-    console.log(test2);
-    
-    transcript=test2.transcript;
       var syncData2 = []; // New array to track sentences
       
       // Convert syncData to syncData2
@@ -20,24 +109,25 @@
       var counter = 0;
       var pattern = /^[A-Za-z]+$/;
   for (let i = 0; i < transcript.length; i++) {
-    var word = syncData.words[counter].word;
+    var word = syncData[counter].word;
+    console.log(transcript[i] + "" + word);
      while(pattern.test(transcript[i])){
         i++;
      }
 
     var punctuation = transcript[i + 1];
     while ((!isNaN(transcript[i]) ||[ "千", "万", "亿"].includes(transcript[i]) ||["零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "百", "千", "万", "亿", "两"].
-      includes(syncData.words[counter].word)) && transcript[i]!=word) {
-      word = syncData.words[counter].word;
+      includes(syncData[counter].word)) && transcript[i]!=word) {
+      word = syncData[counter].word;
 
-        if (["零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "百", "千", "万", "亿", "两"].includes(syncData.words[counter].word) && (!isNaN(transcript[i]) || ["千", "万", "亿"].includes(transcript[i]))){
+        if (["零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "百", "千", "万", "亿", "两"].includes(syncData[counter].word) && (!isNaN(transcript[i]) || ["千", "万", "亿"].includes(transcript[i]))){
           
     
             sentence+=word;
 
             i++;
             counter++;
-            word = syncData.words[counter].word;
+            word = syncData[counter].word;
 
 
         }
@@ -45,10 +135,10 @@
           i++;
         }  
         else{
-          word = syncData.words[counter].word;
+          word = syncData[counter].word;
             sentence+=word;
             counter++;
-           word = syncData.words[counter].word;
+           word = syncData[counter].word;
            punctuation = transcript[i + 1];
 
         }
@@ -58,7 +148,7 @@
 
       if (["！", "，", "。"].includes(punctuation)) {
           sentence += word + "" + punctuation;
-          endTime = syncData.words[counter-1].endTime;
+          endTime = syncData[counter-1].endTime;
           syncData2.push({
             startTime: startTime,
             endTime: endTime,
@@ -72,7 +162,7 @@
      } 
 
       else if(startTime===""&& i!=0){
-       startTime = syncData.words[counter-1].startTime;
+       startTime = syncData[counter-1].startTime;
        sentence+=word;
         counter++
       }
@@ -81,10 +171,9 @@
        counter++;
       } 
   }
-     
-var framesArray = [];
-var currentFrame = [];
-var currentFrameCharCount = 0;
+
+
+
 
 for (var i = 0; i < syncData2.length; i++) {
   var sentenceCharCount = syncData2[i].sentence.length;
@@ -105,33 +194,33 @@ for (var i = 0; i < syncData2.length; i++) {
 if (currentFrame.length > 0) {
   framesArray.push(currentFrame);
 }
- var audioPlayer = document.getElementById("audiofile");
-  var subtitles = document.getElementById("subtitles");
-  var loopButton = document.getElementById("loop-button");
+     
+  var loopButton = doc.getElementById("loop-button");
 
-     var currentSubtitleIndex = 0;
-     var y=0;
+     
 
-    
+     function createSubtitles() {
+    subtitles.innerHTML = ""; // clear existing subtitles
+
+    if(currentSubtitleIndex < framesArray.length) {  // checking if currentSubtitleIndex is within array bounds
+        var currentFrame = framesArray[currentSubtitleIndex];
+        for (var i = 0; i < currentFrame.length; i++) {
+            var element = doc.createElement('span');
+            element.setAttribute("id", "s_" + currentSubtitleIndex + "" + i);
+            element.innerText = currentFrame[i].sentence;
+            subtitles.appendChild(element);
+        }
+        currentSubtitleIndex++;  // increment currentSubtitleIndex for the next frame
+    }
+}
     
 createSubtitles();
 
-function findSubtitleIndex(time) {
-    for(let i = 0; i < framesArray.length; i++) {
-        for(let j = 0; j < framesArray[i].length; j++) {
-            const item = framesArray[i][j];
-            if(time >= parseFloat(item.startTime) && time <= parseFloat(item.endTime)) {
-                return i;
-            }
-        }
-    }
-    return -1; // Return -1 if no suitable index is found
-}
-console.log(currentSubtitleIndex);
+
 
 
 function createSubtitles() {
-    console.log("yes");
+    console.log(currentSubtitleIndex);
     if(currentSubtitleIndex < framesArray.length) {  // checking if currentSubtitleIndex is within array bounds
         var currentFrame = framesArray[currentSubtitleIndex];
         subtitles.innerHTML = ""; // clear existing subtitles
@@ -147,55 +236,16 @@ function createSubtitles() {
 
 createSubtitles();  // create the initial frame
 
-audioPlayer.addEventListener("timeupdate", function(e) {
-    // Check if the currentSubtitleIndex is still correct, update it if necessary
-    const correctIndex = findSubtitleIndex(audioPlayer.currentTime);
-    if(correctIndex !== -1 && correctIndex !== currentSubtitleIndex) {
-        currentSubtitleIndex = correctIndex;
-        createSubtitles();
-    } 
-    if(currentSubtitleIndex < framesArray.length) {
-        let frame = framesArray[currentSubtitleIndex];
-        let isFrameDone = true;
-        
-        for (let j = 0; j < frame.length; j++) {
-            const item = frame[j];
-            const sentenceElement = document.getElementById("s_" + currentSubtitleIndex + "" + j);
-            
-            if (audioPlayer.currentTime >= parseFloat(item.startTime) && audioPlayer.currentTime <= parseFloat(item.endTime)) {
-                if (sentenceElement) {
-                    sentenceElement.style.color = '#E4E4E4';
-                    sentenceElement.style.fontWeight = 'bold';
-                }
-                isFrameDone = false;
-            } else if (sentenceElement) {
-                sentenceElement.style.color = '#595757';
-                sentenceElement.style.fontWeight = 'normal';
-            }
-        }
-        
-        // Move to next frame
-        if(isFrameDone) {
-            currentSubtitleIndex++;
-            // Clear and repopulate the subtitles with the next frame, only if not the last frame
-            if(currentSubtitleIndex < framesArray.length) {
-                createSubtitles();
-            }
-        }
-    }
-});
 
 
 
 
 
 
-    // Variable to store the selected highlighted text
-var selectedText = "";
- var isLoopMode = false;
+
+  var selectedText = "";
+var isLoopMode = false;
 var loopingInterval = null;
-var audioSpeed = 1;
-
 var audioSpeedDisplay = document.getElementById('audio-speed-display');
 
 document.addEventListener('keydown', function(e) {
@@ -315,13 +365,5 @@ subtitles.addEventListener("mouseup", function() {
 
 
 });
-};
 
-
-
- 
-document.addEventListener('DOMContentLoaded', (event) => {
-  ;
-    window.loadSubtitles(window.mediaId, window.test2);
-});
-
+    })(window, document);
