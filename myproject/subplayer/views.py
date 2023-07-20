@@ -1,10 +1,12 @@
 from django.http import JsonResponse
 from django.core.serializers import serialize
 from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+
 import json
 from .models import Media
 
-
+@login_required
 def myapp_view(request):
     return render(request, 'subplayer.html')
 
@@ -18,7 +20,7 @@ def video_view(request):
     context = {'media_id': media_id}
     return render(request, 'video.html', context)
 
-
+@login_required
 def podcast_detail(request, media_id):
     media = get_object_or_404(Media, media_id=media_id, media_type='audio')
 
@@ -32,6 +34,7 @@ def podcast_detail(request, media_id):
     context = {'media': media, 'media_json': media_json}
     return render(request, 'subplayer.html', context)
 
+@login_required
 def video_detail(request, media_id):
     media = get_object_or_404(Media, media_id=media_id, media_type='video')
 

@@ -1,3 +1,51 @@
+//add to view_media once played
+var mediaHasBeenPlayed = false;
+ 
+ function getCookie(name) {
+      var cookieArr = document.cookie.split(";");
+
+      for(var i = 0; i < cookieArr.length; i++) {
+        var cookiePair = cookieArr[i].split("=");
+
+        if(name == cookiePair[0].trim()) {
+          return decodeURIComponent(cookiePair[1]);
+        }
+      }
+
+      // Return null if the cookie by that name does not exist
+      return null;
+    }
+
+ document.addEventListener('DOMContentLoaded', (event) => {
+        csrftoken2=getCookie('csrftoken');
+
+});
+    getCookie('csrftoken')
+
+
+audioPlayer.addEventListener('play', function() {
+    if (!mediaHasBeenPlayed) {
+        // This is the first time the media is played
+        mediaHasBeenPlayed = true;
+        console.log(mediaId);
+
+        // Make a server-side request to add this media to the user's viewed_media
+        fetch('/api/user/viewed-media/add', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken') // Function to get the CSRF token from the cookie
+    },
+    body: JSON.stringify({
+        mediaId: mediaId,
+    })
+});
+
+    }
+});
+
+
+
      var currentSubtitleIndex = 0;
         var y=0;
         var framesArray = [];
@@ -110,7 +158,6 @@ createSubtitles();  // create the initial frame
       var pattern = /^[A-Za-z]+$/;
   for (let i = 0; i < transcript.length; i++) {
     var word = syncData[counter].word;
-    console.log(transcript[i] + "" + word);
      while(pattern.test(transcript[i])){
         i++;
      }
@@ -296,32 +343,28 @@ document.addEventListener('keyup', function(e) {
 });
 
 subtitles.addEventListener("mouseup", function() {
-                            console.log("sd2");
-
     if (isLoopMode) {
-
-                console.log("sd");
-
         var selection = window.getSelection();
         var selectedText = selection.toString().trim();
 
         // Find start and end time for selected text
         var startLoopTime = null;
         var endLoopTime = null;
-        for (var i = 0; i < syncData.words.length; i++) {
-            var currentCharacter = syncData.words[i].word;
+
+        for (var i = 0; i < syncData.length; i++) {
+            var currentCharacter = syncData[i].word;
 
             // If we find a match of the first character of the selected text
             if (currentCharacter === selectedText.charAt(0)) {
                 var potentialMatch = '';
-                var potentialStart = syncData.words[i].startTime;
+                var potentialStart = syncData[i].startTime;
                 var potentialEnd = '';
 
                 // Construct the potential match string
                 for (var j = i; j < i + selectedText.length; j++) {
-                    if (j < syncData.words.length) {
-                        potentialMatch += syncData.words[j].word;
-                        potentialEnd = syncData.words[j].endTime;
+                    if (j < syncData.length) {
+                        potentialMatch += syncData[j].word;
+                        potentialEnd = syncData[j].endTime;
                     } else {
                         break;
                     }
@@ -365,5 +408,103 @@ subtitles.addEventListener("mouseup", function() {
 
 
 });
+let saveProgressInterval;
+
+// Set up interval to save progress every 5 seconds when the media is playing
+audioPlayer.addEventListener('play', function () {
+    saveProgressInterval = setInterval(saveProgress, 5000);
+});
+
+// Clear the interval when the media is paused or ended
+audioPlayer.addEventListener('pause', function () {
+    clearInterval(saveProgressInterval);
+});
+audioPlayer.addEventListener('ended', function () {
+    clearInterval(saveProgressInterval);
+});
+
+function saveProgress() {
+    const progress = audioPlayer.currentTime;
+    
+    fetch('/api/user/save-progress', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            mediaId: mediaId,
+            progress: progress
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => console.log(data))
+    .catch((error) => {
+        console.error('Fetch error:', error);
+    });
+}
+
+
+fetch('/api/user/viewed_media_list/read')
+    .then(response => response.json())
+    .then(data => {
+        const container = document.getElementById('viewed-media-container');
+        data.viewed_media.forEach(mediaId => {
+            const span = document.createElement('span');
+            span.textContent = "mediaId:"+mediaId;
+            container.appendChild(span);
+        });
+    });
+
+fetch(`/api/user/media_progress/${mediaId}/`, {credentials: 'same-origin'})
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log(data);  // the 'data' variable contains your server response
+        let time_stopped = data.time_stopped;
+
+        // Do something with time_stopped...
+    })
+    .catch(error => {
+        console.log('There was an error!', error);
+    });
+audioPlayer.addEventListener('canplaythrough', function() {
+    fetch(`/api/user/media_progress/${mediaId}/`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken2
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw Error(response.statusText);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Check if there's a MediaProgress object for the current media and user
+        if (data && data.time_stopped != null) {
+            // If so, set the currentTime of the audioPlayer to the last stopped time
+            audioPlayer.currentTime = data.time_stopped;
+        } else {
+            // If not, the media should start playing from the beginning
+            console.log("No progress found, starting from the beginning");
+            audioPlayer.currentTime = 0;
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+
+console.log(audioPlayer.currentTime);
 
     })(window, document);

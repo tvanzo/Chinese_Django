@@ -34,6 +34,7 @@
         <button id="save-button">丰富</button>
     </div>
 
+    <div id="viewed-media-container">here</div>
 
     <script>
         // Get the JSON data from the HTML
@@ -43,7 +44,8 @@
         var test2 = "{% static 'subplayer/subtitle_json/' %}" + mediaId + ".json"        
         const mediaType = media.media_type;
         const audioPlayer = document.getElementById('audiofile');
-
+        var userId = "{{ request.user.id }}";
+        var profileId = "{{ request.user.profile.id }}";
 
         if (mediaType === 'audio') {
             audioPlayer.src = "{% static 'subplayer/audio/' %}" + media.media_id + ".mp3";
@@ -52,6 +54,8 @@
             console.log("23434");
             document.getElementById('audiofile').style.display = 'none';
         }
+
+
     </script>
 
   <p>Media Type: {{ media.media_type }}</p>

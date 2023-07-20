@@ -23,6 +23,10 @@ from subplayer import views as subplayer_views
 from subplayer.views import podcast_detail, video_detail
 from django.contrib.auth import views as auth_views
 from accounts.views import register
+from accounts.views import register
+from accounts.views import add_viewed_media, viewed_media_list, get_media_progress, update_media_progress
+
+
 
 
 
@@ -35,8 +39,17 @@ urlpatterns = [
     path('podcast/<str:media_id>/', podcast_detail, name='podcast_detail'),
     path('video/<str:media_id>/', video_detail, name='video_detail'),
     path('register/', register, name='register'),
-    path('login/', auth_views.LoginView.as_view(template_name='accounts/login.html'), name='login'),
+    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('api/user/viewed-media/add', add_viewed_media, name='add_viewed_media'),
+    path('api/user/viewed_media_list/read', views.viewed_media_list, name='viewed_media_list'),
+    path('api/user/media_progress/<int:media_id>/', views.get_media_progress, name='get_media_progress'),
+    path('api/user/save-progress', update_media_progress, name='update_media_progress'),
+
+    
+
+
+
 
 
 

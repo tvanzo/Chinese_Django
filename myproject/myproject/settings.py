@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'subplayer',
     'accounts',
+        'rest_framework',
+
 
 
 
@@ -63,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 ]
 
 ROOT_URLCONF = 'myproject.urls'
@@ -147,7 +150,25 @@ LOGIN_REDIRECT_URL = '/podcast/3'
 
 # Set the LOGOUT_REDIRECT_URL to your desired URL
 LOGOUT_REDIRECT_URL = 'login'  # Replace 'login' with your desired URL
+LOGIN_URL = 'login'
 
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+    'django.server': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
 
 
