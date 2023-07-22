@@ -5,7 +5,7 @@ from django.core import serializers
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from accounts.models import Profile, MediaProgress
-from subplayer.models import Media
+from subplayer.models import Media, Highlight
 import json, math  # <- Add this import at the top
 
 
@@ -92,3 +92,23 @@ def update_media_progress(request):
 
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@login_required
+def create_highlight(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        new_highlight = Highlight.objects.create(
+            user=request.user,
+            media_id=data['media'],
+            start_time=data['start_time'],
+            end_time=data['end_time'],
+            highlighted_text=data['highlighted_text']
+        )
+        new_highlight.save()
+
+        return JsonResponse({'message': 'Highlight created!'}, status=201)
+
+def get_highlights(request, media_id):
+    highlights = Highlight.objects.filter(user_id=request.user.id, media_id=media_id)
+    data = serializers.serialize('json', highlights)
+    return JsonResponse(data, safe=False)

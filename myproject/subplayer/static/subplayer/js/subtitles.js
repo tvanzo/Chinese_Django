@@ -129,7 +129,7 @@ createSubtitles();  // create the initial frame
     (async function(win, doc) {
         // JavaScript code
 
-   
+
     let transcript;
     let syncData5 = null; // Assign an initial value to syncData5
 
@@ -296,7 +296,7 @@ var loopingInterval = null;
 var audioSpeedDisplay = document.getElementById('audio-speed-display');
 
 document.addEventListener('keydown', function(e) {
-        console.log("test");
+        console.log("bananda");
 
     if (e.keyCode === 91) { // 91 is the keyCode for 'Command' key on Mac
         isLoopMode = true;
@@ -304,7 +304,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 document.addEventListener('keydown', function(e) {
-        console.log("test1");
+        console.log("banana");
 
     if (isLoopMode) {
         if (e.keyCode === 38) { // 38 is the keyCode for 'Up' key
@@ -461,50 +461,125 @@ fetch('/api/user/viewed_media_list/read')
         });
     });
 
-fetch(`/api/user/media_progress/${mediaId}/`, {credentials: 'same-origin'})
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log(data);  // the 'data' variable contains your server response
-        let time_stopped = data.time_stopped;
 
-        // Do something with time_stopped...
-    })
-    .catch(error => {
-        console.log('There was an error!', error);
-    });
-audioPlayer.addEventListener('canplaythrough', function() {
-    fetch(`/api/user/media_progress/${mediaId}/`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken2
-        },
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw Error(response.statusText);
+fetch(`/api/user/media_progress/${mediaId}/`, {
+    method: 'GET',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken2
+    },
+})
+.then(response => {
+    if (!response.ok) {
+        throw Error(response.statusText);
+    }
+    return response.json();
+})
+.then(data => {
+    // Check if there's a MediaProgress object for the current media and user
+    if (data && data.time_stopped != null) {
+        // If so, set the currentTime of the audioPlayer to the last stopped time
+        audioPlayer.currentTime = data.time_stopped;
+    } else {
+        // If not, the media should start playing from the beginning
+        console.log("No progress found, starting from the beginning");
+        audioPlayer.currentTime = 0;
+    }
+})
+.catch(error => console.error('Error:', error));
+
+
+document.addEventListener('keydown', function(event) {
+
+  // If 'a' key is pressed and the command and shift keys are also held down
+  if (event.shiftKey) {
+    console.log("shift");
+    let selectedText = window.getSelection().toString().trim();
+        console.log(selectedText);
+
+    if (selectedText) {
+      var startTime = null;
+      var endTime = null;
+
+      for (var i = 0; i < syncData.length; i++) {
+        var currentCharacter = syncData[i].word;
+
+        // If we find a match of the first character of the selected text
+        if (currentCharacter === selectedText.charAt(0)) {
+          var potentialMatch = '';
+          var potentialStart = syncData[i].startTime;
+          var potentialEnd = '';
+
+          // Construct the potential match string
+          for (var j = i; j < i + selectedText.length; j++) {
+            if (j < syncData.length) {
+              potentialMatch += syncData[j].word;
+              potentialEnd = syncData[j].endTime;
+            } else {
+              break;
+            }
+          }
+
+          // Check if we have a perfect match
+          if (potentialMatch === selectedText) {
+            startTime = parseInt(potentialStart.substring(0, potentialStart.length - 1), 10);
+            endTime = parseInt(potentialEnd.substring(0, potentialEnd.length - 1), 10);;
+          
+            break; // We've found our perfect match, no need to keep looping
+            console.log("x"+potentialMatch);
+          }
         }
-        return response.json();
-    })
-    .then(data => {
-        // Check if there's a MediaProgress object for the current media and user
-        if (data && data.time_stopped != null) {
-            // If so, set the currentTime of the audioPlayer to the last stopped time
-            audioPlayer.currentTime = data.time_stopped;
-        } else {
-            // If not, the media should start playing from the beginning
-            console.log("No progress found, starting from the beginning");
-            audioPlayer.currentTime = 0;
-        }
-    })
-    .catch(error => console.error('Error:', error));
+      }
+
+      // Call your backend API to create the highlight
+      createHighlight(selectedText, mediaId, startTime, endTime);
+
+      // Highlight the selected text
+      // This would depend on your HTML structure and CSS
+      // Here's a very basic example:
+    }
+  }
 });
 
-console.log(audioPlayer.currentTime);
 
+function createHighlight(highlightedText, mediaId, startTime, endTime) {
+  let highlightData = {
+    highlighted_text: highlightedText,
+    media: mediaId,
+    start_time: startTime,
+    end_time: endTime
+  };
+
+  // You would need to fill in the URL for your API endpoint
+  fetch('/api/user/create_highlight', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrftoken2,
+
+      // If you're using Django's CSRF protection you'll also need to include the CSRF token
+    },
+    body: 
+    JSON.stringify(highlightData)
+      }).then(response => response.json())
+  .then(data => console.log(data))  // Handle the response from your backend
+  .catch((error) => console.error('Error:', error));
+}
+
+
+// Fetch highlights when page loads or media changes
+fetch(`/api/user/get_highlights/${mediaId}/`, {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-CSRFToken': csrftoken2,
+  },
+})
+.then(response => response.json())
+.then(data => {
+  // 'data' contains the user's highlights
+  console.log(data);
+
+})
+.catch(error => console.error('Error:', error));
     })(window, document);
