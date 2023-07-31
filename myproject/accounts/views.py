@@ -12,7 +12,6 @@ import json, math  # <- Add this import at the top
 
 
 
-print('fuck')
 
 def register(request):
     if request.method == 'POST':
@@ -97,12 +96,20 @@ def update_media_progress(request):
 def create_highlight(request):
     if request.method == 'POST':
         data = json.loads(request.body)
+        media_obj = Media.objects.get(pk=data['media'])
+
         new_highlight = Highlight.objects.create(
             user=request.user,
-            media_id=data['media'],
+            media=media_obj,
             start_time=data['start_time'],
             end_time=data['end_time'],
-            highlighted_text=data['highlighted_text']
+            highlighted_text=data['highlighted_text'],
+            start_index=data['start_index'],
+            end_index=data['end_index'],
+            start_sentence_index=data['start_sentence_index'],
+            end_sentence_index=data['end_sentence_index'],
+            frame_index=data['frame_index']
+
         )
         new_highlight.save()
 
@@ -111,4 +118,5 @@ def create_highlight(request):
 def get_highlights(request, media_id):
     highlights = Highlight.objects.filter(user_id=request.user.id, media_id=media_id)
     data = serializers.serialize('json', highlights)
+    print(data)
     return JsonResponse(data, safe=False)
