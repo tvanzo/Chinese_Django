@@ -1,4 +1,3 @@
-//add to view_media once played
 var mediaHasBeenPlayed = false;
  
  function getCookie(name) {
@@ -623,62 +622,55 @@ fetch(`/api/user/media_progress/${mediaId}/`, {
 })
 .catch(error => console.error('Error:', error));
 
-
-
-document.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
   if (event.shiftKey) {
-    let selectedText = window.getSelection().toString().trim();
-    if (selectedText) {
-      let sentenceSpans = document.querySelectorAll('#subtitles .sentence-span');
-    
+    let selection = window.getSelection();
 
-    
-      let remainingText = selectedText;
-      let highlightStartIndex = null;
-      let highlightEndIndex = null;
-      let highlightStartSentenceIndex = null;
-      let highlightEndSentenceIndex = null;
-      let highlightStartTime = null;
-      let highlightEndTime = null;
+    if (selection.rangeCount === 0) return;
 
+    let range = selection.getRangeAt(0);
+    let selectedText = selection.toString().trim();
 
-      for (let i = 0; i < sentenceSpans.length; i++) {
-        let sentence = sentenceSpans[i].textContent;
+    if (!selectedText) return;
 
-        if (highlightStartIndex === null && sentence.includes(remainingText)) {
-          highlightStartIndex = sentence.indexOf(remainingText);
-          highlightEndIndex = highlightStartIndex + remainingText.length - 1;
-          highlightStartSentenceIndex = i;
-          highlightEndSentenceIndex = i;
-          console.log('subtitleTimes length:', subtitleTimes.length);
-        console.log(' i:', i);
-
-
-          highlightStartTime = subtitleTimes[i].startTime;
-          highlightEndTime = subtitleTimes[i].endTime;
-          break;
-        } else if (highlightStartIndex === null && sentence.includes(remainingText.substring(0, sentence.length))) {
-          highlightStartIndex = sentence.indexOf(remainingText.substring(0, sentence.length));
-          highlightStartSentenceIndex = i;
-
-          highlightStartTime = subtitleTimes[i].startTime;
-          remainingText = remainingText.substring(sentence.length - highlightStartIndex);
-        } else if (highlightStartIndex !== null && sentence.includes(remainingText.substring(0, sentence.length))) {
-
-          remainingText = remainingText.substring(sentence.length);
-        } else if (highlightStartIndex !== null && sentence.includes(remainingText)) {
-
-          highlightEndIndex = sentence.indexOf(remainingText) + remainingText.length - 1;
-          highlightEndSentenceIndex = i;
-          highlightEndTime = subtitleTimes[i].endTime;
+    let calculateOffset = function (container, offset, span) {
+      let walker = document.createTreeWalker(span, NodeFilter.SHOW_TEXT);
+      let totalOffset = 0;
+      let node;
+      while ((node = walker.nextNode())) {
+        if (node === container || node.contains(container)) {
+          totalOffset += offset;
           break;
         }
+        totalOffset += node.textContent.length;
       }
+      return totalOffset;
+    };
 
-      if (highlightStartIndex !== null && highlightEndIndex !== null && highlightStartTime !== null && highlightEndTime !== null) {
-
-        createHighlight(selectedText, mediaId, highlightStartIndex, highlightEndIndex, highlightStartSentenceIndex, highlightEndSentenceIndex, highlightStartTime, highlightEndTime, currentSubtitleIndex);
+    let findParentWithClass = function (node, className) {
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        node = node.parentNode;
       }
+      while (node && (!node.classList || !node.classList.contains(className))) {
+        node = node.parentNode;
+      }
+      return node;
+    };
+
+    let startSpan = findParentWithClass(range.startContainer, 'sentence-span');
+    let endSpan = findParentWithClass(range.endContainer, 'sentence-span');
+
+    let start_char_index = calculateOffset(range.startContainer, range.startOffset, startSpan);
+    let end_char_index = calculateOffset(range.endContainer, range.endOffset, endSpan) - 1;
+
+    let highlightStartSentenceIndex = parseInt(startSpan.id.split('_')[2]);
+    let highlightEndSentenceIndex = parseInt(endSpan.id.split('_')[2]);
+    let highlightStartTime = subtitleTimes[highlightStartSentenceIndex].startTime;
+    let highlightEndTime = subtitleTimes[highlightEndSentenceIndex].endTime;
+
+    if (start_char_index !== null && end_char_index !== null && highlightStartTime !== null && highlightEndTime !== null) {
+      console.log("All indexes found");
+      createHighlight(selectedText, mediaId, start_char_index, end_char_index, highlightStartSentenceIndex, highlightEndSentenceIndex, highlightStartTime, highlightEndTime, currentSubtitleIndex);
     }
   }
 });
@@ -686,21 +678,28 @@ document.addEventListener('keydown', function(event) {
 
 
 
-function createHighlight(selectedText, mediaId, highlightStartIndex, highlightEndIndex, highlightStartSentenceIndex, highlightEndSentenceIndex, startTime, endTime, frameIndex) {
-  let highlightData = {
-    highlighted_text: selectedText,
-    media: mediaId,
-    start_index: highlightStartIndex,
-    end_index: highlightEndIndex,
-    start_sentence_index: highlightStartSentenceIndex,
-    end_sentence_index: highlightEndSentenceIndex,
-    start_time: startTime,
-    end_time: endTime,
-    frame_index: frameIndex,
 
-  };
-  addHighlight(highlightData);
+
+
+function createHighlight(selectedText, mediaId, highlightStartIndex, highlightEndIndex, highlightStartSentenceIndex, highlightEndSentenceIndex, startTime, endTime, frameIndex) {
+    console.log("createHighlight triggered");
+    let highlightData = {
+        highlighted_text: selectedText,
+        media: mediaId,
+        start_index: highlightStartIndex,
+        end_index: highlightEndIndex,
+        start_sentence_index: highlightStartSentenceIndex,
+        end_sentence_index: highlightEndSentenceIndex,
+        start_time: startTime,
+        end_time: endTime,
+        frame_index: frameIndex,
+    };
+    addHighlight(highlightData);
+    console.log(highlightData);
 }
+
+
+
 
 
 
