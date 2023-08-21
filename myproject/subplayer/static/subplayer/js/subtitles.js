@@ -76,6 +76,8 @@ async function fetchHighlights(mediaId) {
                 data = JSON.parse(data);
             }
            transformedArray = data.map(item => ({
+            media: item.fields.media,
+             id: item.pk,
             start_time: item.fields.start_time,
             end_time: item.fields.end_time,
             highlighted_text: item.fields.highlighted_text,
@@ -182,7 +184,6 @@ var y=0;
 
 var subtitleTimes = [];
 function createSubtitles() {
-          console.log(subtitleTimes);
 
   if (currentSubtitleIndex < framesArray.length) {
     var currentFrame = framesArray[currentSubtitleIndex];
@@ -220,7 +221,6 @@ function createSubtitles() {
       });
     }
   }
-          console.log(subtitleTimes);
 
 }
 
@@ -233,8 +233,7 @@ function updateProgress() {
     const correctIndex = findSubtitleIndex(currentTime);
     if (correctIndex !== -1 && correctIndex !== currentSubtitleIndex) {
         currentSubtitleIndex = correctIndex;
-        console.log("csi"+currentSubtitleIndex);
-        console.log("fa"+framesArray[currentSubtitleIndex]);
+       
         createSubtitles();
     }
 
@@ -622,7 +621,7 @@ fetch(`/api/user/media_progress/${mediaId}/`, {
 })
 .catch(error => console.error('Error:', error));
 
-document.addEventListener('keydown', function (event) {
+document.addEventListener('keydown', async function (event) {
   if (event.shiftKey) {
     let selection = window.getSelection();
 
@@ -668,18 +667,42 @@ document.addEventListener('keydown', function (event) {
     let highlightStartTime = subtitleTimes[highlightStartSentenceIndex].startTime;
     let highlightEndTime = subtitleTimes[highlightEndSentenceIndex].endTime;
 
-    if (start_char_index !== null && end_char_index !== null && highlightStartTime !== null && highlightEndTime !== null) {
-      console.log("All indexes found");
-      createHighlight(selectedText, mediaId, start_char_index, end_char_index, highlightStartSentenceIndex, highlightEndSentenceIndex, highlightStartTime, highlightEndTime, currentSubtitleIndex);
-    }
+
+    // Check if the selection overlaps an existing highlight
+const overlappingHighlight = transformedArray.find(item =>
+      item.start_index <= end_char_index &&
+      item.end_index >= start_char_index &&
+      item.frame_index === currentSubtitleIndex &&
+      item.start_sentence_index <= highlightStartSentenceIndex &&
+      item.end_sentence_index >= highlightEndSentenceIndex
+);
+
+
+
+
+
+
+
+
+if (overlappingHighlight) {
+  // Check if the selection exactly matches the existing highlight
+  if (overlappingHighlight.start_index === start_char_index &&
+      overlappingHighlight.end_index === end_char_index) {
+    // If it does, delete the entire highlight
+    await deleteHighlight(overlappingHighlight.id);
+  } else {
+    // If it doesn't, split the highlight at the selected indices
+    await splitHighlight(overlappingHighlight.id, start_char_index, end_char_index);
+  }
+} else {
+  // Otherwise, create a new highlight
+  if (start_char_index !== null && end_char_index !== null && highlightStartTime !== null && highlightEndTime !== null) {
+    console.log("All indexes found");
+    createHighlight(selectedText, mediaId, start_char_index, end_char_index, highlightStartSentenceIndex, highlightEndSentenceIndex, highlightStartTime, highlightEndTime, currentSubtitleIndex);
+  }
+}
   }
 });
-
-
-
-
-
-
 
 function createHighlight(selectedText, mediaId, highlightStartIndex, highlightEndIndex, highlightStartSentenceIndex, highlightEndSentenceIndex, startTime, endTime, frameIndex) {
     console.log("createHighlight triggered");
@@ -696,6 +719,110 @@ function createHighlight(selectedText, mediaId, highlightStartIndex, highlightEn
     };
     addHighlight(highlightData);
     console.log(highlightData);
+}
+async function deleteHighlight(highlightId) {
+  try {
+    const response = await fetch(`/api/user/delete_highlight/${highlightId}/`, { // Removed highlightId from the URL
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken2
+      },
+      body: JSON.stringify({ highlight_id: highlightId }), // Pass highlightId in the request body
+    });
+
+    if (response.ok) {
+      console.log("Highlight deleted successfully!");
+      // Optionally, refresh the highlights or make any necessary updates to the UI
+      await fetchHighlights(mediaId);
+      createSubtitles(); // Recreate subtitles after fetching new highlights
+
+    } else {
+      console.error('Failed to delete highlight:', await response.text());
+    }
+  } catch (error) {
+    console.error('Error during delete highlight:', error);
+  }
+}
+
+
+
+
+
+
+async function splitHighlight(highlightId, splitStartIndex, splitEndIndex) {
+console.log("yooooo");
+
+  // Retrieve the original highlight from the transformedArray by its ID
+  const originalHighlight = transformedArray.find(item => item.id === highlightId);
+  const highlightStartIndexRelativeToHighlight = splitStartIndex - originalHighlight.start_index;
+  const highlightEndIndexRelativeToHighlight = splitEndIndex - originalHighlight.start_index;
+  console.log("yooooo");
+  console.log("startsplit"+splitStartIndex);
+  console.log("riginalHighlight.start_index"+originalHighlight.start_index);
+  console.log("splitEndIndex"+splitEndIndex);
+  console.log("originalHighlight.end_index"+originalHighlight.end_index);
+
+
+
+
+  // If the split starts from the beginning and ends at the end of the highlight, delete the entire highlight
+  if (splitStartIndex <= originalHighlight.start_index && splitEndIndex >= originalHighlight.end_index) {
+    await deleteHighlight(highlightId);
+    return;
+  }
+
+  // If the split starts from the beginning and does not reach the end, create a new highlight from the unsplit part
+  if (splitStartIndex <= originalHighlight.start_index && splitEndIndex < originalHighlight.end_index) {
+    const newHighlight = {
+      ...originalHighlight,
+      start_index: splitEndIndex + 1,
+      highlighted_text: originalHighlight.highlighted_text.substring(highlightEndIndexRelativeToHighlight + 1)
+    };
+
+    await deleteHighlight(highlightId);
+    await addHighlight(newHighlight);
+    return;
+  }
+
+  // If the split starts within the highlight and reaches to the end, create a new highlight from the unsplit part
+  if (splitStartIndex > originalHighlight.start_index && splitEndIndex >= originalHighlight.end_index) {
+    const newHighlight = {
+      ...originalHighlight,
+      end_index: splitStartIndex - 1,
+      highlighted_text: originalHighlight.highlighted_text.substring(0, highlightStartIndexRelativeToHighlight)
+    };
+
+    await deleteHighlight(highlightId);
+    await addHighlight(newHighlight);
+    return;
+  }
+
+  // If the split is completely within the highlight (middle), create two new highlights
+  if (splitStartIndex > originalHighlight.start_index && splitEndIndex < originalHighlight.end_index) {
+    console.log("poop");
+    const firstHighlight = {
+      ...originalHighlight,
+      end_index: splitStartIndex - 1,
+      highlighted_text: originalHighlight.highlighted_text.substring(0, highlightStartIndexRelativeToHighlight)
+    };
+
+    const secondHighlight = {
+      ...originalHighlight,
+      start_index: splitEndIndex + 1,
+      highlighted_text: originalHighlight.highlighted_text.substring(highlightEndIndexRelativeToHighlight + 1)
+    };
+
+
+
+    await deleteHighlight(highlightId);
+    await addHighlight(firstHighlight);
+    await addHighlight(secondHighlight);
+    return;
+  }
+
+  // If none of the above scenarios match, log an error. This may happen if the split indices are inconsistent with the original highlight
+  console.error('Invalid split indices for highlight:', originalHighlight);
 }
 
 

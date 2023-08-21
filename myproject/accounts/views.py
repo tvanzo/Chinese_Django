@@ -114,6 +114,41 @@ def create_highlight(request):
         new_highlight.save()
 
         return JsonResponse({'message': 'Highlight created!'}, status=201)
+def delete_highlight(request, highlight_id):
+    try:
+        highlight = Highlight.objects.get(pk=highlight_id)
+
+        # Check if the user has the right to delete this highlight
+        if request.user == highlight.user:
+            highlight.delete()
+            return JsonResponse({'status': 'success'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Permission denied'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+
+def modify_highlight(request, highlight_id):
+    if request.method == 'PUT':
+        try:
+            highlight = Highlight.objects.get(pk=highlight_id)
+            data = json.loads(request.body.decode('utf-8'))
+
+            # Update fields as needed
+            highlight.start_time = data.get('start_time', highlight.start_time)
+            highlight.end_time = data.get('end_time', highlight.end_time)
+            highlight.highlighted_text = data.get('highlighted_text', highlight.highlighted_text)
+            # ... update other fields as needed ...
+
+            highlight.save()
+            return JsonResponse({'status': 'success'}, status=200)
+        except Highlight.DoesNotExist:
+            return HttpResponse('Highlight not found', status=404)
+        except Exception as e:
+            return HttpResponse(str(e), status=500)
+    else:
+        return HttpResponse('Method not allowed', status=405)
 
 def get_highlights(request, media_id):
     highlights = Highlight.objects.filter(user_id=request.user.id, media_id=media_id)

@@ -24,7 +24,7 @@ from subplayer.views import podcast_detail, video_detail
 from django.contrib.auth import views as auth_views
 from accounts.views import register
 from accounts.views import register
-from accounts.views import add_viewed_media, viewed_media_list, get_media_progress, update_media_progress, get_highlights, create_highlight
+from accounts.views import add_viewed_media, viewed_media_list, get_media_progress, update_media_progress, get_highlights, create_highlight, delete_highlight, modify_highlight
 
 
 
@@ -46,7 +46,11 @@ urlpatterns = [
     path('api/user/media_progress/<int:media_id>/', views.get_media_progress, name='get_media_progress'),
     path('api/user/save-progress', update_media_progress, name='update_media_progress'),
     path('api/user/create_highlight', create_highlight, name='create_highlight'),
+    path('api/user/delete_highlight/<int:highlight_id>/', delete_highlight, name='delete_highlight'),
+    path('api/user/modify_highlight/<int:highlight_id>/', modify_highlight, name='modify_highlight'),
+
     path('api/user/get_highlights/<int:media_id>/', get_highlights, name='get_highlights'),
+
 
 
     

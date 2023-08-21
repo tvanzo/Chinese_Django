@@ -58,28 +58,3 @@ def video_detail(request, media_id):
 # Set up logging
 logger = logging.getLogger(__name__)
 
-@login_required
-@csrf_exempt
-def create_highlight(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        logger.info(f"Received data: {data}")  # Log the received data
-        try:
-            media_obj = Media.objects.get(pk=data['media'])
-            new_highlight = Highlight.objects.create(
-                user=request.user,
-                media=media_obj,
-                start_time=data['start_time'],
-                end_time=data['end_time'],
-                highlighted_text=data['highlighted_text'],
-                frame_index=data['frame_index']
-            )
-        except ObjectDoesNotExist:
-            return JsonResponse({'error': 'Media not found.'}, status=404)
-        except Exception as e:
-            logger.error(f"Error while creating highlight: {str(e)}")  # Log the error
-            return JsonResponse({'error': str(e)}, status=500)
-
-        return JsonResponse({'message': 'Highlight created!'}, status=201)
-    else:
-        return JsonResponse({'error': 'Invalid request method.'}, status=405)
