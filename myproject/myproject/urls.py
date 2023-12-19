@@ -20,18 +20,18 @@ from accounts import views
 from django.contrib.auth.views import LoginView
 from django.views.generic import TemplateView
 from subplayer import views as subplayer_views
-from subplayer.views import podcast_detail, video_detail
+from subplayer.views import podcast_detail, video_detail, media_list
 from django.contrib.auth import views as auth_views
 from accounts.views import register
 from accounts.views import register
-from accounts.views import add_viewed_media, viewed_media_list, get_media_progress, update_media_progress, get_highlights, create_highlight, delete_highlight, modify_highlight
-
+from accounts.views import add_viewed_media, viewed_media_list, get_media_progress, update_media_progress, get_highlights, get_all_highlights, create_highlight, delete_highlight, modify_highlight
 
 
 
 
 
 urlpatterns = [
+    path('', media_list, name='home'),
     path('admin/', admin.site.urls),
     path('subplayer/', TemplateView.as_view(template_name='subplayer.html'), name='subplayer'),
     path('podcast/', subplayer_views.podcast_view, name='podcast_view'),
@@ -49,8 +49,10 @@ urlpatterns = [
     path('api/user/delete_highlight/<int:highlight_id>/', delete_highlight, name='delete_highlight'),
     path('api/user/modify_highlight/<int:highlight_id>/', modify_highlight, name='modify_highlight'),
 
+ path('api/user/get_highlights/', get_all_highlights, name='get_all_highlights'),
     path('api/user/get_highlights/<int:media_id>/', get_highlights, name='get_highlights'),
 
+path('highlights/', views.highlights, name='highlights'),
 
 
     

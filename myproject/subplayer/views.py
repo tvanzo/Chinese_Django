@@ -55,6 +55,12 @@ def video_detail(request, media_id):
     context = {'media': media, 'media_json': media_json}
     return render(request, 'subplayer.html', context)
 
+def media_list(request):
+    media_objects = Media.objects.all()
+    return render(request, 'media_list.html', {'media': media_objects})
+
+
 # Set up logging
 logger = logging.getLogger(__name__)
+
 

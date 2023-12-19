@@ -116,6 +116,8 @@ def create_highlight(request):
         return JsonResponse({'message': 'Highlight created!'}, status=201)
 def delete_highlight(request, highlight_id):
     try:
+        data = json.loads(request.body.decode('utf-8'))  # Parse JSON from the request body
+        highlight_id = data['highlight_id']
         highlight = Highlight.objects.get(pk=highlight_id)
 
         # Check if the user has the right to delete this highlight
@@ -150,8 +152,27 @@ def modify_highlight(request, highlight_id):
     else:
         return HttpResponse('Method not allowed', status=405)
 
+@login_required
 def get_highlights(request, media_id):
     highlights = Highlight.objects.filter(user_id=request.user.id, media_id=media_id)
-    data = serializers.serialize('json', highlights)
-    print(data)
-    return JsonResponse(data, safe=False)
+    highlights_data = serializers.serialize('json', highlights)
+    return JsonResponse(highlights_data, safe=False)
+
+@login_required
+def get_all_highlights(request):
+    highlights = Highlight.objects.filter(user_id=request.user.id)
+    highlights_data = serializers.serialize('json', highlights)
+    return JsonResponse(highlights_data, safe=False)
+
+
+@login_required
+def highlights(request):
+    profile = Profile.objects.get(user=request.user)
+    media_highlights = {}
+    for media in profile.viewed_media.all():
+        highlights = Highlight.objects.filter(user=request.user, media=media)
+        media_highlights[media] = highlights
+
+    return render(request, 'accounts/highlights.html', {'media_highlights': media_highlights})
+
+

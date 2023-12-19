@@ -1,0 +1,38 @@
+
+
+
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<!DOCTYPE html>
+<html>
+<head>
+        <link rel="stylesheet" type="text/css" href="{% static 'accounts/css/styles.css' %}">
+
+    <title>My HTML Page</title>
+    <script src="{% static 'accounts/js/highlights.js' %}"></script>
+        <link rel="stylesheet" type="text/css" href="{% static 'accounts/css/styles.css' %}">
+
+
+</head>
+<body>
+
+<div id="highlights-container">
+    <h2>Your Highlights</h2>
+    <div id="highlights-content">
+        <!-- Media components with highlights will be loaded here -->
+    </div>
+</div>
+
+</body>
+</html>{% endblock %}
+
+
+
+

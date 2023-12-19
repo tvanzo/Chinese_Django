@@ -94,5 +94,20 @@ body {
 
   #subtitles .active-highlight {
   color: white;
-  font-size: 40px;
+  font-size: 30px;
+  font-weight:bold;
 }
+
+
+span.active-highlight {
+  color: red;
+}
+
+#subtitles span.perm-highlight {
+    background-color: #1a8cff;
+    color:white;
+}
+  
+
+
+

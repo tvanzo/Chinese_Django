@@ -1,0 +1,35 @@
+
+
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Media List</title>
+    <link rel="stylesheet" href="{% static 'subplayer/styles.css' %}">
+</head>
+<body>
+{% for media in media %}
+    <div class="media-item">
+        {% if media.media_type == 'audio' %}
+            <a href="{% url 'podcast_detail' media.media_id %}">
+                <h3>{{ media.title }}</h3>
+                <!-- Additional podcast details -->
+            </a>
+        {% elif media.media_type == 'video' %}
+            <a href="{% url 'video_detail' media.media_id %}">
+                <h3>{{ media.title }}</h3>
+                <!-- Additional video details -->
+            </a>
+        {% endif %}
+    </div>
+{% empty %}
+    <p>No media found.</p>
+{% endfor %}
+
+</body>
+</html>{% endblock %}

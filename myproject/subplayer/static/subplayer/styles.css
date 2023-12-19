@@ -111,3 +111,27 @@ span.active-highlight {
 
 
 
+
+
+
+/*for homepage
+/* your_app/static/your_app/css/styles.css */
+
+.media-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.media-item {
+    width: 30%; /* Adjust the width as per your layout */
+    margin: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    border-radius: 10px;
+    text-align: center;
+}
+
+
+
+

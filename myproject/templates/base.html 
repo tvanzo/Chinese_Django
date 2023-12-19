@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}My Site{% endblock %}</title>
+    <!-- Include any common CSS files or other head elements here -->
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'highlights' %}">Highlights</a></li>
+                <!-- Add other navigation links as needed -->
+            </ul>
+        </nav>
+    </header>
+
+    {% block content %}
+    <!-- Page specific content will go here -->
+    {% endblock %}
+
+    <footer>
+        <!-- Common footer content goes here -->
+    </footer>
+</body>
+</html>

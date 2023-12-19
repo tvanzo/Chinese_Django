@@ -662,39 +662,60 @@ document.addEventListener('keydown', async function (event) {
     let start_char_index = calculateOffset(range.startContainer, range.startOffset, startSpan);
     let end_char_index = calculateOffset(range.endContainer, range.endOffset, endSpan) - 1;
 
+    if (start_char_index < 10) {
+        start_char_index = '0' + start_char_index;
+    }
+
+    if (end_char_index < 10) {
+        end_char_index = '0' + end_char_index;
+    }
+
     let highlightStartSentenceIndex = parseInt(startSpan.id.split('_')[2]);
     let highlightEndSentenceIndex = parseInt(endSpan.id.split('_')[2]);
     let highlightStartTime = subtitleTimes[highlightStartSentenceIndex].startTime;
     let highlightEndTime = subtitleTimes[highlightEndSentenceIndex].endTime;
+    console.log("start " + start_char_index);
+        console.log("end " + end_char_index);
 
 
     // Check if the selection overlaps an existing highlight
 const overlappingHighlight = transformedArray.find(item =>
-      item.start_index <= end_char_index &&
-      item.end_index >= start_char_index &&
-      item.frame_index === currentSubtitleIndex &&
-      item.start_sentence_index <= highlightStartSentenceIndex &&
-      item.end_sentence_index >= highlightEndSentenceIndex
+    parseFloat(`${item.start_sentence_index}.${item.start_index.toString().padStart(2, '0')}`) <= parseFloat(`${highlightEndSentenceIndex}.${end_char_index}`) &&
+    parseFloat(`${item.end_sentence_index}.${item.end_index.toString().padStart(2, '0')}`) >= parseFloat(`${highlightStartSentenceIndex}.${start_char_index}`) &&
+    item.frame_index === currentSubtitleIndex
 );
+if (overlappingHighlight) {
+   console.log(overlappingHighlight);
 
-
-
-
-
-
-
+} else {
+  console.log("No overlapping highlight found.");
+}
 
 if (overlappingHighlight) {
+console.log("startindex of " + overlappingHighlight.start_index + " endindex " + overlappingHighlight.end_index + " highlight start "+start_char_index);
+    console.log("fuck");
+  if (overlappingHighlight.start_sentence_index!=overlappingHighlight.end_sentence_index){
+        console.log("first"+overlappingHighlight.start_sentence_index);
+        console.log(overlappingHighlight.end_sentence_index);
+        await deleteHighlight(overlappingHighlight.id);
+  }
   // Check if the selection exactly matches the existing highlight
-  if (overlappingHighlight.start_index === start_char_index &&
+  else if (overlappingHighlight.start_index === start_char_index &&
       overlappingHighlight.end_index === end_char_index) {
     // If it does, delete the entire highlight
     await deleteHighlight(overlappingHighlight.id);
+    console.log("Deleted");
   } else {
+        console.log("lo");
+    console.log(start_char_index + " "+ end_char_index);
+
     // If it doesn't, split the highlight at the selected indices
     await splitHighlight(overlappingHighlight.id, start_char_index, end_char_index);
+    console.log(start_char_index + ""+ end_char_index);
   }
 } else {
+            console.log("low");
+
   // Otherwise, create a new highlight
   if (start_char_index !== null && end_char_index !== null && highlightStartTime !== null && highlightEndTime !== null) {
     console.log("All indexes found");
@@ -706,6 +727,17 @@ if (overlappingHighlight) {
 
 function createHighlight(selectedText, mediaId, highlightStartIndex, highlightEndIndex, highlightStartSentenceIndex, highlightEndSentenceIndex, startTime, endTime, frameIndex) {
     console.log("createHighlight triggered");
+
+    // Add leading zero if start_index is a single digit
+    if (highlightStartIndex.toString().length === 1) {
+        highlightStartIndex = "0" + highlightStartIndex;
+    }
+
+    // Add leading zero if end_index is a single digit
+    if (highlightEndIndex.toString().length === 1) {
+        highlightEndIndex = "0" + highlightEndIndex;
+    }
+
     let highlightData = {
         highlighted_text: selectedText,
         media: mediaId,
@@ -718,7 +750,7 @@ function createHighlight(selectedText, mediaId, highlightStartIndex, highlightEn
         frame_index: frameIndex,
     };
     addHighlight(highlightData);
-    console.log(highlightData);
+    console.log("here " + highlightData.start_index);
 }
 async function deleteHighlight(highlightId) {
   try {
@@ -751,32 +783,30 @@ async function deleteHighlight(highlightId) {
 
 
 async function splitHighlight(highlightId, splitStartIndex, splitEndIndex) {
-console.log("yooooo");
+  console.log("highlightId:", highlightId);
+  console.log("splitStartIndex:", splitStartIndex);
+  console.log("splitEndIndex:", splitEndIndex);
 
-  // Retrieve the original highlight from the transformedArray by its ID
   const originalHighlight = transformedArray.find(item => item.id === highlightId);
   const highlightStartIndexRelativeToHighlight = splitStartIndex - originalHighlight.start_index;
   const highlightEndIndexRelativeToHighlight = splitEndIndex - originalHighlight.start_index;
-  console.log("yooooo");
-  console.log("startsplit"+splitStartIndex);
-  console.log("riginalHighlight.start_index"+originalHighlight.start_index);
-  console.log("splitEndIndex"+splitEndIndex);
-  console.log("originalHighlight.end_index"+originalHighlight.end_index);
 
+  console.log("originalHighlight:", originalHighlight);
+  console.log("highlightStartIndexRelativeToHighlight:", highlightStartIndexRelativeToHighlight);
+  console.log("highlightEndIndexRelativeToHighlight:", highlightEndIndexRelativeToHighlight);
 
-
-
-  // If the split starts from the beginning and ends at the end of the highlight, delete the entire highlight
   if (splitStartIndex <= originalHighlight.start_index && splitEndIndex >= originalHighlight.end_index) {
+    console.log("1");
     await deleteHighlight(highlightId);
     return;
   }
 
-  // If the split starts from the beginning and does not reach the end, create a new highlight from the unsplit part
   if (splitStartIndex <= originalHighlight.start_index && splitEndIndex < originalHighlight.end_index) {
+        console.log("2");
+
     const newHighlight = {
       ...originalHighlight,
-      start_index: splitEndIndex + 1,
+      start_index: parseInt(splitEndIndex, 10) + 1,
       highlighted_text: originalHighlight.highlighted_text.substring(highlightEndIndexRelativeToHighlight + 1)
     };
 
@@ -785,22 +815,25 @@ console.log("yooooo");
     return;
   }
 
-  // If the split starts within the highlight and reaches to the end, create a new highlight from the unsplit part
   if (splitStartIndex > originalHighlight.start_index && splitEndIndex >= originalHighlight.end_index) {
+        console.log("3");
+
     const newHighlight = {
       ...originalHighlight,
       end_index: splitStartIndex - 1,
       highlighted_text: originalHighlight.highlighted_text.substring(0, highlightStartIndexRelativeToHighlight)
     };
+        console.log("mon");
 
     await deleteHighlight(highlightId);
     await addHighlight(newHighlight);
     return;
   }
 
-  // If the split is completely within the highlight (middle), create two new highlights
   if (splitStartIndex > originalHighlight.start_index && splitEndIndex < originalHighlight.end_index) {
-    console.log("poop");
+            console.log("4");
+
+
     const firstHighlight = {
       ...originalHighlight,
       end_index: splitStartIndex - 1,
@@ -809,23 +842,22 @@ console.log("yooooo");
 
     const secondHighlight = {
       ...originalHighlight,
-      start_index: splitEndIndex + 1,
+    start_index: parseInt(splitEndIndex, 10) + 1,
       highlighted_text: originalHighlight.highlighted_text.substring(highlightEndIndexRelativeToHighlight + 1)
     };
-
+        console.log(secondHighlight);
+                console.log(firstHighlight);
 
 
     await deleteHighlight(highlightId);
-    await addHighlight(firstHighlight);
     await addHighlight(secondHighlight);
+
+    await addHighlight(firstHighlight);
     return;
   }
 
-  // If none of the above scenarios match, log an error. This may happen if the split indices are inconsistent with the original highlight
   console.error('Invalid split indices for highlight:', originalHighlight);
 }
-
-
 
 
 
