@@ -5,13 +5,10 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from .models import Highlight
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ObjectDoesNotExist
+import json
 
 import json
 from .models import Media
-import logging
-from django.db import models
-from django.contrib.auth.models import User
 
 @login_required
 def myapp_view(request):
@@ -54,13 +51,4 @@ def video_detail(request, media_id):
 
     context = {'media': media, 'media_json': media_json}
     return render(request, 'subplayer.html', context)
-
-def media_list(request):
-    media_objects = Media.objects.all()
-    return render(request, 'media_list.html', {'media': media_objects})
-
-
-# Set up logging
-logger = logging.getLogger(__name__)
-
 

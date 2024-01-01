@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from accounts.models import Profile, MediaProgress
 from subplayer.models import Media, Highlight
 import json, math  # <- Add this import at the top
+from youtube_transcript_api import YouTubeTranscriptApi 
 
 
 
@@ -176,3 +177,11 @@ def highlights(request):
     return render(request, 'accounts/highlights.html', {'media_highlights': media_highlights})
 
 
+
+  
+# assigning srt variable with the list 
+# of dictionaries obtained by the get_transcript() function
+srt = YouTubeTranscriptApi.get_transcript("Ku507_9m2s8", languages=['zh'])
+  
+# prints the result
+print(srt)
