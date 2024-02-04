@@ -181,7 +181,7 @@ def highlights(request):
   
 # assigning srt variable with the list 
 # of dictionaries obtained by the get_transcript() function
-srt = YouTubeTranscriptApi.get_transcript("Ku507_9m2s8", languages=['zh'])
+#srt = YouTubeTranscriptApi.get_transcript("Ku507_9m2s8", languages=['zh'])
   
 # prints the result
-print(srt)
+#print(srt)

@@ -17,12 +17,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from accounts import views
+from django.conf import settings
+from django.conf.urls.static import static
+from django.contrib import admin
+from django.urls import path, include
 from django.contrib.auth.views import LoginView
 from django.views.generic import TemplateView
 from subplayer import views as subplayer_views
 from subplayer.views import podcast_detail, video_detail, media_list
 from django.contrib.auth import views as auth_views
-from accounts.views import register
 from accounts.views import register
 from accounts.views import add_viewed_media, viewed_media_list, get_media_progress, update_media_progress, get_highlights, get_all_highlights, create_highlight, delete_highlight, modify_highlight
 
@@ -53,6 +56,8 @@ urlpatterns = [
     path('api/user/get_highlights/<int:media_id>/', get_highlights, name='get_highlights'),
 
 path('highlights/', views.highlights, name='highlights'),
+    path('admin/', admin.site.urls),
+
 
 
     
@@ -68,3 +73,6 @@ path('highlights/', views.highlights, name='highlights'),
 
     # Add other URL patterns for your project
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
