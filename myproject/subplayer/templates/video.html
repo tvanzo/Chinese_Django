@@ -59,7 +59,7 @@ function createSubtitles() {
 
 createSubtitles();  // create the initial frame
 
-        function updateProgress() {
+function updateProgress() {
     var currentTime = player.getCurrentTime();
     
     var duration = player.getDuration();
@@ -111,7 +111,7 @@ createSubtitles();  // create the initial frame
         var player;
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
-                videoId: 'N8gSMCWMlDw',
+                videoId: 'Ka2aByXeh7Q',
                 events: {
                     'onReady': onPlayerReady,
                     'onStateChange': onPlayerStateChange
@@ -446,6 +446,348 @@ subtitles.addEventListener("mouseup", function() {
         }
     }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+let saveProgressInterval;
+
+// Function to save progress
+function saveProgress() {
+    const progress = player.getCurrentTime(); // Get current time from YouTube Player
+    
+    fetch('/api/user/save-progress', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            mediaId: mediaId,
+            progress: progress
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => console.log(data))
+    .catch((error) => {
+        console.error('Fetch error:', error);
+    });
+}
+
+// Function to handle player state changes
+function onPlayerStateChange(event) {
+    if (event.data == YT.PlayerState.PLAYING && !saveProgressInterval) {
+        // Start saving progress every 5 seconds when the video is playing
+        saveProgressInterval = setInterval(saveProgress, 5000);
+    } else if (event.data == YT.PlayerState.PAUSED || event.data == YT.PlayerState.ENDED) {
+        // Clear the interval when the video is paused or ended
+        clearInterval(saveProgressInterval);
+        saveProgressInterval = null;
+    }
+}
+
+// Fetch and set the last stopped time
+fetch(`/api/user/media_progress/${mediaId}/`, {
+    method: 'GET',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken2
+    },
+})
+.then(response => {
+    if (!response.ok) {
+        throw Error(response.statusText);
+    }
+    return response.json();
+})
+.then(data => {
+    // Check if there's a MediaProgress object for the current media and user
+    if (data && data.time_stopped != null) {
+        // If so, seek the video to the last stopped time
+        player.seekTo(data.time_stopped, true);
+    } else {
+        // If not, the video should start playing from the beginning
+        console.log("No progress found, starting from the beginning");
+    }
+})
+.catch(error => console.error('Error:', error));
+
+// Make sure to add 'onPlayerStateChange' to the player's event listeners
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+        videoId: 'Ka2aByXeh7Q',
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+        }
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+document.addEventListener('keydown', async function (event) {
+  if (event.shiftKey) {
+    let selection = window.getSelection();
+
+    if (selection.rangeCount === 0) return;
+
+    let range = selection.getRangeAt(0);
+    let selectedText = selection.toString().trim();
+
+    if (!selectedText) return;
+
+    let calculateOffset = function (container, offset, span) {
+      let walker = document.createTreeWalker(span, NodeFilter.SHOW_TEXT);
+      let totalOffset = 0;
+      let node;
+      while ((node = walker.nextNode())) {
+        if (node === container || node.contains(container)) {
+          totalOffset += offset;
+          break;
+        }
+        totalOffset += node.textContent.length;
+      }
+      return totalOffset;
+    };
+
+    let findParentWithClass = function (node, className) {
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        node = node.parentNode;
+      }
+      while (node && (!node.classList || !node.classList.contains(className))) {
+        node = node.parentNode;
+      }
+      return node;
+    };
+
+    let startSpan = findParentWithClass(range.startContainer, 'sentence-span');
+    let endSpan = findParentWithClass(range.endContainer, 'sentence-span');
+
+    let start_char_index = calculateOffset(range.startContainer, range.startOffset, startSpan);
+    let end_char_index = calculateOffset(range.endContainer, range.endOffset, endSpan) - 1;
+
+    if (start_char_index < 10) {
+        start_char_index = '0' + start_char_index;
+    }
+
+    if (end_char_index < 10) {
+        end_char_index = '0' + end_char_index;
+    }
+
+    let highlightStartSentenceIndex = parseInt(startSpan.id.split('_')[2]);
+    let highlightEndSentenceIndex = parseInt(endSpan.id.split('_')[2]);
+    let highlightStartTime = subtitleTimes[highlightStartSentenceIndex].startTime;
+    let highlightEndTime = subtitleTimes[highlightEndSentenceIndex].endTime;
+    console.log("start " + start_char_index);
+        console.log("end " + end_char_index);
+
+
+    // Check if the selection overlaps an existing highlight
+const overlappingHighlight = transformedArray.find(item =>
+    parseFloat(`${item.start_sentence_index}.${item.start_index.toString().padStart(2, '0')}`) <= parseFloat(`${highlightEndSentenceIndex}.${end_char_index}`) &&
+    parseFloat(`${item.end_sentence_index}.${item.end_index.toString().padStart(2, '0')}`) >= parseFloat(`${highlightStartSentenceIndex}.${start_char_index}`) &&
+    item.frame_index === currentSubtitleIndex
+);
+if (overlappingHighlight) {
+   console.log(overlappingHighlight);
+
+} else {
+  console.log("No overlapping highlight found.");
+}
+
+if (overlappingHighlight) {
+console.log("startindex of " + overlappingHighlight.start_index + " endindex " + overlappingHighlight.end_index + " highlight start "+start_char_index);
+    console.log("fuck");
+  if (overlappingHighlight.start_sentence_index!=overlappingHighlight.end_sentence_index){
+        console.log("first"+overlappingHighlight.start_sentence_index);
+        console.log(overlappingHighlight.end_sentence_index);
+        await deleteHighlight(overlappingHighlight.id);
+  }
+  // Check if the selection exactly matches the existing highlight
+  else if (overlappingHighlight.start_index === start_char_index &&
+      overlappingHighlight.end_index === end_char_index) {
+    // If it does, delete the entire highlight
+    await deleteHighlight(overlappingHighlight.id);
+    console.log("Deleted");
+  } else {
+        console.log("lo");
+    console.log(start_char_index + " "+ end_char_index);
+
+    // If it doesn't, split the highlight at the selected indices
+    await splitHighlight(overlappingHighlight.id, start_char_index, end_char_index);
+    console.log(start_char_index + ""+ end_char_index);
+  }
+} else {
+            console.log("low");
+
+  // Otherwise, create a new highlight
+  if (start_char_index !== null && end_char_index !== null && highlightStartTime !== null && highlightEndTime !== null) {
+    console.log("All indexes found");
+    createHighlight(selectedText, mediaId, start_char_index, end_char_index, highlightStartSentenceIndex, highlightEndSentenceIndex, highlightStartTime, highlightEndTime, currentSubtitleIndex);
+  }
+}
+  }
+});
+
+function createHighlight(selectedText, mediaId, highlightStartIndex, highlightEndIndex, highlightStartSentenceIndex, highlightEndSentenceIndex, startTime, endTime, frameIndex) {
+    console.log("createHighlight triggered");
+
+    // Add leading zero if start_index is a single digit
+    if (highlightStartIndex.toString().length === 1) {
+        highlightStartIndex = "0" + highlightStartIndex;
+    }
+
+    // Add leading zero if end_index is a single digit
+    if (highlightEndIndex.toString().length === 1) {
+        highlightEndIndex = "0" + highlightEndIndex;
+    }
+
+    let highlightData = {
+        highlighted_text: selectedText,
+        media: mediaId,
+        start_index: highlightStartIndex,
+        end_index: highlightEndIndex,
+        start_sentence_index: highlightStartSentenceIndex,
+        end_sentence_index: highlightEndSentenceIndex,
+        start_time: startTime,
+        end_time: endTime,
+        frame_index: frameIndex,
+    };
+    addHighlight(highlightData);
+    console.log("here " + highlightData.start_index);
+}
+async function deleteHighlight(highlightId) {
+  try {
+    const response = await fetch(`/api/user/delete_highlight/${highlightId}/`, { // Removed highlightId from the URL
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken2
+      },
+      body: JSON.stringify({ highlight_id: highlightId }), // Pass highlightId in the request body
+    });
+
+    if (response.ok) {
+      console.log("Highlight deleted successfully!");
+      // Optionally, refresh the highlights or make any necessary updates to the UI
+      await fetchHighlights(mediaId);
+      createSubtitles(); // Recreate subtitles after fetching new highlights
+
+    } else {
+      console.error('Failed to delete highlight:', await response.text());
+    }
+  } catch (error) {
+    console.error('Error during delete highlight:', error);
+  }
+}
+
+
+
+
+
+
+async function splitHighlight(highlightId, splitStartIndex, splitEndIndex) {
+  console.log("highlightId:", highlightId);
+  console.log("splitStartIndex:", splitStartIndex);
+  console.log("splitEndIndex:", splitEndIndex);
+
+  const originalHighlight = transformedArray.find(item => item.id === highlightId);
+  const highlightStartIndexRelativeToHighlight = splitStartIndex - originalHighlight.start_index;
+  const highlightEndIndexRelativeToHighlight = splitEndIndex - originalHighlight.start_index;
+
+  console.log("originalHighlight:", originalHighlight);
+  console.log("highlightStartIndexRelativeToHighlight:", highlightStartIndexRelativeToHighlight);
+  console.log("highlightEndIndexRelativeToHighlight:", highlightEndIndexRelativeToHighlight);
+
+  if (splitStartIndex <= originalHighlight.start_index && splitEndIndex >= originalHighlight.end_index) {
+    console.log("1");
+    await deleteHighlight(highlightId);
+    return;
+  }
+
+  if (splitStartIndex <= originalHighlight.start_index && splitEndIndex < originalHighlight.end_index) {
+        console.log("2");
+
+    const newHighlight = {
+      ...originalHighlight,
+      start_index: parseInt(splitEndIndex, 10) + 1,
+      highlighted_text: originalHighlight.highlighted_text.substring(highlightEndIndexRelativeToHighlight + 1)
+    };
+
+    await deleteHighlight(highlightId);
+    await addHighlight(newHighlight);
+    return;
+  }
+
+  if (splitStartIndex > originalHighlight.start_index && splitEndIndex >= originalHighlight.end_index) {
+        console.log("3");
+
+    const newHighlight = {
+      ...originalHighlight,
+      end_index: splitStartIndex - 1,
+      highlighted_text: originalHighlight.highlighted_text.substring(0, highlightStartIndexRelativeToHighlight)
+    };
+        console.log("mon");
+
+    await deleteHighlight(highlightId);
+    await addHighlight(newHighlight);
+    return;
+  }
+
+  if (splitStartIndex > originalHighlight.start_index && splitEndIndex < originalHighlight.end_index) {
+            console.log("4");
+
+
+    const firstHighlight = {
+      ...originalHighlight,
+      end_index: splitStartIndex - 1,
+      highlighted_text: originalHighlight.highlighted_text.substring(0, highlightStartIndexRelativeToHighlight)
+    };
+
+    const secondHighlight = {
+      ...originalHighlight,
+    start_index: parseInt(splitEndIndex, 10) + 1,
+      highlighted_text: originalHighlight.highlighted_text.substring(highlightEndIndexRelativeToHighlight + 1)
+    };
+        console.log(secondHighlight);
+                console.log(firstHighlight);
+
+
+    await deleteHighlight(highlightId);
+    await addHighlight(secondHighlight);
+
+    await addHighlight(firstHighlight);
+    return;
+  }
+
+  console.error('Invalid split indices for highlight:', originalHighlight);
+}
+
+
+
     })(window, document);
 </script>
 

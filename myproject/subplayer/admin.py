@@ -21,14 +21,17 @@ class MediaAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         video_details = fetch_video_details(obj.url)
         if video_details['status'] == 'valid':
-            # Use the path to the subtitles file
-            obj.subtitle_file = video_details['subtitles_file_path']
-            obj.title = video_details['title']
-            obj.media_type = 'video'
-            obj.media_id = video_details['video_id']
-            super().save_model(request, obj, form, change)
+            subtitles_path = process_and_save_subtitles(video_details['subtitles'], video_details['video_id'])
+            if subtitles_path:  # Check if subtitles were successfully saved
+                obj.subtitle_file = subtitles_path
+                obj.title = video_details['title']
+                obj.media_type = 'video'
+                obj.media_id = video_details['video_id']
+                obj.youtube_video_id = video_details['video_id']
+                super().save_model(request, obj, form, change)
+            else:
+                messages.error(request, "Failed to save subtitles.")
         else:
-            # Handle invalid video or other errors
             messages.error(request, video_details['message'])
 
 

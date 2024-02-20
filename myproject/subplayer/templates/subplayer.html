@@ -1,58 +1,81 @@
 
+
+
+
+
+
+
+
+
 {% extends 'base.html' %}
 
 {% block title %}Home{% endblock %}
 
 {% block content %}
 {% load static %}
-{% load static %}
-
 
 <!DOCTYPE html>
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="{% static 'subplayer/styles.css' %}">
-
     <meta charset="UTF-8">
     <title>Your Title</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'subplayer/styles.css' %}">
-
 </head>
 <body>
-  <script src="{% static 'subplayer/convertForLongAudio.js' %}"></script>
 
-    <div id="podcast-cover">
-          <img src="{% static 'subplayer/cover.jpeg' %}" alt="Podcast Cover">
+<div class="dashboard">
+    <!-- Sidebar for Highlights -->
+ <!-- Sidebar for Highlights -->
+<aside class="sidebar">
+    <h2>Highlights</h2>
+    <ul id="highlight-list"> <!-- Add this ID -->
+       {% for highlight in highlights %}
+    <li><a href="#" data-start-time="{{ highlight.start_time }}">{{ highlight.highlighted_text }}</a></li>
+    {% empty %}
+    <li>No highlights found.</li>
+    {% endfor %}
+
+    </ul>
+</aside>
+
+
+    <div class="media-content">
+        <div id="podcast-cover">
+            <img src="{% static 'subplayer/cover.jpeg' %}" alt="Podcast Cover">
+        </div>
+
+        <audio id="audiofile" controls="controls" type="audio/mp3"></audio>
+        <br>
+        <div class="player-wrapper">
+            <div id="player"></div>
+        </div>
+
+        <div id="subtitles"></div>
+        <a href="{% url 'update_media_status' media.media_id 'in_progress' %}">Mark as In Progress</a>
+        <h1>{{ media.id }}</h1>
+        <a href="{% url 'update_media_status' media.media_id 'completed' %}">Mark as Completed</a>
+
+        <div id="audio-speed-display" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.5); color: white; padding: 20px; border-radius: 10px; font-size: 2em;"></div>
+
+        <button id="loop-button">Loop Mode</button>
+
+        <div id="notes">
+            <textarea id="note-input" placeholder="方法"></textarea>
+            <button id="save-button">丰富</button>
+        </div>
+
+        <div id="viewed-media-container">here</div>
+        <div id="highlight-display"></div>
     </div>
+</div>
 
-
-
-<audio id="audiofile"  controls="controls" type="audio/mp3"></audio><br>
- <div id="player"></div>
-
-
-
-    <div id="subtitles"></div>
-<div id="audio-speed-display" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.5); color: white; padding: 20px; border-radius: 10px; font-size: 2em;"></div>
-
-    <button id="loop-button">Loop Mode</button>
-
-    <div id="notes">
-        <textarea id="note-input" placeholder="方法"></textarea>
-        <button id="save-button">丰富</button>
-    </div>
-
-    <div id="viewed-media-container">here</div>
-    '
-    <div id="highlight-display"></div>
-'
-
+<script src="{% static 'subplayer/convertForLongAudio.js' %}"></script>
     <script>
         // Get the JSON data from the HTML
         var media = JSON.parse('{{ media_json|escapejs }}');
         var mediaId=media.media_id;
-
-        var test2 = "{% static 'subplayer/subtitle_json/' %}" + mediaId + ".json"        
+        var test2 = media.url; // if you added 'url': media.subtitle_file.url to media_dict]
+        console.log("location" +test2);
         const mediaType = media.media_type;
         const audioPlayer = document.getElementById('audiofile');
         var userId = "{{ request.user.id }}";
@@ -66,21 +89,39 @@
         }
 
 
+
+        function setupHighlightLinks() {
+    const highlights = document.querySelectorAll('#highlight-list a');
+    highlights.forEach(highlight => {
+        highlight.addEventListener('click', function(e) {
+            e.preventDefault();
+            const startTime = parseFloat(this.getAttribute('data-start-time')); // Ensure you're setting this attribute when generating the list
+            if (player && !isNaN(startTime)) {
+                player.seekTo(startTime, true);
+            }
+        });
+    });
+}
+
+// Call this function after the list is generated/updated
+setupHighlightLinks();
+
+
+
+
+
     </script>
 
-  <p>Media Type: {{ media.media_type }}</p>
-
-<!-- Conditionally include one of two templates based on media.media_type -->
 {% if media.media_type == 'audio' %}
     {% include 'subtitles.html' with media=media %}
-        <script src="{% static 'subplayer/js/subtitles.js' %}"></script>
-
+    <script src="{% static 'subplayer/js/subtitles.js' %}"></script>
 {% else %}
-        <script src="{% static 'subplayer/js/subtitles_video.js' %}"></script>
+    <script src="{% static 'subplayer/js/subtitles_video.js' %}"></script>
 {% endif %}
 
 </body>
-</html>{% endblock %}
+</html>
+{% endblock %}
 
 
 

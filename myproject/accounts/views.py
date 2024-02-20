@@ -5,9 +5,11 @@ from django.core import serializers
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from accounts.models import Profile, MediaProgress
-from subplayer.models import Media, Highlight
+from subplayer.models import Media, Highlight, UserMediaStatus
 import json, math  # <- Add this import at the top
 from youtube_transcript_api import YouTubeTranscriptApi 
+from django.shortcuts import get_object_or_404
+
 
 
 
@@ -95,9 +97,9 @@ def update_media_progress(request):
 
 @login_required
 def create_highlight(request):
-    if request.method == 'POST':
+    try:
         data = json.loads(request.body)
-        media_obj = Media.objects.get(pk=data['media'])
+        media_obj = Media.objects.get(media_id=data['media'])  # Assuming 'media_id' is the field name
 
         new_highlight = Highlight.objects.create(
             user=request.user,
@@ -110,11 +112,21 @@ def create_highlight(request):
             start_sentence_index=data['start_sentence_index'],
             end_sentence_index=data['end_sentence_index'],
             frame_index=data['frame_index']
-
         )
-        new_highlight.save()
 
-        return JsonResponse({'message': 'Highlight created!'}, status=201)
+        # Return the highlight details as JSON
+        return JsonResponse({
+            'id': new_highlight.id,
+            'highlighted_text': new_highlight.highlighted_text,
+            'media_id': new_highlight.media.media_id,  # Include media_id if needed for linking
+            # Add any other details you might need on the frontend
+        }, status=201)
+    except Media.DoesNotExist:
+        return JsonResponse({'error': 'Media not found'}, status=404)
+    except KeyError as e:
+        return JsonResponse({'error': f'Missing key in request data: {e}'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 def delete_highlight(request, highlight_id):
     try:
         data = json.loads(request.body.decode('utf-8'))  # Parse JSON from the request body
@@ -155,7 +167,7 @@ def modify_highlight(request, highlight_id):
 
 @login_required
 def get_highlights(request, media_id):
-    highlights = Highlight.objects.filter(user_id=request.user.id, media_id=media_id)
+    highlights = Highlight.objects.filter(user=request.user, media__media_id=media_id)
     highlights_data = serializers.serialize('json', highlights)
     return JsonResponse(highlights_data, safe=False)
 
@@ -177,7 +189,25 @@ def highlights(request):
     return render(request, 'accounts/highlights.html', {'media_highlights': media_highlights})
 
 
+@login_required
+def update_media_status(request, media_id, status):
+    # Assuming media_id is a unique identifier for Media other than the primary key
+    media = get_object_or_404(Media, media_id=media_id)
 
+    # Update or create the UserMediaStatus
+    UserMediaStatus.objects.update_or_create(
+        user=request.user,
+        media=media,
+        defaults={'status': status}
+    )
+
+    # Redirect to the media detail page, using the media_id
+    return render(request, 'subplayer.html', {'media': media})
+
+@login_required
+def list_media_by_status(request, status):
+    media_statuses = UserMediaStatus.objects.filter(user=request.user, status=status)
+    return render(request, 'media/list_by_status.html', {'media_statuses': media_statuses})
   
 # assigning srt variable with the list 
 # of dictionaries obtained by the get_transcript() function
@@ -185,3 +215,26 @@ def highlights(request):
   
 # prints the result
 #print(srt)
+
+@login_required
+def my_media(request):
+    status_filter = request.GET.getlist('status')  # Allows multiple status filters
+
+    # Fetch media with any user status if no specific filter is applied
+    if status_filter:
+        user_media_statuses = UserMediaStatus.objects.filter(user=request.user, status__in=status_filter)
+    else:
+        user_media_statuses = UserMediaStatus.objects.filter(user=request.user, status__in=['in_progress', 'completed'])
+
+    return render(request, 'accounts/my_media.html', {'user_media_statuses': user_media_statuses})
+
+@login_required
+def remove_media_status(request, media_id):
+    # Assuming 'media_id' is the primary key of the Media model
+    UserMediaStatus.objects.filter(user=request.user, media_id=media_id).delete()
+    # Redirect to the 'my_media' view to show the updated list of media statuses
+    return redirect('my_media')  # Make sure 'my_media' is the name of the URL pattern for the my_media view
+
+
+
+

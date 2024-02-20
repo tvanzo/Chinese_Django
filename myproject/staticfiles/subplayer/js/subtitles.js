@@ -1,3 +1,4 @@
+console.log("lmao");
 var mediaHasBeenPlayed = false;
  
  function getCookie(name) {
@@ -140,6 +141,16 @@ function applyPermanentHighlight(frameIndex, charIndex) {
 
 
 
+function updateSidebarWithHighlight(highlight) {
+  const ul = document.getElementById('highlight-list'); // Assuming your UL has this ID
+  const li = document.createElement('li');
+  li.id = `highlight-${highlight.id}`; // Give each highlight a unique ID
+  const a = document.createElement('a');
+  a.href = `#highlight-${highlight.id}`; // Create a link or identifier (modify as needed)
+  a.textContent = highlight.highlighted_text;
+  li.appendChild(a);
+  ul.appendChild(li);
+}
 
 
 async function addHighlight(highlightData) {
@@ -147,21 +158,22 @@ async function addHighlight(highlightData) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-CSRFToken': csrftoken2 // Function to get the CSRF token from the cookie
+      'X-CSRFToken': csrftoken2 // Ensure you have the CSRF token
     },
     body: JSON.stringify(highlightData),
   });
 
   if (response.ok) {
-    console.log("added highlight!")
-    // If the addition was successful, fetch the updated list of highlights
-    await fetchHighlights(highlightData.media);
-    createSubtitles(); // Recreate subtitles after fetching new highlights
+    console.log("Highlight added successfully!");
+    const addedHighlight = await response.json(); // Assuming the server returns the added highlight
+    updateSidebarWithHighlight(addedHighlight); // Update the sidebar with the new highlight
+    await fetchHighlights(highlightData.media); // Optionally refresh highlights if needed
+    createSubtitles(); // Recreate subtitles to include new highlights
   } else {
     console.error('Failed to add highlight:', await response.text());
-    console.log(highlightData);
   }
 }
+
 
 
 
@@ -307,9 +319,11 @@ fetchHighlights(mediaId);
 
     let transcript;
     let syncData5 = null; // Assign an initial value to syncData5
-
+    console.log("test2"+ test2);
     try {
   const response = await fetch(test2);
+  console.log(test2);
+console.log("poop");
   const data = await response.json();
   transcript = data.transcript;
   syncData5 = data.words;
@@ -321,100 +335,46 @@ fetchHighlights(mediaId);
 
     var syncData=syncData5;
 
-
       var syncData2 = []; // New array to track sentences
       
-      // Convert syncData to syncData2
-      var sentence = "";
-      var startTime = "0";
-      var endTime = "";
-      var counter = 0;
-      var pattern = /^[A-Za-z]+$/;
-  for (let i = 0; i < transcript.length; i++) {
-    var word = syncData[counter].word;
-     while(pattern.test(transcript[i])){
-        i++;
-     }
+  function createFramesArray(syncData) {
+    let currentFrame = [];
+    let currentFrameCharCount = 0;
+    const charLimit = 60; // Character limit for each frame
 
-    var punctuation = transcript[i + 1];
-    while ((!isNaN(transcript[i]) ||[ "千", "万", "亿"].includes(transcript[i]) ||["零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "百", "千", "万", "亿", "两"].
-      includes(syncData[counter].word)) && transcript[i]!=word) {
-      word = syncData[counter].word;
+    syncData.forEach(wordItem => {
+        console.log(wordItem);
+         console.log(wordItem.word);
 
-        if (["零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "百", "千", "万", "亿", "两"].includes(syncData[counter].word) && (!isNaN(transcript[i]) || ["千", "万", "亿"].includes(transcript[i]))){
-          
-    
-            sentence+=word;
-
-            i++;
-            counter++;
-            word = syncData[counter].word;
-
-
+        let sentenceCharCount = wordItem.word.length;
+        if ((currentFrameCharCount + sentenceCharCount) <= charLimit) {
+            // Add wordItem to the current frame if within char limit
+            currentFrame.push({
+                startTime: wordItem.startTime,
+                endTime: wordItem.endTime,
+                sentence: wordItem.word
+            });
+            currentFrameCharCount += sentenceCharCount;
+        } else {
+            // Push the current frame to framesArray and start a new frame
+            framesArray.push(currentFrame);
+            currentFrame = [{
+                startTime: wordItem.startTime,
+                endTime: wordItem.endTime,
+                sentence: wordItem.word
+            }];
+            currentFrameCharCount = sentenceCharCount;
         }
-        else if(!isNaN(transcript[i])||[ "千", "万", "亿"].includes(transcript[i])){
-          i++;
-        }  
-        else{
-          word = syncData[counter].word;
-            sentence+=word;
-            counter++;
-           word = syncData[counter].word;
-           punctuation = transcript[i + 1];
-
-        }
-       
-
+    });
+    // Don't forget to add the last frame if it has content
+    if (currentFrame.length > 0) {
+        framesArray.push(currentFrame);
     }
-
-      if (["！", "，", "。"].includes(punctuation)) {
-          sentence += word + "" + punctuation;
-          endTime = syncData[counter-1].endTime;
-          syncData2.push({
-            startTime: startTime,
-            endTime: endTime,
-            sentence: sentence
-          });
-          sentence = "";
-          startTime = "";
-        i++;
-        counter++;
-
-     } 
-
-      else if(startTime===""&& i!=0){
-       startTime = syncData[counter-1].startTime;
-       sentence+=word;
-        counter++
-      }
-      else{
-        sentence+=word;
-       counter++;
-      } 
-  }
-
-
-
-
-for (let i = 0; i < syncData2.length; i++) {
-  var sentenceCharCount = syncData2[i].sentence.length;
-
-  if ((currentFrameCharCount + sentenceCharCount) <= 60) {
-    // If adding this sentence doesn't exceed 60 chars, add it to the current frame
-    currentFrame.push(syncData2[i]);
-    currentFrameCharCount += sentenceCharCount;
-  } else {
-    // Otherwise, start a new frame
-    framesArray.push(currentFrame);
-    currentFrame = [syncData2[i]];
-    currentFrameCharCount = sentenceCharCount;
-  }
 }
 
-// Don't forget to add the last frame
-if (currentFrame.length > 0) {
-  framesArray.push(currentFrame);
-}
+// Call this function with your syncData
+createFramesArray(syncData);
+
      
   var loopButton = doc.getElementById("loop-button");
 

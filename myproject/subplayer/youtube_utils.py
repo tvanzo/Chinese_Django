@@ -12,15 +12,22 @@ logger = logging.getLogger(__name__)
 # Initialize YouTube API
 youtube = build('youtube', 'v3', developerKey='AIzaSyBbuGRULqUYyCxDBZyoHFgzHwseF-fnrwg')
 
-def fetch_subtitles(video_id):
+def fetch_subtitles(video_id, language='en'):
     try:
-        # Fetch the subtitles using the youtube_transcript_api
-        subtitles = YouTubeTranscriptApi.get_transcript(video_id)
-        logger.info(f"Subtitles fetched successfully for video ID: {video_id}")
+        # Try fetching Chinese subtitles first
+        try:
+            subtitles = YouTubeTranscriptApi.get_transcript(video_id, languages=['zh-Hans', 'zh-Hant'])
+            logger.info(f"Chinese subtitles fetched successfully for video ID: {video_id}")
+        except:
+            # If fetching Chinese subtitles fails, fall back to the default language
+            subtitles = YouTubeTranscriptApi.get_transcript(video_id, languages=[language])
+            logger.info(f"Subtitles fetched successfully for video ID: {video_id} in default language")
+        
         return subtitles
     except Exception as e:
         logger.error(f"An error occurred while fetching subtitles for video ID {video_id}: {e}")
         return None
+
 
 def fetch_video_details(url):
     # Extract video ID from URL
@@ -33,7 +40,8 @@ def fetch_video_details(url):
             'status': 'invalid',
             'message': "This is not a valid YouTube URL.",
             'title': None,
-            'video_id': None
+            'video_id': None,
+            'thumbnail_url': None  # Include thumbnail_url in the return dictionary
         }
 
     try:
@@ -45,11 +53,14 @@ def fetch_video_details(url):
                 'status': 'invalid',
                 'message': "This YouTube video does not exist.",
                 'title': None,
-                'video_id': None
+                'video_id': None,
+                'thumbnail_url': None  # Include thumbnail_url in the return dictionary
             }
 
-        # Extract title from video details
-        video_title = video_response['items'][0]['snippet']['title']
+        video_item = video_response['items'][0]
+        video_title = video_item['snippet']['title']
+        # Extract thumbnail URL
+        thumbnail_url = video_item['snippet']['thumbnails']['high']['url']
 
         # Fetch and process subtitles
         subtitles = fetch_subtitles(video_id)
@@ -59,7 +70,8 @@ def fetch_video_details(url):
                 'status': 'invalid',
                 'message': "Failed to fetch subtitles for this video.",
                 'title': video_title,
-                'video_id': video_id
+                'video_id': video_id,
+                'thumbnail_url': thumbnail_url  # Include thumbnail_url in the return dictionary
             }
 
         # Process and save subtitles
@@ -70,7 +82,8 @@ def fetch_video_details(url):
                 'status': 'invalid',
                 'message': "Failed to process and save subtitles for this video.",
                 'title': video_title,
-                'video_id': video_id
+                'video_id': video_id,
+                'thumbnail_url': thumbnail_url  # Include thumbnail_url in the return dictionary
             }
 
         logger.info(f"Video details fetched successfully for video ID: {video_id}")
@@ -79,7 +92,8 @@ def fetch_video_details(url):
             'message': "This YouTube video is valid and has subtitles.",
             'title': video_title,
             'video_id': video_id,
-            'subtitles_file_path': subtitles_file_path
+            'subtitles_file_path': subtitles_file_path,
+            'thumbnail_url': thumbnail_url  # Include thumbnail_url in the return dictionary
         }
 
     except HttpError as e:
@@ -88,7 +102,8 @@ def fetch_video_details(url):
             'status': 'invalid',
             'message': f"An API error occurred: {e.resp.status} {e.content}",
             'title': None,
-            'video_id': None
+            'video_id': None,
+            'thumbnail_url': None  # Include thumbnail_url in the return dictionary
         }
 
 
@@ -125,31 +140,22 @@ def process_and_save_subtitles(subtitles, video_id):
         'transcript': transcript.strip(),  # Remove trailing space
         'words': words
     }
-
-    # Define the directory to save subtitle files within MEDIA_ROOT
+ # Define the directory to save subtitle files within MEDIA_ROOT
     subtitles_dir = 'subtitles'  # Relative path from MEDIA_ROOT
     full_subtitles_dir = os.path.join(settings.MEDIA_ROOT, subtitles_dir)
-    try:
-        os.makedirs(full_subtitles_dir, exist_ok=True)  # Ensure directory exists
-    except OSError as e:
-        print(f"An error occurred while creating the directory: {e}")
-        # Handle the error or propagate it as needed
+    os.makedirs(full_subtitles_dir, exist_ok=True)  # Ensure directory exists
 
     # Specify the file path where you want to save the JSON data
     file_name = f"{video_id}_subtitles.json"
     file_path = os.path.join(full_subtitles_dir, file_name)
-    relative_file_path = os.path.join(subtitles_dir, file_name)  # Relative path for the FileField
 
     # Convert to JSON and write to a file
     try:
         with open(file_path, 'w', encoding='utf-8') as file:
             json.dump(output_data, file, ensure_ascii=False, indent=4)
         print(f"Subtitles saved to {file_path}")
-        return relative_file_path  # Return the relative path for storing in the model
+        return os.path.join(subtitles_dir, file_name)  # Return the relative path for storing in the model
     except IOError as e:
         print(f"An error occurred while writing the file: {e}")
-        # Handle the error or propagate it as needed
         return None
-
-
 

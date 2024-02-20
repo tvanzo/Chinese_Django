@@ -24,10 +24,10 @@ from django.urls import path, include
 from django.contrib.auth.views import LoginView
 from django.views.generic import TemplateView
 from subplayer import views as subplayer_views
-from subplayer.views import podcast_detail, video_detail, media_list
+from subplayer.views import podcast_detail, video_detail, media_list, add_media
 from django.contrib.auth import views as auth_views
 from accounts.views import register
-from accounts.views import add_viewed_media, viewed_media_list, get_media_progress, update_media_progress, get_highlights, get_all_highlights, create_highlight, delete_highlight, modify_highlight
+from accounts.views import add_viewed_media, viewed_media_list, get_media_progress, update_media_progress, get_highlights, get_all_highlights, create_highlight, delete_highlight, modify_highlight, my_media, remove_media_status
 
 
 
@@ -53,15 +53,21 @@ urlpatterns = [
     path('api/user/modify_highlight/<int:highlight_id>/', modify_highlight, name='modify_highlight'),
 
  path('api/user/get_highlights/', get_all_highlights, name='get_all_highlights'),
-    path('api/user/get_highlights/<int:media_id>/', get_highlights, name='get_highlights'),
+    path('api/user/get_highlights/<str:media_id>/', get_highlights, name='get_highlights'),
 
 path('highlights/', views.highlights, name='highlights'),
     path('admin/', admin.site.urls),
+        path('add_media/', add_media, name='add_media'),
+    path('media_list/', views.media_list, name='media_list'),
 
+path('media/update_status/<str:media_id>/<str:status>/', views.update_media_status, name='update_media_status'),
+    path('media/list_by_status/<str:status>/', views.list_media_by_status, name='list_media_by_status'),
 
+    path('my_media/', views.my_media, name='my_media'),
 
     
 
+    path('media/remove_status/<int:media_id>/', views.remove_media_status, name='remove_media_status'),
 
 
 

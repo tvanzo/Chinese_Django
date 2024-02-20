@@ -1,47 +1,97 @@
 document.addEventListener('DOMContentLoaded', function() {
-    fetchHighlights();
+    fetchAllHighlights();
+});
+ function getCookie(name) {
+      var cookieArr = document.cookie.split(";");
+
+      for(let i = 0; i < cookieArr.length; i++) {
+        var cookiePair = cookieArr[i].split("=");
+
+        if(name == cookiePair[0].trim()) {
+          return decodeURIComponent(cookiePair[1]);
+        }
+      }
+
+      // Return null if the cookie by that name does not exist
+      return null;
+    }
+
+var csrftoken2;
+ document.addEventListener('DOMContentLoaded', (event) => {
+        csrftoken2=getCookie('csrftoken');
+
 });
 
-function fetchHighlights() {
-    fetch('/api/user/get_highlights/')
-    .then(response => response.json())
-    .then(data => {
-        displayHighlights(data.media_highlights);
+function fetchAllHighlights() {
+    console.log("Fetching all highlights");  // Log 1
+    fetch('/api/user/get_highlights/', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken2
+        },
     })
-    .catch(error => console.error('Error:', error));
+    .then(response => {
+        console.log("Received response", response);  // Log 2
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json(); // This already parses the JSON response
+    })
+    .then(parsedData => {
+        console.log("Parsed data:", parsedData);  // Log the parsed data
+        displayHighlights(parsedData); // Pass the parsed data directly
+    })
+    .catch(error => {
+        console.log('Error during fetch:', error);
+    });
 }
 
-function displayHighlights(mediaHighlights) {
+
+function displayHighlights(highlights) {
     const highlightsContent = document.getElementById('highlights-content');
-    highlightsContent.innerHTML = ''; // Clear existing content
+    highlightsContent.innerHTML = '';  // Clear existing content
 
-    for (const [media, highlights] of Object.entries(mediaHighlights)) {
+    // Parse the JSON string and then group highlights by media
+    const parsedHighlights = JSON.parse(highlights);
+    const highlightsByMedia = groupHighlightsByMedia(parsedHighlights);
+
+    Object.keys(highlightsByMedia).forEach(mediaId => {
         const mediaDiv = document.createElement('div');
-        mediaDiv.className = 'media-block';
+        mediaDiv.className = 'media';
+        mediaDiv.textContent = `Media ID: ${mediaId}`;  // Use Media ID for now
 
-        const mediaTitle = document.createElement('button');
-        mediaTitle.className = 'media-title';
-        mediaTitle.textContent = media.title; // Assuming 'media' has a 'title' property
-        mediaTitle.onclick = () => toggleHighlights(mediaDiv);
+        const highlightsDiv = document.createElement('div');
+        highlightsDiv.className = 'highlights';
+        highlightsDiv.style.display = 'none';  // Initially hide the highlights
 
-        const highlightsList = document.createElement('div');
-        highlightsList.className = 'highlight-list';
-        highlightsList.style.display = 'none';
-
-        highlights.forEach(highlight => {
+        highlightsByMedia[mediaId].forEach(highlight => {
             const highlightDiv = document.createElement('div');
             highlightDiv.className = 'highlight';
-            highlightDiv.textContent = highlight.highlighted_text; // Update with correct property
-            highlightsList.appendChild(highlightDiv);
+            highlightDiv.textContent = highlight.fields.highlighted_text;
+            highlightsDiv.appendChild(highlightDiv);
         });
 
-        mediaDiv.appendChild(mediaTitle);
-        mediaDiv.appendChild(highlightsList);
+        mediaDiv.addEventListener('click', function() {
+            // Toggle display of highlights
+            highlightsDiv.style.display = highlightsDiv.style.display === 'none' ? 'block' : 'none';
+        });
+
         highlightsContent.appendChild(mediaDiv);
-    }
+        highlightsContent.appendChild(highlightsDiv);
+    });
 }
 
-function toggleHighlights(mediaDiv) {
-    const highlightsList = mediaDiv.querySelector('.highlight-list');
-    highlightsList.style.display = highlightsList.style.display === 'none' ? 'block' : 'none';
+function groupHighlightsByMedia(highlights) {
+    const grouped = {};
+    highlights.forEach(highlight => {
+        const mediaId = highlight.fields.media;  // Using media ID from fields
+        if (!grouped[mediaId]) {
+            grouped[mediaId] = [];
+        }
+        grouped[mediaId].push(highlight);
+    });
+    return grouped;
 }
+
+

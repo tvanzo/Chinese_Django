@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}My Media{% endblock %}
+{% load static %}
+
+{% block content %}
+    <header>
+    <link rel="stylesheet" type="text/css" href="{% static 'subplayer/styles.css' %}">
+</header>
+
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="float-top">
+            <div class="sidebar-controls">
+                <button class="hide-sidebar"><i class="fa fa-chevron-left"></i></button>
+            </div>
+        </div>
+        <h2>Mediaa List</h2>
+        <ul>
+            {% for media_status in user_media_statuses %}
+            <li>
+                <a href="{% url 'video_detail' media_status.media.media_id %}">
+                    {{ media_status.media.title }}
+                </a>
+            </li>
+            {% empty %}
+            <li>No media found.</li>
+            {% endfor %}
+        </ul>
+    </aside>
+    <main class="content">
+        <h2>Welcomeeeee to Your Media Dashboard</h2>
+        <p>Select a media from the list to view details.</p>
+    </main>
+</div>
+
+
+
+
+    <script>
+     document.addEventListener("DOMContentLoaded", function() {
+    const sidebar = document.querySelector(".sidebar");
+    const toggleSidebarButton = document.querySelector(".hide-sidebar");
+
+    toggleSidebarButton.addEventListener("click", function() {
+        sidebar.classList.toggle("hidden");
+        document.querySelector(".content").classList.toggle("sidebar-hidden");
+    });
+});
+    </script>
+{% endblock %}
