@@ -1,22 +1,40 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}My Site{% endblock %}</title>
-    <!-- Include any common CSS files or other head elements here -->
+    <link rel="stylesheet" type="text/css" href="{% static 'subplayer/css/styles.css' %}">
 </head>
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="{% url 'home' %}">Home</a></li>
-                <li><a href="{% url 'highlights' %}">Highlights</a></li>
-                <li><a href="{% url 'my_media' %}">My Media</a></li>
 
-                <!-- Add other navigation links as needed -->
-            </ul>
-        </nav>
-    </header>
+<header>
+    {% if not hide_nav %}
+    <nav>
+<ul>
+            <li>
+                <a href="{% url 'home' %}" class="nav-icon" data-text="Home">
+                    <img src="{% static 'subplayer/house_icon.jpeg' %}" alt="Home">
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'highlights' %}" class="nav-icon" data-text="Highlights">
+                    <img src="{% static 'subplayer/highlight_icon.png' %}" alt="Highlights">
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'my_media' %}" class="nav-icon" data-text="My Media">
+                    <img src="{% static 'subplayer/saved_icon.png' %}" alt="My Media">
+                </a>
+            </li>
+        </ul>    </nav>
+    {% endif %}
+</header>
+
+
+
+
 
     {% block content %}
     <!-- Page specific content will go here -->

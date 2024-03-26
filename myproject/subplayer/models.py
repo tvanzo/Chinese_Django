@@ -20,6 +20,8 @@ class Media(models.Model):
     youtube_video_id = models.CharField(max_length=200, blank=True, null=True)
     thumbnail_url = models.URLField(blank=True, null=True)  # New field for thumbnail URL
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='added_media')
+    video_length = models.CharField(max_length=10, blank=True, null=True)  # For storing as "4:13"
+
 
 
     from django.db import models

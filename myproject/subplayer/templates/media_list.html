@@ -4,31 +4,90 @@
 
 {% block content %}
 {% load static %}
+<header>
+    <link rel="stylesheet" type="text/css" href="{% static 'subplayer/css/media_list.css' %}">
+</header>
+
 <div class="container">
+
+
+     <div class="logo-container">
+        <img src="{% static 'subplayer/perp_logo.png' %}" alt="Logo" class="logo">
+    </div>
+
+
     <div class="search-container">
         <form action="{% url 'add_media' %}" method="post" class="search-box">
             {% csrf_token %}
             <input type="text" id="youtube_url" name="youtube_url" class="search-input" placeholder="Enter YouTube URL here..." required>
+            <button type="submit" class="add-media-button">+</button>
         </form>
     </div>
 
     <div class="media-grid">
         {% for media in media %}
-            {% if media.media_type == 'video' %}
-                <div class="media-item">
-                    <a href="{% url 'video_detail' media.media_id %}">
-                        <div class="thumbnail-container">
-                            <img src="{{ media.thumbnail_url }}" alt="{{ media.title }}" class="media-thumbnail">
-                        </div>
-                        <div class="media-title">{{ media.title }}</div>
-                                               
-
-                    </a>
+        {% if media.media_type == 'video' %}
+        <div class="media-item">
+            <a href="{% url 'video_detail' media.media_id %}">
+                <div class="thumbnail-container">
+                    <img src="{{ media.thumbnail_url }}" alt="{{ media.title }}" class="media-thumbnail">
                 </div>
-            {% endif %}
+                <div class="media-title">{{ media.title }}</div>
+                <div class="media-details">
+                    <span class="media-length">{{ media.length }}</span> <!-- Display video length -->
+                    <button class="mark-in-progress-btn" data-media-id="{{ media.media_id }}">+</button> <!-- Mark as in-progress button -->
+                </div>
+            </a>
+        </div>
+        {% endif %}
         {% empty %}
-            <p class="no-media">No videos found.</p>
+        <p class="no-media">No videos found.</p>
         {% endfor %}
     </div>
 </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.mark-in-progress-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const mediaId = this.getAttribute('data-media-id');
+            fetch(`/media/update_status/${mediaId}/in_progress/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 'status': 'in_progress' })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Media marked as in-progress successfully!');
+                    // Optionally, update the UI to reflect the change
+                } else {
+                    alert('Failed to update media status.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+
 {% endblock %}

@@ -9,6 +9,8 @@ from subplayer.models import Media, Highlight, UserMediaStatus
 import json, math  # <- Add this import at the top
 from youtube_transcript_api import YouTubeTranscriptApi 
 from django.shortcuts import get_object_or_404
+from django.db.models import Count, Q
+
 
 
 
@@ -189,20 +191,7 @@ def highlights(request):
     return render(request, 'accounts/highlights.html', {'media_highlights': media_highlights})
 
 
-@login_required
-def update_media_status(request, media_id, status):
-    # Assuming media_id is a unique identifier for Media other than the primary key
-    media = get_object_or_404(Media, media_id=media_id)
 
-    # Update or create the UserMediaStatus
-    UserMediaStatus.objects.update_or_create(
-        user=request.user,
-        media=media,
-        defaults={'status': status}
-    )
-
-    # Redirect to the media detail page, using the media_id
-    return render(request, 'subplayer.html', {'media': media})
 
 @login_required
 def list_media_by_status(request, status):
@@ -216,24 +205,61 @@ def list_media_by_status(request, status):
 # prints the result
 #print(srt)
 
+
+
 @login_required
 def my_media(request):
     status_filter = request.GET.getlist('status')  # Allows multiple status filters
 
-    # Fetch media with any user status if no specific filter is applied
     if status_filter:
-        user_media_statuses = UserMediaStatus.objects.filter(user=request.user, status__in=status_filter)
+        user_media_statuses = UserMediaStatus.objects.filter(
+            user=request.user, 
+            status__in=status_filter
+        )
     else:
-        user_media_statuses = UserMediaStatus.objects.filter(user=request.user, status__in=['in_progress', 'completed'])
+        user_media_statuses = UserMediaStatus.objects.filter(
+            user=request.user, 
+            status__in=['in_progress', 'completed']
+        )
+
+    # Annotate each UserMediaStatus object with the count of related highlights
+    user_media_statuses = user_media_statuses.annotate(
+        highlights_count=Count('media__highlights', filter=Q(media__highlights__user=request.user))
+    )
 
     return render(request, 'accounts/my_media.html', {'user_media_statuses': user_media_statuses})
 
+
+
 @login_required
 def remove_media_status(request, media_id):
-    # Assuming 'media_id' is the primary key of the Media model
-    UserMediaStatus.objects.filter(user=request.user, media_id=media_id).delete()
-    # Redirect to the 'my_media' view to show the updated list of media statuses
-    return redirect('my_media')  # Make sure 'my_media' is the name of the URL pattern for the my_media view
+    if request.method == 'POST':
+        # Assuming 'media_id' is the primary key of the Media model
+        UserMediaStatus.objects.filter(user=request.user, media_id=media_id).delete()
+        return JsonResponse({'status': 'success', 'message': 'Media status removed successfully'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+@login_required
+def update_media_status(request, media_id, status=None):
+    if request.method == 'POST':
+        media = get_object_or_404(Media, media_id=media_id)
+
+        # If the status is 'remove', delete the status
+        if status == 'remove':
+            UserMediaStatus.objects.filter(user=request.user, media=media).delete()
+            return JsonResponse({'status': 'success', 'message': 'Media status removed successfully'})
+
+        # Otherwise, update or create the status
+        else:
+            UserMediaStatus.objects.update_or_create(
+                user=request.user,
+                media=media,
+                defaults={'status': status}
+            )
+            return JsonResponse({'status': 'success', 'message': f'Media status updated to {status} successfully'})
+
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 
 

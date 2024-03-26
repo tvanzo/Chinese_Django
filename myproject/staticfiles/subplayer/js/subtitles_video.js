@@ -90,19 +90,23 @@ async function fetchHighlights(mediaId) {
             if (!Array.isArray(data)) {
                 data = JSON.parse(data);
             }
-           transformedArray = data.map(item => ({
-            media: item.fields.media,
-             id: item.pk,
-            start_time: item.fields.start_time,
-            end_time: item.fields.end_time,
-            highlighted_text: item.fields.highlighted_text,
-            start_index: item.fields.start_index,
-            end_index: item.fields.end_index,
-            start_sentence_index: item.fields.start_sentence_index,
-            end_sentence_index: item.fields.end_sentence_index,
-            frame_index: item.fields.frame_index // add this line
-        }));
+            transformedArray = data.map(item => {
+                // Log the id here
+                console.log('Highlight ID:', item.pk);
 
+                return {
+                    media: item.fields.media,
+                    id: item.pk,
+                    start_time: item.fields.start_time,
+                    end_time: item.fields.end_time,
+                    highlighted_text: item.fields.highlighted_text,
+                    start_index: item.fields.start_index,
+                    end_index: item.fields.end_index,
+                    start_sentence_index: item.fields.start_sentence_index,
+                    end_sentence_index: item.fields.end_sentence_index,
+                    frame_index: item.fields.frame_index // add this line
+                };
+            });
 
             updateHighlightMap();
             resolve();
@@ -116,11 +120,13 @@ async function fetchHighlights(mediaId) {
 
 
 
+
 function addHighlightToMap(frameIndex, sentenceIndex, charIndex, highlight) {
   const key = `${frameIndex}_${sentenceIndex}_${charIndex}`; // construct a unique key
   if (!highlightMap[key]) {
     highlightMap[key] = [];
   }
+
   highlightMap[key].push({
     startTime: parseFloat(highlight.start_time),
     endTime: parseFloat(highlight.end_time)
@@ -153,26 +159,88 @@ function applyPermanentHighlight(frameIndex, charIndex) {
 
 
 
+
+
+function updateSidebarWithHighlight(highlight) {
+    const ul = document.getElementById('highlight-list'); // Assuming your UL has this ID
+    const li = document.createElement('li');
+
+    const div = document.createElement('div');
+    div.className = 'highlight-container';
+
+    const a = document.createElement('a');
+    a.href = "#"; // Since you can't use Django template tags, set href to "#" or the actual link if available
+    a.setAttribute('data-start-time', highlight.start_time); // Set custom data attribute
+    a.textContent = highlight.highlighted_text;
+    div.appendChild(a);
+
+    // Create the delete icon for the new highlight
+    const img = document.createElement('img');
+    // Ensure the path to the trash icon is correct for your static files setup
+    img.src = '/static/subplayer/trash.png'; // Adjust the path as needed
+    img.alt = "Delete";
+    img.className = "delete-highlight";
+    img.setAttribute('data-highlight-id', highlight.id); // Use setAttribute for data attributes
+    img.style.cursor = "pointer";
+
+    // Attach the event listener for deletion
+    img.addEventListener('click', function() {
+        deleteHighlight(this.dataset.highlightId);
+    });
+
+    div.appendChild(img);
+    li.appendChild(div);
+    ul.appendChild(li);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 async function addHighlight(highlightData) {
-    console.log("trying to add");
   const response = await fetch(`/api/user/create_highlight`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-CSRFToken': csrftoken2 // Function to get the CSRF token from the cookie
+      'X-CSRFToken': csrftoken2 // Ensure you have the CSRF token
     },
     body: JSON.stringify(highlightData),
   });
 
   if (response.ok) {
-    console.log("added highlight!")
-    // If the addition was successful, fetch the updated list of highlights
-    await fetchHighlights(highlightData.media);
-    createSubtitles(); // Recreate subtitles after fetching new highlights
+    console.log("Highlight added successfully!");
+    const addedHighlight = await response.json(); // Assuming the server returns the added highlight
+    updateSidebarWithHighlight(addedHighlight); // Update the sidebar with the new highlight
+    await fetchHighlights(highlightData.media); // Optionally refresh highlights if needed
+    createSubtitles(); // Recreate subtitles to include new highlights
   } else {
-    console.log("ur a failure");
     console.error('Failed to add highlight:', await response.text());
-    console.log(highlightData);
   }
 }
 
@@ -312,7 +380,7 @@ function onPlayerReady(event) {
 
 
     var syncData=syncData5;
-
+    console.log(syncData);
       var syncData2 = []; // New array to track sentences
       
   function createFramesArray(syncData) {
@@ -370,10 +438,42 @@ var isLoopMode = false;
 var loopingInterval = null;
 var audioSpeedDisplay = document.getElementById('audio-speed-display');
 
-document.addEventListener('keydown', function(e) {
 
-    if (e.keyCode === 91) { // 91 is the keyCode for 'Command' key on Mac
-        isLoopMode = true;
+
+function toggleLoopMode() {
+    isLoopMode = !isLoopMode; // Toggle the state
+    updateLoopIcon(); // Update the icon based on the new state
+
+    if (!isLoopMode && loopingInterval) {
+        clearInterval(loopingInterval); // Clear the interval when turning loop mode off
+        loopingInterval = null; // Reset the interval ID
+    }
+}
+
+function updateLoopIcon() {
+    const loopIcon = document.getElementById('loop-icon');
+    if (isLoopMode) {
+        loopIcon.src = '/static/subplayer/loopon.png';
+        loopIcon.alt = 'Loop On';
+    } else {
+        loopIcon.src = '/static/subplayer/loopoff.png';
+        loopIcon.alt = 'Loop Off';
+    }
+}
+
+document.getElementById('loop-icon').addEventListener('click', toggleLoopMode);
+
+// Optional: Listen for Command key (or Control key for Windows) to toggle loop mode
+document.addEventListener('keydown', function(event) {
+    if (event.key === "Meta" || event.key === "Control") { // Meta for Mac Command key, Control for Ctrl key
+        toggleLoopMode();
+    }
+});
+
+// Optional: Reset loop mode when key is released
+document.addEventListener('keyup', function(event) {
+    if (event.key === "Meta" || event.key === "Control") {
+        toggleLoopMode();
     }
 });
 
@@ -412,70 +512,59 @@ document.addEventListener('keyup', function(e) {
     }
 });
 
-
+//tried here
 subtitles.addEventListener("mouseup", function() {
     if (isLoopMode) {
-        var selection = window.getSelection();
-        var selectedText = selection.toString().trim();
+        const selection = window.getSelection();
+        const selectedText = selection.toString().trim();
+        if (!selectedText) return;
 
-        // Find start and end time for selected text
-        var startLoopTime = null;
-        var endLoopTime = null;
+        // Find the frame index that matches the current time
+        const currentTime = player.getCurrentTime();
+        const currentFrameIndex = findSubtitleIndex(currentTime);
+        if (currentFrameIndex === -1) return; // Exit if no matching frame found
 
-        for (let i = 0; i < syncData.length; i++) {
-            var currentCharacter = syncData[i].word;
+        // Attempt to match the selected text with the subtitles in the current frame
+        let startLoopTime = null;
+        let endLoopTime = null;
 
-            // If we find a match of the first character of the selected text
-            if (currentCharacter === selectedText.charAt(0)) {
-                var potentialMatch = '';
-                var potentialStart = syncData[i].startTime;
-                var potentialEnd = '';
+        const frameSubtitles = framesArray[currentFrameIndex];
+        let concatenatedSubtitles = frameSubtitles.map(sub => sub.sentence).join('');
+        
+        if (concatenatedSubtitles.includes(selectedText)) {
+            // If the selected text matches part of the concatenated subtitles, set loop times
+            startLoopTime = parseFloat(frameSubtitles[0].startTime);
+            endLoopTime = parseFloat(frameSubtitles[frameSubtitles.length - 1].endTime);
 
-                // Construct the potential match string
-                for (var j = i; j < i + selectedText.length; j++) {
-                    if (j < syncData.length) {
-                        potentialMatch += syncData[j].word;
-                        potentialEnd = syncData[j].endTime;
-                    } else {
-                        break;
-                    }
+            // Adjust loop times if the selection is within a smaller range
+            for (let i = 0; i < frameSubtitles.length; i++) {
+                if (frameSubtitles[i].sentence.includes(selectedText.slice(0, Math.floor(selectedText.length / 2)))) {
+                    startLoopTime = Math.max(startLoopTime, parseFloat(frameSubtitles[i].startTime));
                 }
-
-                // Check if we have a perfect match
-                if (potentialMatch === selectedText) {
-                    startLoopTime = potentialStart;
-                    endLoopTime = potentialEnd;
-                    break; // We've found our perfect match, no need to keep looping
+                if (frameSubtitles[i].sentence.includes(selectedText.slice(Math.floor(selectedText.length / 2)))) {
+                    endLoopTime = Math.min(endLoopTime, parseFloat(frameSubtitles[i].endTime));
+                    break; // Found the end of the selection within the frame
                 }
             }
         }
 
-        // Loop the selected text
+        // Implement the looping based on the start and end times found
         if (startLoopTime !== null && endLoopTime !== null) {
-            // If only one character is selected, extend start and end times by 0.1 seconds
-            if (selectedText.length === 1) {
-                startLoopTime = Math.max(0, parseFloat(startLoopTime) - 0.1);
-                endLoopTime = parseFloat(endLoopTime) + 0.1;
-            }
+            if (loopingInterval) clearInterval(loopingInterval); // Clear existing interval
 
-            player.seekTo(parseFloat(startLoopTime), true);
-            player.setPlaybackRate(audioSpeed);
+            player.seekTo(startLoopTime, true);
             player.playVideo();
 
-            if (loopingInterval) {
-                clearInterval(loopingInterval);
-            }
-
-            loopingInterval = setInterval(function() {
-                if (player.getCurrentTime() >= parseFloat(endLoopTime)) {
-                    player.seekTo(parseFloat(startLoopTime), true);
-                    player.setPlaybackRate(audioSpeed);
-                    player.playVideo();
+            loopingInterval = setInterval(() => {
+                if (player.getCurrentTime() >= endLoopTime) {
+                    player.seekTo(startLoopTime, true);
                 }
-            }, 100);
+            }, 100); // Check every 100ms to loop back if needed
         }
     }
 });
+
+
 
 let saveProgressInterval;
 

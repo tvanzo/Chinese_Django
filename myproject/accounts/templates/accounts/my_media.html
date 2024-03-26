@@ -4,41 +4,175 @@
 {% load static %}
 
 {% block content %}
-    <header>
-    <link rel="stylesheet" type="text/css" href="{% static 'subplayer/styles.css' %}">
+<header>
+    <link rel="stylesheet" type="text/css" href="{% static 'subplayer/css/media_list.css' %}">
 </header>
 
+<style>
+
+
+.media-highlights, .media-status {
+    margin-top: 0; /* Remove top margin to align them on the same line */
+    color: #333; /* Adjust the color as needed */
+    font-weight: bold;
+}
+
+
+
+.media-status {
+    color: yellow; /* Default color for in progress */
+}
+
+.media-status.completed {
+    color: green; /* Completed status in green */
+}
+
+
+
+
+
+
+
+.button-group:hover .tooltip-text {
+    display: block; /* Show the tooltip text on hover */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.media-item-details {
+    display: flex;
+    justify-content: space-between; /* Space out content */
+    align-items: center; /* Align items vertically */
+    position: relative; /* For absolute positioning of the icon */
+}
+
+/* Container for the status icon and its tooltip */
+.status-icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    position: absolute;
+    bottom: 5px; /* Adjust based on your layout */
+    right: 5px; /* Adjust based on your layout */
+}
+
+/* Ensure the .media-status-icon class has specific dimensions and does not inherit global img styles */
+.media-status-icon {
+    width: 30px; /* Example size, adjust as necessary */
+    height: 30px; /* Maintains aspect ratio */
+    object-fit: contain; /* Prevents stretching */
+}
+
+/* Updated tooltip CSS for visibility and positioning */
+.tooltip-text {
+    visibility: hidden;
+    position: absolute;
+    bottom: 120%; /* Position above the icon */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: black;
+    color: #ebc334;
+    text-align: center;
+    padding: 5px;
+    border-radius: 6px;
+    white-space: nowrap;
+    z-index: 1; /* Ensure it's above other content */
+    transition: visibility 0.2s, opacity 0.2s ease-in-out;
+    opacity: 0;
+}
+
+.status-icon-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+
+.highlight-count-container {
+    display: inline-block; /* Treat the container like an inline element */
+    background-color: #ebc334; /* Background color for the highlight count */
+    padding: 2px 5px; /* Add some padding around the text */
+    border-radius: 5px; /* Optional: round the corners for a softer look */
+    font-weight: bold; /* Make the count stand out */
+    color: black; /* Text color */
+    margin-left: 10px; /* Add some space from the preceding content */
+}
+.highlight-count {
+    background-color: yellow;
+    color: black;
+    padding: 2px 5px;
+    border-radius: 5px;
+}
+
+
+</style>
+
 <div class="dashboard">
-    <aside class="sidebar">
-        <div class="float-top">
-            <div class="sidebar-controls">
-                <button class="hide-sidebar"><i class="fa fa-chevron-left"></i></button>
-            </div>
-        </div>
-        <h2>Mediaa List</h2>
-        <ul>
-            {% for media_status in user_media_statuses %}
-            <li>
-                <a href="{% url 'video_detail' media_status.media.media_id %}">
-                    {{ media_status.media.title }}
-                </a>
-            </li>
-            {% empty %}
-            <li>No media found.</li>
-            {% endfor %}
-        </ul>
-    </aside>
     <main class="content">
-        <h2>Welcomeeeee to Your Media Dashboard</h2>
-        <p>Select a media from the list to view details.</p>
+        <h2>Welcome to Your Media Dashboard</h2>
+        <div class="media-grid">
+            {% for media_status in user_media_statuses %}
+            <div class="media-item">
+                <a href="{% url 'video_detail' media_status.media.media_id %}">
+                    <div class="thumbnail-container">
+                        <img src="{{ media_status.media.thumbnail_url }}" alt="{{ media_status.media.title }}">
+                        <div class="video-length">10:30</div> <!-- Example video length -->
+                    </div>
+                    <div class="media-details">
+                        <div class="media-title">{{ media_status.media.title }}</div>
+                        <img src="{{ media_status.media.channel_thumbnail_url }}" alt="" class="channel-thumbnail">
+                        <div class="media-info">
+                            <div class="highlight-count">{{ media_status.highlights_count }}</div>
+                            <!-- Status icon and tooltip will be dynamically inserted here -->
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% empty %}
+            <p>No media found.</p>
+            {% endfor %}
+        </div>
     </main>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const tooltip = document.querySelector(".tooltip-text");
+    const icon = document.querySelector(".status-icon-container");
 
+    icon.addEventListener("mouseover", function() {
+        const tooltipRect = tooltip.getBoundingClientRect();
+        const overflowRight = window.innerWidth - (tooltipRect.left + tooltipRect.width);
+        
+        // Check if the tooltip overflows the viewport
+        if (overflowRight < 0) {
+            // Adjust the tooltip position to prevent overflow
+            tooltip.style.left = "auto";
+            tooltip.style.right = "0px"; // Align to the right edge
+        } else {
+            // Reset to default if no overflow
+            tooltip.style.left = "50%";
+            tooltip.style.right = "auto";
+            tooltip.style.transform = "translateX(-50%)";
+        }
+    });
 
-
-
-    <script>
-     document.addEventListener("DOMContentLoaded", function() {
+    icon.addEventListener("mouseout", function() {
+        // Reset tooltip position when not hovering
+        tooltip.style.left = "50%";
+        tooltip.style.right = "auto";
+        tooltip.style.transform = "translateX(-50%)";
+    });
     const sidebar = document.querySelector(".sidebar");
     const toggleSidebarButton = document.querySelector(".hide-sidebar");
 
@@ -47,5 +181,5 @@
         document.querySelector(".content").classList.toggle("sidebar-hidden");
     });
 });
-    </script>
+</script>
 {% endblock %}

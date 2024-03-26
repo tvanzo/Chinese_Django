@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 {% extends 'base.html' %}
 
 {% block title %}Home{% endblock %}
@@ -17,47 +8,93 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="{% static 'subplayer/styles.css' %}">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'subplayer/css/subplayer.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'subplayer/css/sidebar.css' %}">
     <meta charset="UTF-8">
     <title>Your Title</title>
+    <div id="media-status" data-status="{{ media_status }}" style="display:none;"></div>
+
 </head>
-<body>
+<body class="subplayer-page">
 
 <div class="dashboard">
-    <!-- Sidebar for Highlights -->
- <!-- Sidebar for Highlights -->
-<aside class="sidebar">
-    <h2>Highlights</h2>
-    <ul id="highlight-list"> <!-- Add this ID -->
-       {% for highlight in highlights %}
-    <li><a href="#" data-start-time="{{ highlight.start_time }}">{{ highlight.highlighted_text }}</a></li>
-    {% empty %}
-    <li>No highlights found.</li>
-    {% endfor %}
+    <aside class="sidebar">
+            <h2>Highlights</h2>
+            <ul id="highlight-list">
+                {% for highlight in highlights %}
+                <li>
+                    <div class="highlight-container">
+                        <a href="#" data-start-time="{{ highlight.start_time }}">{{ highlight.highlighted_text }}</a>
+                        <img src="{% static 'subplayer/trash.png' %}" alt="Delete" class="delete-highlight" data-highlight-id="{{ highlight.id }}">
+                    </div>
+                </li>
+                {% empty %}
+                    <li>No highlights found.</li>
+                {% endfor %}
+            </ul>
 
+            <!-- Navigation at the bottom of the sidebar -->
+           <!-- Sidebar Navigation in subplayer.html -->
+<nav class="sidebar-nav">
+    <ul>
+        <li>
+            <a href="{% url 'home' %}" title="Home">
+                <img src="{% static 'subplayer/house_icon.jpeg' %}" alt="Home">
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'highlights' %}" title="Highlights">
+                <img src="{% static 'subplayer/highlight_icon.png' %}" alt="Highlights">
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'my_media' %}" title="My Media">
+                <img src="{% static 'subplayer/saved_icon.png' %}" alt="My Media">
+            </a>
+        </li>
     </ul>
-</aside>
+</nav>
 
+
+        </aside>
 
     <div class="media-content">
-        <div id="podcast-cover">
-            <img src="{% static 'subplayer/cover.jpeg' %}" alt="Podcast Cover">
-        </div>
-
         <audio id="audiofile" controls="controls" type="audio/mp3"></audio>
-        <br>
         <div class="player-wrapper">
             <div id="player"></div>
         </div>
 
+
+
         <div id="subtitles"></div>
-        <a href="{% url 'update_media_status' media.media_id 'in_progress' %}">Mark as In Progress</a>
-        <h1>{{ media.id }}</h1>
-        <a href="{% url 'update_media_status' media.media_id 'completed' %}">Mark as Completed</a>
+        <div id="definitionContainer"></div>
+      <div class="buttons-container">
+<div class="buttons-container">
+    <!-- Single status icon container -->
+    <div class="button-group">
+        <img id="status-icon" src="{% static 'subplayer/set-status.png' %}" alt="Set Status" class="icon-button" data-status="set-status">
+        <span class="tooltip-text" id="status-tooltip">Set Status</span>
+    </div>
+    <div class="button-group">
+        <img id="loop-icon" src="{% static 'subplayer/loopoff.png' %}" alt="Loop Off" class="icon-button" style="cursor:pointer;">
+        <span class="tooltip-text">Loop Mode: Select Text, Turn on Loop Mode (CMD Key)</span>
+    </div>
+    <div class="button-group">
+        <img id="highlight-icon" src="{% static 'subplayer/black-high.png' %}" alt="Highlighter" class="icon-button" style="cursor:pointer;">
+        <span class="tooltip-text">Highlight Mode: Select Text Then Click Shift</span>
+    </div>
+</div>
 
-        <div id="audio-speed-display" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.5); color: white; padding: 20px; border-radius: 10px; font-size: 2em;"></div>
 
-        <button id="loop-button">Loop Mode</button>
+</div>
+<!-- Existing content here... -->
+
+
+<!-- Continue with your existing HTML... -->
+
+
+
 
         <div id="notes">
             <textarea id="note-input" placeholder="方法"></textarea>
@@ -69,7 +106,11 @@
     </div>
 </div>
 
-<script src="{% static 'subplayer/convertForLongAudio.js' %}"></script>
+
+<h1>头城</h1>
+<div id="media-status" data-status="{{ media_status }}"></div>
+
+
     <script>
         // Get the JSON data from the HTML
         var media = JSON.parse('{{ media_json|escapejs }}');
@@ -115,12 +156,230 @@ setupHighlightLinks();
 {% if media.media_type == 'audio' %}
     {% include 'subtitles.html' with media=media %}
     <script src="{% static 'subplayer/js/subtitles.js' %}"></script>
+
 {% else %}
     <script src="{% static 'subplayer/js/subtitles_video.js' %}"></script>
-{% endif %}
+    <script src="{% static 'subplayer/js/dc.js' %}"></script>
 
+{% endif %}
+<script>  var DICT_BASE_PATH = "{% static 'subplayer/pop_dic/' %}";
+</script>
 </body>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Setup Highlight Links
+    setupHighlightLinks();
+
+    // Highlight mode toggle on Shift key press/release
+    toggleHighlightMode();
+
+     // Initialize Status UI and Attach Status Update Event Listeners
+    initializeStatusUI();
+
+    // Single status icon event listener
+    attachSingleStatusIconEventListener();
+
+});
+
+function setupHighlightLinks() {
+    const highlights = document.querySelectorAll('#highlight-list a');
+    highlights.forEach(highlight => {
+        highlight.addEventListener('click', function(e) {
+            e.preventDefault();
+            const startTime = parseFloat(this.getAttribute('data-start-time'));
+            if (player && !isNaN(startTime)) {
+                player.seekTo(startTime, true);
+            }
+        });
+    });
+}
+
+function toggleHighlightMode() {
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Shift") {
+            document.getElementById('highlight-icon').src = '{% static "subplayer/yellow-high.png" %}';
+        }
+    });
+
+    document.addEventListener('keyup', function(event) {
+        if (event.key === "Shift") {
+            document.getElementById('highlight-icon').src = '{% static "subplayer/black-high.png" %}';
+        }
+    });
+}
+
+function initializeStatusUI() {
+    const mediaStatusElement = document.getElementById('media-status');
+    const initialStatus = mediaStatusElement.getAttribute('data-status');
+    updateSingleStatusIcon(initialStatus);
+}
+
+function attachSingleStatusIconEventListener() {
+    const statusIcon = document.getElementById('status-icon'); // This should be the ID of your single status icon
+    statusIcon.addEventListener('click', function() {
+        // Determine the new status based on the current icon source
+        let newStatus = '';
+        switch (statusIcon.dataset.status) {
+            case 'in_progress':
+                newStatus = 'completed';
+                break;
+            case 'completed':
+                newStatus = 'set-status';
+                break;
+            case 'set-status':
+            default:
+                newStatus = 'in_progress';
+                break;
+        }
+        toggleStatus(newStatus);
+    });
+}
+
+async function toggleStatus(newStatus) {
+    const mediaId = '{{ media.media_id }}';
+    const response = await updateMediaStatus(mediaId, newStatus === 'set-status' ? 'remove' : newStatus);
+    if (response && response.status === 'success') {
+        updateSingleStatusIcon(newStatus);
+    }
+}
+
+async function updateMediaStatus(mediaId, status) {
+    let url = `/media/update_status/${mediaId}/${status}/`;
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 'status': status })
+        });
+        if (!response.ok) throw new Error('Network response was not ok');
+        return await response.json();
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+function updateSingleStatusIcon(status) { 
+    const statusIcon = document.getElementById('status-icon');
+    const statusTooltip = document.getElementById('status-tooltip');
+
+    switch (status) {
+        case 'in_progress':
+            statusIcon.src = '{% static "subplayer/in-prog.png" %}'; // Update with the correct path to your in-progress icon
+            statusTooltip.textContent = 'In Progress';
+            statusIcon.dataset.status = 'in_progress'; // Updating the data-status attribute
+            break;
+        case 'completed':
+            statusIcon.src = '{% static "subplayer/complete-check.png" %}'; // Update with the correct path to your completed icon
+            statusTooltip.textContent = 'Completed';
+            statusIcon.dataset.status = 'completed'; // Updating the data-status attribute
+            break;
+        default:
+            // This is the case for 'set-status' or no status
+            statusIcon.src = '{% static "subplayer/status.png" %}'; // Update with the correct path to your set-status icon
+            statusTooltip.textContent = 'Set Status';
+            statusIcon.dataset.status = 'set-status'; // Updating the data-status attribute to reflect no specific status
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+
+</script>
+
+
+
+
+
+
+<style>
+    /* Button General Styles */
+.media-content button {
+    cursor: pointer;
+    border: none;
+    outline: none;
+    padding: 10px 15px;
+    margin: 5px;
+    border-radius: 5px;
+    font-size: 14px;
+    text-transform: uppercase;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+/* Specific Styles for Each Button */
+
+
+/* Additional styles for better layout */
+.media-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.player-wrapper + div, /* Directly following the player wrapper */
+.audio-speed-display + div { /* Directly following the audio speed display */
+    margin-top: 20px;
+}
+.active {
+    opacity: 1; /* Fully opaque */
+}
+
+.dimmed {
+    opacity: 0.5; /* Half transparent */
+    cursor: not-allowed;
+}
+
+#dictionary-popup {
+    position: absolute;
+    display: none;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    max-width: 300px;
+    z-index: 1000;
+    font-family: Arial, sans-serif;
+    color: #333;
+    line-height: 1.4;
+}
+
+#dictionary-popup.show {
+    display: block;
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+
+
+
+
+
+</style>
+
+
 </html>
+
 {% endblock %}
 
 

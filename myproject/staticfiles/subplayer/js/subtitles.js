@@ -1,740 +1,942 @@
-console.log("lmao");
-var mediaHasBeenPlayed = false;
- 
- function getCookie(name) {
-      var cookieArr = document.cookie.split(";");
+'use strict';
 
-      for(let i = 0; i < cookieArr.length; i++) {
-        var cookiePair = cookieArr[i].split("=");
+let dictionary = null; // This will hold the loaded dictionary
+let config;
 
-        if(name == cookiePair[0].trim()) {
-          return decodeURIComponent(cookiePair[1]);
-        }
-      }
+let savedTarget;
 
-      // Return null if the cookie by that name does not exist
-      return null;
-    }
-var csrftoken2;
- document.addEventListener('DOMContentLoaded', (event) => {
-        csrftoken2=getCookie('csrftoken');
+let savedRangeNode;
 
-});
+let savedRangeOffset;
 
- audioPlayer.addEventListener('loadedmetadata', function() {
-  // Call createSubtitles when the metadata for the audio is loaded
-  createSubtitles();
-});
+let selText;
 
+let clientX;
 
+let clientY;
 
-audioPlayer.addEventListener('play', function() {
-    if (!mediaHasBeenPlayed) {
-        // This is the first time the media is played
-        mediaHasBeenPlayed = true;
+let selStartDelta;
 
-        // Make a server-side request to add this media to the user's viewed_media
-        fetch('/api/user/viewed-media/add', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken2 // Function to get the CSRF token from the cookie
-    },
-    body: JSON.stringify({
-        mediaId: mediaId,
-    })
-});
+let selStartIncrement;
 
-    }
-});
+let popX = 0;
 
-//Global Variables
-var highlightMap = {};
-var transformedArray = [];
-var currentSubtitleIndex = 0;
-var framesArray = [];
-var currentFrame = [];
-var currentFrameCharCount = 0;
+let popY = 0;
 
-async function fetchHighlights(mediaId) {
-    return new Promise((resolve, reject) => {
-        fetch(`/api/user/get_highlights/${mediaId}/`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrftoken2
-            },
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+let timer;
 
-            return response.json();
-        })
-        .then(data => {
-            if (!Array.isArray(data)) {
-                data = JSON.parse(data);
-            }
-           transformedArray = data.map(item => ({
-            media: item.fields.media,
-             id: item.pk,
-            start_time: item.fields.start_time,
-            end_time: item.fields.end_time,
-            highlighted_text: item.fields.highlighted_text,
-            start_index: item.fields.start_index,
-            end_index: item.fields.end_index,
-            start_sentence_index: item.fields.start_sentence_index,
-            end_sentence_index: item.fields.end_sentence_index,
-            frame_index: item.fields.frame_index // add this line
-        }));
+let altView = 0;
 
+let savedSearchResults = [];
 
-            updateHighlightMap();
-            resolve();
-        })
-        .catch(error => {
-            console.log('Error during fetch:', error);
-            reject(error);
-        });
-    });
-}
+let savedSelStartOffset = 0;
 
+let savedSelEndList = [];
 
-
-function addHighlightToMap(frameIndex, sentenceIndex, charIndex, highlight) {
-  const key = `${frameIndex}_${sentenceIndex}_${charIndex}`; // construct a unique key
-  if (!highlightMap[key]) {
-    highlightMap[key] = [];
-  }
-  highlightMap[key].push({
-    startTime: parseFloat(highlight.start_time),
-    endTime: parseFloat(highlight.end_time)
-  });
-}
-
-function updateHighlightMap() {
-  highlightMap = {}; // clear previous data
-  transformedArray.forEach(highlight => {
-    let frameIndex = highlight.frame_index; // Use the frame index
-
-    for (let sentenceIndex = highlight.start_sentence_index; sentenceIndex <= highlight.end_sentence_index; sentenceIndex++) {
-      let startCharIndex = sentenceIndex == highlight.start_sentence_index ? highlight.start_index : 0;
-      let endCharIndex = sentenceIndex == highlight.end_sentence_index ? highlight.end_index : framesArray[frameIndex][sentenceIndex].sentence.length - 1;
-      for (let charIndex = startCharIndex; charIndex <= endCharIndex; charIndex++) {
-        addHighlightToMap(frameIndex, sentenceIndex, charIndex, highlight);
-      }
-    }
-  });
-}
-
-
-function applyPermanentHighlight(frameIndex, charIndex) {
-  const sentenceElement = document.getElementById("s_" + frameIndex + "_" + charIndex);
-  if (sentenceElement) {
-    sentenceElement.classList.add('perm-highlight');
-  }
-}
-
-
-
-
-
-
-function updateSidebarWithHighlight(highlight) {
-  const ul = document.getElementById('highlight-list'); // Assuming your UL has this ID
-  const li = document.createElement('li');
-  li.id = `highlight-${highlight.id}`; // Give each highlight a unique ID
-  const a = document.createElement('a');
-  a.href = `#highlight-${highlight.id}`; // Create a link or identifier (modify as needed)
-  a.textContent = highlight.highlighted_text;
-  li.appendChild(a);
-  ul.appendChild(li);
-}
-
-
-async function addHighlight(highlightData) {
-  const response = await fetch(`/api/user/create_highlight`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': csrftoken2 // Ensure you have the CSRF token
-    },
-    body: JSON.stringify(highlightData),
-  });
-
-  if (response.ok) {
-    console.log("Highlight added successfully!");
-    const addedHighlight = await response.json(); // Assuming the server returns the added highlight
-    updateSidebarWithHighlight(addedHighlight); // Update the sidebar with the new highlight
-    await fetchHighlights(highlightData.media); // Optionally refresh highlights if needed
-    createSubtitles(); // Recreate subtitles to include new highlights
-  } else {
-    console.error('Failed to add highlight:', await response.text());
-  }
-}
-
-
-
-
-
-
-// Your other functions (updateProgress, createSubtitles, etc.) go here...
-// ...
-var y=0;
-      function findSubtitleIndex(time) {
-    for (let i = 0; i < framesArray.length; i++) {
-        let frameStartTime = parseFloat(framesArray[i][0].startTime);
-        let frameEndTime = parseFloat(framesArray[i][framesArray[i].length - 1].endTime);
-        if (time >= frameStartTime && time <= frameEndTime) {
-            return i;
-        }
-    }
-    return -1; // Return -1 if no suitable index is found
-}
-
-
-var subtitleTimes = [];
-function createSubtitles() {
-
-  if (currentSubtitleIndex < framesArray.length) {
-    var currentFrame = framesArray[currentSubtitleIndex];
-
-    subtitles.innerHTML = ""; // clear existing subtitles
-    subtitleTimes = []; // reset times for new frame
-    for (let i = 0; i < currentFrame.length; i++) {
-      var element = document.createElement('span');
-      element.setAttribute("id", "s_" + currentSubtitleIndex + "_" + i);
-        element.classList.add('sentence-span'); // Add this line
-
-      
-      // Begin new highlight processing
-      let highlightedSentence = "";
-      let sentence = currentFrame[i].sentence;
-      for (let k = 0; k < sentence.length; k++) {
-        const character = sentence.charAt(k);
-        const characterHighlights = highlightMap[`${currentSubtitleIndex}_${i}_${k}`];
-
-        if (characterHighlights) {
-          highlightedSentence += `<span class="perm-highlight">${character}</span>`;
-        } else {
-          highlightedSentence += character;
-        }
-      }
-      element.innerHTML = highlightedSentence;
-      // End new highlight processing
-      
-      subtitles.appendChild(element);
-
-      // Save time information
-      subtitleTimes.push({
-        startTime: parseFloat(currentFrame[i].startTime),
-        endTime: parseFloat(currentFrame[i].endTime),
-      });
-    }
-  }
-
-}
-
-
-
-
-function updateProgress() {
-    var currentTime = audioPlayer.currentTime;
-
-    const correctIndex = findSubtitleIndex(currentTime);
-    if (correctIndex !== -1 && correctIndex !== currentSubtitleIndex) {
-        currentSubtitleIndex = correctIndex;
-       
-        createSubtitles();
+// regular expression for zero-width non-joiner U+200C &zwnj;
+let zwnj = /\u200c/g;
+class ZhongwenDictionary {
+    constructor(wordDict, wordIndex, grammarKeywords, vocabKeywords) {
+        this.wordDict = wordDict;
+        this.wordIndex = wordIndex;
+        this.grammarKeywords = grammarKeywords;
+        this.vocabKeywords = vocabKeywords;
+        this.cache = {};
     }
 
-    if (currentSubtitleIndex < framesArray.length) {
-        let frame = framesArray[currentSubtitleIndex];
+    static find(needle, haystack) {
 
-        for (let j = 0; j < frame.length; j++) {
-            const sentenceData = frame[j];
-            const sentenceElement = document.getElementById("s_" + currentSubtitleIndex + "_" + j);
+        let beg = 0;
+        let end = haystack.length - 1;
 
-            if (sentenceElement) {
-                if (currentTime >= parseFloat(sentenceData.startTime) && currentTime <= parseFloat(sentenceData.endTime)) {
-                    sentenceElement.classList.add('active-highlight');
-                } else {
-                    sentenceElement.classList.remove('active-highlight');
-                }
+        while (beg < end) {
+            let mi = Math.floor((beg + end) / 2);
+            let i = haystack.lastIndexOf('\n', mi) + 1;
+
+            let mis = haystack.substr(i, needle.length);
+            if (needle < mis) {
+                end = i - 1;
+            } else if (needle > mis) {
+                beg = haystack.indexOf('\n', mi + 1) + 1;
+            } else {
+                return haystack.substring(i, haystack.indexOf('\n', mi + 1));
             }
         }
+
+        return null;
     }
-}
 
-
-
-// Fetch highlights when the page loads
-
-
-
-
-// Fetch highlights when the page loads
-fetchHighlights(mediaId);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-        audioPlayer.addEventListener('timeupdate', updateProgress);
-
-        var subtitles = document.getElementById("subtitles");
-
-    (async function(win, doc) {
-        // JavaScript code
-
-
-    let transcript;
-    let syncData5 = null; // Assign an initial value to syncData5
-    console.log("test2"+ test2);
-    try {
-  const response = await fetch(test2);
-  console.log(test2);
-console.log("poop");
-  const data = await response.json();
-  transcript = data.transcript;
-  syncData5 = data.words;
-  
-} catch (error) {
-  console.error('Erroreeeee:', error);
-}
-
-
-    var syncData=syncData5;
-
-      var syncData2 = []; // New array to track sentences
-      
-  function createFramesArray(syncData) {
-    let currentFrame = [];
-    let currentFrameCharCount = 0;
-    const charLimit = 60; // Character limit for each frame
-
-    syncData.forEach(wordItem => {
-        console.log(wordItem);
-         console.log(wordItem.word);
-
-        let sentenceCharCount = wordItem.word.length;
-        if ((currentFrameCharCount + sentenceCharCount) <= charLimit) {
-            // Add wordItem to the current frame if within char limit
-            currentFrame.push({
-                startTime: wordItem.startTime,
-                endTime: wordItem.endTime,
-                sentence: wordItem.word
-            });
-            currentFrameCharCount += sentenceCharCount;
-        } else {
-            // Push the current frame to framesArray and start a new frame
-            framesArray.push(currentFrame);
-            currentFrame = [{
-                startTime: wordItem.startTime,
-                endTime: wordItem.endTime,
-                sentence: wordItem.word
-            }];
-            currentFrameCharCount = sentenceCharCount;
-        }
-    });
-    // Don't forget to add the last frame if it has content
-    if (currentFrame.length > 0) {
-        framesArray.push(currentFrame);
+    hasGrammarKeyword(keyword) {
+        return this.grammarKeywords[keyword];
     }
-}
 
-// Call this function with your syncData
-createFramesArray(syncData);
-
-     
-  var loopButton = doc.getElementById("loop-button");
-
-
-    
-createSubtitles();
-
-
-
-
-
-  var selectedText = "";
-  var frame_index;
-var isLoopMode = false;
-var loopingInterval = null;
-var audioSpeedDisplay = document.getElementById('audio-speed-display');
-
-document.addEventListener('keydown', function(e) {
-
-    if (e.keyCode === 91) { // 91 is the keyCode for 'Command' key on Mac
-        isLoopMode = true;
+    hasVocabKeyword(keyword) {
+        return this.vocabKeywords[keyword];
     }
-});
 
-document.addEventListener('keydown', function(e) {
+    wordSearch(word, max) {
 
-    if (isLoopMode) {
-        if (e.keyCode === 38) { // 38 is the keyCode for 'Up' key
-            // Increase speed by 10%, with a maximum of 2x
-            audioSpeed = Math.min(audioSpeed + 0.1, 2);
-        } else if (e.keyCode === 40) { // 40 is the keyCode for 'Down' key
-            // Decrease speed by 10%, with a minimum of 0.1x
-            audioSpeed = Math.max(audioSpeed - 0.1, 0.1);
-        }
+        let entry = { data: [] };
 
-        e.preventDefault();  // prevent the default action (scroll)
+        let dict = this.wordDict;
+        let index = this.wordIndex;
 
-        audioSpeedDisplay.innerText = "Speed: " + audioSpeed.toFixed(1) + "x";
-        audioSpeedDisplay.style.display = "block";
+        let maxTrim = max || 7;
 
-        setTimeout(function() {
-            audioSpeedDisplay.style.display = "none";
-        }, 1000);  // hide the display after 1 second
-    }
-});
+        let count = 0;
+        let maxLen = 0;
 
+        WHILE:
+            while (word.length > 0) {
 
-document.addEventListener('keyup', function(e) {
-
-    if (e.keyCode === 91) { // 91 is the keyCode for 'Command' key on Mac
-        isLoopMode = false;
-        audioSpeed = 1;
-        audioPlayer.playbackRate = 1;  // reset speed to normal
-
-        if (loopingInterval) {
-            clearInterval(loopingInterval);
-            loopingInterval = null;
-        }
-    }
-});
-
-subtitles.addEventListener("mouseup", function() {
-    if (isLoopMode) {
-        var selection = window.getSelection();
-        var selectedText = selection.toString().trim();
-
-        // Find start and end time for selected text
-        var startLoopTime = null;
-        var endLoopTime = null;
-
-        for (let i = 0; i < syncData.length; i++) {
-            var currentCharacter = syncData[i].word;
-
-            // If we find a match of the first character of the selected text
-            if (currentCharacter === selectedText.charAt(0)) {
-                var potentialMatch = '';
-                var potentialStart = syncData[i].startTime;
-                var potentialEnd = '';
-
-                // Construct the potential match string
-                for (var j = i; j < i + selectedText.length; j++) {
-                    if (j < syncData.length) {
-                        potentialMatch += syncData[j].word;
-                        potentialEnd = syncData[j].endTime;
-                    } else {
-                        break;
+                let ix = this.cache[word];
+                if (!ix) {
+                    ix = ZhongwenDictionary.find(word + ',', index);
+                    if (!ix) {
+                        this.cache[word] = [];
+                        continue;
                     }
+                    ix = ix.split(',');
+                    this.cache[word] = ix;
                 }
 
-                // Check if we have a perfect match
-                if (potentialMatch === selectedText) {
-                    startLoopTime = potentialStart;
-                    endLoopTime = potentialEnd;
-                    break; // We've found our perfect match, no need to keep looping
+                for (let j = 1; j < ix.length; ++j) {
+                    let offset = ix[j];
+
+                    let dentry = dict.substring(offset, dict.indexOf('\n', offset));
+
+                    if (count >= maxTrim) {
+                        entry.more = 1;
+                        break WHILE;
+                    }
+
+                    ++count;
+                    if (maxLen === 0) {
+                        maxLen = word.length;
+                    }
+
+                    entry.data.push([dentry, word]);
                 }
+
+                word = word.substr(0, word.length - 1);
             }
+
+        if (entry.data.length === 0) {
+            return null;
         }
 
-        // Loop the selected text
-        if (startLoopTime !== null && endLoopTime !== null) {
-            // If only one character is selected, extend start and end times by 0.1 seconds
-            if (selectedText.length === 1) {
-                startLoopTime = Math.max(0, parseFloat(startLoopTime) - 0.1);
-                endLoopTime = parseFloat(endLoopTime) + 0.1;
-            }
-
-            audioPlayer.currentTime = parseFloat(startLoopTime);
-            audioPlayer.playbackRate = audioSpeed;
-            audioPlayer.play();
-
-            if (loopingInterval) {
-                clearInterval(loopingInterval);
-            }
-
-            loopingInterval = setInterval(function() {
-                if (audioPlayer.currentTime >= parseFloat(endLoopTime)) {
-                    audioPlayer.currentTime = parseFloat(startLoopTime);
-                    audioPlayer.playbackRate = audioSpeed;
-                    audioPlayer.play();
-                }
-            }, 100);
-        }
+        entry.matchLen = maxLen;
+        return entry;
     }
 
 
-});
-let saveProgressInterval;
+    // Add other methods here as per your current code...
+}
 
-// Set up interval to save progress every 5 seconds when the media is playing
-audioPlayer.addEventListener('play', function () {
-    saveProgressInterval = setInterval(saveProgress, 5000);
+function search(text) {
+
+    if (!dict) {
+        // dictionary not loaded
+        return;
+    }
+
+    let entry = dict.wordSearch(text);
+
+    if (entry) {
+        for (let i = 0; i < entry.data.length; i++) {
+            let word = entry.data[i][1];
+            if (dict.hasGrammarKeyword(word) && (entry.matchLen === word.length)) {
+                // the final index should be the last one with the maximum length
+                entry.grammar = { keyword: word, index: i };
+            }
+            if (dict.hasVocabKeyword(word) && (entry.matchLen === word.length)) {
+                // the final index should be the last one with the maximum length
+                entry.vocab = { keyword: word, index: i };
+            }
+        }
+    }
+
+    return entry;
+}
+// Function to load dictionary data
+async function loadDictData() {
+    const basePath = '{% static "subplayer/pop_dic/" %}'; // Adjusted to use Django static files
+    try {
+        const wordDictPromise = fetch(`${basePath}cedict_ts.u8`).then(response => response.text());
+        const wordIndexPromise = fetch(`${basePath}cedict.idx`).then(response => response.text());
+        const grammarKeywordsPromise = fetch(`${basePath}grammarKeywordsMin.json`).then(response => response.json());
+        const vocabKeywordsPromise = fetch(`${basePath}vocabularyKeywordsMin.json`).then(response => response.json());
+
+        return await Promise.all([wordDictPromise, wordIndexPromise, grammarKeywordsPromise, vocabKeywordsPromise]);
+    } catch (error) {
+        console.error("Failed to load dictionary data:", error);
+    }
+}
+
+
+// Function to initialize the dictionary
+async function loadDictionary() {
+    const [wordDict, wordIndex, grammarKeywords, vocabKeywords] = await loadDictData();
+    dictionary = new ZhongwenDictionary(wordDict, wordIndex, grammarKeywords, vocabKeywords);
+    console.log("Dictionary loaded successfully!");
+}
+// Execute the loadDictionary function when the document is fully loaded
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadDictionary();
+    // You can add other initializations here...
 });
 
-// Clear the interval when the media is paused or ended
-audioPlayer.addEventListener('pause', function () {
-    clearInterval(saveProgressInterval);
-});
-audioPlayer.addEventListener('ended', function () {
-    clearInterval(saveProgressInterval);
-});
-
-function saveProgress() {
-    const progress = audioPlayer.currentTime;
     
-    fetch('/api/user/save-progress', {
-        method: 'POST',
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+let dictionaryIndex = {}; // Dictionary index object
+
+// Example function to parse the IDX file content
+// Assume `idxFileContent` is a string containing the content of the IDX file
+function parseIdxFile(idxFileContent) {
+    const lines = idxFileContent.split('\n');
+    lines.forEach(line => {
+        const [word, offset] = line.split(',');
+        dictionaryIndex[word] = parseInt(offset, 10);
+    });
+}
+// Function to fetch word data by byte offset from the server
+async function fetchWordData(offset) {
+    const response = await fetch('/path/to/your/dictionary.u8', {
         headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        body: JSON.stringify({
-            mediaId: mediaId,
-            progress: progress
-        })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            'Range': `bytes=${offset}-` // Fetch a specific byte range
         }
-        return response.json();
-    })
-    .then(data => console.log(data))
-    .catch((error) => {
-        console.error('Fetch error:', error);
     });
+    const text = await response.text(); // Assuming the response is text
+    return text; // You might need to adjust this based on the actual format of your .u8 file
+}
+async function displayWordDataOnHover(word) {
+    const offset = dictionaryIndex[word];
+    if (typeof offset !== 'undefined') {
+        const wordData = await fetchWordData(offset);
+        // Show the word data in your popup
+        console.log(wordData); // Replace this with your actual popup display logic
+    } else {
+        console.log('Word not found in index.');
+    }
 }
 
 
-fetch('/api/user/viewed_media_list/read')
-    .then(response => response.json())
-    .then(data => {
-        const container = document.getElementById('viewed-media-container');
-        data.viewed_media.forEach(mediaId => {
-            const span = document.createElement('span');
-            span.textContent = "mediaId:"+mediaId;
-            container.appendChild(span);
+
+// Elements for displaying the popup
+let popup = null;
+let savedRangeNode = null;
+let savedRangeOffset = 0;
+
+// Initialize the popup element
+function initPopup() {
+    popup = document.createElement('div');
+    popup.id = 'dictionary-popup';
+    popup.style.position = 'absolute';
+    popup.style.display = 'none';
+    popup.style.border = '1px solid black';
+    popup.style.backgroundColor = 'white';
+    popup.style.padding = '5px';
+    popup.style.borderRadius = '5px';
+    popup.style.zIndex = 10000; // Ensure it's on top of other elements
+    document.body.appendChild(popup);
+}
+
+// Show the dictionary popup
+function showPopup(html, x, y) {
+    if (!popup) {
+        initPopup();
+    }
+    popup.innerHTML = html;
+    popup.style.left = `${x}px`;
+    popup.style.top = `${y}px`;
+    popup.style.display = 'block';
+}
+
+// Hide the dictionary popup
+function hidePopup() {
+    if (popup) {
+        popup.style.display = 'none';
+    }
+}
+
+function onMouseMove(mouseMove) {
+    if (mouseMove.target.nodeName === 'TEXTAREA' || mouseMove.target.nodeName === 'INPUT'
+        || mouseMove.target.nodeName === 'DIV') {
+
+        let div = document.getElementById('zhongwenDiv');
+
+    }
+
+    if (clientX && clientY) {
+        if (mouseMove.clientX === clientX && mouseMove.clientY === clientY) {
+            return;
+        }
+    }
+    clientX = mouseMove.clientX;
+    clientY = mouseMove.clientY;
+
+    let range;
+    let rangeNode;
+    let rangeOffset;
+
+    // Handle Chrome and Firefox
+    if (document.caretRangeFromPoint) {
+        range = document.caretRangeFromPoint(mouseMove.clientX, mouseMove.clientY);
+        if (range === null) {
+            return;
+        }
+        rangeNode = range.startContainer;
+        rangeOffset = range.startOffset;
+    } else if (document.caretPositionFromPoint) {
+        range = document.caretPositionFromPoint(mouseMove.clientX, mouseMove.clientY);
+        if (range === null) {
+            return;
+        }
+        rangeNode = range.offsetNode;
+        rangeOffset = range.offset;
+    }
+
+    if (mouseMove.target === savedTarget) {
+        if (rangeNode === savedRangeNode && rangeOffset === savedRangeOffset) {
+            return;
+        }
+    }
+
+    if (timer) {
+        clearTimeout(timer);
+        timer = null;
+    }
+
+    if (rangeNode.data && rangeOffset === rangeNode.data.length) {
+        rangeNode = findNextTextNode(rangeNode.parentNode, rangeNode);
+        rangeOffset = 0;
+    }
+
+    if (!rangeNode || rangeNode.parentNode !== mouseMove.target) {
+        rangeNode = null;
+        rangeOffset = -1;
+    }
+
+    savedTarget = mouseMove.target;
+    savedRangeNode = rangeNode;
+    savedRangeOffset = rangeOffset;
+
+    selStartDelta = 0;
+    selStartIncrement = 1;
+
+    if (rangeNode && rangeNode.data && rangeOffset < rangeNode.data.length) {
+        popX = mouseMove.clientX;
+        popY = mouseMove.clientY;
+        timer = setTimeout(() => triggerSearch(), 50);
+        return;
+    }
+
+    // Don't close just because we moved from a valid pop-up slightly over to a place with nothing.
+    let dx = popX - mouseMove.clientX;
+    let dy = popY - mouseMove.clientY;
+    let distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance > 4) {
+        clearHighlight();
+        hidePopup();
+    }
+}
+
+function triggerSearch() {
+
+    let rangeNode = savedRangeNode;
+    let selStartOffset = savedRangeOffset + selStartDelta;
+
+    selStartIncrement = 1;
+
+    if (!rangeNode) {
+        clearHighlight();
+        hidePopup();
+        return 1;
+    }
+
+    if (selStartOffset < 0 || rangeNode.data.length <= selStartOffset) {
+        clearHighlight();
+        hidePopup();
+        return 2;
+    }
+
+    let u = rangeNode.data.charCodeAt(selStartOffset);
+
+    let isChineseCharacter = !isNaN(u) && (
+        u === 0x25CB ||
+        (0x3400 <= u && u <= 0x9FFF) ||
+        (0xF900 <= u && u <= 0xFAFF) ||
+        (0xFF21 <= u && u <= 0xFF3A) ||
+        (0xFF41 <= u && u <= 0xFF5A) ||
+        (0xD800 <= u && u <= 0xDFFF)
+    );
+
+    if (!isChineseCharacter) {
+        clearHighlight();
+        hidePopup();
+        return 3;
+    }
+
+    let selEndList = [];
+    let originalText = getText(rangeNode, selStartOffset, selEndList, 30 /*maxlength*/);
+
+    // Workaround for Google Docs: remove zero-width non-joiner &zwnj;
+    let text = originalText.replace(zwnj, '');
+
+    savedSelStartOffset = selStartOffset;
+    savedSelEndList = selEndList;
+
+    search(text);
+
+    return 0;
+}
+function processSearchResult(result) {
+
+    let selStartOffset = savedSelStartOffset;
+    let selEndList = savedSelEndList;
+
+    if (!result) {
+        hidePopup();
+        clearHighlight();
+        return;
+    }
+
+    let highlightLength;
+    let index = 0;
+    for (let i = 0; i < result.matchLen; i++) {
+        // Google Docs workaround: determine the correct highlight length
+        while (result.originalText[index] === '\u200c') {
+            index++;
+        }
+        index++;
+    }
+    highlightLength = index;
+
+    selStartIncrement = result.matchLen;
+    selStartDelta = (selStartOffset - savedRangeOffset);
+
+    let rangeNode = savedRangeNode;
+    // don't try to highlight form elements
+    if (!('form' in savedTarget)) {
+        let doc = rangeNode.ownerDocument;
+        if (!doc) {
+            clearHighlight();
+            hidePopup();
+            return;
+        }
+        highlightMatch(doc, rangeNode, selStartOffset, highlightLength, selEndList);
+    }
+
+    showPopup(makeHtml(result, config.tonecolors !== 'no'), savedTarget, popX, popY, false);
+}
+// modifies selEndList as a side-effect
+function getText(startNode, offset, selEndList, maxLength) {
+    let text = '';
+    let endIndex;
+
+    if (startNode.nodeType !== Node.TEXT_NODE) {
+        return '';
+    }
+
+    endIndex = Math.min(startNode.data.length, offset + maxLength);
+    text += startNode.data.substring(offset, endIndex);
+    selEndList.push({
+        node: startNode,
+        offset: endIndex
+    });
+
+    let nextNode = startNode;
+    while ((text.length < maxLength) && ((nextNode = findNextTextNode(nextNode.parentNode, nextNode)) !== null)) {
+        text += getTextFromSingleNode(nextNode, selEndList, maxLength - text.length);
+    }
+
+    return text;
+}
+
+// modifies selEndList as a side-effect
+function getTextFromSingleNode(node, selEndList, maxLength) {
+    let endIndex;
+
+    if (node.nodeName === '#text') {
+        endIndex = Math.min(maxLength, node.data.length);
+        selEndList.push({
+            node: node,
+            offset: endIndex
         });
-    });
-
-
-fetch(`/api/user/media_progress/${mediaId}/`, {
-    method: 'GET',
-    headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken2
-    },
-})
-.then(response => {
-    if (!response.ok) {
-        throw Error(response.statusText);
-    }
-    return response.json();
-})
-.then(data => {
-    // Check if there's a MediaProgress object for the current media and user
-    if (data && data.time_stopped != null) {
-        // If so, set the currentTime of the audioPlayer to the last stopped time
-        audioPlayer.currentTime = data.time_stopped;
+        return node.data.substring(0, endIndex);
     } else {
-        // If not, the media should start playing from the beginning
-        console.log("No progress found, starting from the beginning");
-        audioPlayer.currentTime = 0;
+        return '';
     }
-})
-.catch(error => console.error('Error:', error));
+}
 
-document.addEventListener('keydown', async function (event) {
-  if (event.shiftKey) {
-    let selection = window.getSelection();
+function showPopup(html, elem, x, y, looseWidth) {
 
-    if (selection.rangeCount === 0) return;
+    if (!x || !y) {
+        x = y = 0;
+    }
 
-    let range = selection.getRangeAt(0);
-    let selectedText = selection.toString().trim();
+    let popup = document.getElementById('zhongwen-window');
 
-    if (!selectedText) return;
+    if (!popup) {
+        popup = document.createElement('div');
+        popup.setAttribute('id', 'zhongwen-window');
+        document.documentElement.appendChild(popup);
+    }
 
-    let calculateOffset = function (container, offset, span) {
-      let walker = document.createTreeWalker(span, NodeFilter.SHOW_TEXT);
-      let totalOffset = 0;
-      let node;
-      while ((node = walker.nextNode())) {
-        if (node === container || node.contains(container)) {
-          totalOffset += offset;
-          break;
+    popup.style.width = 'auto';
+    popup.style.height = 'auto';
+    popup.style.maxWidth = (looseWidth ? '' : '600px');
+    popup.className = `background-${config.css} tonecolor-${config.toneColorScheme}`;
+
+    $(popup).html(html);
+
+    if (elem) {
+        popup.style.top = '-1000px';
+        popup.style.left = '0px';
+        popup.style.display = '';
+
+        let pW = popup.offsetWidth;
+        let pH = popup.offsetHeight;
+
+        if (pW <= 0) {
+            pW = 200;
         }
-        totalOffset += node.textContent.length;
-      }
-      return totalOffset;
-    };
+        if (pH <= 0) {
+            pH = 0;
+            let j = 0;
+            while ((j = html.indexOf('<br/>', j)) !== -1) {
+                j += 5;
+                pH += 22;
+            }
+            pH += 25;
+        }
 
-    let findParentWithClass = function (node, className) {
-      if (node.nodeType !== Node.ELEMENT_NODE) {
-        node = node.parentNode;
-      }
-      while (node && (!node.classList || !node.classList.contains(className))) {
-        node = node.parentNode;
-      }
-      return node;
-    };
+        if (altView === 1) {
+            x = window.scrollX;
+            y = window.scrollY;
+        } else if (altView === 2) {
+            x = (window.innerWidth - (pW + 20)) + window.scrollX;
+            y = (window.innerHeight - (pH + 20)) + window.scrollY;
+        } else if (elem instanceof window.HTMLOptionElement) {
 
-    let startSpan = findParentWithClass(range.startContainer, 'sentence-span');
-    let endSpan = findParentWithClass(range.endContainer, 'sentence-span');
+            x = 0;
+            y = 0;
 
-    let start_char_index = calculateOffset(range.startContainer, range.startOffset, startSpan);
-    let end_char_index = calculateOffset(range.endContainer, range.endOffset, endSpan) - 1;
+            let p = elem;
+            while (p) {
+                x += p.offsetLeft;
+                y += p.offsetTop;
+                p = p.offsetParent;
+            }
 
-    if (start_char_index < 10) {
-        start_char_index = '0' + start_char_index;
+            if (elem.offsetTop > elem.parentNode.clientHeight) {
+                y -= elem.offsetTop;
+            }
+
+            if (x + popup.offsetWidth > window.innerWidth) {
+                // too much to the right, go left
+                x -= popup.offsetWidth + 5;
+                if (x < 0) {
+                    x = 0;
+                }
+            } else {
+                // use SELECT's width
+                x += elem.parentNode.offsetWidth + 5;
+            }
+        } else {
+            // go left if necessary
+            if (x + pW > window.innerWidth - 20) {
+                x = (window.innerWidth - pW) - 20;
+                if (x < 0) {
+                    x = 0;
+                }
+            }
+
+            // below the mouse
+            let v = 25;
+
+            // go up if necessary
+            if (y + v + pH > window.innerHeight) {
+                let t = y - pH - 30;
+                if (t >= 0) {
+                    y = t;
+                }
+            } else  {
+                y += v;
+            }
+
+            x += window.scrollX;
+            y += window.scrollY;
+        }
+    } else {
+        x += window.scrollX;
+        y += window.scrollY;
     }
 
-    if (end_char_index < 10) {
-        end_char_index = '0' + end_char_index;
+    // (-1, -1) indicates: leave position unchanged
+    if (x !== -1 && y !== -1) {
+        popup.style.left = x + 'px';
+        popup.style.top = y + 'px';
+        popup.style.display = '';
     }
-
-    let highlightStartSentenceIndex = parseInt(startSpan.id.split('_')[2]);
-    let highlightEndSentenceIndex = parseInt(endSpan.id.split('_')[2]);
-    let highlightStartTime = subtitleTimes[highlightStartSentenceIndex].startTime;
-    let highlightEndTime = subtitleTimes[highlightEndSentenceIndex].endTime;
-    console.log("start " + start_char_index);
-        console.log("end " + end_char_index);
-
-
-    // Check if the selection overlaps an existing highlight
-const overlappingHighlight = transformedArray.find(item =>
-    parseFloat(`${item.start_sentence_index}.${item.start_index.toString().padStart(2, '0')}`) <= parseFloat(`${highlightEndSentenceIndex}.${end_char_index}`) &&
-    parseFloat(`${item.end_sentence_index}.${item.end_index.toString().padStart(2, '0')}`) >= parseFloat(`${highlightStartSentenceIndex}.${start_char_index}`) &&
-    item.frame_index === currentSubtitleIndex
-);
-if (overlappingHighlight) {
-   console.log(overlappingHighlight);
-
-} else {
-  console.log("No overlapping highlight found.");
 }
 
-if (overlappingHighlight) {
-console.log("startindex of " + overlappingHighlight.start_index + " endindex " + overlappingHighlight.end_index + " highlight start "+start_char_index);
-    console.log("fuck");
-  if (overlappingHighlight.start_sentence_index!=overlappingHighlight.end_sentence_index){
-        console.log("first"+overlappingHighlight.start_sentence_index);
-        console.log(overlappingHighlight.end_sentence_index);
-        await deleteHighlight(overlappingHighlight.id);
-  }
-  // Check if the selection exactly matches the existing highlight
-  else if (overlappingHighlight.start_index === start_char_index &&
-      overlappingHighlight.end_index === end_char_index) {
-    // If it does, delete the entire highlight
-    await deleteHighlight(overlappingHighlight.id);
-    console.log("Deleted");
-  } else {
-        console.log("lo");
-    console.log(start_char_index + " "+ end_char_index);
-
-    // If it doesn't, split the highlight at the selected indices
-    await splitHighlight(overlappingHighlight.id, start_char_index, end_char_index);
-    console.log(start_char_index + ""+ end_char_index);
-  }
-} else {
-            console.log("low");
-
-  // Otherwise, create a new highlight
-  if (start_char_index !== null && end_char_index !== null && highlightStartTime !== null && highlightEndTime !== null) {
-    console.log("All indexes found");
-    createHighlight(selectedText, mediaId, start_char_index, end_char_index, highlightStartSentenceIndex, highlightEndSentenceIndex, highlightStartTime, highlightEndTime, currentSubtitleIndex);
-  }
+function hidePopup() {
+    let popup = document.getElementById('zhongwen-window');
+    if (popup) {
+        popup.style.display = 'none';
+        popup.textContent = '';
+    }
 }
-  }
-});
 
-function createHighlight(selectedText, mediaId, highlightStartIndex, highlightEndIndex, highlightStartSentenceIndex, highlightEndSentenceIndex, startTime, endTime, frameIndex) {
-    console.log("createHighlight triggered");
+function highlightMatch(doc, rangeStartNode, rangeStartOffset, matchLen, selEndList) {
+    if (!selEndList || selEndList.length === 0) return;
 
-    // Add leading zero if start_index is a single digit
-    if (highlightStartIndex.toString().length === 1) {
-        highlightStartIndex = "0" + highlightStartIndex;
+    let selEnd;
+    let offset = rangeStartOffset + matchLen;
+
+    for (let i = 0, len = selEndList.length; i < len; i++) {
+        selEnd = selEndList[i];
+        if (offset <= selEnd.offset) {
+            break;
+        }
+        offset -= selEnd.offset;
     }
 
-    // Add leading zero if end_index is a single digit
-    if (highlightEndIndex.toString().length === 1) {
-        highlightEndIndex = "0" + highlightEndIndex;
+    let range = doc.createRange();
+    range.setStart(rangeStartNode, rangeStartOffset);
+    range.setEnd(selEnd.node, offset);
+
+    let sel = window.getSelection();
+    if (!sel.isCollapsed && selText !== sel.toString())
+        return;
+    sel.empty();
+    sel.addRange(range);
+    selText = sel.toString();
+}
+
+function clearHighlight() {
+
+    if (selText === null) {
+        return;
     }
 
-    let highlightData = {
-        highlighted_text: selectedText,
-        media: mediaId,
-        start_index: highlightStartIndex,
-        end_index: highlightEndIndex,
-        start_sentence_index: highlightStartSentenceIndex,
-        end_sentence_index: highlightEndSentenceIndex,
-        start_time: startTime,
-        end_time: endTime,
-        frame_index: frameIndex,
-    };
-    addHighlight(highlightData);
-    console.log("here " + highlightData.start_index);
+    let selection = window.getSelection();
+    if (selection.isCollapsed || selText === selection.toString()) {
+        selection.empty();
+    }
+    selText = null;
 }
-async function deleteHighlight(highlightId) {
-  try {
-    const response = await fetch(`/api/user/delete_highlight/${highlightId}/`, { // Removed highlightId from the URL
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken2
-      },
-      body: JSON.stringify({ highlight_id: highlightId }), // Pass highlightId in the request body
+
+function isVisible() {
+    let popup = document.getElementById('zhongwen-window');
+    return popup && popup.style.display !== 'none';
+}
+
+function getTextForClipboard() {
+    let result = '';
+    for (let i = 0; i < savedSearchResults.length; i++) {
+        result += savedSearchResults[i].slice(0, -1).join('\t');
+        result += '\n';
+    }
+    return result;
+}
+
+function makeDiv(input) {
+    let div = document.createElement('div');
+
+    div.id = 'zhongwenDiv';
+
+    let text;
+    if (input.value) {
+        text = input.value;
+    } else {
+        text = '';
+    }
+    div.innerText = text;
+
+    div.style.cssText = window.getComputedStyle(input, '').cssText;
+    div.scrollTop = input.scrollTop;
+    div.scrollLeft = input.scrollLeft;
+    div.style.position = 'absolute';
+    div.style.zIndex = 7000;
+    $(div).offset({
+        top: $(input).offset().top,
+        left: $(input).offset().left
     });
 
-    if (response.ok) {
-      console.log("Highlight deleted successfully!");
-      // Optionally, refresh the highlights or make any necessary updates to the UI
-      await fetchHighlights(mediaId);
-      createSubtitles(); // Recreate subtitles after fetching new highlights
+    return div;
+}
 
-    } else {
-      console.error('Failed to delete highlight:', await response.text());
+function findNextTextNode(root, previous) {
+    if (root === null) {
+        return null;
     }
-  } catch (error) {
-    console.error('Error during delete highlight:', error);
-  }
+    let nodeIterator = document.createNodeIterator(root, NodeFilter.SHOW_TEXT, null);
+    let node = nodeIterator.nextNode();
+    while (node !== previous) {
+        node = nodeIterator.nextNode();
+        if (node === null) {
+            return findNextTextNode(root.parentNode, previous);
+        }
+    }
+    let result = nodeIterator.nextNode();
+    if (result !== null) {
+        return result;
+    } else {
+        return findNextTextNode(root.parentNode, previous);
+    }
+}
+
+function findPreviousTextNode(root, previous) {
+    if (root === null) {
+        return null;
+    }
+    let nodeIterator = document.createNodeIterator(root, NodeFilter.SHOW_TEXT, null);
+    let node = nodeIterator.nextNode();
+    while (node !== previous) {
+        node = nodeIterator.nextNode();
+        if (node === null) {
+            return findPreviousTextNode(root.parentNode, previous);
+        }
+    }
+    nodeIterator.previousNode();
+    let result = nodeIterator.previousNode();
+    if (result !== null) {
+        return result;
+    } else {
+        return findPreviousTextNode(root.parentNode, previous);
+    }
+}
+
+function copyToClipboard(data) {
+    chrome.runtime.sendMessage({
+        'type': 'copy',
+        'data': data
+    });
+
+    showPopup('Copied to clipboard', null, -1, -1);
+}
+
+function makeHtml(result, showToneColors) {
+
+    let entry;
+    let html = '';
+    let texts = [];
+    let hanziClass;
+
+    if (result === null) return '';
+
+    for (let i = 0; i < result.data.length; ++i) {
+        entry = result.data[i][0].match(/^([^\s]+?)\s+([^\s]+?)\s+\[(.*?)\]?\s*\/(.+)\//);
+        if (!entry) continue;
+
+        // Hanzi
+
+        if (config.simpTrad === 'auto') {
+
+            let word = result.data[i][1];
+
+            hanziClass = 'w-hanzi';
+            if (config.fontSize === 'small') {
+                hanziClass += '-small';
+            }
+            html += '<span class="' + hanziClass + '">' + word + '</span>&nbsp;';
+
+        } else {
+
+            hanziClass = 'w-hanzi';
+            if (config.fontSize === 'small') {
+                hanziClass += '-small';
+            }
+            html += '<span class="' + hanziClass + '">' + entry[2] + '</span>&nbsp;';
+            if (entry[1] !== entry[2]) {
+                html += '<span class="' + hanziClass + '">' + entry[1] + '</span>&nbsp;';
+            }
+
+        }
+
+        // Pinyin
+
+        let pinyinClass = 'w-pinyin';
+        if (config.fontSize === 'small') {
+            pinyinClass += '-small';
+        }
+        let p = pinyinAndZhuyin(entry[3], showToneColors, pinyinClass);
+        html += p[0];
+
+        // Zhuyin
+
+        if (config.zhuyin === 'yes') {
+            html += '<br>' + p[2];
+        }
+
+        // Definition
+
+        let defClass = 'w-def';
+        if (config.fontSize === 'small') {
+            defClass += '-small';
+        }
+        let translation = entry[4].replace(/\//g, ' ◆ ');
+        html += '<br><span class="' + defClass + '">' + translation + '</span><br>';
+
+        let addFinalBr = false;
+
+        // Grammar
+        if (config.grammar !== 'no' && result.grammar && result.grammar.index === i) {
+            html += '<br><span class="grammar">Press "g" for grammar and usage notes.</span><br>';
+            addFinalBr = true;
+        }
+
+        // Vocab
+        if (config.vocab !== 'no' && result.vocab && result.vocab.index === i) {
+            html += '<br><span class="vocab">Press "v" for vocabulary notes.</span><br>';
+            addFinalBr = true;
+        }
+
+        if (addFinalBr) {
+            html += '<br>';
+        }
+
+        texts[i] = [entry[2], entry[1], p[1], translation, entry[3]];
+    }
+    if (result.more) {
+        html += '&hellip;<br/>';
+    }
+
+    savedSearchResults = texts;
+    savedSearchResults.grammar = result.grammar;
+    savedSearchResults.vocab = result.vocab;
+
+    return html;
+}
+
+let tones = {
+    1: '&#772;',
+    2: '&#769;',
+    3: '&#780;',
+    4: '&#768;',
+    5: ''
+};
+
+let utones = {
+    1: '\u0304',
+    2: '\u0301',
+    3: '\u030C',
+    4: '\u0300',
+    5: ''
+};
+
+function parse(s) {
+    return s.match(/([^AEIOU:aeiou]*)([AEIOUaeiou:]+)([^aeiou:]*)([1-5])/);
+}
+
+function tonify(vowels, tone) {
+    let html = '';
+    let text = '';
+
+    if (vowels === 'ou') {
+        html = 'o' + tones[tone] + 'u';
+        text = 'o' + utones[tone] + 'u';
+    } else {
+        let tonified = false;
+        for (let i = 0; i < vowels.length; i++) {
+            let c = vowels.charAt(i);
+            html += c;
+            text += c;
+            if (c === 'a' || c === 'e') {
+                html += tones[tone];
+                text += utones[tone];
+                tonified = true;
+            } else if (i === vowels.length - 1 && !tonified) {
+                html += tones[tone];
+                text += utones[tone];
+                tonified = true;
+            }
+        }
+        html = html.replace(/u:/, '&uuml;');
+        text = text.replace(/u:/, '\u00FC');
+    }
+
+    return [html, text];
+}
+
+function pinyinAndZhuyin(syllables, showToneColors, pinyinClass) {
+    let text = '';
+    let html = '';
+    let zhuyin = '';
+    let a = syllables.split(/[\s·]+/);
+    for (let i = 0; i < a.length; i++) {
+        let syllable = a[i];
+
+        // ',' in pinyin
+        if (syllable === ',') {
+            html += ' ,';
+            text += ' ,';
+            continue;
+        }
+
+        if (i > 0) {
+            html += '&nbsp;';
+            text += ' ';
+            zhuyin += '&nbsp;';
+        }
+        if (syllable === 'r5') {
+            if (showToneColors) {
+                html += '<span class="' + pinyinClass + ' tone5">r</span>';
+            } else {
+                html += '<span class="' + pinyinClass + '">r</span>';
+            }
+            text += 'r';
+            continue;
+        }
+        if (syllable === 'xx5') {
+            if (showToneColors) {
+                html += '<span class="' + pinyinClass + ' tone5">??</span>';
+            } else {
+                html += '<span class="' + pinyinClass + '">??</span>';
+            }
+            text += '??';
+            continue;
+        }
+        let m = parse(syllable);
+        if (showToneColors) {
+            html += '<span class="' + pinyinClass + ' tone' + m[4] + '">';
+        } else {
+            html += '<span class="' + pinyinClass + '">';
+        }
+        let t = tonify(m[2], m[4]);
+        html += m[1] + t[0] + m[3];
+        html += '</span>';
+        text += m[1] + t[1] + m[3];
+
+        let zhuyinClass = 'w-zhuyin';
+        if (config.fontSize === 'small') {
+            zhuyinClass += '-small';
+        }
+
+        zhuyin += '<span class="tone' + m[4] + ' ' + zhuyinClass + '">'
+            + globalThis.numericPinyin2Zhuyin(syllable) + '</span>';
+    }
+    return [html, text, zhuyin];
 }
 
 
@@ -742,87 +944,14 @@ async function deleteHighlight(highlightId) {
 
 
 
-async function splitHighlight(highlightId, splitStartIndex, splitEndIndex) {
-  console.log("highlightId:", highlightId);
-  console.log("splitStartIndex:", splitStartIndex);
-  console.log("splitEndIndex:", splitEndIndex);
-
-  const originalHighlight = transformedArray.find(item => item.id === highlightId);
-  const highlightStartIndexRelativeToHighlight = splitStartIndex - originalHighlight.start_index;
-  const highlightEndIndexRelativeToHighlight = splitEndIndex - originalHighlight.start_index;
-
-  console.log("originalHighlight:", originalHighlight);
-  console.log("highlightStartIndexRelativeToHighlight:", highlightStartIndexRelativeToHighlight);
-  console.log("highlightEndIndexRelativeToHighlight:", highlightEndIndexRelativeToHighlight);
-
-  if (splitStartIndex <= originalHighlight.start_index && splitEndIndex >= originalHighlight.end_index) {
-    console.log("1");
-    await deleteHighlight(highlightId);
-    return;
-  }
-
-  if (splitStartIndex <= originalHighlight.start_index && splitEndIndex < originalHighlight.end_index) {
-        console.log("2");
-
-    const newHighlight = {
-      ...originalHighlight,
-      start_index: parseInt(splitEndIndex, 10) + 1,
-      highlighted_text: originalHighlight.highlighted_text.substring(highlightEndIndexRelativeToHighlight + 1)
-    };
-
-    await deleteHighlight(highlightId);
-    await addHighlight(newHighlight);
-    return;
-  }
-
-  if (splitStartIndex > originalHighlight.start_index && splitEndIndex >= originalHighlight.end_index) {
-        console.log("3");
-
-    const newHighlight = {
-      ...originalHighlight,
-      end_index: splitStartIndex - 1,
-      highlighted_text: originalHighlight.highlighted_text.substring(0, highlightStartIndexRelativeToHighlight)
-    };
-        console.log("mon");
-
-    await deleteHighlight(highlightId);
-    await addHighlight(newHighlight);
-    return;
-  }
-
-  if (splitStartIndex > originalHighlight.start_index && splitEndIndex < originalHighlight.end_index) {
-            console.log("4");
 
 
-    const firstHighlight = {
-      ...originalHighlight,
-      end_index: splitStartIndex - 1,
-      highlighted_text: originalHighlight.highlighted_text.substring(0, highlightStartIndexRelativeToHighlight)
-    };
+// Add mouse move listener to the document
+document.addEventListener('mousemove', onMouseMove);
 
-    const secondHighlight = {
-      ...originalHighlight,
-    start_index: parseInt(splitEndIndex, 10) + 1,
-      highlighted_text: originalHighlight.highlighted_text.substring(highlightEndIndexRelativeToHighlight + 1)
-    };
-        console.log(secondHighlight);
-                console.log(firstHighlight);
-
-
-    await deleteHighlight(highlightId);
-    await addHighlight(secondHighlight);
-
-    await addHighlight(firstHighlight);
-    return;
-  }
-
-  console.error('Invalid split indices for highlight:', originalHighlight);
-}
+// Example of hiding the popup when the mouse leaves the document
+document.addEventListener('mouseleave', hidePopup);
 
 
 
 
-
-
-
-    })(window, document);
