@@ -1,0 +1,335 @@
+{
+    "transcript": "hello大家好 今天我们讲一讲Jfk airport map Jfk机场地图 这个是2022年Jfk官网提供的机场地图 我对它做了一个小小的调整 方便大家阅读 那首先呢是这个橙色的方框 表示的是机场轻轨站 Jfk有提供airtrain service 也就是说 你可以找到自己相应的航站楼 选择 坐轻轨 就是下了地铁以后坐轻轨 然后到达相应的航站楼 你坐轻轨的时候 需要知道总共有哪几个站 然后你的航站楼所对应的站在哪里 选择在相应的这个站点下车 这个红色椭圆形的标记 指的是航站楼 Terminal Terminal Eight Terminal one 那这里你可以看一看 不管你是接机还是去坐飞机 你都需要提前知道去哪一个航站楼 这个绿色的P 表示的是parking 也就是对应航站楼的停车位了 这里你都可以看到 这个小小的轮椅 标识呢指的是残疾人位 那么在美国 法律要求 如果你的停车场有足够的位置 比如说超过20个或者30个停车位的话 那根据当地的规定 他会要求提前预留一些车位 是专供给残疾人 这个的意思就是说 如果你的车子是由残疾人开的 或者是没有残疾的人开 但是专门用来服务残疾人的 那你可以向政府申请一个permit 有了这个permit就是许可 之后你在美国的任何一个停车场 如果你看到有这个标识的个车位的话 你都可以停过去 那也就是说 如果说你没有这个许可的话 你看到很多残疾人车位空着 但是你不能够停进去 如果你停进去的话 这个叫 illegal parking 就是非法停车 是会吃罚单的 好那这就是这个地图了 希望对你们有用",
+    "words": [
+        {
+            "startTime": 0.3,
+            "endTime": 1.133,
+            "word": "hello大家好"
+        },
+        {
+            "startTime": 1.133,
+            "endTime": 3.966,
+            "word": "今天我们讲一讲Jfk"
+        },
+        {
+            "startTime": 1.133,
+            "endTime": 3.966,
+            "word": "airport"
+        },
+        {
+            "startTime": 1.133,
+            "endTime": 3.966,
+            "word": "map"
+        },
+        {
+            "startTime": 4.066,
+            "endTime": 5.666,
+            "word": "Jfk机场地图"
+        },
+        {
+            "startTime": 5.8,
+            "endTime": 9.666,
+            "word": "这个是2022年Jfk官网提供的机场地图"
+        },
+        {
+            "startTime": 9.8,
+            "endTime": 11.733,
+            "word": "我对它做了一个小小的调整"
+        },
+        {
+            "startTime": 11.733,
+            "endTime": 12.966000000000001,
+            "word": "方便大家阅读"
+        },
+        {
+            "startTime": 13.8,
+            "endTime": 16.0,
+            "word": "那首先呢是这个橙色的方框"
+        },
+        {
+            "startTime": 16.2,
+            "endTime": 18.5,
+            "word": "表示的是机场轻轨站"
+        },
+        {
+            "startTime": 18.566,
+            "endTime": 21.333,
+            "word": "Jfk有提供airtrain"
+        },
+        {
+            "startTime": 18.566,
+            "endTime": 21.333,
+            "word": "service"
+        },
+        {
+            "startTime": 21.6,
+            "endTime": 22.166,
+            "word": "也就是说"
+        },
+        {
+            "startTime": 22.166,
+            "endTime": 25.066,
+            "word": "你可以找到自己相应的航站楼"
+        },
+        {
+            "startTime": 25.2,
+            "endTime": 26.0,
+            "word": "选择"
+        },
+        {
+            "startTime": 26.0,
+            "endTime": 29.266,
+            "word": "坐轻轨"
+        },
+        {
+            "startTime": 26.0,
+            "endTime": 29.266,
+            "word": "就是下了地铁以后坐轻轨"
+        },
+        {
+            "startTime": 29.366,
+            "endTime": 31.366,
+            "word": "然后到达相应的航站楼"
+        },
+        {
+            "startTime": 31.566,
+            "endTime": 32.9,
+            "word": "你坐轻轨的时候"
+        },
+        {
+            "startTime": 32.9,
+            "endTime": 35.699999999999996,
+            "word": "需要知道总共有哪几个站"
+        },
+        {
+            "startTime": 35.9,
+            "endTime": 39.065999999999995,
+            "word": "然后你的航站楼所对应的站在哪里"
+        },
+        {
+            "startTime": 39.1,
+            "endTime": 41.566,
+            "word": "选择在相应的这个站点下车"
+        },
+        {
+            "startTime": 42.466,
+            "endTime": 45.066,
+            "word": "这个红色椭圆形的标记"
+        },
+        {
+            "startTime": 45.066,
+            "endTime": 47.733000000000004,
+            "word": "指的是航站楼"
+        },
+        {
+            "startTime": 45.066,
+            "endTime": 47.733000000000004,
+            "word": "Terminal"
+        },
+        {
+            "startTime": 47.966,
+            "endTime": 49.0,
+            "word": "Terminal"
+        },
+        {
+            "startTime": 47.966,
+            "endTime": 49.0,
+            "word": "Eight"
+        },
+        {
+            "startTime": 49.2,
+            "endTime": 51.800000000000004,
+            "word": "Terminal"
+        },
+        {
+            "startTime": 49.2,
+            "endTime": 51.800000000000004,
+            "word": "one"
+        },
+        {
+            "startTime": 49.2,
+            "endTime": 51.800000000000004,
+            "word": "那这里你可以看一看"
+        },
+        {
+            "startTime": 51.8,
+            "endTime": 54.565999999999995,
+            "word": "不管你是接机还是去坐飞机"
+        },
+        {
+            "startTime": 54.666,
+            "endTime": 57.965999999999994,
+            "word": "你都需要提前知道去哪一个航站楼"
+        },
+        {
+            "startTime": 58.5,
+            "endTime": 61.266,
+            "word": "这个绿色的P"
+        },
+        {
+            "startTime": 58.5,
+            "endTime": 61.266,
+            "word": "表示的是parking"
+        },
+        {
+            "startTime": 61.3,
+            "endTime": 65.1,
+            "word": "也就是对应航站楼的停车位了"
+        },
+        {
+            "startTime": 65.166,
+            "endTime": 66.89999999999999,
+            "word": "这里你都可以看到"
+        },
+        {
+            "startTime": 68.333,
+            "endTime": 70.93299999999999,
+            "word": "这个小小的轮椅"
+        },
+        {
+            "startTime": 70.933,
+            "endTime": 73.9,
+            "word": "标识呢指的是残疾人位"
+        },
+        {
+            "startTime": 74.0,
+            "endTime": 75.166,
+            "word": "那么在美国"
+        },
+        {
+            "startTime": 75.166,
+            "endTime": 76.2,
+            "word": "法律要求"
+        },
+        {
+            "startTime": 76.3,
+            "endTime": 79.3,
+            "word": "如果你的停车场有足够的位置"
+        },
+        {
+            "startTime": 79.5,
+            "endTime": 83.133,
+            "word": "比如说超过20个或者30个停车位的话"
+        },
+        {
+            "startTime": 83.5,
+            "endTime": 85.266,
+            "word": "那根据当地的规定"
+        },
+        {
+            "startTime": 85.266,
+            "endTime": 88.566,
+            "word": "他会要求提前预留一些车位"
+        },
+        {
+            "startTime": 88.733,
+            "endTime": 90.933,
+            "word": "是专供给残疾人"
+        },
+        {
+            "startTime": 90.933,
+            "endTime": 92.566,
+            "word": "这个的意思就是说"
+        },
+        {
+            "startTime": 92.6,
+            "endTime": 95.666,
+            "word": "如果你的车子是由残疾人开的"
+        },
+        {
+            "startTime": 95.966,
+            "endTime": 98.06599999999999,
+            "word": "或者是没有残疾的人开"
+        },
+        {
+            "startTime": 98.066,
+            "endTime": 101.366,
+            "word": "但是专门用来服务残疾人的"
+        },
+        {
+            "startTime": 101.366,
+            "endTime": 104.133,
+            "word": "那你可以向政府申请一个permit"
+        },
+        {
+            "startTime": 104.4,
+            "endTime": 105.933,
+            "word": "有了这个permit就是许可"
+        },
+        {
+            "startTime": 105.933,
+            "endTime": 109.733,
+            "word": "之后你在美国的任何一个停车场"
+        },
+        {
+            "startTime": 109.8,
+            "endTime": 113.6,
+            "word": "如果你看到有这个标识的个车位的话"
+        },
+        {
+            "startTime": 113.666,
+            "endTime": 115.133,
+            "word": "你都可以停过去"
+        },
+        {
+            "startTime": 115.2,
+            "endTime": 116.0,
+            "word": "那也就是说"
+        },
+        {
+            "startTime": 116.0,
+            "endTime": 119.7,
+            "word": "如果说你没有这个许可的话"
+        },
+        {
+            "startTime": 119.766,
+            "endTime": 122.733,
+            "word": "你看到很多残疾人车位空着"
+        },
+        {
+            "startTime": 122.766,
+            "endTime": 124.7,
+            "word": "但是你不能够停进去"
+        },
+        {
+            "startTime": 124.933,
+            "endTime": 126.066,
+            "word": "如果你停进去的话"
+        },
+        {
+            "startTime": 126.066,
+            "endTime": 127.7,
+            "word": "这个叫"
+        },
+        {
+            "startTime": 126.066,
+            "endTime": 127.7,
+            "word": "illegal"
+        },
+        {
+            "startTime": 126.066,
+            "endTime": 127.7,
+            "word": "parking"
+        },
+        {
+            "startTime": 127.7,
+            "endTime": 129.133,
+            "word": "就是非法停车"
+        },
+        {
+            "startTime": 129.2,
+            "endTime": 130.6,
+            "word": "是会吃罚单的"
+        },
+        {
+            "startTime": 131.266,
+            "endTime": 132.766,
+            "word": "好那这就是这个地图了"
+        },
+        {
+            "startTime": 132.766,
+            "endTime": 133.96599999999998,
+            "word": "希望对你们有用"
+        }
+    ]
+}

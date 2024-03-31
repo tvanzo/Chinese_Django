@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>User Stats</h2>
+
+<div>
+    <h3>Daily Highlights</h3>
+    <canvas id="dailyHighlightsChart"></canvas>
+</div>
+
+<div>
+    <h3>Total Highlights</h3>
+    <p>Total highlights: {{ total_highlights_json|safe }}</p>
+</div>
+
+<div>
+    <h3>Daily Words</h3>
+    <canvas id="wordsChart"></canvas>
+</div>
+
+<div>
+    <h3>Daily Minutes</h3>
+    <canvas id="minutesChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Daily Highlights Chart
+const dailyHighlightsCtx = document.getElementById('dailyHighlightsChart').getContext('2d');
+const dailyHighlightsChart = new Chart(dailyHighlightsCtx, {
+    type: 'line',
+    data: {
+        labels: {{ dates_json|safe }},
+        datasets: [{
+            label: 'Daily Highlights',
+            data: {{ highlight_counts_json|safe }},
+            fill: false,
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1
+        }]
+    }
+});
+
+// Daily Words Chart
+const wordsCtx = document.getElementById('wordsChart').getContext('2d');
+const wordsChart = new Chart(wordsCtx, {
+    type: 'line',
+    data: {
+        labels: {{ dates_json|safe }},
+        datasets: [{
+            label: 'Daily Words',
+            data: {{ word_counts_json|safe }},
+            fill: false,
+            borderColor: 'rgb(255, 99, 132)',
+            tension: 0.1
+        }]
+    }
+});
+
+// Daily Minutes Chart
+const minutesCtx = document.getElementById('minutesChart').getContext('2d');
+const minutesChart = new Chart(minutesCtx, {
+    type: 'line',
+    data: {
+        labels: {{ dates_json|safe }},
+        datasets: [{
+            label: 'Daily Minutes',
+            data: {{ minute_counts_json|safe }},
+            fill: false,
+            borderColor: 'rgb(54, 162, 235)',
+            tension: 0.1
+        }]
+    }
+});
+</script>
+{% endblock %}

@@ -8,6 +8,10 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     finished_media = models.ManyToManyField(Media, related_name='finished_users', blank=True)
     viewed_media = models.ManyToManyField(Media, through='MediaProgress', related_name='viewing_users', blank=True)
+    total_word_count = models.IntegerField(default=0, help_text="Total word count from completed videos.")
+    total_minutes = models.IntegerField(default=0, help_text="Total minutes of video completed")
+    total_highlights = models.IntegerField(default=0, help_text="Total highlights")
+
 
 class MediaProgress(models.Model):
     media = models.ForeignKey(Media, on_delete=models.CASCADE)

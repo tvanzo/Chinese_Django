@@ -18,22 +18,26 @@ class MediaAdmin(admin.ModelAdmin):
 
     # In save_model method of MediaAdmin class
 
+class MediaAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         video_details = fetch_video_details(obj.url)
         if video_details['status'] == 'valid':
-            subtitles_path = process_and_save_subtitles(video_details['subtitles'], video_details['video_id'])
-            if subtitles_path:  # Check if subtitles were successfully saved
+            subtitles_path = video_details['subtitles_file_path']
+            word_count = video_details.get('word_count', 0)  # Use .get() to provide a default value of 0
+            if subtitles_path:
                 obj.subtitle_file = subtitles_path
+                obj.word_count = word_count
                 obj.title = video_details['title']
                 obj.media_type = 'video'
                 obj.media_id = video_details['video_id']
                 obj.youtube_video_id = video_details['video_id']
+                obj.video_length = video_details['video_length']  # This should already be an integer
+
                 super().save_model(request, obj, form, change)
             else:
                 messages.error(request, "Failed to save subtitles.")
         else:
             messages.error(request, video_details['message'])
-
 
 
 admin.site.register(Media, MediaAdmin)

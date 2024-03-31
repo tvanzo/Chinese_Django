@@ -1,4 +1,3 @@
-console.log("trip");
 var mediaHasBeenPlayed = false;
 
 function getCookie(name) {
@@ -22,6 +21,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
 // Assuming 'player' is the YouTube Player object
 function onPlayerReady(event) {
     // You can call createSubtitles here if needed, or in response to another event
+    playerReady = true;
+    fetchMediaProgressAndSeek();
+        console.log("called");
+        setupProgressSaving(); 
     createSubtitles();
 }
 
@@ -50,17 +53,52 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 // Define the player variable outside of the functions to have global scope
 var player;
+// Flag to track if the player is ready
+var playerReady = false;
+
+// This function seeks the player to a specific time
+function seekToTimeStopped(timeStopped) {
+    if (player && playerReady) {
+        console.log("Seeking to time stopped:", timeStopped);
+        player.seekTo(timeStopped, true);
+    } else {
+        console.log("Player not ready or player object not available.");
+    }
+}
 
 // This function will be called by the YouTube Iframe API once it's ready
 function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                videoId: mediaId,
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
+    player = new YT.Player('player', {
+        videoId: mediaId, // Your video ID here
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
         }
+    });
+}
+
+// Fetch media progress and seek if applicable
+function fetchMediaProgressAndSeek() {
+    fetch(`/api/user/media_progress/${mediaId}/`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken2
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Fetched media progress:", data.time_stopped, data);
+        // Seek to time stopped if applicable
+        if (data && data.time_stopped != null) {
+            seekToTimeStopped(data.time_stopped);
+        } else {
+            console.log("No progress found, starting from the beginning");
+            player.seekTo(0, true);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
 
 //Global Variables
 var highlightMap = {};
@@ -92,7 +130,6 @@ async function fetchHighlights(mediaId) {
             }
             transformedArray = data.map(item => {
                 // Log the id here
-                console.log('Highlight ID:', item.pk);
 
                 return {
                     media: item.fields.media,
@@ -112,7 +149,6 @@ async function fetchHighlights(mediaId) {
             resolve();
         })
         .catch(error => {
-            console.log('Error during fetch:', error);
             reject(error);
         });
     });
@@ -346,16 +382,78 @@ function updateProgress() {
 // Fetch highlights when the page loads
 fetchHighlights(mediaId);
 
-console.log(test2);
 
 
 
+function setupProgressSaving() {
+    const saveInterval = 5000; // Continue saving every 5 seconds
+    let lastUpdateMark = 0; // To track the last 100-second mark crossed
 
-
-
-function onPlayerReady(event) {
-            setInterval(updateProgress, 300); // Update every second
+    setInterval(() => {
+        if (!player || typeof player.getCurrentTime !== 'function') {
+            console.error('Player not initialized or getCurrentTime not available');
+            return;
         }
+
+        const currentTime = player.getCurrentTime(); // Get the current time in seconds
+        const currentMark = Math.floor(currentTime / 100) * 100; // Find the nearest 100-second mark below the currentTime
+
+        // Check if we've passed a new 100-second mark since the last update
+        if (currentMark > lastUpdateMark) {
+            console.log('Passed a new 100-second mark, updating progress');
+            lastUpdateMark = currentMark; // Update lastUpdateMark to the current mark
+            
+            // Calculate and update words and total minutes based on currentTime
+            // For example, calculate the words and minutes to add, based on the video's progress
+            // This could be included in your save-progress fetch call or require a separate API call
+
+            // Example fetch to update total words and minutes, modify as needed
+            fetch('/api/user/update-progress', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken2,
+                },
+                body: JSON.stringify({
+                    mediaId: mediaId,
+                    // Assuming you have a way to calculate these values based on currentMark
+                    additionalWords: calculatedWords, 
+                    additionalMinutes: calculatedMinutes,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Additional progress saved successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error saving additional progress:', error);
+            });
+        }
+
+        // Always save current playback time every 5 seconds
+        fetch('/api/user/save-progress', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken2,
+            },
+            body: JSON.stringify({
+                mediaId: mediaId,
+                progress: currentTime,
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Playback progress saved successfully:', data);
+        })
+        .catch(error => {
+            console.error('Error saving playback progress:', error);
+        });
+    }, saveInterval);
+}
+
+
+
 
         var subtitles = document.getElementById("subtitles");
 
@@ -368,8 +466,7 @@ function onPlayerReady(event) {
 
     try {
   const response = await fetch(test2);
-  console.log(test2);
-  console.log("poop");
+ 
   const data = await response.json();
   transcript = data.transcript;
   syncData5 = data.words;
@@ -389,8 +486,7 @@ function onPlayerReady(event) {
     const charLimit = 60; // Character limit for each frame
 
     syncData.forEach(wordItem => {
-        console.log(wordItem);
-         console.log(wordItem.word);
+       
 
         let sentenceCharCount = wordItem.word.length;
         if ((currentFrameCharCount + sentenceCharCount) <= charLimit) {
@@ -571,35 +667,36 @@ let saveProgressInterval;
 // Set up interval to save progress every 5 seconds when the video is playing
 function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.PLAYING) {
-        saveProgressInterval = setInterval(saveProgress, 5000);
+        // Set an interval to save progress every 5 seconds while the video is playing
+        saveProgressInterval = setInterval(() => saveProgress(player.getCurrentTime()), 5000);
     } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+        // When the video is paused or ended, clear the interval and immediately save progress
         clearInterval(saveProgressInterval);
+        saveProgress(player.getCurrentTime()); // Save the current progress immediately
     }
 }
 
-function saveProgress() {
-    const progress = player.getCurrentTime();
-    
-    fetch('/api/user/save-progress', {
+function saveProgress(progress) {
+    fetch('/api/user/save-progress', { // Adjust the URL to match your Django view for updating media progress
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken2 // Assuming csrftoken2 is your CSRF token
+            'X-CSRFToken': csrftoken2, // Ensure csrftoken2 contains the correct CSRF token
         },
         body: JSON.stringify({
-            mediaId: mediaId, // Assuming mediaId is the ID of your media
-            progress: progress
-        })
+            mediaId: mediaId, // Ensure mediaId is correctly defined elsewhere in your script
+            progress: progress,
+        }),
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
         return response.json();
     })
-    .then(data => console.log(data))
+    .then(data => console.log('Progress saved successfully:', data))
     .catch((error) => {
-        console.error('Fetch error:', error);
+        console.error('Error saving progress:', error);
     });
 }
 
@@ -635,13 +732,22 @@ fetch(`/api/user/media_progress/${mediaId}/`, {
     if (!response.ok) {
         throw Error(response.statusText);
     }
+    else{
+        console.log(response);
+    }
     return response.json();
 })
 .then(data => {
+        console.log("Fetched media progress:", data.time_stopped, data);
+
     // Check if there's a MediaProgress object for the current media and user
     if (data && data.time_stopped != null) {
         // If so, set the currentTime of the player to the last stopped time
-        player.seekTo(data.time_stopped, true);
+        if (playerReady) {
+    player.seekTo(data.time_stopped, true);
+} else {
+    console.log("Player not ready.");
+}
     } else {
         // If not, the media should start playing from the beginning
         console.log("No progress found, starting from the beginning");
@@ -719,16 +825,9 @@ const overlappingHighlight = transformedArray.find(item =>
     parseFloat(`${item.end_sentence_index}.${item.end_index.toString().padStart(2, '0')}`) >= parseFloat(`${highlightStartSentenceIndex}.${start_char_index}`) &&
     item.frame_index === currentSubtitleIndex
 );
-if (overlappingHighlight) {
-   console.log(overlappingHighlight);
 
-} else {
-  console.log("No overlapping highlight found.");
-}
 
 if (overlappingHighlight) {
-console.log("startindex of " + overlappingHighlight.start_index + " endindex " + overlappingHighlight.end_index + " highlight start "+start_char_index);
-    console.log("fuck");
   if (overlappingHighlight.start_sentence_index!=overlappingHighlight.end_sentence_index){
         console.log("first"+overlappingHighlight.start_sentence_index);
         console.log(overlappingHighlight.end_sentence_index);

@@ -129,7 +129,17 @@
             document.getElementById('audiofile').style.display = 'none';
         }
 
-
+    // Setup Highlight Links
+    const highlights = document.querySelectorAll('#highlight-list a');
+    highlights.forEach(highlight => {
+        highlight.addEventListener('click', function(e) {
+            e.preventDefault();
+            const startTime = parseFloat(this.getAttribute('data-start-time'));
+            if (player && !isNaN(startTime)) {
+                player.seekTo(startTime, true);
+            }
+        });
+    });
 
         function setupHighlightLinks() {
     const highlights = document.querySelectorAll('#highlight-list a');

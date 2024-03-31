@@ -29,6 +29,13 @@
                 </a>
             </li>
         </ul>    </nav>
+       {% if user.is_authenticated %}
+    <p>Total words from videos: {{ user.profile.total_word_count }}</p>
+        <p>Total highlights: {{ user.profile.total_highlights }}</p>
+        <p>Total video minutes watched: {{ request.user.profile.total_minutes }}</p>
+
+
+{% endif %}
     {% endif %}
 </header>
 

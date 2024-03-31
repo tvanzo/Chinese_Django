@@ -26,7 +26,7 @@ from django.views.generic import TemplateView
 from subplayer import views as subplayer_views
 from subplayer.views import podcast_detail, video_detail, media_list, add_media, dictionary_lookup, search
 from django.contrib.auth import views as auth_views
-from accounts.views import register
+from accounts.views import register, stats_view
 from accounts.views import add_viewed_media, viewed_media_list, get_media_progress, update_media_progress, get_highlights, get_all_highlights, create_highlight, delete_highlight, modify_highlight, my_media, remove_media_status
 
 
@@ -46,7 +46,7 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('api/user/viewed-media/add', add_viewed_media, name='add_viewed_media'),
     path('api/user/viewed_media_list/read', views.viewed_media_list, name='viewed_media_list'),
-    path('api/user/media_progress/<int:media_id>/', views.get_media_progress, name='get_media_progress'),
+    path('api/user/media_progress/<str:media_id>/', views.get_media_progress, name='get_media_progress'),
     path('api/user/save-progress', update_media_progress, name='update_media_progress'),
     path('api/user/create_highlight', create_highlight, name='create_highlight'),
     path('api/user/delete_highlight/<int:highlight_id>/', delete_highlight, name='delete_highlight'),
@@ -71,6 +71,7 @@ path('media/remove_status/<int:media_id>/', views.remove_media_status, name='rem
     path('api/dictionary-lookup/', dictionary_lookup, name='dictionary_lookup'),
 
 
+    path('stats/', stats_view, name='stats'),
 
 
 

@@ -10,9 +10,18 @@ import json, math  # <- Add this import at the top
 from youtube_transcript_api import YouTubeTranscriptApi 
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Q
+from django.db.models.functions import TruncDay
+from django.db.models import Count, Sum
+from datetime import datetime, timedelta
+from django.shortcuts import render
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Sum
+from django.contrib.auth.decorators import login_required
+import json
+import logging
 
-
-
+logger = logging.getLogger(__name__)
 
 
 
@@ -63,7 +72,9 @@ def add_viewed_media(request):
 def get_media_progress(request, media_id):
     user_id = request.user.id
     try:
-        progress = MediaProgress.objects.get(profile__user_id=user_id, media_id=media_id)
+        # Here, use 'media_id=media_id' to match the 'media_id' field in your Media model.
+        media = get_object_or_404(Media, media_id=media_id)
+        progress = MediaProgress.objects.get(profile__user_id=user_id, media=media)
         return JsonResponse({'time_stopped': progress.time_stopped})
     except MediaProgress.DoesNotExist:
         return JsonResponse({'error': 'MediaProgress not found'}, status=404)
@@ -81,7 +92,8 @@ def update_media_progress(request):
             # Get the current user's profile
             profile = Profile.objects.get(user_id=request.user.id)
             # Get the MediaProgress object for this media and profile
-            media_progress = MediaProgress.objects.get(media_id=media_id, profile=profile)
+            media_progress = MediaProgress.objects.get(media__media_id=media_id, profile=profile)
+
             # Update the time_stopped attribute
             media_progress.time_stopped = progress
             # Save the changes
@@ -115,6 +127,9 @@ def create_highlight(request):
             end_sentence_index=data['end_sentence_index'],
             frame_index=data['frame_index']
         )
+        user_profile = request.user.profile
+        user_profile.total_highlights += 1
+        user_profile.save()
 
         # Return the highlight details as JSON
         return JsonResponse({
@@ -138,7 +153,11 @@ def delete_highlight(request, highlight_id):
         # Check if the user has the right to delete this highlight
         if request.user == highlight.user:
             highlight.delete()
+            user_profile = request.user.profile
+            user_profile.total_highlights -= 1
+            user_profile.save()
             return JsonResponse({'status': 'success'})
+
         else:
             return JsonResponse({'status': 'error', 'message': 'Permission denied'})
     except Exception as e:
@@ -239,17 +258,54 @@ def remove_media_status(request, media_id):
         return JsonResponse({'status': 'success', 'message': 'Media status removed successfully'})
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
 @login_required
 def update_media_status(request, media_id, status=None):
     if request.method == 'POST':
         media = get_object_or_404(Media, media_id=media_id)
+        user_profile = Profile.objects.get(user=request.user)
 
-        # If the status is 'remove', delete the status
+        # Existing status for this media and user
+        existing_status = UserMediaStatus.objects.filter(user=request.user, media=media).first()
+
+        # Video length is now an integer representing total minutes
+        minutes = media.video_length
+
+        # Removal logic
         if status == 'remove':
+            if existing_status and existing_status.status == 'completed':
+                user_profile.total_word_count -= media.word_count
+                user_profile.total_minutes -= minutes
+                user_profile.save()
             UserMediaStatus.objects.filter(user=request.user, media=media).delete()
             return JsonResponse({'status': 'success', 'message': 'Media status removed successfully'})
 
-        # Otherwise, update or create the status
+        # Set to 'completed', add word count and minutes
+        elif status == 'completed':
+            user_media_status, created = UserMediaStatus.objects.update_or_create(
+                user=request.user,
+                media=media,
+                defaults={'status': status, 'completion_date': timezone.now().date()}
+            )
+            if created or (existing_status and existing_status.status != 'completed'):
+                user_profile.total_word_count += media.word_count
+                user_profile.total_minutes += minutes
+                user_profile.save()
+            return JsonResponse({'status': 'success', 'message': 'Media status updated to completed successfully'})
+
+        # Change from 'completed' to another status, subtract word count and minutes
+        elif existing_status and existing_status.status == 'completed' and status != 'completed':
+            UserMediaStatus.objects.update_or_create(
+                user=request.user,
+                media=media,
+                defaults={'status': status, 'completion_date': None}
+            )
+            user_profile.total_word_count -= media.word_count
+            user_profile.total_minutes -= minutes
+            user_profile.save()
+            return JsonResponse({'status': 'success', 'message': 'Media status changed from completed'})
+
+        # Other statuses
         else:
             UserMediaStatus.objects.update_or_create(
                 user=request.user,
@@ -263,4 +319,57 @@ def update_media_status(request, media_id, status=None):
 
 
 
+def get_words_read_data(user):
+    one_month_ago = datetime.now() - timedelta(days=30)
+    words_read_per_day = (
+        UserMediaStatus.objects
+        .filter(user=user, status='completed', completion_date__gte=one_month_ago)
+        .annotate(day=TruncDay('completion_date'))
+        .values('day')
+        .annotate(total_words=Sum('media__word_count'))
+        .order_by('day')
+    )
+    return words_read_per_day
 
+@login_required
+def stats_view(request):
+    # Define the date range: last 30 days
+    end_date = timezone.now()
+    start_date = end_date - timedelta(days=30)
+
+    # Aggregate daily highlights
+    daily_highlights = Highlight.objects.filter(
+        user=request.user,
+        created_at__gte=start_date
+    ).annotate(day=TruncDay('created_at')).values('day').annotate(total=Count('id')).order_by('day')
+
+    # Prepare daily highlights data for Chart.js
+    dates = [highlight['day'].strftime('%Y-%m-%d') for highlight in daily_highlights]
+    highlight_counts = [highlight['total'] for highlight in daily_highlights]
+
+    # Aggregate total highlights
+    total_highlights = Highlight.objects.filter(user=request.user).count()
+
+    # Aggregate daily words and minutes for completed media
+    daily_words_minutes = UserMediaStatus.objects.filter(
+        user=request.user,
+        status='completed',
+        completion_date__gte=start_date
+    ).annotate(day=TruncDay('completion_date')).values('day').annotate(
+        daily_words=Sum('media__word_count'),
+        daily_minutes=Sum('media__video_length')
+    ).order_by('day')
+
+    # Prepare words and minutes data for Chart.js
+    word_counts = [entry['daily_words'] for entry in daily_words_minutes]
+    minute_counts = [entry['daily_minutes'] for entry in daily_words_minutes]
+
+    context = {
+        'dates_json': json.dumps(dates),
+        'highlight_counts_json': json.dumps(highlight_counts),
+        'word_counts_json': json.dumps(word_counts),
+        'minute_counts_json': json.dumps(minute_counts),
+        'total_highlights_json': json.dumps(total_highlights),
+    }
+
+    return render(request, 'accounts/stats.html', context)

@@ -371,8 +371,10 @@ function onPlayerReady(event) {
   console.log(test2);
   console.log("poop");
   const data = await response.json();
+  console.log("data " + data)
   transcript = data.transcript;
   syncData5 = data.words;
+  console.log(syncData5 + "syncata");
   
 } catch (error) {
   console.error('Erroreeeee:', error);

@@ -1,8 +1,10 @@
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 
 from django.contrib.auth.models import User
-
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.db import models
 
 class Media(models.Model):
@@ -20,7 +22,9 @@ class Media(models.Model):
     youtube_video_id = models.CharField(max_length=200, blank=True, null=True)
     thumbnail_url = models.URLField(blank=True, null=True)  # New field for thumbnail URL
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='added_media')
-    video_length = models.CharField(max_length=10, blank=True, null=True)  # For storing as "4:13"
+    video_length = models.PositiveIntegerField(blank=True, null=True, help_text="Length of the video in seconds.")
+    word_count = models.IntegerField(default=0, blank=True, null=True, help_text="Estimated word count from video subtitles.")
+
 
 
 
@@ -42,9 +46,10 @@ class UserMediaStatus(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='media_statuses')
     media = models.ForeignKey(Media, on_delete=models.CASCADE, related_name='user_statuses')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
-
+    completion_date = models.DateField(null=True, blank=True)
+    
     class Meta:
-        unique_together = ('user', 'media')  # Ensure one status per user-media pair
+        unique_together = ('user', 'media')
 
 
 
@@ -54,11 +59,12 @@ class Highlight(models.Model):
     start_time = models.DecimalField(max_digits=6, decimal_places=2)
     end_time = models.DecimalField(max_digits=6, decimal_places=2)
     highlighted_text = models.TextField()
-    start_index = models.IntegerField() # index where the highlight starts within the sentence
-    end_index = models.IntegerField() # index where the highlight ends within the sentence
-    start_sentence_index = models.IntegerField() # sentence where the highlight starts
-    end_sentence_index = models.IntegerField() # sentence where the highlight ends
+    start_index = models.IntegerField()  # index where the highlight starts within the sentence
+    end_index = models.IntegerField()  # index where the highlight ends within the sentence
+    start_sentence_index = models.IntegerField()  # sentence where the highlight starts
+    end_sentence_index = models.IntegerField()  # sentence where the highlight ends
     frame_index = models.IntegerField()
+    created_at = models.DateTimeField(default=timezone.now)  # Add this line
 
     class Meta:
         unique_together = ['user', 'media', 'start_time', 'end_time', 'highlighted_text']

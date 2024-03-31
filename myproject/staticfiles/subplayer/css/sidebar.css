@@ -2,10 +2,10 @@
 
 .dashboard {
     display: flex;
-    flex-wrap: wrap; /* Allows items to wrap on smaller screens */
-    max-width: 1200px; /* Adjust based on your preference */
+    max-width: 100%; /* Adjusted to allow for full-width usage */
     margin: auto;
 }
+
 
  /* Sidebar becomes a flex container */
 .sidebar {
