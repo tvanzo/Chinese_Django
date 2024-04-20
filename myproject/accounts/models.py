@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from subplayer.models import Media
+from django.utils import timezone
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -17,6 +18,12 @@ class MediaProgress(models.Model):
     media = models.ForeignKey(Media, on_delete=models.CASCADE)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)  # Linking to Profile
     time_stopped = models.IntegerField(default=0)
+    date = models.DateField(default=timezone.now)  # Track the day of the progress
+    words_learned = models.IntegerField(default=0, help_text="Number of words learned during this session.")
+    minutes_watched = models.IntegerField(default=0, help_text="Number of minutes watched during this session.")
+
+    class Meta:
+        unique_together = ('media', 'profile', 'date')  # Ensuring one entry per media, profile, and date
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

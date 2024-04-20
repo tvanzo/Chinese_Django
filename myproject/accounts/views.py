@@ -20,8 +20,11 @@ from django.db.models import Sum
 from django.contrib.auth.decorators import login_required
 import json
 import logging
+from django.views.decorators.csrf import csrf_exempt
 
 logger = logging.getLogger(__name__)
+
+from django.db.models import F
 
 
 
@@ -72,12 +75,17 @@ def add_viewed_media(request):
 def get_media_progress(request, media_id):
     user_id = request.user.id
     try:
-        # Here, use 'media_id=media_id' to match the 'media_id' field in your Media model.
         media = get_object_or_404(Media, media_id=media_id)
-        progress = MediaProgress.objects.get(profile__user_id=user_id, media=media)
-        return JsonResponse({'time_stopped': progress.time_stopped})
-    except MediaProgress.DoesNotExist:
-        return JsonResponse({'error': 'MediaProgress not found'}, status=404)
+        progress = MediaProgress.objects.filter(profile__user_id=user_id, media=media).last()
+        if progress:
+            return JsonResponse({'time_stopped': progress.time_stopped, 'lastUpdateTime': progress.minutes_watched})
+        else:
+            return JsonResponse({'error': 'MediaProgress not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+
 
 @login_required
 def update_media_progress(request):
@@ -259,63 +267,88 @@ def remove_media_status(request, media_id):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
+
+
 @login_required
 def update_media_status(request, media_id, status=None):
-    if request.method == 'POST':
-        media = get_object_or_404(Media, media_id=media_id)
-        user_profile = Profile.objects.get(user=request.user)
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
-        # Existing status for this media and user
-        existing_status = UserMediaStatus.objects.filter(user=request.user, media=media).first()
+    data = json.loads(request.body)
+    status = data.get('status')
+    current_time = data.get('current_time', 0)  # Assuming current_time is provided in seconds
 
-        # Video length is now an integer representing total minutes
-        minutes = media.video_length
+    media = get_object_or_404(Media, media_id=media_id)
+    profile = get_object_or_404(Profile, user=request.user)
+    existing_status = UserMediaStatus.objects.filter(user=request.user, media=media).first()
 
-        # Removal logic
-        if status == 'remove':
+    words_per_second = media.word_count / media.video_length
+    current_words = int(words_per_second * current_time)
+    current_minutes = current_time 
+
+    if status == 'completed':
+        # Adjust for total video completion
+        total_words = media.word_count
+        print("fuckkkk")
+        total_minutes = round(media.video_length, 2)  # Round to 2 decimal places
+
+        previous_progress = MediaProgress.objects.filter(profile=profile, media=media)
+        previously_added_words = sum(progress.words_learned for progress in previous_progress)
+        previously_added_minutes = sum(progress.minutes_watched for progress in previous_progress)
+        print(previously_added_minutes)
+
+
+        adjusted_words_to_add = total_words - previously_added_words
+        adjusted_minutes_to_add = total_minutes - previously_added_minutes
+        print(adjusted_minutes_to_add)
+        profile.total_word_count += adjusted_words_to_add
+        profile.total_minutes += adjusted_minutes_to_add
+        
+        profile.save()
+
+        MediaProgress.objects.update_or_create(
+            profile=profile, media=media,
+            defaults={'time_stopped': media.video_length, 'words_learned': total_words, 'minutes_watched': total_minutes, 'date': timezone.now().date()}
+        )
+
+    elif status == 'in_progress':
+    # Since we start fresh each time it's set to 'in_progress', directly use the current counts
+        profile.total_word_count += current_words
+        profile.total_minutes += current_minutes
+        profile.save()
+
+        # Update or create the progress entry with current data
+        MediaProgress.objects.update_or_create(
+            profile=profile, media=media,
+            defaults={'time_stopped': current_time, 'words_learned': current_words, 'minutes_watched': current_minutes, 'date': timezone.now().date()}
+        )
+
+    elif status == 'completed' or status == 'set-status':
+        # When changing status, delete any 'in_progress' records if they exist
+        MediaProgress.objects.filter(profile=profile, media=media).delete()
+        if status == 'completed':
+            # Adjust for total video completion
+            profile.total_word_count += media.word_count
+            profile.total_minutes += media.video_length
+            profile.save()
+        elif status == 'set-status':
+            # If status is removed and it was previously 'completed', adjust profile totals back
             if existing_status and existing_status.status == 'completed':
-                user_profile.total_word_count -= media.word_count
-                user_profile.total_minutes -= minutes
-                user_profile.save()
+                profile.total_word_count -= media.word_count
+                profile.total_minutes -= media.video_length
+                profile.save()
             UserMediaStatus.objects.filter(user=request.user, media=media).delete()
             return JsonResponse({'status': 'success', 'message': 'Media status removed successfully'})
 
-        # Set to 'completed', add word count and minutes
-        elif status == 'completed':
-            user_media_status, created = UserMediaStatus.objects.update_or_create(
-                user=request.user,
-                media=media,
-                defaults={'status': status, 'completion_date': timezone.now().date()}
-            )
-            if created or (existing_status and existing_status.status != 'completed'):
-                user_profile.total_word_count += media.word_count
-                user_profile.total_minutes += minutes
-                user_profile.save()
-            return JsonResponse({'status': 'success', 'message': 'Media status updated to completed successfully'})
+    if status in ['completed', 'in_progress']:
+        UserMediaStatus.objects.update_or_create(
+            user=profile.user, media=media,
+            defaults={'status': status, 'completion_date': timezone.now().date() if status == 'completed' else None}
+        )
 
-        # Change from 'completed' to another status, subtract word count and minutes
-        elif existing_status and existing_status.status == 'completed' and status != 'completed':
-            UserMediaStatus.objects.update_or_create(
-                user=request.user,
-                media=media,
-                defaults={'status': status, 'completion_date': None}
-            )
-            user_profile.total_word_count -= media.word_count
-            user_profile.total_minutes -= minutes
-            user_profile.save()
-            return JsonResponse({'status': 'success', 'message': 'Media status changed from completed'})
-
-        # Other statuses
-        else:
-            UserMediaStatus.objects.update_or_create(
-                user=request.user,
-                media=media,
-                defaults={'status': status}
-            )
-            return JsonResponse({'status': 'success', 'message': f'Media status updated to {status} successfully'})
-
-    else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+    response_data = {'status': 'success', 'message': 'Media status updated successfully'}
+    print("Sending response:", response_data)  # Debug print
+    return JsonResponse(response_data)
 
 
 
@@ -333,43 +366,80 @@ def get_words_read_data(user):
 
 @login_required
 def stats_view(request):
-    # Define the date range: last 30 days
     end_date = timezone.now()
-    start_date = end_date - timedelta(days=30)
+    time_span = request.GET.get('span', 'month')  # Default to last month
+    start_date = end_date - timedelta(days=7 if time_span == 'week' else 30)
+    
+    num_days = (end_date - start_date).days
+    all_dates = [(start_date + timedelta(days=x)).date() for x in range(num_days + 1)]
+    dates_str = [date.strftime('%Y-%m-%d') for date in all_dates]
+
+    highlights_data = {date: 0 for date in dates_str}
+    words_data = {date: 0 for date in dates_str}
+    minutes_data = {date: 0 for date in dates_str}
 
     # Aggregate daily highlights
     daily_highlights = Highlight.objects.filter(
         user=request.user,
-        created_at__gte=start_date
-    ).annotate(day=TruncDay('created_at')).values('day').annotate(total=Count('id')).order_by('day')
+        created_at__date__range=[start_date, end_date]
+    ).annotate(day=TruncDay('created_at')).values('day').annotate(total=Count('id'))    
+    for highlight in daily_highlights:
+        day_str = highlight['day'].strftime('%Y-%m-%d')
+        highlights_data[day_str] = highlight['total']
 
-    # Prepare daily highlights data for Chart.js
-    dates = [highlight['day'].strftime('%Y-%m-%d') for highlight in daily_highlights]
-    highlight_counts = [highlight['total'] for highlight in daily_highlights]
-
-    # Aggregate total highlights
-    total_highlights = Highlight.objects.filter(user=request.user).count()
-
-    # Aggregate daily words and minutes for completed media
-    daily_words_minutes = UserMediaStatus.objects.filter(
-        user=request.user,
-        status='completed',
-        completion_date__gte=start_date
-    ).annotate(day=TruncDay('completion_date')).values('day').annotate(
-        daily_words=Sum('media__word_count'),
-        daily_minutes=Sum('media__video_length')
-    ).order_by('day')
-
-    # Prepare words and minutes data for Chart.js
-    word_counts = [entry['daily_words'] for entry in daily_words_minutes]
-    minute_counts = [entry['daily_minutes'] for entry in daily_words_minutes]
+    # Aggregate daily words and minutes
+    daily_progress = MediaProgress.objects.filter(profile__user=request.user, date__range=[start_date, end_date]).annotate(day=TruncDay('date')).values('day').annotate(total_words=Sum('words_learned'), total_minutes=Sum('minutes_watched'))
+    print(daily_progress)
+    for progress in daily_progress:
+        day_str = progress['day'].strftime('%Y-%m-%d')
+        words_data[day_str] = progress['total_words']
+        minutes_data[day_str] = progress['total_minutes']
 
     context = {
-        'dates_json': json.dumps(dates),
-        'highlight_counts_json': json.dumps(highlight_counts),
-        'word_counts_json': json.dumps(word_counts),
-        'minute_counts_json': json.dumps(minute_counts),
-        'total_highlights_json': json.dumps(total_highlights),
+        'dates_json': json.dumps(dates_str),
+        'highlight_counts_json': json.dumps(list(highlights_data.values())),
+        'word_counts_json': json.dumps(list(words_data.values())),
+        'minute_counts_json': json.dumps(list(minutes_data.values())),
+        'total_highlights_json': json.dumps(Highlight.objects.filter(user=request.user).count()),
+        'time_span': time_span,
     }
-
+    print(context)
     return render(request, 'accounts/stats.html', context)
+
+
+@login_required
+def update_progress(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+    data = json.loads(request.body)
+    media_id = data.get('mediaId')
+    additional_words = data.get('additionalWords')
+    additional_minutes = data.get('additionalMinutes')
+    progress_time = data.get('progressTime')
+
+    media = get_object_or_404(Media, media_id=media_id)
+    profile = get_object_or_404(Profile, user=request.user)
+
+    # Retrieve the sum of all previously logged words and minutes for this media
+    existing_progress = MediaProgress.objects.filter(profile=profile, media=media)
+    total_words_so_far = existing_progress.aggregate(Sum('words_learned'))['words_learned__sum'] or 0
+    total_minutes_so_far = existing_progress.aggregate(Sum('minutes_watched'))['minutes_watched__sum'] or 0
+
+    # Calculate the new totals
+    new_total_words = total_words_so_far + additional_words
+    new_total_minutes = total_minutes_so_far + additional_minutes
+
+    # Update or create the media progress with the new total time
+    media_progress, created = MediaProgress.objects.update_or_create(
+        profile=profile,
+        media=media,
+        defaults={'time_stopped': progress_time, 'words_learned': new_total_words, 'minutes_watched': new_total_minutes, 'date': timezone.now().date()}
+    )
+
+    # Update the profile with the new totals
+    profile.total_word_count = new_total_words
+    profile.total_minutes = new_total_minutes
+    profile.save()
+
+    return JsonResponse({'status': 'success', 'message': 'Progress updated successfully'})

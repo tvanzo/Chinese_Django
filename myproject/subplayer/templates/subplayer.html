@@ -16,6 +16,13 @@
     <div id="media-status" data-status="{{ media_status }}" style="display:none;"></div>
 
 </head>
+  {% if user.is_authenticated %}
+    <p>Total words from videos: {{ user.profile.total_word_count }}</p>
+        <p>Total highlights: {{ user.profile.total_highlights }}</p>
+        <p>Total video minutes watched: {{ request.user.profile.total_minutes }}</p>
+
+
+{% endif %}
 <body class="subplayer-page">
 
 <div class="dashboard">
@@ -160,8 +167,7 @@ setupHighlightLinks();
 
 
 
-
-    </script>
+</script>
 
 {% if media.media_type == 'audio' %}
     {% include 'subtitles.html' with media=media %}
@@ -177,19 +183,12 @@ setupHighlightLinks();
 </body>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Initial setup functions
 
-    // Setup Highlight Links
     setupHighlightLinks();
-
-    // Highlight mode toggle on Shift key press/release
     toggleHighlightMode();
-
-     // Initialize Status UI and Attach Status Update Event Listeners
     initializeStatusUI();
-
-    // Single status icon event listener
     attachSingleStatusIconEventListener();
-
 });
 
 function setupHighlightLinks() {
@@ -220,17 +219,18 @@ function toggleHighlightMode() {
 }
 
 function initializeStatusUI() {
+    console.log('Initializing status UI');
     const mediaStatusElement = document.getElementById('media-status');
     const initialStatus = mediaStatusElement.getAttribute('data-status');
+    console.log('Initial status:', initialStatus);
     updateSingleStatusIcon(initialStatus);
 }
 
 function attachSingleStatusIconEventListener() {
-    const statusIcon = document.getElementById('status-icon'); // This should be the ID of your single status icon
+    const statusIcon = document.getElementById('status-icon');
     statusIcon.addEventListener('click', function() {
-        // Determine the new status based on the current icon source
-        let newStatus = '';
-        switch (statusIcon.dataset.status) {
+        let newStatus;
+        switch (this.dataset.status) {
             case 'in_progress':
                 newStatus = 'completed';
                 break;
@@ -247,52 +247,91 @@ function attachSingleStatusIconEventListener() {
 }
 
 async function toggleStatus(newStatus) {
-    const mediaId = '{{ media.media_id }}';
-    const response = await updateMediaStatus(mediaId, newStatus === 'set-status' ? 'remove' : newStatus);
-    if (response && response.status === 'success') {
-        updateSingleStatusIcon(newStatus);
+    console.log("Toggle status called:", newStatus);
+    const mediaId = '{{ media.media_id }}';  // Adjust this dynamically as needed
+    const currentTime = player.getCurrentTime();
+    currentStatus=newStatus;
+    if (currentStatus==='set-status'){
+        lastUpdateTime=0;
     }
-}
-
-async function updateMediaStatus(mediaId, status) {
-    let url = `/media/update_status/${mediaId}/${status}/`;
     try {
+        let url = `/media/update_status/${mediaId}/${newStatus}/`;
+        let data = { status: newStatus, current_time: currentTime };
         const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken'),
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ 'status': status })
+            body: JSON.stringify(data)
         });
-        if (!response.ok) throw new Error('Network response was not ok');
-        return await response.json();
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json(); // Ensure this line is inside try-catch
+        console.log("Response received from updateMediaStatus:" + newStatus, result); // Check what's logged here
+
+        if (result && result.status === 'success') {
+            updateSingleStatusIcon(newStatus);
+        } else {
+            console.error('Failed to update status. Response:', result);
+        }
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error updating media status:', error);
     }
 }
 
-function updateSingleStatusIcon(status) { 
+
+async function updateMediaStatus(mediaId, newStatus) {
+    let url = `/media/update_status/${mediaId}/${newStatus}/`;
+    let data = { status: newStatus, current_time: player.getCurrentTime() };
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')  // Ensure CSRF token is included
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            console.log('Update status successful:', result.message);
+            // Update the status in your JavaScript and DOM
+            document.getElementById('media-status').setAttribute('data-status', result.newStatus);
+        } else {
+            throw new Error('Failed to update status');
+        }
+    } catch (error) {
+        console.error('Error updating media status:', error);
+    }
+}
+
+
+function updateSingleStatusIcon(status) {
+    console.log("updatedstatusicon")
     const statusIcon = document.getElementById('status-icon');
     const statusTooltip = document.getElementById('status-tooltip');
 
     switch (status) {
         case 'in_progress':
-            statusIcon.src = '{% static "subplayer/in-prog.png" %}'; // Update with the correct path to your in-progress icon
+            statusIcon.src = '{% static "subplayer/in-prog.png" %}';
             statusTooltip.textContent = 'In Progress';
-            statusIcon.dataset.status = 'in_progress'; // Updating the data-status attribute
             break;
         case 'completed':
-            statusIcon.src = '{% static "subplayer/complete-check.png" %}'; // Update with the correct path to your completed icon
+            statusIcon.src = '{% static "subplayer/complete-check.png" %}';
             statusTooltip.textContent = 'Completed';
-            statusIcon.dataset.status = 'completed'; // Updating the data-status attribute
             break;
         default:
-            // This is the case for 'set-status' or no status
-            statusIcon.src = '{% static "subplayer/status.png" %}'; // Update with the correct path to your set-status icon
+            statusIcon.src = '{% static "subplayer/status.png" %}';
             statusTooltip.textContent = 'Set Status';
-            statusIcon.dataset.status = 'set-status'; // Updating the data-status attribute to reflect no specific status
+            break;
     }
+    statusIcon.dataset.status = status; // Update the data-status attribute based on the current status
 }
 
 function getCookie(name) {
@@ -309,9 +348,8 @@ function getCookie(name) {
     }
     return cookieValue;
 }
-
-
 </script>
+
 
 
 
@@ -386,6 +424,14 @@ function getCookie(name) {
 
 
 </style>
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+                console.log("fuckyou");
+
+        var media = JSON.parse('{{ media_json|escapejs }}');
+
+
+</script>
 
 
 </html>

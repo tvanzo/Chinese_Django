@@ -103,15 +103,18 @@ def video_detail(request, media_id):
 
     # Assuming UserMediaStatus has a 'status' field that contains the media status
     user_media_status = UserMediaStatus.objects.filter(user=request.user, media=media).first()
-
     media_status = user_media_status.status if user_media_status else 'none'
 
+    # Serialize the media object to include in the JavaScript
     media_serialized = serialize('json', [media])
     media_dict = json.loads(media_serialized)[0]['fields']
     media_dict['media_id'] = media.media_id
     media_dict['media_type'] = media.media_type
     media_dict['model'] = str(media._meta)
     media_dict['url'] = media.subtitle_file.url
+    # Add video_length and word_count directly to media_dict
+    media_dict['video_length'] = media.video_length
+    media_dict['word_count'] = media.word_count
 
     media_json = json.dumps(media_dict)
 
@@ -120,20 +123,27 @@ def video_detail(request, media_id):
         'media_json': media_json,
         'highlights': highlights,
         'has_status': user_media_status is not None,
-        'media_status': media_status,  # Include the media status in the context
+        'media_status': media_status,
         'hide_nav': True,
     }
     return render(request, 'subplayer.html', context)
 
 
-
+@login_required
 def media_list(request):
     media_objects = Media.objects.all()
-    return render(request, 'media_list.html', {'media': media_objects})
+    
+    # Count the number of completed media for the user
+    completed_media_count = UserMediaStatus.objects.filter(
+        user=request.user, status='completed'
+    ).count()
+    
+    context = {
+        'media': media_objects,
+        'completed_media_count': completed_media_count,  # Pass the count to the template
+    }
 
-
-
-
+    return render(request, 'media_list.html', context)
 
 def parse_duration(duration):
     # Regular expression to match the duration format
