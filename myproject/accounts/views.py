@@ -21,6 +21,7 @@ from django.contrib.auth.decorators import login_required
 import json
 import logging
 from django.views.decorators.csrf import csrf_exempt
+from django.core.serializers import serialize
 
 logger = logging.getLogger(__name__)
 
@@ -42,9 +43,17 @@ def register(request):
         form = UserCreationForm()
     return render(request, 'accounts/register.html', {'form': form})
 
+@login_required
 def media_list(request):
     media_data = serializers.serialize('json', Media.objects.all())
-    return render(request, 'media/list.html', {'media': media_data})
+    finished_media_count = request.user.profile.finished_media.count()  # Get the count of finished media for the user
+
+    context = {
+        'media': media_data,
+        'finished_media_count': finished_media_count,  # Add this to the context
+    }
+
+    return render(request, 'media/list.html', context)
 
 @login_required
 def viewed_media_list(request):
@@ -87,32 +96,46 @@ def get_media_progress(request, media_id):
 
 
 
+from django.utils.timezone import localtime, now
+
 @login_required
 def update_media_progress(request):
-    print("update_media_progress called")  # <-- Add this
+    print("update_media_progress called")  # Debugging statement
 
     if request.method == 'POST':
-        data = json.loads(request.body)  # Load the JSON from the request body
-        media_id = data.get('mediaId')  # Get the mediaId from the data
-        progress = data.get('progress')  # Get the progress from the data
+        data = json.loads(request.body)
+        media_id = data.get('mediaId')
+        progress = data.get('progress')
 
         try:
-            # Get the current user's profile
-            profile = Profile.objects.get(user_id=request.user.id)
-            # Get the MediaProgress object for this media and profile
-            media_progress = MediaProgress.objects.get(media__media_id=media_id, profile=profile)
+            media = get_object_or_404(Media, media_id=media_id)
+            profile = request.user.profile
 
-            # Update the time_stopped attribute
-            media_progress.time_stopped = progress
-            # Save the changes
-            print("progooo" + str(progress))
-            print(media_progress.time_stopped)
-            media_progress.save()
+            # Get today's date
+            today = localtime(now()).date()
+
+            # Try to get the MediaProgress for today, or none if it doesn't exist
+            media_progress, created = MediaProgress.objects.get_or_create(
+                media=media,
+                profile=profile,
+                date=today,
+                defaults={'time_stopped': progress}  # Set defaults for a new record
+            )
+
+            if not created:
+                # If the record was not created, it means it already exists, and we just need to update it
+                media_progress.time_stopped = progress
+                media_progress.save()
+
+            print("Progress updated to:", progress)  # Debugging statement
 
             return JsonResponse({'status': 'ok'})
 
-        except (Profile.DoesNotExist, MediaProgress.DoesNotExist):
-            return JsonResponse({'error': 'Profile or MediaProgress not found'}, status=404)
+        except Media.DoesNotExist:
+            return JsonResponse({'error': 'Media not found'}, status=404)
+        except Exception as e:
+            print(str(e))  # Print the error for debugging
+            return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
 
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
@@ -209,14 +232,13 @@ def get_all_highlights(request):
 
 @login_required
 def highlights(request):
-    profile = Profile.objects.get(user=request.user)
-    media_highlights = {}
-    for media in profile.viewed_media.all():
-        highlights = Highlight.objects.filter(user=request.user, media=media)
-        media_highlights[media] = highlights
+    user = request.user
+    profile = Profile.objects.get(user=user)
+    all_highlights = Highlight.objects.filter(user=user).order_by('created_at')
 
-    return render(request, 'accounts/highlights.html', {'media_highlights': media_highlights})
+    print(f"Total highlights: {all_highlights.count()}")  # Debugging line to check the total number of highlights
 
+    return render(request, 'accounts/highlights.html', {'highlights': all_highlights})
 
 
 
@@ -303,7 +325,7 @@ def update_media_status(request, media_id, status=None):
         print(adjusted_minutes_to_add)
         profile.total_word_count += adjusted_words_to_add
         profile.total_minutes += adjusted_minutes_to_add
-        
+
         profile.save()
 
         MediaProgress.objects.update_or_create(
@@ -364,48 +386,141 @@ def get_words_read_data(user):
     )
     return words_read_per_day
 
+import json
+from datetime import timedelta
+from django.utils.timezone import now
+from django.shortcuts import render
+from django.db.models import Count, Sum
+from django.db.models.functions import TruncDay
+from django.contrib.auth.decorators import login_required
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.utils.timezone import now
+from datetime import timedelta
+from django.db.models import Count
+from django.db.models.functions import TruncDay, TruncMonth
+from itertools import accumulate
+import json
+
+from django.shortcuts import render
+from django.utils.timezone import now
+from datetime import timedelta
+from django.db.models import Count, F, ExpressionWrapper, fields
+from django.db.models.functions import TruncDay
+from django.contrib.auth.decorators import login_required
+import json
+
+from django.shortcuts import render
+from django.utils.timezone import now
+from datetime import timedelta
+from django.db.models import Count, Max, Subquery, OuterRef, F, ExpressionWrapper, fields
+from django.db.models.functions import TruncDay
+from django.contrib.auth.decorators import login_required
+import json
+
 @login_required
 def stats_view(request):
-    end_date = timezone.now()
-    time_span = request.GET.get('span', 'month')  # Default to last month
-    start_date = end_date - timedelta(days=7 if time_span == 'week' else 30)
-    
-    num_days = (end_date - start_date).days
-    all_dates = [(start_date + timedelta(days=x)).date() for x in range(num_days + 1)]
-    dates_str = [date.strftime('%Y-%m-%d') for date in all_dates]
+    user = request.user
+    profile = user.profile
+    end_date = now().date()  # Today's date
 
-    highlights_data = {date: 0 for date in dates_str}
-    words_data = {date: 0 for date in dates_str}
-    minutes_data = {date: 0 for date in dates_str}
+    data = {
+        'week': timedelta(days=7),
+        'month': timedelta(days=30),
+        'all_time': timedelta(days=365*100)  # Large number to encompass "all time"
+    }
 
-    # Aggregate daily highlights
-    daily_highlights = Highlight.objects.filter(
-        user=request.user,
-        created_at__date__range=[start_date, end_date]
-    ).annotate(day=TruncDay('created_at')).values('day').annotate(total=Count('id'))    
-    for highlight in daily_highlights:
-        day_str = highlight['day'].strftime('%Y-%m-%d')
-        highlights_data[day_str] = highlight['total']
+    results = {}
+    totals = {}
 
-    # Aggregate daily words and minutes
-    daily_progress = MediaProgress.objects.filter(profile__user=request.user, date__range=[start_date, end_date]).annotate(day=TruncDay('date')).values('day').annotate(total_words=Sum('words_learned'), total_minutes=Sum('minutes_watched'))
-    print(daily_progress)
-    for progress in daily_progress:
-        day_str = progress['day'].strftime('%Y-%m-%d')
-        words_data[day_str] = progress['total_words']
-        minutes_data[day_str] = progress['total_minutes']
+    for key, delta in data.items():
+        start_date = end_date - delta
+        num_days = (end_date - start_date).days
+        all_dates = [start_date + timedelta(days=x) for x in range(num_days + 1)]
+        dates_str = [date.strftime('%Y-%m-%d') for date in all_dates]
+
+        highlights_data = {date: 0 for date in dates_str}
+        minutes_data = {date: 0 for date in dates_str}
+        words_data = {date: 0 for date in dates_str}  # Assuming you have a word count field or similar logic
+
+        daily_highlights = Highlight.objects.filter(
+            user=user,
+            created_at__date__range=[start_date, end_date]
+        ).annotate(day=TruncDay('created_at')).values('day').annotate(total=Count('id'))
+        for highlight in daily_highlights:
+            day_str = highlight['day'].strftime('%Y-%m-%d')
+            highlights_data[day_str] = highlight['total']
+
+        daily_minutes = MediaProgress.objects.filter(
+            profile=profile,
+            date__range=[start_date, end_date]
+        ).annotate(day=TruncDay('date')).values('day').annotate(total_minutes=Sum('minutes_watched'))
+        for minute in daily_minutes:
+            day_str = minute['day'].strftime('%Y-%m-%d')
+            minutes_data[day_str] = minute['total_minutes']
+
+        results[key] = {
+            'dates': dates_str,
+            'highlights': list(highlights_data.values()),
+            'minutes': list(minutes_data.values())  # Ensure that minutes data is provided
+        }
+
+        # Calculate totals for the period
+        total_highlights = sum(highlights_data.values())
+        total_minutes = sum(minutes_data.values())
+        total_words = sum(words_data.values())  # This needs actual data source
+        total_videos = MediaProgress.objects.filter(
+            profile=profile,
+            date__range=[start_date, end_date]
+        ).values('media_id').distinct().count()
+        
+        totals[key] = {
+            'total_highlights': total_highlights,
+            'total_minutes': total_minutes,
+            'total_words': total_words,
+            'total_videos': total_videos
+        }
+
+    # Include Media Information
+    media_statuses = UserMediaStatus.objects.filter(
+        user=user,
+        status__in=['in_progress', 'completed']
+    ).select_related('media').annotate(
+        total_highlights=Count('media__highlights', filter=Q(media__highlights__user=user)),
+        latest_time_stopped=Subquery(
+            MediaProgress.objects.filter(
+                profile=profile,
+                media=OuterRef('media')
+            ).order_by('-date').values('time_stopped')[:1]
+        )
+    )
+
+    media_info = []
+    for status in media_statuses:
+        video_length = status.media.video_length
+        latest_time_stopped = status.latest_time_stopped or 0
+        progress_percent = (latest_time_stopped / video_length * 100) if video_length > 0 else 0
+        if status.status == 'completed':
+            progress_percent = 100
+        
+        media_info.append({
+            'media_id': status.media.media_id,  # Include media_id here
+            'title': status.media.title,
+            'total_highlights': status.total_highlights,
+            'length': f"{video_length // 60}:{video_length % 60:02d}",
+            'status': status.status,
+            'progress_percent': round(progress_percent, 2)
+        })   
+
 
     context = {
-        'dates_json': json.dumps(dates_str),
-        'highlight_counts_json': json.dumps(list(highlights_data.values())),
-        'word_counts_json': json.dumps(list(words_data.values())),
-        'minute_counts_json': json.dumps(list(minutes_data.values())),
-        'total_highlights_json': json.dumps(Highlight.objects.filter(user=request.user).count()),
-        'time_span': time_span,
+        'highlight_data_json': json.dumps(results),
+        'totals_json': json.dumps(totals),
+        'media_info': media_info
     }
-    print(context)
-    return render(request, 'accounts/stats.html', context)
 
+    return render(request, 'accounts/stats.html', context)
 
 @login_required
 def update_progress(request):
@@ -420,22 +535,28 @@ def update_progress(request):
 
     media = get_object_or_404(Media, media_id=media_id)
     profile = get_object_or_404(Profile, user=request.user)
+    today = localtime(now()).date()  # Get today's date in the local timezone
 
-    # Retrieve the sum of all previously logged words and minutes for this media
-    existing_progress = MediaProgress.objects.filter(profile=profile, media=media)
-    total_words_so_far = existing_progress.aggregate(Sum('words_learned'))['words_learned__sum'] or 0
-    total_minutes_so_far = existing_progress.aggregate(Sum('minutes_watched'))['minutes_watched__sum'] or 0
-
-    # Calculate the new totals
-    new_total_words = total_words_so_far + additional_words
-    new_total_minutes = total_minutes_so_far + additional_minutes
-
-    # Update or create the media progress with the new total time
-    media_progress, created = MediaProgress.objects.update_or_create(
-        profile=profile,
+    # Try to get or create a MediaProgress for today
+    media_progress, created = MediaProgress.objects.get_or_create(
         media=media,
-        defaults={'time_stopped': progress_time, 'words_learned': new_total_words, 'minutes_watched': new_total_minutes, 'date': timezone.now().date()}
+        profile=profile,
+        date=today,
+        defaults={
+            'time_stopped': progress_time,
+            'words_learned': additional_words,
+            'minutes_watched': additional_minutes
+        }
     )
+
+    if not created:
+        # If not created, it means the entry exists, and we should update the cumulative fields
+        media_progress.time_stopped = progress_time
+        media_progress.words_learned += additional_words
+        media_progress.minutes_watched += additional_minutes
+        media_progress.save()
+
+    return JsonResponse({'status': 'success', 'message': 'Progress updated successfully'})
 
     # Update the profile with the new totals
     profile.total_word_count = new_total_words
@@ -443,3 +564,35 @@ def update_progress(request):
     profile.save()
 
     return JsonResponse({'status': 'success', 'message': 'Progress updated successfully'})
+
+
+def highlights_detail(request, media_id):
+    media = get_object_or_404(Media, media_id=media_id, media_type='video')
+    highlights = Highlight.objects.filter(media=media, user=request.user)
+
+    # Assuming UserMediaStatus has a 'status' field that contains the media status
+    user_media_status = UserMediaStatus.objects.filter(user=request.user, media=media).first()
+    media_status = user_media_status.status if user_media_status else 'none'
+
+    # Serialize the media object to include in the JavaScript
+    media_serialized = serialize('json', [media])
+    media_dict = json.loads(media_serialized)[0]['fields']
+    media_dict['media_id'] = media.media_id
+    media_dict['media_type'] = media.media_type
+    media_dict['model'] = str(media._meta)
+    media_dict['url'] = media.subtitle_file.url
+    # Add video_length and word_count directly to media_dict
+    media_dict['video_length'] = media.video_length
+    media_dict['word_count'] = media.word_count
+
+    media_json = json.dumps(media_dict)
+
+    context = {
+        'media': media,
+        'media_json': media_json,
+        'highlights': highlights,
+        'has_status': user_media_status is not None,
+        'media_status': media_status,
+        'hide_nav': True,
+    }
+    return render(request, 'accounts/highlights_detail.html', context)

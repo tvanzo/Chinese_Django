@@ -1,4 +1,3 @@
-{% extends 'base.html' %}
 
 {% block title %}Home{% endblock %}
 
@@ -8,45 +7,55 @@
 <!DOCTYPE html>
 <html>
 <head>
-
     <link rel="stylesheet" type="text/css" href="{% static 'subplayer/css/subplayer.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'subplayer/css/sidebar.css' %}">
     <meta charset="UTF-8">
     <title>Your Title</title>
-    <div id="media-status" data-status="{{ media_status }}" style="display:none;"></div>
-
 </head>
-  {% if user.is_authenticated %}
-    <p>Total words from videos: {{ user.profile.total_word_count }}</p>
-        <p>Total highlights: {{ user.profile.total_highlights }}</p>
-        <p>Total video minutes watched: {{ request.user.profile.total_minutes }}</p>
-
-
-{% endif %}
 <body class="subplayer-page">
+
+{% if user.is_authenticated %}
+<div class="stats-overview">
+    <div class="circular-progress" id="words-progress" data-progress="{{ user.profile.total_word_count|default_if_none:'0' }}"></div>
+    <div class="circular-progress" id="highlights-progress" data-progress="{{ user.profile.total_highlights|default_if_none:'0' }}"></div>
+    <div class="circular-progress" id="minutes-progress" data-progress="{{ request.user.profile.total_minutes|default_if_none:'0' }}"></div>
+</div>
+{% endif %}
 
 <div class="dashboard">
     <aside class="sidebar">
             <h2>Highlights</h2>
-            <ul id="highlight-list">
-                {% for highlight in highlights %}
-                <li>
-                    <div class="highlight-container">
-                        <a href="#" data-start-time="{{ highlight.start_time }}">{{ highlight.highlighted_text }}</a>
-                        <img src="{% static 'subplayer/trash.png' %}" alt="Delete" class="delete-highlight" data-highlight-id="{{ highlight.id }}">
-                    </div>
-                </li>
-                {% empty %}
-                    <li>No highlights found.</li>
-                {% endfor %}
-            </ul>
+           <ul id="highlight-list">
+  {% for highlight in highlights %}
+<li class="highlight-item">
+    <div class="highlight-container">
+        <a href="#" 
+           data-start-time="{{ highlight.start_time }}"
+           data-end-time="{{ highlight.end_time }}"
+
+           data-frame-index="{{ highlight.frame_index }}"
+           data-start-sentence-index="{{ highlight.start_sentence_index }}"
+           data-start-index="{{ highlight.start_index }}">
+            {{ highlight.highlighted_text }}
+        </a>
+        <img src="{% static 'subplayer/trash.png' %}" alt="Delete" class="delete-highlight" data-highlight-id="{{ highlight.id }}">
+    </div>
+</li>
+{% empty %}
+    <li id="no-highlights">No highlights found.</li>
+{% endfor %}
+
+</ul>
+
+<button id="play-all-btn">Play All Highlights</button>
+
 
             <!-- Navigation at the bottom of the sidebar -->
            <!-- Sidebar Navigation in subplayer.html -->
 <nav class="sidebar-nav">
     <ul>
         <li>
-            <a href="{% url 'home' %}" title="Home">
+            <a href="{% url 'stats' %}" title="Home">
                 <img src="{% static 'subplayer/house_icon.jpeg' %}" alt="Home">
             </a>
         </li>
@@ -182,8 +191,22 @@ setupHighlightLinks();
 </script>
 </body>
 <script>
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Initial setup functions
+    const highlightList = document.getElementById('highlight-list');
+
+    highlightList.addEventListener('click', function(event) {
+        // Check if the click is on the delete button or one of its children
+        let deleteBtn = event.target.closest('.delete-highlight');
+        if (deleteBtn) {
+            event.preventDefault();
+            const highlightId = deleteBtn.getAttribute('data-highlight-id');
+            deleteHighlight(highlightId).then(() => {
+                deleteBtn.closest('li').remove(); // Remove the highlight element from the list after deletion
+                checkHighlightExistence(); // Check if "No highlights found" message should be displayed
+            });
+        }
+    });
 
     setupHighlightLinks();
     toggleHighlightMode();
@@ -191,15 +214,46 @@ document.addEventListener('DOMContentLoaded', function() {
     attachSingleStatusIconEventListener();
 });
 
-function setupHighlightLinks() {
-    const highlights = document.querySelectorAll('#highlight-list a');
-    highlights.forEach(highlight => {
-        highlight.addEventListener('click', function(e) {
-            e.preventDefault();
-            const startTime = parseFloat(this.getAttribute('data-start-time'));
-            if (player && !isNaN(startTime)) {
-                player.seekTo(startTime, true);
-            }
+
+async function deleteHighlight(highlightId) {
+  try {
+    const response = await fetch(`/api/user/delete_highlight/${highlightId}/`, { // Removed highlightId from the URL
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken2
+      },
+      body: JSON.stringify({ highlight_id: highlightId }), // Pass highlightId in the request body
+    });
+
+
+
+
+    if (response.ok) {
+      console.log("Highlight deleted successfully!");
+      // Optionally, refresh the highlights or make any necessary updates to the UI
+      await fetchHighlights(mediaId);
+      createSubtitles(); // Recreate subtitles after fetching new highlights
+
+    } else {
+      console.error('Failed to delete highlight:', await response.text());
+    }
+  } catch (error) {
+    console.error('Error during delete highlight:', error);
+  }
+}
+
+
+
+function setupHighlightDeletion() {
+    const deleteButtons = document.querySelectorAll('.delete-highlight');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.preventDefault();  // Prevent the browser from performing the default action for the element.
+            const highlightId = this.getAttribute('data-highlight-id');
+            deleteHighlight(highlightId).then(() => {
+                this.closest('li').remove();  // Remove the highlight element from the list after deletion.
+            });
         });
     });
 }
@@ -348,6 +402,7 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+
 </script>
 
 
@@ -356,74 +411,6 @@ function getCookie(name) {
 
 
 
-<style>
-    /* Button General Styles */
-.media-content button {
-    cursor: pointer;
-    border: none;
-    outline: none;
-    padding: 10px 15px;
-    margin: 5px;
-    border-radius: 5px;
-    font-size: 14px;
-    text-transform: uppercase;
-    transition: background-color 0.3s, transform 0.2s;
-}
-
-/* Specific Styles for Each Button */
-
-
-/* Additional styles for better layout */
-.media-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.player-wrapper + div, /* Directly following the player wrapper */
-.audio-speed-display + div { /* Directly following the audio speed display */
-    margin-top: 20px;
-}
-.active {
-    opacity: 1; /* Fully opaque */
-}
-
-.dimmed {
-    opacity: 0.5; /* Half transparent */
-    cursor: not-allowed;
-}
-
-#dictionary-popup {
-    position: absolute;
-    display: none;
-    padding: 10px;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    max-width: 300px;
-    z-index: 1000;
-    font-family: Arial, sans-serif;
-    color: #333;
-    line-height: 1.4;
-}
-
-#dictionary-popup.show {
-    display: block;
-    animation: fadeIn 0.3s;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-
-
-
-
-
-</style>
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function() {
                 console.log("fuckyou");
@@ -432,6 +419,108 @@ function getCookie(name) {
 
 
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const playAllButton = document.getElementById('play-all-btn');
+    let currentHighlightIndex = 0;
+
+ function setupHighlightLinks() {
+        const highlights = document.querySelectorAll('#highlight-list a');
+        highlights.forEach(highlight => {
+            highlight.removeEventListener('click', playHighlight);
+            highlight.addEventListener('click', playHighlight);
+        });
+    }
+
+
+    function playHighlight(e) {
+        if (e) e.preventDefault();
+        const highlightElement = e.currentTarget;
+        currentHighlightIndex = Array.from(highlights).indexOf(highlightElement);
+        const startTime = parseFloat(highlightElement.getAttribute('data-start-time'));
+        seekAndPlay(startTime);
+        updateActiveHighlight(highlightElement);
+    }
+
+    function playAllHighlights() {
+        const highlights = document.querySelectorAll('#highlight-list a');
+        if (currentHighlightIndex < highlights.length) {
+            const highlight = highlights[currentHighlightIndex];
+            const startTime = parseFloat(highlight.getAttribute('data-start-time'));
+            const endTime = parseFloat(highlight.getAttribute('data-end-time'));
+
+            seekAndPlay(startTime, () => {
+                let checkPlaybackInterval = setInterval(() => {
+                    if (player.getCurrentTime() >= endTime) {
+                        clearInterval(checkPlaybackInterval);
+                        currentHighlightIndex++;
+                        if (currentHighlightIndex < highlights.length) {
+                            playAllHighlights();
+                        } else {
+                            console.log('All highlights have been played.');
+                            player.pauseVideo();
+                            currentHighlightIndex = 0;
+                        }
+                    }
+                }, 100);
+            });
+            updateActiveHighlight(highlight);
+        } else {
+            console.log('All highlights have been played.');
+            player.pauseVideo();
+            currentHighlightIndex = 0;
+        }
+    }
+
+    function seekAndPlay(startTime, callback) {
+        console.log("has it?" +mediaHasBeenPlayed);
+        if (!mediaHasBeenPlayed) {
+            console.log("never");
+            mediaHasBeenPlayed=true;
+            // Play video for 5 seconds to ensure readiness
+            player.playVideo();
+            setTimeout(() => {
+                player.seekTo(startTime, true);
+                setTimeout(() => {
+                    player.playVideo();
+                    if (callback) callback();
+                }, 300); // Check after 300ms if it's ready
+            }, 2000);
+        } else {
+            player.seekTo(startTime, true);
+            setTimeout(() => {
+                player.playVideo();
+                if (callback) callback();
+            }, 300);
+        }
+    }
+
+    function updateActiveHighlight(activeElement) {
+        document.querySelectorAll('#highlight-list a').forEach(highlight => {
+            highlight.classList.remove('played-highlight');
+        });
+        activeElement.classList.add('played-highlight');
+    }
+
+    function removeHighlightActiveStates() {
+        document.querySelectorAll('#highlight-list a').forEach(highlight => {
+            highlight.classList.remove('played-highlight');
+        });
+    }
+
+    playAllButton.addEventListener('click', function() {
+        currentHighlightIndex = 0;
+        playAllHighlights();
+    });
+
+    setupHighlightLinks();
+});
+
+</script>
+
+
+
+
 
 
 </html>

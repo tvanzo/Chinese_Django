@@ -163,6 +163,12 @@
     flex-grow: 1; /* Ensure link uses available space, pushing button to the end */
 }
 
+.played-highlight {
+    background-color: #f0f0f0; /* Light grey background for active highlight */
+    border-left: 5px solid #007BFF; /* Blue left border for emphasis */
+}
+
+
 .sidebar ul li:hover  {
     background-color: #eaeaea;
 }

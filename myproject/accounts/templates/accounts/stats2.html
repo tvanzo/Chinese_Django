@@ -1,0 +1,368 @@
+
+Copy code
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>User Stats</h2>
+
+<div style="text-align:center; margin-bottom: 20px;">
+    <a href="?span=week">Last Week</a> |
+    <a href="?span=month">Last Month</a>
+</div>
+
+<div class="chart-grid">
+    <div class="chart-container">
+        <h3>Daily Highlights</h3>
+        <canvas id="dailyHighlightsChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <h3>Cumulative Highlights</h3>
+        <canvas id="cumulativeHighlightsChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <h3>Daily Minutes</h3>
+        <canvas id="dailyMinutesWatchedChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <h3>Cumulative Minutes</h3>
+        <canvas id="cumulativeMinutesWatchedChart"></canvas>
+    </div>
+    <div class="chart-container">
+    <h3>Daily Words Learned</h3>
+    <canvas id="dailyWordsLearnedChart"></canvas>
+</div>
+
+<div class="chart-container">
+    <h3>Cumulative Words Learned</h3>
+    <canvas id="cumulativeWordsLearnedChart"></canvas>
+</div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const dates = {{ dates_json|safe }};
+const highlightCounts = {{ highlight_counts_json|safe }};
+
+// Calculate cumulative highlights
+const cumulativeHighlightCounts = highlightCounts.reduce((acc, currentValue, currentIndex) => {
+    if (currentIndex === 0) {
+        acc.push(currentValue);
+    } else {
+        acc.push(currentValue + acc[currentIndex - 1]);
+    }
+    return acc;
+}, []);
+
+// Initialize Daily Highlights Chart
+const dailyHighlightsCtx = document.getElementById('dailyHighlightsChart').getContext('2d');
+const dailyHighlightsChart = new Chart(dailyHighlightsCtx, {
+    type: 'line', // Change this to 'bar' if preferred
+    data: {
+        labels: dates,
+        datasets: [{
+            label: 'Daily Highlights',
+            data: highlightCounts,
+            fill: false,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgb(75, 192, 192)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1,
+                    precision: 0
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: true
+            }
+        }
+    }
+});
+
+// Initialize Cumulative Highlights Chart
+const cumulativeHighlightsCtx = document.getElementById('cumulativeHighlightsChart').getContext('2d');
+const cumulativeHighlightsChart = new Chart(cumulativeHighlightsCtx, {
+    type: 'line',
+    data: {
+        labels: dates,
+        datasets: [{
+            label: 'Cumulative Highlights',
+            data: cumulativeHighlightCounts,
+            fill: true,
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgb(255, 99, 132)',
+            borderWidth: 2,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1,
+                    precision: 0
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: true
+            }
+        }
+    }
+});
+
+// Assuming these are defined and populated similarly to how highlightCounts were
+const dailyMinutesWatched = {{ minute_counts_json|safe }};
+const cumulativeMinutesWatched = dailyMinutesWatched.reduce((acc, cur, i) => [...acc, (i === 0 ? cur : cur + acc[i-1])], []);
+
+// Initialize Daily Minutes Watched Chart
+const dailyMinutesWatchedCtx = document.getElementById('dailyMinutesWatchedChart').getContext('2d');
+// Add the new Chart initialization for dailyMinutesWatched here, following the pattern from dailyHighlightsChart
+const dailyMinutesWChart = new Chart(dailyMinutesWatchedCtx, {
+    type: 'line', // Change this to 'bar' if preferred
+    data: {
+        labels: dates,
+        datasets: [{
+            label: 'Daily Minutes',
+            data: dailyMinutesWatched,
+            fill: false,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgb(75, 192, 192)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1,
+                    precision: 0
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: true
+            }
+        }
+    }
+});
+// Initialize Cumulative Minutes Watched Chart
+const cumulativeMinutesWatchedCtx = document.getElementById('cumulativeMinutesWatchedChart').getContext('2d');
+// Add the new Chart initialization for cumulativeMinutesWatched here, following the pattern from cumulativeHighlightsChart
+const cumulativeMinutesChart = new Chart(cumulativeMinutesWatchedCtx, {
+    type: 'line',
+    data: {
+        labels: dates,
+        datasets: [{
+            label: 'Cumulative Minutes',
+            data: cumulativeMinutesWatched,
+            fill: true,
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgb(255, 99, 132)',
+            borderWidth: 2,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1,
+                    precision: 0
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: true
+            }
+        }
+    }
+});
+// Daily Words Learned Chart
+const dailyWordsCtx = document.getElementById('dailyWordsLearnedChart').getContext('2d');
+const dailyWordsLearned = {{ word_counts_json|safe }};
+const dailyWordsLearnedChart = new Chart(dailyWordsCtx, {
+    type: 'line',
+    data: {
+        labels: dates,
+        datasets: [{
+            label: 'Daily Words Learned',
+            data: dailyWordsLearned,
+            fill: false,
+            borderColor: 'rgba(153, 102, 255, 1)',
+            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            legend: {
+                display: true
+            }
+        }
+    }
+});
+
+// Cumulative Words Learned Chart
+const cumulativeWordsCtx = document.getElementById('cumulativeWordsLearnedChart').getContext('2d');
+const cumulativeWordsLearned = dailyWordsLearned.reduce((acc, cur, i) => [...acc, (i === 0 ? cur : cur + acc[i-1])], []);
+const cumulativeWordsLearnedChart = new Chart(cumulativeWordsCtx, {
+    type: 'line',
+    data: {
+        labels: dates,
+        datasets: [{
+            label: 'Cumulative Words Learned',
+            data: cumulativeWordsLearned,
+            fill: true,
+            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderWidth: 1,
+            tension: 0.4
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            legend: {
+                display: true
+            }
+        }
+    }
+});
+
+</script>
+<style>
+     body {
+        font-family: 'Arial', sans-serif;
+    }
+
+    .toggle-buttons {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .toggle-button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        margin: 0 10px;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+    .toggle-button:hover, .toggle-button:focus {
+        background-color: #0056b3;
+        color: white;
+        outline: none;
+    }
+
+    .user-stats-title {
+        text-align: center;
+        color: #333;
+        font-size: 24px;
+        margin: 20px 0;
+    }
+
+    .chart-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .chart-container {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+    }
+
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.chart-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.chart-container h3 {
+    margin-top: 0;
+    text-align: center;
+    font-size: 18px;
+    color: #333;
+}
+.toggle-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.toggle-container a {
+    text-decoration: none;
+    color: #007bff;
+    background-color: #f8f9fa;
+    border: 1px solid #dae0e5;
+    padding: 5px 15px;
+    border-radius: 20px;
+    margin: 0 5px;
+    transition: all 0.3s ease;
+}
+
+.toggle-container a:hover, .toggle-container a:focus {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 30px;
+}
+
+
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+</style>
+
+{% endblock %}

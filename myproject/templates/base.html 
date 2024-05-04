@@ -2,26 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}My Site{% endblock %}</title>
-    <!-- Include any common CSS files or other head elements here -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Your Site Title{% endblock %}</title>
+    <!-- Additional head elements can be added here -->
 </head>
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="{% url 'home' %}">Home</a></li>
-                <li><a href="{% url 'highlights' %}">Highlights</a></li>
-                <!-- Add other navigation links as needed -->
-            </ul>
-        </nav>
-    </header>
+    <!-- Include the sidebar -->
+    <aside>
+        {% include 'sidebar.html' %}
+    </aside>
 
-    {% block content %}
-    <!-- Page specific content will go here -->
-    {% endblock %}
-
-    <footer>
-        <!-- Common footer content goes here -->
-    </footer>
+    <!-- Main content area where child templates will render -->
+    <main>
+        {% block content %}
+        <!-- Default content can go here if any -->
+        {% endblock %}
+    </main>
 </body>
 </html>

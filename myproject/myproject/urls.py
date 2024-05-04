@@ -27,14 +27,15 @@ from subplayer import views as subplayer_views
 from subplayer.views import podcast_detail, video_detail, media_list, add_media, dictionary_lookup, search
 from django.contrib.auth import views as auth_views
 from accounts.views import register, stats_view
-from accounts.views import add_viewed_media, viewed_media_list, get_media_progress, update_media_progress, get_highlights, get_all_highlights, create_highlight, delete_highlight, modify_highlight, my_media, remove_media_status, update_progress
+from accounts.views import add_viewed_media, highlights_detail, viewed_media_list, get_media_progress, update_media_progress, get_highlights, get_all_highlights, create_highlight, delete_highlight, modify_highlight, my_media, remove_media_status, update_progress
+from accounts.views import highlights
 
 
 
 
 
 urlpatterns = [
-    path('', media_list, name='home'),
+    path('', stats_view, name='stats'),
     path('admin/', admin.site.urls),
     path('subplayer/', TemplateView.as_view(template_name='subplayer.html'), name='subplayer'),
     path('podcast/', subplayer_views.podcast_view, name='podcast_view'),
@@ -55,7 +56,7 @@ urlpatterns = [
  path('api/user/get_highlights/', get_all_highlights, name='get_all_highlights'),
     path('api/user/get_highlights/<str:media_id>/', get_highlights, name='get_highlights'),
 
-path('highlights/', views.highlights, name='highlights'),
+    path('highlights/', views.highlights, name='highlights'),
     path('admin/', admin.site.urls),
         path('add_media/', add_media, name='add_media'),
     path('media_list/', views.media_list, name='media_list'),
@@ -79,7 +80,7 @@ path('api/user/update-progress', update_progress, name='update_progress'),
 
 path('search/', search, name='search'),
 
-
+    path('highlights/<str:media_id>/', highlights_detail, name='highlights_detail'),
     # Add other URL patterns for your project
 ]
 

@@ -7,6 +7,7 @@ var player;
 var currentStatus=document.getElementById('media-status').getAttribute('data-status');
 var initialTimeSet = false; // This flag will help us ensure we only set the time once after the desired point
 let lastUpdateTime = 0;
+    let isPlayingHighlights = false; // Flag to control highlight playback
 
 function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
@@ -123,6 +124,7 @@ let saveProgressInterval;
 // Set up interval to save progress every 5 seconds when the video is playing
 function onPlayerStateChange(event) {
     console.log("Player state changed:", event.data);
+    console.log("isplayinghiglights"+ isPlayingHighlights);
     if ((event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.PAUSED) && !mediaHasBeenPlayed) {
         mediaHasBeenPlayed = true;
         fetchMediaProgressAndSeek();
@@ -164,7 +166,6 @@ function setupProgressSaving() {
 
     function getCurrentStatus() {
         // This function ensures fetching the latest status dynamically
-        
         return document.getElementById('media-status').getAttribute('data-status');
     }
 
@@ -173,64 +174,47 @@ function setupProgressSaving() {
             console.error('Player not initialized or getCurrentTime not available');
             return;
         }
-            console.log("currentStatus" +currentStatus);
+
+        const currentStatus = getCurrentStatus(); // Fetch the current status
         const currentTime = player.getCurrentTime();
-        if (lastUpdateTime === 0 && currentStatus==='in_progress') { // Initialize lastUpdateTime on first run
-            lastUpdateTime = currentTime;
-        }
         const timeChange = currentTime - lastUpdateTime; // Calculate the time change since last update
-        const timebefore=lastUpdateTime;
-            console.log("prelast update time" + lastUpdateTime + " TC" + timeChange);
 
-        if (Math.abs(timeChange) >= 60) { // Proceed if the change is 60 seconds or more
+        console.log("currentStatus: " + currentStatus);
+        console.log("currentTime: " + currentTime);
+        console.log("timeChange: " + timeChange);
+
+        // Call update-progress endpoint if the time change is 60 seconds or more and status is 'in_progress'
+        if (Math.abs(timeChange) >= 10 && currentStatus === 'in_progress') {
             const wordsPerSecond = media.word_count / media.video_length; // Assuming these values are correctly initialized
-            const additionalWords = wordsPerSecond * timeChange; // Calculate additional words (can be negative)
-            const additionalMinutes = timeChange; // Calculate additional minutes (can be negative)
+            const additionalWords = wordsPerSecond * timeChange; // Calculate additional words
+            const additionalMinutes = timeChange; // Calculate additional minutes
 
-            lastUpdateTime = currentTime; // Update lastUpdateTime to the current time
+            console.log(`Updating progress: Additional Words: ${additionalWords}, Additional Minutes: ${additionalMinutes}, Last Update Time: ${lastUpdateTime}`);
 
-            if (currentStatus === 'in_progress') {
-                lastUpdateTime = currentTime; // Update lastUpdateTime to the current time
-                console.log(`PREQUEDATETime Change: ${timeChange}, Time before: ${timebefore}, Words Per Second: ${wordsPerSecond}, Additional Words: ${additionalWords}, Additional Minutes: ${additionalMinutes}, Last Update Time: ${lastUpdateTime}`);
+            fetch('/api/user/update-progress', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken2,
+                },
+                body: JSON.stringify({
+                    mediaId: mediaId,
+                    additionalWords: additionalWords,
+                    additionalMinutes: additionalMinutes,
+                    progressTime: currentTime,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => console.log('Update progress successful:', data))
+            .catch(error => console.error('Error updating progress:', error));
 
-                // Call update-progress endpoint with calculated values
-                fetch('/api/user/update-progress', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrftoken2,
-                    },
-                    body: JSON.stringify({
-                        mediaId: mediaId,
-                        additionalWords: additionalWords,
-                        additionalMinutes: additionalMinutes,
-                        progressTime: currentTime,
-                    }),
-                })
-                .then(response => response.json())
-                .then(data => console.log('Update progress successful:', data))
-                .catch(error => console.error('Error updating progress:', error));
-            }
+            lastUpdateTime = currentTime; // Update lastUpdateTime to the current time after sending update
         }
-            console.log("current time" +currentTime);
 
-        // Always save current playback time every 5 seconds
-        fetch('/api/user/save-progress', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrftoken2,
-            },
-            body: JSON.stringify({
-                mediaId: mediaId,
-                progress: currentTime,
-            }),
-        })
-        .then(response => response.json())
-        .then(data => console.log('Playback progress saved:', currentTime))
-        .catch(error => console.error('Error saving playback progress:', error));
+       
     }, saveInterval);
 }
+
 
 
 
@@ -327,6 +311,7 @@ function addHighlightToMap(frameIndex, sentenceIndex, charIndex, highlight) {
     startTime: parseFloat(highlight.start_time),
     endTime: parseFloat(highlight.end_time)
   });
+
 }
 
 function updateHighlightMap() {
@@ -343,68 +328,85 @@ function updateHighlightMap() {
     }
   });
 }
-
-
-function applyPermanentHighlight(frameIndex, charIndex) {
-  const sentenceElement = document.getElementById("s_" + frameIndex + "_" + charIndex);
-  if (sentenceElement) {
-    sentenceElement.classList.add('perm-highlight');
-  }
-}
-
-
-
-
-
+ function checkHighlightExistence() {
+        const ul = document.getElementById('highlight-list');
+        const noHighlightsMsg = document.getElementById('no-highlights');
+        if (ul.children.length === 0) {
+            if (!noHighlightsMsg) {
+                const li = document.createElement('li');
+                li.id = 'no-highlights';
+                li.textContent = 'No highlights found.';
+                ul.appendChild(li);
+            }
+        } else {
+            if (noHighlightsMsg) {
+                noHighlightsMsg.remove();
+            }
+        }
+    }
 
 function updateSidebarWithHighlight(highlight) {
-    const ul = document.getElementById('highlight-list'); // Assuming your UL has this ID
+    const ul = document.getElementById('highlight-list');
     const li = document.createElement('li');
+    li.className = 'highlight-item';
 
     const div = document.createElement('div');
     div.className = 'highlight-container';
 
     const a = document.createElement('a');
-    a.href = "#"; // Since you can't use Django template tags, set href to "#" or the actual link if available
-    a.setAttribute('data-start-time', highlight.start_time); // Set custom data attribute
+    a.href = "#";
     a.textContent = highlight.highlighted_text;
-    div.appendChild(a);
+    a.dataset.startTime = highlight.start_time.toString();
+    a.dataset.endTime = highlight.end_time.toString();  // Ensure end time is also set
+    a.dataset.frameIndex = highlight.frame_index;
+    a.dataset.startSentenceIndex = highlight.start_sentence_index;
+    a.dataset.startIndex = highlight.start_index;
 
-    // Create the delete icon for the new highlight
     const img = document.createElement('img');
-    // Ensure the path to the trash icon is correct for your static files setup
-    img.src = '/static/subplayer/trash.png'; // Adjust the path as needed
+    img.src = '/static/subplayer/trash.png';
     img.alt = "Delete";
     img.className = "delete-highlight";
-    img.setAttribute('data-highlight-id', highlight.id); // Use setAttribute for data attributes
-    img.style.cursor = "pointer";
-
-    // Attach the event listener for deletion
+    img.setAttribute('data-highlight-id', highlight.id);
     img.addEventListener('click', function() {
         deleteHighlight(this.dataset.highlightId);
     });
 
+    div.appendChild(a);
     div.appendChild(img);
     li.appendChild(div);
-    ul.appendChild(li);
+
+    // Find correct position based on frame index, sentence index, and start index
+    let inserted = false;
+    const existingHighlights = Array.from(ul.getElementsByClassName('highlight-item'));
+    for (let i = 0; i < existingHighlights.length; i++) {
+        const existingHighlight = existingHighlights[i];
+        const existingFrameIndex = parseInt(existingHighlight.querySelector('a').dataset.frameIndex);
+        const existingSentenceIndex = parseInt(existingHighlight.querySelector('a').dataset.startSentenceIndex);
+        const existingStartIndex = parseInt(existingHighlight.querySelector('a').dataset.startIndex);
+
+        if ((highlight.frame_index < existingFrameIndex) ||
+            (highlight.frame_index === existingFrameIndex && highlight.start_sentence_index < existingSentenceIndex) ||
+            (highlight.frame_index === existingFrameIndex && highlight.start_sentence_index === existingSentenceIndex && highlight.start_index < existingStartIndex)) {
+            ul.insertBefore(li, existingHighlight);
+            inserted = true;
+            break;
+        }
+    }
+
+    if (!inserted) {
+        ul.appendChild(li);
+    }
+
+    checkHighlightExistence();
+    setupHighlightLinks();  // Re-setup links to ensure new highlight is interactive
 }
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+function handleHighlightClick(e) {
+    e.preventDefault();
+}
 
 
 
@@ -420,26 +422,26 @@ function updateSidebarWithHighlight(highlight) {
 
 
 async function addHighlight(highlightData) {
-  const response = await fetch(`/api/user/create_highlight`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': csrftoken2 // Ensure you have the CSRF token
-    },
-    body: JSON.stringify(highlightData),
-  });
+    const response = await fetch(`/api/user/create_highlight`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken2
+        },
+        body: JSON.stringify(highlightData),
+    });
 
-  if (response.ok) {
-    console.log("Highlight added successfully!");
-    const addedHighlight = await response.json(); // Assuming the server returns the added highlight
-    updateSidebarWithHighlight(addedHighlight); // Update the sidebar with the new highlight
-    await fetchHighlights(highlightData.media); // Optionally refresh highlights if needed
-    createSubtitles(); // Recreate subtitles to include new highlights
-  } else {
-    console.error('Failed to add highlight:', await response.text());
-  }
+    if (response.ok) {
+        const addedHighlight = await response.json();
+        highlightData.id = addedHighlight.id;
+        updateSidebarWithHighlight(highlightData); // Adds the new highlight to the sidebar
+        await fetchHighlights(highlightData.media); // Refresh highlights data
+        createSubtitles(); // This needs to refresh or recreate subtitles based on new data
+        setupHighlightLinks(); // Re-setup links to ensure new highlights are interactive
+    } else {
+        console.error('Failed to add highlight:', await response.text());
+    }
 }
-
 
 
 

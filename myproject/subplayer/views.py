@@ -11,16 +11,23 @@ import logging
 import json
 import os
 import re
+from math import ceil
 
 from .models import Media, Highlight, UserMediaStatus
-from accounts.models import Profile
+from accounts.models import Profile, MediaProgress
 from .forms import MediaForm, SearchForm
 from .youtube_utils import fetch_video_details, process_and_save_subtitles, parse_duration
 from googleapiclient.discovery import build
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Count, Q
 
 
-
-
+def format_duration(seconds):
+    """Helper function to convert seconds to 'minutes:seconds' format."""
+    minutes = seconds // 60
+    remainder_seconds = seconds % 60
+    return f"{minutes}m {remainder_seconds}s"
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -99,7 +106,7 @@ def podcast_detail(request, media_id):
 @login_required
 def video_detail(request, media_id):
     media = get_object_or_404(Media, media_id=media_id, media_type='video')
-    highlights = Highlight.objects.filter(media=media, user=request.user)
+    highlights = Highlight.objects.filter(media=media, user=request.user).order_by('start_time')
 
     # Assuming UserMediaStatus has a 'status' field that contains the media status
     user_media_status = UserMediaStatus.objects.filter(user=request.user, media=media).first()
@@ -131,37 +138,46 @@ def video_detail(request, media_id):
 
 @login_required
 def media_list(request):
-    media_objects = Media.objects.all()
-    
-    # Count the number of completed media for the user
-    completed_media_count = UserMediaStatus.objects.filter(
-        user=request.user, status='completed'
-    ).count()
-    
+    user = request.user
+    today = timezone.now().date()
+
+    time_span = request.GET.get('span', 'all')
+    if time_span == 'day':
+        start_date = today
+    elif time_span == 'month':
+        start_date = today.replace(day=1)
+    else:
+        start_date = None
+
+    all_media = Media.objects.annotate(
+        user_highlights_count=Count('highlights', filter=Q(highlights__user=user))
+    )
+
+    progress_filters = {'profile': user.profile}
+    if start_date:
+        progress_filters['date__gte'] = start_date
+    progress_entries = MediaProgress.objects.filter(**progress_filters)
+
+    total_minutes = progress_entries.aggregate(sum_minutes=Sum('minutes_watched'))['sum_minutes'] or 0
+    total_words = progress_entries.aggregate(sum_words=Sum('words_learned'))['sum_words'] or 0
+    total_highlights = Highlight.objects.filter(user=user).count()
+
+    # Map status to each media
+    media_statuses = {entry.media_id: entry.status for entry in UserMediaStatus.objects.filter(media__in=all_media, user=user)}
+
+    # Attach the status and formatted video length directly to each media object
+    for media in all_media:
+        media.status = media_statuses.get(media.id, "Not Available")
+        media.formatted_video_length = format_duration(media.video_length)
+
     context = {
-        'media': media_objects,
-        'completed_media_count': completed_media_count,  # Pass the count to the template
+        'media': all_media,
+        'total_minutes': round(total_minutes, 2),
+        'total_words': total_words,
+        'total_highlights': total_highlights,
     }
 
     return render(request, 'media_list.html', context)
-
-def parse_duration(duration):
-    # Regular expression to match the duration format
-    pattern = re.compile(r'PT(\d+H)?(\d+M)?(\d+S)?')
-    match = pattern.match(duration)
-    
-    if match:  # Check if the pattern matched
-        hours, minutes, seconds = match.groups()
-        hours = int(hours[:-1]) if hours else 0
-        minutes = int(minutes[:-1]) if minutes else 0
-        seconds = int(seconds[:-1]) if seconds else 0
-
-        # Convert hours to minutes
-        total_minutes = hours * 60 + minutes
-        return f'{total_minutes}:{seconds:02}'  # Format minutes:seconds with leading zeros for seconds
-    else:
-        return "0:00"  # Return a default value or handle the error as appropriate
-
 
 def dictionary_lookup(request):
     word = request.GET.get('word', '')
