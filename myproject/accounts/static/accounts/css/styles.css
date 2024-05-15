@@ -21,3 +21,9 @@
     border-bottom: 1px solid #eee;
 }
 
+.title-container{
+    display: flex;
+    align-items: center; /* Centers the title vertically */
+    height: 40px; /* Fixed height to ensure consistent alignment */
+    transform: translateY(-10%); /* Adjust vertical position to better align multi-line titles */
+}

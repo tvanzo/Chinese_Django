@@ -717,9 +717,9 @@ let popup = null;
 let savedRangeNode = null;
 let savedRangeOffset = 0;
 
-// Initialize the popup element
-function initPopup() {
-    popup = document.createElement('div');
+// Initialize popup and other necessary elements
+function init() {
+    const popup = document.createElement('div');
     popup.id = 'dictionary-popup';
     popup.style.position = 'absolute';
     popup.style.display = 'none';
@@ -727,12 +727,18 @@ function initPopup() {
     popup.style.backgroundColor = 'white';
     popup.style.padding = '5px';
     popup.style.borderRadius = '5px';
-    popup.style.zIndex = 10000; // Ensure it's on top of other elements
+    popup.style.zIndex = 10000;
     document.body.appendChild(popup);
-}
 
-// Show the dictionary popup
+    const toggleButton = document.createElement('button');
+    toggleButton.id = 'toggleDictionary';
+    toggleButton.textContent = 'Enable Dictionary';
+    toggleButton.onclick = toggleDictionary;
+    document.body.appendChild(toggleButton);
+}
 function showPopup(html, x, y) {
+    if (!dictionaryEnabled) return; // Check if dictionary is enabled
+
     if (!popup) initPopup();
     popup.innerHTML = html;
     let rect = popup.getBoundingClientRect();
@@ -745,7 +751,7 @@ function showPopup(html, x, y) {
 
     popup.style.left = `${x}px`;
     popup.style.top = `${y}px`;
-    popup.classList.add('show'); // Use class for showing the popup
+    popup.style.display = 'block'; // Make sure to set display to block to show the popup
 }
 
 
@@ -755,56 +761,58 @@ document.addEventListener('DOMContentLoaded', () => {
     showPopup('This is a test popup', 200, 200);
 });
 
+// Initially set the dictionary to be disabled
+let dictionaryEnabled = false;
 
+// Function to toggle the dictionary on or off
+function toggleDictionary() {
+    dictionaryEnabled = !dictionaryEnabled;
+    document.getElementById('toggleDictionary').textContent = dictionaryEnabled ? 'Disable Dictionary' : 'Enable Dictionary';
+    if (!dictionaryEnabled) {
+        hidePopup(); // Ensure the popup is hidden when the dictionary is disabled
+    }
+}
 
 // Hide the dictionary popup
 function hidePopup() {
+    let popup = document.getElementById('dictionary-popup');
     if (popup) {
         popup.style.display = 'none';
     }
 }
 
 function onMouseMove(mouseMove) {
-    if (mouseMove.target.nodeName === 'TEXTAREA' || mouseMove.target.nodeName === 'INPUT'
-        || mouseMove.target.nodeName === 'DIV') {
+    if (!dictionaryEnabled) return; // Check if dictionary is enabled
 
-        let div = document.getElementById('zhongwenDiv');
-
+    if (mouseMove.target.nodeName === 'TEXTAREA' || mouseMove.target.nodeName === 'INPUT' || mouseMove.target.nodeName === 'DIV') {
+        return; // Avoid triggering in these elements
     }
 
     if (clientX && clientY) {
         if (mouseMove.clientX === clientX && mouseMove.clientY === clientY) {
-            return;
+            return; // No movement
         }
     }
+
     clientX = mouseMove.clientX;
     clientY = mouseMove.clientY;
 
-    let range;
-    let rangeNode;
-    let rangeOffset;
+    let range, rangeNode, rangeOffset;
 
-    // Handle Chrome and Firefox
     if (document.caretRangeFromPoint) {
         range = document.caretRangeFromPoint(mouseMove.clientX, mouseMove.clientY);
-        if (range === null) {
-            return;
-        }
+        if (!range) return;
         rangeNode = range.startContainer;
         rangeOffset = range.startOffset;
     } else if (document.caretPositionFromPoint) {
         range = document.caretPositionFromPoint(mouseMove.clientX, mouseMove.clientY);
-        if (range === null) {
-            return;
-        }
+        if (!range) return;
         rangeNode = range.offsetNode;
         rangeOffset = range.offset;
     }
 
-    if (mouseMove.target === savedTarget) {
-        if (rangeNode === savedRangeNode && rangeOffset === savedRangeOffset) {
-            return;
-        }
+    if (mouseMove.target === savedTarget && rangeNode === savedRangeNode && rangeOffset === savedRangeOffset) {
+        return; // No significant change
     }
 
     if (timer) {
@@ -818,33 +826,18 @@ function onMouseMove(mouseMove) {
     }
 
     if (!rangeNode || rangeNode.parentNode !== mouseMove.target) {
-        rangeNode = null;
-        rangeOffset = -1;
+        return; // Invalid range node or parent mismatch
     }
 
     savedTarget = mouseMove.target;
     savedRangeNode = rangeNode;
     savedRangeOffset = rangeOffset;
 
-    selStartDelta = 0;
-    selStartIncrement = 1;
-
-    if (rangeNode && rangeNode.data && rangeOffset < rangeNode.data.length) {
-        popX = mouseMove.clientX;
-        popY = mouseMove.clientY;
-        timer = setTimeout(() => triggerSearch(), 50);
-        return;
-    }
-
-    // Don't close just because we moved from a valid pop-up slightly over to a place with nothing.
-    let dx = popX - mouseMove.clientX;
-    let dy = popY - mouseMove.clientY;
-    let distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance > 4) {
-        clearHighlight();
-        hidePopup();
-    }
+    popX = mouseMove.clientX;
+    popY = mouseMove.clientY;
+    timer = setTimeout(triggerSearch, 50);
 }
+
 
 
 function triggerSearch() {

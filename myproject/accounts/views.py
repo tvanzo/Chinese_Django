@@ -12,13 +12,15 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Count, Q
 from django.db.models.functions import TruncDay
 from django.db.models import Count, Sum
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from django.shortcuts import render
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Sum
 from django.contrib.auth.decorators import login_required
 import json
+from subplayer.views import format_duration  # Import the function from subplayer.views
+
 import logging
 from django.views.decorators.csrf import csrf_exempt
 from django.core.serializers import serialize
@@ -418,36 +420,53 @@ from django.db.models import Count, Max, Subquery, OuterRef, F, ExpressionWrappe
 from django.db.models.functions import TruncDay
 from django.contrib.auth.decorators import login_required
 import json
+from django.conf.urls.static import static
+
 
 @login_required
 def stats_view(request):
     user = request.user
     profile = user.profile
-    end_date = now().date()  # Today's date
+    end_date = date.today()
 
     data = {
         'week': timedelta(days=7),
         'month': timedelta(days=30),
-        'all_time': timedelta(days=365*100)  # Large number to encompass "all time"
+        'all_time': timedelta(days=365*100)
     }
 
     results = {}
     totals = {}
+    media_info = []
+
+    highlight_dates = Highlight.objects.filter(user=user).dates('created_at', 'day')
+    media_dates = MediaProgress.objects.filter(profile=profile).dates('date', 'day')
+    active_dates = sorted(set(highlight_dates) | set(media_dates))
+
+    streak = 0
+    today = date.today()
+    for i in range(len(active_dates) - 1, -1, -1):
+        if active_dates[i] == today:
+            streak += 1
+            today -= timedelta(days=1)
+        else:
+            break
 
     for key, delta in data.items():
         start_date = end_date - delta
         num_days = (end_date - start_date).days
         all_dates = [start_date + timedelta(days=x) for x in range(num_days + 1)]
-        dates_str = [date.strftime('%Y-%m-%d') for date in all_dates]
+        dates_str = [d.strftime('%Y-%m-%d') for d in all_dates]
 
         highlights_data = {date: 0 for date in dates_str}
         minutes_data = {date: 0 for date in dates_str}
-        words_data = {date: 0 for date in dates_str}  # Assuming you have a word count field or similar logic
+        words_data = {date: 0 for date in dates_str}
 
         daily_highlights = Highlight.objects.filter(
             user=user,
             created_at__date__range=[start_date, end_date]
         ).annotate(day=TruncDay('created_at')).values('day').annotate(total=Count('id'))
+
         for highlight in daily_highlights:
             day_str = highlight['day'].strftime('%Y-%m-%d')
             highlights_data[day_str] = highlight['total']
@@ -455,69 +474,55 @@ def stats_view(request):
         daily_minutes = MediaProgress.objects.filter(
             profile=profile,
             date__range=[start_date, end_date]
-        ).annotate(day=TruncDay('date')).values('day').annotate(total_minutes=Sum('minutes_watched'))
+        ).annotate(day=TruncDay('date')).values('day').annotate(total_minutes=Sum('minutes_watched'), total_words=Sum('words_learned'))
+
         for minute in daily_minutes:
             day_str = minute['day'].strftime('%Y-%m-%d')
-            minutes_data[day_str] = minute['total_minutes']
+            minutes_data[day_str] = round(minute['total_minutes'] / 60, 2)
+            words_data[day_str] = minute['total_words'] if minute['total_words'] else 0
 
         results[key] = {
             'dates': dates_str,
             'highlights': list(highlights_data.values()),
-            'minutes': list(minutes_data.values())  # Ensure that minutes data is provided
+            'minutes': list(minutes_data.values()),
+            'words': list(words_data.values())
         }
 
-        # Calculate totals for the period
-        total_highlights = sum(highlights_data.values())
-        total_minutes = sum(minutes_data.values())
-        total_words = sum(words_data.values())  # This needs actual data source
-        total_videos = MediaProgress.objects.filter(
-            profile=profile,
-            date__range=[start_date, end_date]
-        ).values('media_id').distinct().count()
-        
         totals[key] = {
-            'total_highlights': total_highlights,
-            'total_minutes': total_minutes,
-            'total_words': total_words,
-            'total_videos': total_videos
+            'total_highlights': sum(highlights_data.values()),
+            'total_minutes': sum(minutes_data.values()),
+            'total_words': sum(words_data.values()),  # Now properly calculated
+            'total_videos': MediaProgress.objects.filter(profile=profile, date__range=[start_date, end_date]).values('media_id').distinct().count()
         }
 
-    # Include Media Information
-    media_statuses = UserMediaStatus.objects.filter(
-        user=user,
-        status__in=['in_progress', 'completed']
-    ).select_related('media').annotate(
+    media_statuses = UserMediaStatus.objects.filter(user=user, status__in=['in_progress', 'completed']).select_related('media').annotate(
         total_highlights=Count('media__highlights', filter=Q(media__highlights__user=user)),
         latest_time_stopped=Subquery(
-            MediaProgress.objects.filter(
-                profile=profile,
-                media=OuterRef('media')
-            ).order_by('-date').values('time_stopped')[:1]
+            MediaProgress.objects.filter(profile=profile, media=OuterRef('media')).order_by('-date').values('time_stopped')[:1]
         )
     )
 
-    media_info = []
     for status in media_statuses:
         video_length = status.media.video_length
         latest_time_stopped = status.latest_time_stopped or 0
-        progress_percent = (latest_time_stopped / video_length * 100) if video_length > 0 else 0
-        if status.status == 'completed':
-            progress_percent = 100
-        
+        progress_percent = round((latest_time_stopped / video_length * 100), 0) if video_length > 0 else 100
+
         media_info.append({
-            'media_id': status.media.media_id,  # Include media_id here
+            'media_id': status.media.media_id,
             'title': status.media.title,
             'total_highlights': status.total_highlights,
             'length': f"{video_length // 60}:{video_length % 60:02d}",
             'status': status.status,
-            'progress_percent': round(progress_percent, 2)
-        })   
-
+            'progress_percent': progress_percent,
+            'profile_image_url': status.media.profile_image_url
+        })
 
     context = {
         'highlight_data_json': json.dumps(results),
         'totals_json': json.dumps(totals),
-        'media_info': media_info
+        'media_info': media_info,
+        'streak': streak,
+        'default_image_url': static('accounts/img/small-logos/logo-xd.svg')
     }
 
     return render(request, 'accounts/stats.html', context)
@@ -596,3 +601,38 @@ def highlights_detail(request, media_id):
         'hide_nav': True,
     }
     return render(request, 'accounts/highlights_detail.html', context)
+
+@login_required
+def add_to_log(request, media_id):
+    media = get_object_or_404(Media, id=media_id)
+    request.user.added_media.add(media)
+    return redirect('media_list')  # Redirect to the media list or another appropriate page
+
+@login_required
+def user_videos(request):
+    user = request.user
+    today = timezone.now().date()
+
+    # Fetch the media associated with the logged-in user
+    user_media = Media.objects.filter(users=user).annotate(
+        user_highlights_count=Count('highlights', filter=Q(highlights__user=user))
+    )
+
+    # Map status to each media
+    media_statuses = {entry.media_id: entry.status for entry in UserMediaStatus.objects.filter(media__in=user_media, user=user)}
+
+    # Attach the status and formatted video length directly to each media object
+    for media in user_media:
+        media.status = media_statuses.get(media.id, "Not Available")
+        media.formatted_video_length = format_duration(media.video_length)
+
+    context = {
+        'media': user_media,
+    }
+
+    return render(request, 'accounts/user_videos.html', context)
+@login_required
+def remove_from_log(request, media_id):
+    media = get_object_or_404(Media, id=media_id)
+    request.user.added_media.remove(media)
+    return redirect('user_videos')  # Redirect to the user's associated videos page

@@ -27,7 +27,7 @@ from subplayer import views as subplayer_views
 from subplayer.views import podcast_detail, video_detail, media_list, add_media, dictionary_lookup, search
 from django.contrib.auth import views as auth_views
 from accounts.views import register, stats_view
-from accounts.views import add_viewed_media, highlights_detail, viewed_media_list, get_media_progress, update_media_progress, get_highlights, get_all_highlights, create_highlight, delete_highlight, modify_highlight, my_media, remove_media_status, update_progress
+from accounts.views import add_viewed_media, highlights_detail, viewed_media_list, get_media_progress, update_media_progress, get_highlights, get_all_highlights, create_highlight, delete_highlight, modify_highlight, my_media, remove_media_status, update_progress, user_videos, remove_from_log, add_to_log
 from accounts.views import highlights
 
 
@@ -35,7 +35,7 @@ from accounts.views import highlights
 
 
 urlpatterns = [
-    path('', stats_view, name='stats'),
+    path('', stats_view, name='stats_view'),
     path('admin/', admin.site.urls),
     path('subplayer/', TemplateView.as_view(template_name='subplayer.html'), name='subplayer'),
     path('podcast/', subplayer_views.podcast_view, name='podcast_view'),
@@ -59,7 +59,7 @@ urlpatterns = [
     path('highlights/', views.highlights, name='highlights'),
     path('admin/', admin.site.urls),
         path('add_media/', add_media, name='add_media'),
-    path('media_list/', views.media_list, name='media_list'),
+    path('media_list/', subplayer_views.media_list, name='media_list'),
 
 path('media/update_status/<str:media_id>/<str:status>/', views.update_media_status, name='update_media_status'),
     path('media/list_by_status/<str:status>/', views.list_media_by_status, name='list_media_by_status'),
@@ -76,13 +76,16 @@ path('media/remove_status/<int:media_id>/', views.remove_media_status, name='rem
 path('api/user/update-progress', update_progress, name='update_progress'),
 
 
-
+path('user_videos/', user_videos, name='user_videos'),
+    path('remove_from_log/<int:media_id>/', remove_from_log, name='remove_from_log'),
+    path('add_to_log/<int:media_id>/', add_to_log, name='add_to_log'),
 
 path('search/', search, name='search'),
 
     path('highlights/<str:media_id>/', highlights_detail, name='highlights_detail'),
     # Add other URL patterns for your project
 ]
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

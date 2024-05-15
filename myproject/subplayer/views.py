@@ -13,10 +13,10 @@ import os
 import re
 from math import ceil
 
-from .models import Media, Highlight, UserMediaStatus
+from .models import Media, Highlight, UserMediaStatus, Channel
 from accounts.models import Profile, MediaProgress
 from .forms import MediaForm, SearchForm
-from .youtube_utils import fetch_video_details, process_and_save_subtitles, parse_duration
+from .youtube_utils import fetch_video_details, process_and_save_subtitles, parse_duration,  get_channel_profile_pic, fetch_channel_details
 from googleapiclient.discovery import build
 from django.utils import timezone
 from datetime import timedelta
@@ -35,10 +35,29 @@ logger = logging.getLogger(__name__)
 def add_media(request):
     if request.method == 'POST':
         youtube_url = request.POST.get('youtube_url')
-        logger.debug(f"Fetching video details for URL: {youtube_url}")
+        logger.info(f"Fetching video details for URL: {youtube_url}")
 
         video_details = fetch_video_details(youtube_url)
         if video_details['status'] == 'valid':
+            channel_details = fetch_channel_details(f"https://www.youtube.com/channel/{video_details['channel_id']}")
+            if channel_details:
+                channel, created = Channel.objects.update_or_create(
+                    channel_id=channel_details['channel_id'],
+                    defaults={
+                        'name': channel_details['channel_name'],
+                        'url': f"https://www.youtube.com/channel/{channel_details['channel_id']}",
+                        'profile_pic_url': channel_details['profile_pic_url']
+                    }
+                )
+                if created:
+                    logger.info(f"New channel created: {channel.name} with ID {channel.channel_id}")
+                else:
+                    logger.info(f"Channel updated: {channel.name} with ID {channel.channel_id}")
+            else:
+                logger.error("Failed to fetch or update channel details.")
+                messages.error(request, "Failed to fetch or update channel details.")
+                return redirect('add_media')
+
             try:
                 new_media = Media(
                     title=video_details['title'],
@@ -48,11 +67,13 @@ def add_media(request):
                     url=youtube_url,
                     thumbnail_url=video_details['thumbnail_url'],
                     video_length=video_details['video_length'],
-                    word_count=video_details.get('word_count', 0)  # Ensure the model has a word_count field
+                    word_count=int(video_details.get('word_count', 0)),
+                    channel=channel,
+                    category=video_details.get('category_id', 'Unknown')
                 )
 
-                if video_details.get('subtitles_file_path'):
-                    subtitles_path = video_details['subtitles_file_path']
+                subtitles_path = video_details.get('subtitles_file_path')
+                if subtitles_path:
                     full_path = os.path.join(settings.MEDIA_ROOT, subtitles_path)
                     with open(full_path, 'rb') as f:
                         new_media.subtitle_file.save(os.path.basename(subtitles_path), ContentFile(f.read()))
@@ -60,16 +81,16 @@ def add_media(request):
 
                 new_media.save()
                 messages.success(request, 'Media added successfully!')
-                return redirect('home')
+                logger.info(f"Media added successfully: {new_media.title}")
+                return redirect('stats_view')
             except Exception as e:
                 logger.error(f"Failed to add new media for {youtube_url}: {e}")
                 messages.error(request, 'Failed to add new media.')
         else:
-            logger.error(f"Failed to fetch video details for {youtube_url}: {video_details.get('message')}")
+            logger.error(f"Failed to fetch video details for {youtube_url}: {video_details['message']}")
             messages.error(request, video_details.get('message', 'Failed to fetch video details.'))
-    
-    return render(request, 'media_list.html')
 
+    return render(request, 'add_media.html')
 
 
 
@@ -106,20 +127,23 @@ def podcast_detail(request, media_id):
 @login_required
 def video_detail(request, media_id):
     media = get_object_or_404(Media, media_id=media_id, media_type='video')
-    highlights = Highlight.objects.filter(media=media, user=request.user).order_by('start_time')
+    highlights = Highlight.objects.filter(media=media, user=request.user)
 
-    # Assuming UserMediaStatus has a 'status' field that contains the media status
+    # Function to sort highlights based on frame index, sentence index, and start index
+    def sort_highlights(highlight):
+        return (highlight.frame_index, highlight.start_sentence_index, highlight.start_index)
+
+    sorted_highlights = sorted(highlights, key=sort_highlights)
+
     user_media_status = UserMediaStatus.objects.filter(user=request.user, media=media).first()
     media_status = user_media_status.status if user_media_status else 'none'
 
-    # Serialize the media object to include in the JavaScript
     media_serialized = serialize('json', [media])
     media_dict = json.loads(media_serialized)[0]['fields']
     media_dict['media_id'] = media.media_id
     media_dict['media_type'] = media.media_type
     media_dict['model'] = str(media._meta)
     media_dict['url'] = media.subtitle_file.url
-    # Add video_length and word_count directly to media_dict
     media_dict['video_length'] = media.video_length
     media_dict['word_count'] = media.word_count
 
@@ -128,13 +152,13 @@ def video_detail(request, media_id):
     context = {
         'media': media,
         'media_json': media_json,
-        'highlights': highlights,
+        'highlights': sorted_highlights,
         'has_status': user_media_status is not None,
         'media_status': media_status,
         'hide_nav': True,
     }
-    return render(request, 'subplayer.html', context)
 
+    return render(request, 'subplayer.html', context)
 
 @login_required
 def media_list(request):

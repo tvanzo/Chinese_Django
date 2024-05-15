@@ -689,67 +689,71 @@ document.addEventListener('keydown', function(e) {
 
 
 
-document.addEventListener('keyup', function(e) {
-
-    if (e.keyCode === 91) { // Command key on Mac
-        isLoopMode = false;
-        player.setPlaybackRate(1); // reset speed to normal
-
-        if (loopingInterval) {
-            clearInterval(loopingInterval);
-            loopingInterval = null;
-        }
-    }
-});
-
-//tried here
+// Mouseup event listener on subtitles for detailed debugging
 subtitles.addEventListener("mouseup", function() {
+    console.log("ZZZ Mouseup event triggered" + isLoopMode);
     if (isLoopMode) {
         const selection = window.getSelection();
         const selectedText = selection.toString().trim();
-        if (!selectedText) return;
+        console.log("ZZZ Selected text:", selectedText);
+        if (!selectedText) {
+            console.log("ZZZ No text selected.");
+            return;
+        }
 
-        // Find the frame index that matches the current time
         const currentTime = player.getCurrentTime();
         const currentFrameIndex = findSubtitleIndex(currentTime);
-        if (currentFrameIndex === -1) return; // Exit if no matching frame found
+        console.log("ZZZ Current time:", currentTime, "Frame index:", currentFrameIndex);
 
-        // Attempt to match the selected text with the subtitles in the current frame
-        let startLoopTime = null;
-        let endLoopTime = null;
+        if (currentFrameIndex === -1) {
+            console.log("ZZZ No matching frame found for current time.");
+            return;
+        }
 
         const frameSubtitles = framesArray[currentFrameIndex];
         let concatenatedSubtitles = frameSubtitles.map(sub => sub.sentence).join('');
-        
+        console.log("ZZZ Concatenated subtitles:", concatenatedSubtitles);
+
+        let startLoopTime = null;
+        let endLoopTime = null;
+
         if (concatenatedSubtitles.includes(selectedText)) {
-            // If the selected text matches part of the concatenated subtitles, set loop times
             startLoopTime = parseFloat(frameSubtitles[0].startTime);
             endLoopTime = parseFloat(frameSubtitles[frameSubtitles.length - 1].endTime);
 
-            // Adjust loop times if the selection is within a smaller range
             for (let i = 0; i < frameSubtitles.length; i++) {
                 if (frameSubtitles[i].sentence.includes(selectedText.slice(0, Math.floor(selectedText.length / 2)))) {
                     startLoopTime = Math.max(startLoopTime, parseFloat(frameSubtitles[i].startTime));
+                    console.log(`ZZZ Adjusting start time at index ${i}: ${startLoopTime}`);
                 }
                 if (frameSubtitles[i].sentence.includes(selectedText.slice(Math.floor(selectedText.length / 2)))) {
                     endLoopTime = Math.min(endLoopTime, parseFloat(frameSubtitles[i].endTime));
+                    console.log(`ZZZ Adjusting end time at index ${i}: ${endLoopTime}`);
                     break; // Found the end of the selection within the frame
                 }
             }
         }
 
-        // Implement the looping based on the start and end times found
+        console.log("ZZZ Final loop times:", startLoopTime, endLoopTime);
+
         if (startLoopTime !== null && endLoopTime !== null) {
-            if (loopingInterval) clearInterval(loopingInterval); // Clear existing interval
+            if (loopingInterval) {
+                clearInterval(loopingInterval);
+                console.log("ZZZ Clearing existing interval");
+            }
 
             player.seekTo(startLoopTime, true);
             player.playVideo();
+            console.log("ZZZ Starting video from:", startLoopTime);
 
             loopingInterval = setInterval(() => {
                 if (player.getCurrentTime() >= endLoopTime) {
+                    console.log("ZZZ Restarting loop from:", startLoopTime);
                     player.seekTo(startLoopTime, true);
                 }
-            }, 100); // Check every 100ms to loop back if needed
+            }, 100);
+        } else {
+            console.log("ZZZ Loop times not found, not initiating loop");
         }
     }
 });
