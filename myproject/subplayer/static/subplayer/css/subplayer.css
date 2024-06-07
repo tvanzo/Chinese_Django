@@ -1,3 +1,4 @@
+@ -0,0 +1,223 @@
 /* Subplayer Page Layout */
 body {
     display: flex;
@@ -50,9 +51,8 @@ body {
 }
 
 #subtitles span.perm-highlight {
-   background-color: rgba(255, 255, 0, 0.5); /* Yellow with 50% transparency */
-    color: #333; /* Optional: sets text color if needed */
-    font-weight: bold; /* Optional: makes the text bold */
+    background-color: #ffca28;
+    color: #333;
 }
 
 /* Notes Section */
@@ -221,4 +221,3 @@ body {
     filter: brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) hue-rotate(93deg) brightness(93%) contrast(88%);
     transition: filter 0.3s ease; /* Smooth transition for color change */
 }
-

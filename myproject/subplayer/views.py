@@ -6,6 +6,7 @@ from django.core.files.base import ContentFile
 from django.db.models import Sum
 from django.core.serializers import serialize
 from django.conf import settings
+from django.http import HttpResponse
 
 import logging
 import json
@@ -149,6 +150,15 @@ def video_detail(request, media_id):
 
     media_json = json.dumps(media_dict)
 
+    # Get the user's total points
+    total_points = request.user.profile.total_points
+
+    # Get the user's total minutes
+    total_minutes = request.user.profile.total_minutes   # Convert seconds to minutes
+
+    # Get the user's last media progress for the current media
+    last_media_progress = MediaProgress.objects.filter(profile=request.user.profile, media=media).last()
+
     context = {
         'media': media,
         'media_json': media_json,
@@ -156,9 +166,13 @@ def video_detail(request, media_id):
         'has_status': user_media_status is not None,
         'media_status': media_status,
         'hide_nav': True,
+        'total_points': total_points,  # Add total points to the context
+        'total_minutes': total_minutes,  # Add total minutes to the context
+        'last_media_progress': last_media_progress,  # Add last media progress to the context
     }
 
     return render(request, 'subplayer.html', context)
+
 
 @login_required
 def media_list(request):
@@ -268,6 +282,34 @@ def video_completion_stats(request):
         'total_minutes': total_minutes,
         'total_words': total_words,
     }
+@login_required
+def channel_view(request, channel_name):
+    channel = get_object_or_404(Channel, channel_id=channel_name)
+    user = request.user
+
+    media_list = Media.objects.filter(channel=channel).annotate(
+        user_highlights_count=Count('highlights', filter=Q(highlights__user=user))
+    )
+
+    media_statuses = {entry.media_id: entry.status for entry in UserMediaStatus.objects.filter(media__in=media_list, user=user)}
+
+    for media in media_list:
+        media.status = media_statuses.get(media.id, "Not Available")
+        media.formatted_video_length = format_duration(media.video_length)
+
+    context = {
+        'channel': channel,
+        'media_list': media_list,
+    }
+    return render(request, 'channel.html', context)
+def channels_list(request):
+    channels = Channel.objects.annotate(media_count=Count('media'))
+    context = {
+        'channels': channels
+    }
+    return render(request, 'channels.html', context)
+def intro_view(request):
+    return render(request, 'intro.html')
 
 # Set up logging
 logger = logging.getLogger(__name__)

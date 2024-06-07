@@ -13,12 +13,14 @@ logger = logging.getLogger(__name__)
 # Initialize YouTube API
 youtube = build('youtube', 'v3', developerKey='AIzaSyBbuGRULqUYyCxDBZyoHFgzHwseF-fnrwg')
 
+
 def fetch_subtitles(video_id, language='zh'):
     try:
         return YouTubeTranscriptApi.get_transcript(video_id, languages=['zh-CN', 'zh-Hans', 'zh-Hant', 'zh', 'zh-TW'])
     except Exception as e:
         logger.error(f"Failed to fetch subtitles for video ID {video_id}: {e}")
         return None
+
 
 def fetch_video_details(url):
     logger.debug(f"Fetching video details for URL: {url}")
@@ -34,7 +36,7 @@ def fetch_video_details(url):
     if not video_id:
         logger.error("Invalid YouTube URL provided: " + url)
         return {'status': 'invalid', 'message': "Invalid YouTube URL."}
-    
+
     logger.debug(f"Using video ID: {video_id} to fetch details.")
 
     try:
@@ -75,7 +77,6 @@ def fetch_video_details(url):
         return {'status': 'invalid', 'message': f"An API error occurred: {e}"}
 
 
-
 def process_and_save_subtitles(subtitles, video_id):
     if not subtitles:
         logger.error(f"No subtitles data provided for video ID: {video_id}")
@@ -106,7 +107,8 @@ def process_and_save_subtitles(subtitles, video_id):
 
         if os.path.exists(file_path):
             relative_path = os.path.relpath(file_path, start=settings.MEDIA_ROOT)
-            logger.info(f"Successfully saved subtitles for video ID {video_id} at {relative_path} with word count of {word_count}")
+            logger.info(
+                f"Successfully saved subtitles for video ID {video_id} at {relative_path} with word count of {word_count}")
             return relative_path, word_count
         else:
             logger.error(f"Subtitle file was not created at the expected path: {file_path}")
@@ -115,29 +117,39 @@ def process_and_save_subtitles(subtitles, video_id):
         logger.error(f"Failed to save subtitles for video ID {video_id}: {e}")
         return None, 0
 
-        return None, 0
-
 
 def fetch_channel_details(url):
     try:
         channel_id = None
+        username = None
         # Try extracting channel ID from URL
         match = re.search(r'youtube\.com/channel/([^/?]+)', url)
         if match:
             channel_id = match.group(1)
+            logger.debug(f"Extracted channel ID: {channel_id}")
         else:
             # Try extracting username from URL
             match = re.search(r'youtube\.com/@([^/?]+)', url)
             if match:
                 username = match.group(1)
-                response = youtube.channels().list(forUsername=username, part='snippet').execute()
+                logger.debug(f"Extracted username: {username}")
+                # Fetch channel ID using the username
+                response = youtube.channels().list(part='snippet', forUsername=username).execute()
+                logger.debug(f"Response for username {username}: {response}")
                 if response.get('items'):
                     channel_id = response['items'][0]['id']
+                else:
+                    # Handle the case where username lookup fails
+                    search_response = youtube.search().list(part='snippet', q=username, type='channel').execute()
+                    logger.debug(f"Search response for username {username}: {search_response}")
+                    if search_response.get('items'):
+                        channel_id = search_response['items'][0]['snippet']['channelId']
         if not channel_id:
             logger.error("Channel ID could not be found or extracted from the URL.")
             return None
         # Fetch details using the channel ID
         response = youtube.channels().list(id=channel_id, part='snippet').execute()
+        logger.debug(f"Response for channel ID {channel_id}: {response}")
         if response.get('items'):
             item = response['items'][0]
             return {
@@ -154,15 +166,15 @@ def fetch_channel_details(url):
 
 
 
-
 def fetch_videos_from_channel_with_chinese_subtitles(channel_id):
     videos = []
     nextPageToken = None
     try:
         logger.info(f"Starting video fetch for channel ID: {channel_id}")
-        while len(videos) < 3:
+        while len(videos) < 5:
             response = youtube.search().list(
-                channelId=channel_id, part='id,snippet', maxResults=50, order='date', type='video', pageToken=nextPageToken
+                channelId=channel_id, part='id,snippet', maxResults=5, order='date', type='video',
+                pageToken=nextPageToken
             ).execute()
             if 'items' not in response:
                 logger.warning("No items found in response from YouTube API.")
@@ -177,7 +189,7 @@ def fetch_videos_from_channel_with_chinese_subtitles(channel_id):
                         logger.info(f"Video {video_id} added with subtitles.")
                     else:
                         logger.info(f"Video {video_id} skipped, no subtitles.")
-                    if len(videos) == 3:
+                    if len(videos) == 5:
                         break
             nextPageToken = response.get('nextPageToken')
             if not nextPageToken:
@@ -202,7 +214,7 @@ def get_channel_profile_pic(youtube_url):
             logger.error(f"Invalid YouTube URL provided: {youtube_url}")
             return None
 
-        # Fetch channel ID 
+        # Fetch channel ID
         video_response = youtube.videos().list(
             part="snippet",
             id=video_id

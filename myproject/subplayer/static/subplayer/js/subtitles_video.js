@@ -9,6 +9,17 @@ var initialTimeSet = false; // This flag will help us ensure we only set the tim
 let lastUpdateTime = 0;
     let isPlayingHighlights = false; // Flag to control highlight playback
 
+function findCurrentSubtitleFrame(currentTime) {
+    for (const word of subtitleData.words) { // Iterate over the "words" array
+        if (currentTime >= word.startTime && currentTime <= word.endTime) {
+            return word;
+        }
+    }
+    console.log("ZZZ No matching word found for current time: " + currentTime);
+    return null;
+}
+
+
 function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
         videoId: mediaId,
@@ -29,15 +40,15 @@ function onPlayerReady(event) {
   playerReady = true;
   console.log("Player is ready. Player ready state:", playerReady);
 
-  createSubtitles(); 
+  createSubtitles();
 
   if (media) {
     console.log("Media is defined, setting up progress saving and fetching media progress...");
-    setupProgressSaving(); 
+    setupProgressSaving();
 
     // Introduce a delay before fetching progress
-    setTimeout(() => { 
-      fetchMediaProgressAndSeek(); 
+    setTimeout(() => {
+      fetchMediaProgressAndSeek();
     }, 1000); // Delay of 1000 milliseconds (1 second)
 
     setInterval(updateProgress, 300);
@@ -130,7 +141,7 @@ function onPlayerStateChange(event) {
         fetchMediaProgressAndSeek();
         console.log(event.data);
         console.log("Media is now playing for the first time.");
-        
+
         fetch('/api/user/viewed-media/add', {
             method: 'POST',
             headers: {
@@ -145,7 +156,7 @@ function onPlayerStateChange(event) {
           .catch(error => console.error("Error adding viewed media:", error));
     }
 
-   
+
 }
 
 function getCookie(name) {
@@ -211,7 +222,7 @@ function setupProgressSaving() {
             lastUpdateTime = currentTime; // Update lastUpdateTime to the current time after sending update
         }
 
-       
+
     }, saveInterval);
 }
 
@@ -449,7 +460,14 @@ async function addHighlight(highlightData) {
 // Your other functions (updateProgress, createSubtitles, etc.) go here...
 // ...
 var y=0;
-      function findSubtitleIndex(time) {
+function findSubtitleIndex(time) {
+    if (framesArray.length === 0) return -1;
+
+    // Handle time before the start of the first frame
+    if (time < parseFloat(framesArray[0][0].startTime)) {
+        return 0; // Consider it as the first frame
+    }
+
     for (let i = 0; i < framesArray.length; i++) {
         let frameStartTime = parseFloat(framesArray[i][0].startTime);
         let frameEndTime = parseFloat(framesArray[i][framesArray[i].length - 1].endTime);
@@ -457,6 +475,7 @@ var y=0;
             return i;
         }
     }
+
     return -1; // Return -1 if no suitable index is found
 }
 
@@ -474,7 +493,7 @@ function createSubtitles() {
       element.setAttribute("id", "s_" + currentSubtitleIndex + "_" + i);
         element.classList.add('sentence-span'); // Add this line
 
-      
+
       // Begin new highlight processing
       let highlightedSentence = "";
       let sentence = currentFrame[i].sentence;
@@ -490,7 +509,7 @@ function createSubtitles() {
       }
       element.innerHTML = highlightedSentence;
       // End new highlight processing
-      
+
       subtitles.appendChild(element);
 
       // Save time information
@@ -512,7 +531,7 @@ function updateProgress() {
     const correctIndex = findSubtitleIndex(currentTime);
     if (correctIndex !== -1 && correctIndex !== currentSubtitleIndex) {
         currentSubtitleIndex = correctIndex;
-       
+
         createSubtitles();
     }
 
@@ -540,7 +559,6 @@ function updateProgress() {
 
 
 
-
 // Fetch highlights when the page loads
 fetchHighlights(mediaId);
 
@@ -560,11 +578,11 @@ fetchHighlights(mediaId);
 
     try {
   const response = await fetch(test2);
- 
+
   const data = await response.json();
   transcript = data.transcript;
   syncData5 = data.words;
-  
+
 } catch (error) {
   console.error('Erroreeeee:', error);
 }
@@ -573,18 +591,15 @@ fetchHighlights(mediaId);
     var syncData=syncData5;
     console.log("datga" + syncData);
       var syncData2 = []; // New array to track sentences
-      
+
   function createFramesArray(syncData) {
     let currentFrame = [];
     let currentFrameCharCount = 0;
     const charLimit = 60; // Character limit for each frame
 
     syncData.forEach(wordItem => {
-       
-
         let sentenceCharCount = wordItem.word.length;
         if ((currentFrameCharCount + sentenceCharCount) <= charLimit) {
-            // Add wordItem to the current frame if within char limit
             currentFrame.push({
                 startTime: wordItem.startTime,
                 endTime: wordItem.endTime,
@@ -592,7 +607,6 @@ fetchHighlights(mediaId);
             });
             currentFrameCharCount += sentenceCharCount;
         } else {
-            // Push the current frame to framesArray and start a new frame
             framesArray.push(currentFrame);
             currentFrame = [{
                 startTime: wordItem.startTime,
@@ -602,20 +616,27 @@ fetchHighlights(mediaId);
             currentFrameCharCount = sentenceCharCount;
         }
     });
-    // Don't forget to add the last frame if it has content
+
+    // Add the last frame if it has content
     if (currentFrame.length > 0) {
         framesArray.push(currentFrame);
     }
+
+    // Ensure the first frame starts at 0 seconds
+    if (framesArray.length > 0 && framesArray[0][0].startTime > 0) {
+        framesArray[0][0].startTime = 0;
+    }
 }
+
 
 // Call this function with your syncData
 createFramesArray(syncData);
 
-     
+
   var loopButton = doc.getElementById("loop-button");
 
 
-    
+
 createSubtitles();
 
 
@@ -625,10 +646,8 @@ createSubtitles();
   var selectedText = "";
   var frame_index;
 var isLoopMode = false;
+var isCmdPressed = false; // Track the Command/Control key state
 var loopingInterval = null;
-var audioSpeedDisplay = document.getElementById('audio-speed-display');
-
-
 
 function toggleLoopMode() {
     isLoopMode = !isLoopMode; // Toggle the state
@@ -637,6 +656,16 @@ function toggleLoopMode() {
     if (!isLoopMode && loopingInterval) {
         clearInterval(loopingInterval); // Clear the interval when turning loop mode off
         loopingInterval = null; // Reset the interval ID
+    }
+
+    if (isLoopMode) {
+        const currentTime = player.getCurrentTime();
+        const currentFrameIndex = findSubtitleIndex(currentTime);
+
+        if (currentFrameIndex === 0) {
+            player.seekTo(0, true); // Ensure it starts from the very beginning
+            player.playVideo();
+        }
     }
 }
 
@@ -651,68 +680,43 @@ function updateLoopIcon() {
     }
 }
 
-document.getElementById('loop-icon').addEventListener('click', toggleLoopMode);
-
-// Optional: Listen for Command key (or Control key for Windows) to toggle loop mode
+// Add event listeners for the Command/Control key
 document.addEventListener('keydown', function(event) {
-    if (event.key === "Meta" || event.key === "Control") { // Meta for Mac Command key, Control for Ctrl key
-        toggleLoopMode();
-    }
-});
-
-// Optional: Reset loop mode when key is released
-document.addEventListener('keyup', function(event) {
-    if (event.key === "Meta" || event.key === "Control") {
-        toggleLoopMode();
-    }
-});
-
-document.addEventListener('keydown', function(e) {
-    if (isLoopMode) {
-        if (e.keyCode === 38) { // Up key
-            // Increase speed
-            let currentRate = player.getPlaybackRate();
-            let availableRates = player.getAvailablePlaybackRates();
-            let newRateIndex = availableRates.indexOf(currentRate) + 1;
-            let newRate = availableRates[Math.min(newRateIndex, availableRates.length - 1)];
-            player.setPlaybackRate(newRate);
-        } else if (e.keyCode === 40) { // Down key
-            // Decrease speed
-            let currentRate = player.getPlaybackRate();
-            let availableRates = player.getAvailablePlaybackRates();
-            let newRateIndex = availableRates.indexOf(currentRate) - 1;
-            let newRate = availableRates[Math.max(newRateIndex, 0)];
-            player.setPlaybackRate(newRate);
+    if ((event.key === "Meta" || event.key === "Control") && !isCmdPressed) { // Meta for Mac Command key, Control for Ctrl key
+        isCmdPressed = true;
+        if (!isLoopMode) {
+            toggleLoopMode(); // Enable loop mode when Command/Control key is pressed
         }
     }
 });
 
+document.addEventListener('keyup', function(event) {
+    if ((event.key === "Meta" || event.key === "Control") && isCmdPressed) {
+        isCmdPressed = false;
+        if (isLoopMode) {
+            toggleLoopMode(); // Disable loop mode when Command/Control key is released
+        }
+    }
+});
 
+document.getElementById('loop-icon').addEventListener('click', function() {
+    toggleLoopMode(); // Toggle loop mode when the loop button is clicked
+});
 
-// Mouseup event listener on subtitles for detailed debugging
+// Existing code for mouseup event listener
 subtitles.addEventListener("mouseup", function() {
-    console.log("ZZZ Mouseup event triggered" + isLoopMode);
     if (isLoopMode) {
         const selection = window.getSelection();
         const selectedText = selection.toString().trim();
-        console.log("ZZZ Selected text:", selectedText);
-        if (!selectedText) {
-            console.log("ZZZ No text selected.");
-            return;
-        }
+        if (!selectedText) return;
 
         const currentTime = player.getCurrentTime();
         const currentFrameIndex = findSubtitleIndex(currentTime);
-        console.log("ZZZ Current time:", currentTime, "Frame index:", currentFrameIndex);
 
-        if (currentFrameIndex === -1) {
-            console.log("ZZZ No matching frame found for current time.");
-            return;
-        }
+        if (currentFrameIndex === -1) return;
 
         const frameSubtitles = framesArray[currentFrameIndex];
         let concatenatedSubtitles = frameSubtitles.map(sub => sub.sentence).join('');
-        console.log("ZZZ Concatenated subtitles:", concatenatedSubtitles);
 
         let startLoopTime = null;
         let endLoopTime = null;
@@ -724,40 +728,30 @@ subtitles.addEventListener("mouseup", function() {
             for (let i = 0; i < frameSubtitles.length; i++) {
                 if (frameSubtitles[i].sentence.includes(selectedText.slice(0, Math.floor(selectedText.length / 2)))) {
                     startLoopTime = Math.max(startLoopTime, parseFloat(frameSubtitles[i].startTime));
-                    console.log(`ZZZ Adjusting start time at index ${i}: ${startLoopTime}`);
                 }
                 if (frameSubtitles[i].sentence.includes(selectedText.slice(Math.floor(selectedText.length / 2)))) {
                     endLoopTime = Math.min(endLoopTime, parseFloat(frameSubtitles[i].endTime));
-                    console.log(`ZZZ Adjusting end time at index ${i}: ${endLoopTime}`);
                     break; // Found the end of the selection within the frame
                 }
             }
         }
 
-        console.log("ZZZ Final loop times:", startLoopTime, endLoopTime);
-
         if (startLoopTime !== null && endLoopTime !== null) {
             if (loopingInterval) {
                 clearInterval(loopingInterval);
-                console.log("ZZZ Clearing existing interval");
             }
 
             player.seekTo(startLoopTime, true);
             player.playVideo();
-            console.log("ZZZ Starting video from:", startLoopTime);
 
             loopingInterval = setInterval(() => {
                 if (player.getCurrentTime() >= endLoopTime) {
-                    console.log("ZZZ Restarting loop from:", startLoopTime);
                     player.seekTo(startLoopTime, true);
                 }
             }, 100);
-        } else {
-            console.log("ZZZ Loop times not found, not initiating loop");
         }
     }
 });
-
 
 
 
@@ -776,11 +770,7 @@ fetch('/api/user/viewed_media_list/read')
     .then(response => response.json())
     .then(data => {
         const container = document.getElementById('viewed-media-container');
-        data.viewed_media.forEach(mediaId => {
-            const span = document.createElement('span');
-            span.textContent = "mediaId:" + mediaId;
-            container.appendChild(span);
-        });
+
     });
 
 fetch(`/api/user/media_progress/${mediaId}/`, {
@@ -1054,6 +1044,7 @@ async function splitHighlight(highlightId, splitStartIndex, splitEndIndex) {
 
   console.error('Invalid split indices for highlight:', originalHighlight);
 }
+
 
 
     })(window, document);

@@ -1,13 +1,4 @@
-/* Sidebar Styles */
-
-.dashboard {
-    display: flex;
-    max-width: 100%; /* Adjusted to allow for full-width usage */
-    margin: auto;
-}
-
-
- /* Sidebar becomes a flex container */
+/* Sidebar becomes a flex container */
 .sidebar {
     display: flex;
     flex-direction: column;
@@ -17,45 +8,155 @@
     left: 0;
     top: 0;
     overflow-y: auto;
-    background-color: green;
+    background-color: #FFFFFF; /* Sidebar background color */
     padding: 20px;
+    padding-bottom: 10px;
+    box-sizing: border-box;
+    z-index: 1000; /* Ensure the sidebar is above other content */
+    transition: transform 0.3s ease-in-out;
+    width: 280px; /* Increased width */
 }
 
-
-/* Pushes the navigation to the bottom */
-.sidebar-nav {
-    margin-top: auto;
-    width: 100%; /* Ensures the navigation container takes full width of the sidebar */
+.sidebar.collapsed {
+    transform: translateX(-100%);
 }
 
-/* Additional styling for navigation links to display icons horizontally */
-.sidebar-nav ul {
-    display: flex;
-    justify-content: center; /* Center the icons horizontally */
-    padding: 0;
-    list-style: none;
+.media-content {
+    flex-grow: 1;
+    padding: 20px;
+    margin-left: 280px; /* Adjusted margin-left */
+    transition: margin-left 0.3s ease-in-out;
 }
 
-.sidebar-nav ul li {
-    padding: 10px; /* Adds some spacing around each icon */
+.sidebar.collapsed ~ .media-content {
+    margin-left: 0;
+    width: 100%;
 }
 
-.sidebar-nav ul li a {
+/* Sidebar header */
+.sidebar-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.sidebar-header h3 {
+    margin: 0;
+}
+
+/* Sidebar toggle button */
+.sidebar-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-toggle .icon {
+    width: 100%;
+    height: 100%;
+}
+
+/* Highlight list container */
+.highlight-list-container {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* Highlight list styles */
+#highlight-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.highlight-item {
+    margin-bottom: 10px;
+}
+
+.highlight-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, border-left-color 0.3s ease;
+}
+
+.highlight-container a {
     text-decoration: none;
+    color: #333;
+    flex-grow: 1;
+    margin-right: 10px;
 }
 
-.sidebar-nav ul li a img {
-    width: 24px; /* Adjust as needed */
-    height: auto;
+.highlight-container:hover {
+    background-color: #f0f0f0;
 }
-/* Tooltip styling */
+
+.delete-highlight {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    visibility: hidden;
+    transition: visibility 0.2s ease-in-out;
+}
+
+.highlight-container:hover .delete-highlight {
+    visibility: visible;
+}
+
+.played-highlight {
+    background-color: #e0f7fa; /* Active highlight background color */
+    border-left: 5px solid #007BFF; /* Active highlight left border */
+}
+
+/* Bottom buttons container */
+.bottom-buttons {
+    margin-top: 20px;
+    text-align: center; /* Center the buttons */
+    padding-bottom: 10px; /* Add padding at the bottom */
+}
+
+/* Sidebar navigation styles */
+.sidebar-nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: space-between; /* Space out the buttons evenly */
+    padding: 0 10px; /* Adjust padding for side spacing */
+    gap: 10px; /* Adjust spacing between buttons */
+}
+
+.sidebar-nav li {
+    display: flex;
+    justify-content: center; /* Center the content within each list item */
+}
+
 .sidebar-nav a {
-    position: relative; /* Context for the tooltip positioning */
-    display: inline-block; /* Necessary for width and height */
+    display: block;
+    width: 30px;
+    height: 30px;
+    position: relative;
 }
 
+.sidebar-nav img,
+.sidebar-nav .xp-circle {
+    width: 30px; /* Adjust size of images and XP circle to fit four elements */
+    height: 30px; /* Maintain aspect ratio */
+    object-fit: contain;
+}
+
+/* Tooltip styling */
 .sidebar-nav a::after {
     content: attr(title); /* Use the title attribute as the tooltip content */
     position: absolute;
@@ -79,161 +180,3 @@
     visibility: visible; /* Make it visible */
     transform: translateX(-50%) translateY(-10px); /* Adjust the position to move slightly above */
 }
-
-
-.sidebar h2 {
-    margin-bottom: 20px;
-    position: relative; /* Allows absolute positioning of the icon relative to the h2 */
-    padding-left: 30px; /* Adds space for the icon to the left of the text */
-}
-#highlight-list li:first-child {
-    margin-top: 0; /* Removes top margin from the first list item */
-}
-
-
-.sidebar h2:before {
-    content: '';
-    position: absolute;
-    left: 0; /* Aligns the icon to the left edge of the h2's padding area */
-    top: 50%; /* Centers the icon vertically relative to the h2 */
-    transform: translateY(-50%); /* Adjusts the icon to be centered with the text */
-    width: 20px; /* Icon width */
-    height: 20px; /* Icon height */
-    background-image: url('/static/subplayer/highlight_side.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-}
-
-.media-content {
-    flex-grow: 1; /* Takes up remaining space */
-    padding: 20px;
-    margin-left: 200px; /* Equal to sidebar width */
-}
-
-
-/* Sidebar styles */
-.sidebar {
-    width: 200px; /* Fixed sidebar width */
-    height: 100vh; /* Full viewport height */
-    position: fixed; /* Fixed position */
-    left: 0;
-    top: 0; /* Aligns the sidebar to the top */
-    overflow-y: auto; /* Enable scrolling for overflow content */
-    background-color: #FFFFFF; /* Slightly grey background, adjust as needed */
-    z-index: 1000; /* Ensures the sidebar is above other content */
-}
-
-/* Content area styles */
-.media-content {
-    margin-left: 200px; /* Offset by the sidebar width */
-    width: calc(100% - 200px); /* Adjusted for the sidebar width */
-    padding: 20px; /* Adjust padding as needed */
-}
-
-
-
-
-
-
-
-.sidebar ul {
-    list-style: none;
-    padding: 0;
-}
-
-.sidebar ul li {
-    position: relative;
-    margin-bottom: 10px; /* Spacing between items */
-}
-
-.highlight-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-}
-
-.sidebar ul li a {
-    display: block;
-    padding: 10px;
-    color: #333;
-    text-decoration: none;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-    flex-grow: 1; /* Ensure link uses available space, pushing button to the end */
-}
-
-.played-highlight {
-    background-color: #f0f0f0; /* Light grey background for active highlight */
-    border-left: 5px solid #007BFF; /* Blue left border for emphasis */
-}
-
-
-.sidebar ul li:hover  {
-    background-color: #eaeaea;
-}
-
-.delete-highlight {
-    cursor: pointer;
-    width: 18px; /* Adjust based on your icon's size */
-    height: 18px;
-    visibility: hidden; /* Hide by default */
-    transition: visibility 0.2s ease-in-out; /* Smooth transition for visibility */
-    margin-right:5px;
-    padding-right:5px;
-}
-
-
-.sidebar ul li:hover .delete-highlight {
-    visibility: visible; /* Show the delete button on hover */
-    color:eaeaea;
-}
-
-
-/* Base styles for video player and subtitles */
-.player-wrapper, #subtitles {
-    width: 90%; /* Set width to 70% for larger screens */
-    margin: 0 auto; /* Center the elements */
-}
-
-/* Adjusting the player wrapper */
-.player-wrapper {
-    display: block; /* Ensures block-level display for margin auto to work */
-    width: 90%; /* Adjust based on your preference */
-    margin: 20px auto; /* Adds top and bottom margin while centering horizontally */
-    position: relative; /* For absolute positioning of child elements if needed */
-}
-
-/* Adjusting subtitles container */
-#subtitles {
-    width: 90%; /* Match player width or adjust as needed */
-    margin: 20px auto; /* Adds space and centers the box */
-    max-height: 200px; /* Example max height, adjust based on your needs */
-    overflow-y: auto; /* Allows scrolling within the container if content exceeds max height */
-    padding: 10px; /* Adds some internal space */
-    box-sizing: border-box; /* Includes padding in the element's total width and height */
-}
-
-/* Responsive Adjustments for Smaller Screens */
-@media (max-width: 768px) {
-    .sidebar {
-        position: relative; /* Resets fixed positioning */
-        height: auto; /* Adjusts height based on content */
-        width: 100%; /* Full width */
-        order: 2; /* Ensures sidebar is below main content */
-    }
-
-    .media-content {
-        margin-left: 0; /* Resets margin */
-        order: 1; /* Ensures content is above sidebar */
-    }
-
-    .dashboard {
-        flex-direction: column; /* Stacks sidebar below content */
-    }
-}
-
-
-
-
-
