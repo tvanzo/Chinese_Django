@@ -1,0 +1,233 @@
+/* Sidebar Styles */
+
+.dashboard {
+    display: flex;
+    max-width: 100%; /* Adjusted to allow for full-width usage */
+    margin: auto;
+}
+
+
+ /* Sidebar becomes a flex container */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Aligns content to the top */
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    overflow-y: auto;
+    background-color: green;
+    padding: 20px;
+}
+
+
+/* Pushes the navigation to the bottom */
+.sidebar-nav {
+    margin-top: auto;
+    width: 100%; /* Ensures the navigation container takes full width of the sidebar */
+}
+
+/* Additional styling for navigation links to display icons horizontally */
+.sidebar-nav ul {
+    display: flex;
+    justify-content: center; /* Center the icons horizontally */
+    padding: 0;
+    list-style: none;
+}
+
+.sidebar-nav ul li {
+    padding: 10px; /* Adds some spacing around each icon */
+}
+
+.sidebar-nav ul li a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.sidebar-nav ul li a img {
+    width: 24px; /* Adjust as needed */
+    height: auto;
+}
+/* Tooltip styling */
+.sidebar-nav a {
+    position: relative; /* Context for the tooltip positioning */
+    display: inline-block; /* Necessary for width and height */
+}
+
+.sidebar-nav a::after {
+    content: attr(title); /* Use the title attribute as the tooltip content */
+    position: absolute;
+    bottom: 100%; /* Position above the icon */
+    left: 50%; /* Center the tooltip */
+    transform: translateX(-50%) translateY(-5px); /* Adjust horizontal position and add a little space above the icon */
+    white-space: nowrap; /* Prevents the tooltip from wrapping */
+    z-index: 999;
+    background-color: black;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    opacity: 0; /* Initially hidden */
+    visibility: hidden; /* Initially not visible */
+    transition: opacity 0.3s, visibility 0.3s, transform 0.3s; /* Smooth transition for the tooltip appearance */
+}
+
+.sidebar-nav a:hover::after {
+    opacity: 1; /* Show the tooltip */
+    visibility: visible; /* Make it visible */
+    transform: translateX(-50%) translateY(-10px); /* Adjust the position to move slightly above */
+}
+
+
+.sidebar h2 {
+    margin-bottom: 20px;
+    position: relative; /* Allows absolute positioning of the icon relative to the h2 */
+    padding-left: 30px; /* Adds space for the icon to the left of the text */
+}
+#highlight-list li:first-child {
+    margin-top: 0; /* Removes top margin from the first list item */
+}
+
+
+.sidebar h2:before {
+    content: '';
+    position: absolute;
+    left: 0; /* Aligns the icon to the left edge of the h2's padding area */
+    top: 50%; /* Centers the icon vertically relative to the h2 */
+    transform: translateY(-50%); /* Adjusts the icon to be centered with the text */
+    width: 20px; /* Icon width */
+    height: 20px; /* Icon height */
+    background-image: url('/static/subplayer/highlight_side.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.media-content {
+    flex-grow: 1; /* Takes up remaining space */
+    padding: 20px;
+    margin-left: 200px; /* Equal to sidebar width */
+}
+
+
+/* Sidebar styles */
+.sidebar {
+    width: 200px; /* Fixed sidebar width */
+    height: 100vh; /* Full viewport height */
+    position: fixed; /* Fixed position */
+    left: 0;
+    top: 0; /* Aligns the sidebar to the top */
+    overflow-y: auto; /* Enable scrolling for overflow content */
+    background-color: #FFFFFF; /* Slightly grey background, adjust as needed */
+    z-index: 1000; /* Ensures the sidebar is above other content */
+}
+
+/* Content area styles */
+.media-content {
+    margin-left: 200px; /* Offset by the sidebar width */
+    width: calc(100% - 200px); /* Adjusted for the sidebar width */
+    padding: 20px; /* Adjust padding as needed */
+}
+
+
+
+
+
+
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    position: relative;
+    margin-bottom: 10px; /* Spacing between items */
+}
+
+.highlight-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.sidebar ul li a {
+    display: block;
+    padding: 10px;
+    color: #333;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    flex-grow: 1; /* Ensure link uses available space, pushing button to the end */
+}
+
+.sidebar ul li:hover  {
+    background-color: #eaeaea;
+}
+
+.delete-highlight {
+    cursor: pointer;
+    width: 18px; /* Adjust based on your icon's size */
+    height: 18px;
+    visibility: hidden; /* Hide by default */
+    transition: visibility 0.2s ease-in-out; /* Smooth transition for visibility */
+    margin-right:5px;
+    padding-right:5px;
+}
+
+
+.sidebar ul li:hover .delete-highlight {
+    visibility: visible; /* Show the delete button on hover */
+    color:eaeaea;
+}
+
+
+/* Base styles for video player and subtitles */
+.player-wrapper, #subtitles {
+    width: 90%; /* Set width to 70% for larger screens */
+    margin: 0 auto; /* Center the elements */
+}
+
+/* Adjusting the player wrapper */
+.player-wrapper {
+    display: block; /* Ensures block-level display for margin auto to work */
+    width: 90%; /* Adjust based on your preference */
+    margin: 20px auto; /* Adds top and bottom margin while centering horizontally */
+    position: relative; /* For absolute positioning of child elements if needed */
+}
+
+/* Adjusting subtitles container */
+#subtitles {
+    width: 90%; /* Match player width or adjust as needed */
+    margin: 20px auto; /* Adds space and centers the box */
+    max-height: 200px; /* Example max height, adjust based on your needs */
+    overflow-y: auto; /* Allows scrolling within the container if content exceeds max height */
+    padding: 10px; /* Adds some internal space */
+    box-sizing: border-box; /* Includes padding in the element's total width and height */
+}
+
+/* Responsive Adjustments for Smaller Screens */
+@media (max-width: 768px) {
+    .sidebar {
+        position: relative; /* Resets fixed positioning */
+        height: auto; /* Adjusts height based on content */
+        width: 100%; /* Full width */
+        order: 2; /* Ensures sidebar is below main content */
+    }
+
+    .media-content {
+        margin-left: 0; /* Resets margin */
+        order: 1; /* Ensures content is above sidebar */
+    }
+
+    .dashboard {
+        flex-direction: column; /* Stacks sidebar below content */
+    }
+}
+
+
+
+
+

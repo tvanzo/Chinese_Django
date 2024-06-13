@@ -1,0 +1,121 @@
+<script src="{% static 'subplayer/convertForLongAudio.js' %}"></script>
+<script>
+   (async function(win, doc) {
+        const media_id = "{{ media_id }}"; // Replace with the actual podcast number or video number
+        const scriptURL = `/path/to/podcast/script_${media_id}.json`; // Replace with the URL to the podcast script JSON file
+        // JavaScript code
+      const test1 = "{% static 'subplayer/test.json' %}";
+      const test2 = "{% static 'subplayer/test2.json' %}";
+    restructureJson(test1, test2);
+    let transcript, syncData5;
+
+    try {
+  const response = await fetch(test2);
+  const data = await response.json();
+  transcript = data.transcript;
+  syncData5 = data.words;
+  
+} catch (error) {
+  console.error('Error:', error);
+}
+
+    var syncData = syncData5;
+    
+
+
+      var syncData2 = []; // New array to track sentences
+      
+      // Convert syncData to syncData2
+      var sentence = "";
+      var startTime = "0";
+      var endTime = "";
+      var counter = 0;
+      var pattern = /^[A-Za-z]+$/;
+  for (let i = 0; i < transcript.length; i++) {
+    var word = syncData[counter].word;
+     while(pattern.test(transcript[i])){
+        i++;
+     }
+
+    var punctuation = transcript[i + 1];
+    while ((!isNaN(transcript[i]) ||[ "千", "万", "亿"].includes(transcript[i]) ||["零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "百", "千", "万", "亿", "两"].
+      includes(syncData[counter].word)) && transcript[i]!=word) {
+      word = syncData[counter].word;
+
+        if (["零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "百", "千", "万", "亿", "两"].includes(syncData[counter].word) && (!isNaN(transcript[i]) || ["千", "万", "亿"].includes(transcript[i]))){
+          
+    
+            sentence+=word;
+
+            i++;
+            counter++;
+            word = syncData[counter].word;
+
+
+        }
+        else if(!isNaN(transcript[i])||[ "千", "万", "亿"].includes(transcript[i])){
+          i++;
+        }  
+        else{
+          word = syncData[counter].word;
+            sentence+=word;
+            counter++;
+           word = syncData[counter].word;
+           punctuation = transcript[i + 1];
+
+        }
+       
+
+    }
+
+      if (["！", "，", "。"].includes(punctuation)) {
+          sentence += word + "" + punctuation;
+          endTime = syncData[counter-1].endTime;
+          syncData2.push({
+            startTime: startTime,
+            endTime: endTime,
+            sentence: sentence
+          });
+          sentence = "";
+          startTime = "";
+        i++;
+        counter++;
+
+     } 
+
+      else if(startTime===""&& i!=0){
+       startTime = syncData[counter-1].startTime;
+       sentence+=word;
+        counter++
+      }
+      else{
+        sentence+=word;
+       counter++;
+      } 
+  }
+console.log(syncData);
+     
+var framesArray = [];
+var currentFrame = [];
+var currentFrameCharCount = 0;
+
+for (var i = 0; i < syncData2.length; i++) {
+  var sentenceCharCount = syncData2[i].sentence.length;
+
+  if ((currentFrameCharCount + sentenceCharCount) <= 60) {
+    // If adding this sentence doesn't exceed 60 chars, add it to the current frame
+    currentFrame.push(syncData2[i]);
+    currentFrameCharCount += sentenceCharCount;
+  } else {
+    // Otherwise, start a new frame
+    framesArray.push(currentFrame);
+    currentFrame = [syncData2[i]];
+    currentFrameCharCount = sentenceCharCount;
+  }
+}
+
+// Don't forget to add the last frame
+if (currentFrame.length > 0) {
+  framesArray.push(currentFrame);
+}
+</script>
