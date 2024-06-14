@@ -1,26 +1,45 @@
 import os
 from pathlib import Path
+import dj_database_url
+import django_heroku
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Static and Media files
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+# Static files finders
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+# Ensure static files are served using Whitenoise
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
+]
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-xrigfr!#p85sj0l%8r#7wlqp))+ov&%0+=d+-g6-%cxarh3ph2')
+# Whitenoise storage
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '5442-240e-46c-1f00-1cb4-b823-17b2-5b83-61c8.ngrok-free.app']
+# Security settings
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-default-secret-key')
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '5442-240e-46c-1f00-1cb4-b823-17b2-5b83-61c8.ngrok-free.app', 'your-heroku-app-name.herokuapp.com']
 
 # Application definition
 INSTALLED_APPS = [
@@ -39,23 +58,12 @@ INSTALLED_APPS = [
     'allauth.account',
 ]
 
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware',  # Add this line
-]
-
 ROOT_URLCONF = 'myproject.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Global templates directory
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -63,7 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'accounts.context_processors.total_minutes_watched',  # Add this line
+                'accounts.context_processors.total_minutes_watched',
             ],
         },
     },
@@ -71,16 +79,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'myproject.wsgi.application'
 
-# Database
+# Database configuration for Heroku
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'chinese',
-        'USER': 'tylervanzo',
-        'PASSWORD': 'mypassword',
-        'HOST': 'localhost',
-        'PORT': '',
-    }
+    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
 }
 
 # Password validation
@@ -104,9 +105,6 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
-
-# Static files
-STATIC_URL = '/static/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -135,10 +133,6 @@ LOGGING = {
     },
 }
 
-# Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 # Authentication backends
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
@@ -150,7 +144,6 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_VERIFICATION = 'none'
-
 
 # Sites framework
 SITE_ID = 1
@@ -164,3 +157,6 @@ MESSAGE_TAGS = {
     messages.WARNING: 'warning',
     messages.ERROR: 'error',
 }
+
+# Activate Django-Heroku.
+django_heroku.settings(locals())
