@@ -28,18 +28,21 @@ jobs:
         python manage.py migrate
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        DJANGO_SETTINGS_MODULE: myproject.settings.production
+        DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        ALLOWED_HOSTS: chinese-django.onrender.com
-        DEBUG: false
+        ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+        DEBUG: ${{ secrets.DEBUG }}
+      retry:
+        max_attempts: 3
 
     - name: Collect static files
       run: |
         python manage.py collectstatic --noinput
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        DJANGO_SETTINGS_MODULE: myproject.settings.production
+        DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        ALLOWED_HOSTS: chinese-django.onrender.com
-        DEBUG: false
-
+        ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+        DEBUG: ${{ secrets.DEBUG }}
+      retry:
+        max_attempts: 3
