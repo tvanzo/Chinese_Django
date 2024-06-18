@@ -42,17 +42,35 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from subplayer.forms import CustomUserCreationForm  # Import the custom form
 
+# views.py
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import CustomUserCreationForm
+
+# views.py
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import CustomUserCreationForm
+
+
 def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
+            print("Form is valid. Invite code passed validation.")
             form.save()
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}!')
             return redirect('login')
+        else:
+            print("Form is invalid.")
+            print(form.errors)  # Print form errors to debug
+            messages.error(request, 'Invalid form submission. Please correct the errors and try again.')
     else:
         form = CustomUserCreationForm()
+
     return render(request, 'accounts/register.html', {'form': form})
+
 
 @login_required
 def media_list(request):
@@ -320,14 +338,11 @@ def remove_media_status(request, media_id):
 
 
 @login_required
-
-@login_required
 def update_media_status(request, media_id, status=None):
     if request.method != 'POST':
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
     data = json.loads(request.body)
-    status = data.get('status')
     current_time = data.get('current_time', 0)  # Assuming current_time is provided in seconds
 
     media = get_object_or_404(Media, media_id=media_id)
@@ -336,23 +351,23 @@ def update_media_status(request, media_id, status=None):
 
     words_per_second = media.word_count / media.video_length
     current_words = int(words_per_second * current_time)
-    current_minutes = current_time   # Convert seconds to minutes
+    current_minutes = current_time / 60  # Convert seconds to minutes
 
     today = timezone.now().date()
 
     if status == 'completed':
         # Adjust for total video completion
         total_words = media.word_count
-        total_minutes = media.video_length # Convert to minutes
+        total_minutes = media.video_length / 60  # Convert to minutes
 
         previous_progress = MediaProgress.objects.filter(profile=profile, media=media).last()
-        all_previous_progress=MediaProgress.objects.filter(profile=profile, media=media)
-        print(previous_progress.words_learned)
-        previously_added_words = sum(progress.words_learned for progress in all_previous_progress)
-        previously_added_minutes = previous_progress.time_stopped
+        all_previous_progress = MediaProgress.objects.filter(profile=profile, media=media)
 
-        adjusted_words_to_add = total_words - previous_progress.words_learned
-        adjusted_minutes_to_add = total_minutes - previous_progress.minutes_watched
+        previously_added_words = sum(progress.words_learned for progress in all_previous_progress)
+        previously_added_minutes = previous_progress.minutes_watched if previous_progress else 0
+
+        adjusted_words_to_add = total_words - previously_added_words
+        adjusted_minutes_to_add = total_minutes - previously_added_minutes
 
         profile.total_word_count += adjusted_words_to_add
         profile.total_minutes += adjusted_minutes_to_add
@@ -364,7 +379,7 @@ def update_media_status(request, media_id, status=None):
         if today_progress:
             # Update the existing progress for today
             today_progress.words_learned += adjusted_words_to_add
-            today_progress.minutes_watched += adjusted_minutes_to_add   # Convert minutes back to seconds for storage
+            today_progress.minutes_watched += adjusted_minutes_to_add  # Convert minutes back to seconds for storage
             today_progress.save()
         else:
             # Create a new progress entry for today
@@ -377,7 +392,7 @@ def update_media_status(request, media_id, status=None):
                     date=today,
                     time_stopped=media.video_length,
                     words_learned=total_words,
-                    minutes_watched=total_minutes   # Convert to seconds for storage
+                    minutes_watched=total_minutes  # Convert to seconds for storage
                 )
             else:
                 MediaProgress.objects.create(
@@ -386,8 +401,11 @@ def update_media_status(request, media_id, status=None):
                     date=today,
                     time_stopped=media.video_length,
                     words_learned=total_words,
-                    minutes_watched=total_minutes   # Convert to seconds for storage
+                    minutes_watched=total_minutes  # Convert to seconds for storage
                 )
+
+        # Add media to added_media list
+        request.user.added_media.add(media)
 
     elif status == 'in_progress':
         profile.total_word_count += current_words
@@ -398,17 +416,23 @@ def update_media_status(request, media_id, status=None):
         MediaProgress.objects.update_or_create(
             profile=profile, media=media,
             date=today,
-            defaults={'time_stopped': current_time, 'words_learned': current_words, 'minutes_watched': current_minutes }  # Convert minutes back to seconds for storage
+            defaults={'time_stopped': current_time, 'words_learned': current_words, 'minutes_watched': current_minutes}  # Convert minutes back to seconds for storage
         )
+
+        # Add media to added_media list
+        request.user.added_media.add(media)
 
     elif status == 'remove':
         if existing_status and existing_status.status == 'completed':
             profile.total_word_count -= media.word_count
-            profile.total_minutes -= media.video_length   # Convert to minutes
+            profile.total_minutes -= media.video_length / 60  # Convert to minutes
             profile.save()
         UserMediaStatus.objects.filter(user=request.user, media=media).delete()
         profile.total_points = profile.calculate_total_points()
         profile.save()
+
+        # Remove media from added_media list
+        request.user.added_media.remove(media)
         return JsonResponse({'status': 'success', 'message': 'Media status removed successfully', 'total_points': profile.total_points})
 
     elif existing_status and existing_status.status == 'completed' and status != 'completed':
@@ -419,10 +443,13 @@ def update_media_status(request, media_id, status=None):
             defaults={'status': status, 'completion_date': None}
         )
         profile.total_word_count -= media.word_count
-        profile.total_minutes -= media.video_length   # Convert to minutes
+        profile.total_minutes -= media.video_length / 60  # Convert to minutes
         profile.save()
         profile.total_points = profile.calculate_total_points()
         profile.save()
+
+        # Add media to added_media list
+        request.user.added_media.add(media)
         return JsonResponse({'status': 'success', 'message': 'Media status changed from completed', 'total_points': profile.total_points})
 
     if status in ['completed', 'in_progress']:
@@ -436,6 +463,7 @@ def update_media_status(request, media_id, status=None):
 
     response_data = {'status': 'success', 'message': 'Media status updated successfully', 'total_points': profile.total_points}
     return JsonResponse(response_data)
+
 
 
 
@@ -538,6 +566,7 @@ def stats_view(request):
         highlights_data = {date: 0 for date in dates_str}
         minutes_data = {date: 0 for date in dates_str}
         words_data = {date: 0 for date in dates_str}
+        points_data = {date: 0 for date in dates_str}  # Adding points data
 
         daily_highlights = Highlight.objects.filter(
             user=user,
@@ -558,21 +587,26 @@ def stats_view(request):
             minutes_data[day_str] = round(minute['total_minutes'] / 60, 2)
             words_data[day_str] = minute['total_words'] if minute['total_words'] else 0
 
+            # Assuming points are derived from minutes and words. Adjust the calculation as needed.
+            points_data[day_str] = round(minute['total_minutes']) + minute['total_words'] if minute['total_words'] else 0
+
         results[key] = {
             'dates': dates_str,
             'highlights': list(highlights_data.values()),
             'minutes': list(minutes_data.values()),
-            'words': list(words_data.values())
+            'words': list(words_data.values()),
+            'points': list(points_data.values())  # Adding points to results
         }
 
         totals[key] = {
             'total_highlights': sum(highlights_data.values()),
             'total_minutes': round(sum(minutes_data.values())),  # Round to nearest whole number
             'total_words': sum(words_data.values()),
-            'total_videos': MediaProgress.objects.filter(profile=profile, date__range=[start_date, end_date]).values('media_id').distinct().count()
+            'total_videos': MediaProgress.objects.filter(profile=profile, date__range=[start_date, end_date]).values('media_id').distinct().count(),
+            'total_points': sum(points_data.values())  # Adding total points to totals
         }
 
-    media_statuses = UserMediaStatus.objects.filter(user=user, status__in=['in_progress', 'completed']).select_related('media').annotate(
+    media_statuses = UserMediaStatus.objects.filter(user=user, status__in=['in_progress', 'completed']).select_related('media__channel').annotate(
         total_highlights=Count('media__highlights', filter=Q(media__highlights__user=user)),
         latest_time_stopped=Subquery(
             MediaProgress.objects.filter(profile=profile, media=OuterRef('media')).order_by('-date').values('time_stopped')[:1]
@@ -594,7 +628,7 @@ def stats_view(request):
             'length': f"{video_length // 60}:{video_length % 60:02d}",
             'status': status.status,
             'progress_percent': progress_percent,
-            'profile_image_url': status.media.profile_image_url
+            'profile_image_url': status.media.channel.profile_pic_url  # Access the profile_pic_url of the Channel
         })
 
     context = {
@@ -607,6 +641,7 @@ def stats_view(request):
     }
 
     return render(request, 'accounts/stats.html', context)
+
 @login_required
 def update_progress(request):
     if request.method != 'POST':
@@ -695,47 +730,47 @@ def highlights_detail(request, media_id):
     return render(request, 'accounts/highlights_detail.html', context)
 
 
-@login_required
-def add_to_log(request, media_id):
-    media = get_object_or_404(Media, id=media_id)
-    request.user.added_media.add(media)
 
-    # Get the next parameter from the request
-    next_url = request.GET.get('next')
-
-    if next_url:
-        return redirect(next_url)
-
-    return redirect('media_list')  # Fallback if next is not provided
 @login_required
 def user_videos(request):
     user = request.user
-    today = timezone.now().date()
 
-    # Fetch the media associated with the logged-in user
-    user_media = Media.objects.filter(users=user).annotate(
-        user_highlights_count=Count('highlights', filter=Q(highlights__user=user))
-    )
+    # Fetch the media associated with the logged-in user's added_media
+    user_media = user.added_media.all()
 
-    # Map status to each media
-    media_statuses = {entry.media_id: entry.status for entry in UserMediaStatus.objects.filter(media__in=user_media, user=user)}
-
-    # Attach the status and formatted video length directly to each media object
+    # Attach the formatted video length and user highlights count directly to each media object
     for media in user_media:
-        media.status = media_statuses.get(media.id, "Not Available")
         media.formatted_video_length = format_duration(media.video_length)
+        media.user_highlights_count = media.highlights.filter(user=user).count()
 
     context = {
         'media': user_media,
     }
 
     return render(request, 'accounts/user_videos.html', context)
+
+
+@login_required
+def add_to_log(request, media_id):
+    media = get_object_or_404(Media, id=media_id)
+    request.user.added_media.add(media)
+    return JsonResponse({'success': True})
+
 @login_required
 def remove_from_log(request, media_id):
     media = get_object_or_404(Media, id=media_id)
     request.user.added_media.remove(media)
-    return redirect('user_videos')  # Redirect to the user's associated videos page
-
+    return JsonResponse({'success': True})
 
 def join(request):
     return render(request, 'accounts/join.html')
+
+# In your views.py file
+
+from django.contrib.auth import logout
+from django.contrib import messages
+
+def custom_logout_view(request):
+    logout(request)
+    messages.success(request, "You have successfully logged out.")
+    return redirect('login')  # Redirect to the login page after logging ou

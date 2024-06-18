@@ -750,10 +750,7 @@ function showPopup(html, x, y) {
 
 
 // Testing the popup
-document.addEventListener('DOMContentLoaded', () => {
-    // Show the popup with some test content
-    showPopup('This is a test popup', 200, 200);
-});
+
 
 
 

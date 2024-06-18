@@ -7,6 +7,7 @@ from django.views.generic import TemplateView
 from accounts import views as account_views
 from subplayer import views as subplayer_views
 from allauth.account.views import LoginView, LogoutView, SignupView
+from allauth.account.views import PasswordResetView
 
 
 urlpatterns = [
@@ -56,7 +57,10 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('login/', LoginView.as_view(template_name='accounts/login.html'), name='login'),
     path('register/', account_views.register, name='register'),
-    path('logout/', LogoutView.as_view(), name='logout'),
+    path('logout/', account_views.custom_logout_view, name='logout'),
+    path('password/reset/', PasswordResetView.as_view(template_name='accounts/password_reset.html'),
+         name='account_reset_password'),
+
 ]
 
 if settings.DEBUG:

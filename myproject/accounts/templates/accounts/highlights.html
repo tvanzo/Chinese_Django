@@ -1,4 +1,3 @@
-<!-- Working version of https://dribbble.com/shots/14552329--Exploration-Task-Management-Dashboard -->
 {% load static %}
 
 <head>
@@ -108,10 +107,13 @@
             </li>
         </ul>
     </div>
+        <!--
    <div class="sidenav-footer mb-3 mx-3">
     <a class="btn bg-gradient-primary w-90" href="/join" style="margin-bottom: 0;">Upgrade to Pro</a>
     <a class="nav-link mt-1 text-center" href="/accounts/login/">Sign In</a>
+
 </div>
+-->
 
 
 </aside>
@@ -138,7 +140,7 @@
          <li class="nav-item d-flex align-items-center">
             <div class="btn btn-purple btn-sm mb-0 d-flex align-items-center compact-btn" id="unique-xp-display">
               <div class="unique-xp-circle d-flex align-items-center justify-content-center me-2">XP</div>
-              <span id="unique-xp-points">{{ total_minutes_watched }}</span>
+              <span id="unique-xp-points">{{ total_points }}</span>
             </div>
           </li>
         <li class="nav-item d-flex align-items-center">
@@ -183,23 +185,36 @@
         <button class="btn btn-primary mb-3" style="position: absolute; right: 20px;" onclick="downloadHighlights()">Download All (.txt)</button>
     </div>
 </div>
-    <div class='project-tasks' style="display: flex; flex-wrap: wrap;">
+    <div class='project-tasks' style="display: flex; flex-wrap: wrap; padding-left: 20px;">
         {% for highlight in highlights %}
-        <div class='task' draggable='true' style="margin-right: 10px; flex-basis: 20%;">
-            <div class='task__tags'>
-                <span class='task__tag task__tag--design'>{{ highlight.highlighted_text }}</span>
-                <button class='task__options'><i class="fas fa-ellipsis-h"></i></button>
-            </div>
-            <p>{{ highlight.text }}</p>
-            <div class='task__stats'>
-                <span><time datetime="{{ highlight.created_at|date:'Y-m-d' }}"><i class="fas fa-flag"></i>{{ highlight.created_at|date:"M d, Y" }}</time></span>
-                <span><i class="fas fa-comment"></i>{{ highlight.comments.count }}</span>
-                <span><i class="fas fa-paperclip"></i>{{ highlight.attachments.count }}</span>
-                <span class='task__owner'>{{ highlight.user.username }}</span>
-            </div>
-        </div>
+<div class='task' draggable='true' style="margin-right: 10px; flex-basis: 20%; margin-left: 0;">
+  <div class='task__tags'>
+    <span class='task__tag task__tag--design'>{{ highlight.highlighted_text }}</span>
+    <button class='task__options'><i class="fas fa-ellipsis-h"></i></button>
+  </div>
+  <p>{{ highlight.text }}</p>
+  <div class='task__stats'>
+    <span class="task__date">
+      <time datetime="{{ highlight.created_at|date:'Y-m-d' }}">
+        {{ highlight.created_at|date:"M d, Y" }}
+      </time>
+    </span>
+    <span class="task__actions">
+      <a href="{% url 'video_detail' highlight.media.media_id %}" class="btn btn-link btn-sm">
+        <i class="fas fa-link"></i>
+      </a>
+      <form method="POST" class="delete-form" data-id="{{ highlight.id }}" action="{% url 'delete_highlight' highlight.id %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-link btn-sm">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </form>
+    </span>
+  </div>
+</div>
+
         {% empty %}
-        <p>No highlights found.</p>
+        <p class="pl-3 pl-md-5 bg-light ml-5">No highlights found.</p>
         {% endfor %}
     </div>
 </main>
@@ -303,6 +318,7 @@
      grid-template-columns: repeat(4, 1fr);
      width: 100%;
      grid-column-gap: 1.5rem;
+     padding-left: 20px; /* Added padding to the left */
 }
  .project-column-heading {
      margin-bottom: 1rem;
@@ -329,6 +345,7 @@
      box-shadow: rgba(99, 99, 99, 0.1) 0px 2px 8px 0px;
      margin-bottom: 1rem;
      border: 3px dashed transparent;
+     margin-left: 0; /* Removed left margin */
 }
  .task:hover {
      box-shadow: rgba(99, 99, 99, 0.3) 0px 2px 8px 0px;
@@ -605,6 +622,155 @@
   max-height: calc(100vh - 40px); /* Ensure the sidebar fits within the viewport */
   overflow-y: auto; /* Add vertical scrolling if necessary */
 }
+.task__stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    color: var(--light-grey);
+    font-size: 12px;
+}
+
+.task__date {
+    flex-grow: 1;
+}
+
+.task__actions {
+    display: flex;
+    gap: 5px;
+}
+
+.task__actions .btn {
+    padding: 2px 6px;
+}
+.task__stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    color: var(--light-grey);
+    font-size: 12px;
+}
+
+.task__date {
+    flex-grow: 1;
+}
+
+.task__actions {
+    display: flex;
+    gap: 5px;
+}
+
+.task__actions .btn {
+    padding: 2px 6px;
+    color: var(--light-grey); /* Ensure the icons are not red */
+}
+
+.task__actions .btn .fas {
+    color: var(--light-grey); /* Ensure the icons are not red */
+}
+.task__stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    color: var(--light-grey);
+    font-size: 12px;
+}
+
+.task__date {
+    flex-grow: 1;
+    align-self: center;
+}
+
+.task__actions {
+    display: flex;
+    gap: 5px;
+}
+
+.task__actions .btn {
+    padding: 2px 6px;
+    color: var(--light-grey); /* Ensure the icons are not red */
+}
+
+.task__actions .btn .fas {
+    color: var(--light-grey); /* Ensure the icons are not red */
+    font-size: 115%; /* Increase icon size by 15% */
+}
+.btn {
+    margin-bottom: 0 !important; /* Override the bottom margin of the .btn class */
+}
+
+.task__stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    color: var(--light-grey);
+    font-size: 12px;
+}
+
+.task__date {
+    flex-grow: 1;
+    align-self: center;
+}
+
+.task__actions {
+    display: flex;
+    gap: 5px;
+}
+
+.task__actions .btn {
+    padding: 2px 6px;
+    color: var(--light-grey); /* Ensure the icons are not red */
+}
+
+.task__actions .btn .fas {
+    color: var(--light-grey); /* Ensure the icons are not red */
+    font-size: 115%; /* Increase icon size by 15% */
+}
+
+.btn {
+  margin-bottom: 0 !important; /* Override the bottom margin of the .btn class */
+}
+.task__stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    color: var(--light-grey);
+    font-size: 12px;
+}
+
+.task__date {
+    flex-grow: 1;
+    align-self: center;
+}
+
+.task__actions {
+    display: flex;
+    gap: 5px;
+}
+
+.task__actions .btn {
+    padding: 2px 6px;
+    color: var(--light-grey); /* Ensure the icons are not red */
+}
+
+.task__actions .btn .fas {
+    color: var(--light-grey); /* Ensure the icons are not red */
+    font-size: 115%; /* Increase icon size by 15% */
+}
+
+.btn {
+  margin-bottom: 0 !important; /* Override the bottom margin of the .btn class */
+}
+
 
   </style>
 
@@ -673,6 +839,35 @@ document.addEventListener('DOMContentLoaded', (event) => {
     item.addEventListener('drop', handleDrop, false);
     item.addEventListener('dragend', handleDragEnd, false);
   });
+});
+
+</script>
+      <script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.delete-form').forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const highlightId = form.getAttribute('data-id');
+            const url = form.action;
+            const csrfToken = form.querySelector('[name="csrfmiddlewaretoken"]').value;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ highlight_id: highlightId })
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.status === 'success') {
+                      document.querySelector(`[data-id="${highlightId}"]`).closest('.task').remove();
+                  } else {
+                      console.error('Error:', data.message);
+                  }
+              }).catch(error => console.error('Error:', error));
+        });
+    });
 });
 
 </script>
