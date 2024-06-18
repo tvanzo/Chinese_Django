@@ -33,7 +33,10 @@ jobs:
         DEBUG: ${{ secrets.DEBUG }}
 
     - name: Collect static files
-      run: python manage.py collectstatic --noinput
+      run: |
+        python manage.py collectstatic --noinput
+        echo "Static files collected"
+        ls -R staticfiles  # Log the collected static files
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
