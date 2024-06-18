@@ -6,6 +6,8 @@ from django.core.files.base import ContentFile
 from django.db.models import Sum
 from django.core.serializers import serialize
 from django.conf import settings
+from django.db.models import Count, Exists, OuterRef, Q
+
 from django.http import HttpResponse
 
 import logging
@@ -174,6 +176,15 @@ def video_detail(request, media_id):
     return render(request, 'subplayer.html', context)
 
 
+from django.db.models import Exists, OuterRef
+
+from django.db.models import OuterRef, Exists
+
+from django.db.models import OuterRef, Exists
+
+from django.db.models import Exists, OuterRef
+
+
 @login_required
 def media_list(request):
     user = request.user
@@ -187,9 +198,23 @@ def media_list(request):
     else:
         start_date = None
 
+    # Fetch all media and annotate with user_highlights_count and is_in_log
     all_media = Media.objects.annotate(
-        user_highlights_count=Count('highlights', filter=Q(highlights__user=user))
+        user_highlights_count=Count('highlights', filter=Q(highlights__user=user)),
+        is_in_log=Exists(UserMediaStatus.objects.filter(media=OuterRef('pk'), user=user, status__in=["in_progress", "completed"])) |
+                   Exists(user.added_media.filter(id=OuterRef('pk')))
     )
+
+    # Fetch the media with any status for the user
+    user_media_statuses = UserMediaStatus.objects.filter(user=user).select_related('media')
+
+    # Map status to each media
+    media_statuses = {entry.media_id: entry.status for entry in user_media_statuses}
+
+    # Attach the status and formatted video length directly to each media object
+    for media in all_media:
+        media.status = media_statuses.get(media.id, "Not Available")
+        media.formatted_video_length = format_duration(media.video_length)
 
     progress_filters = {'profile': user.profile}
     if start_date:
@@ -200,22 +225,20 @@ def media_list(request):
     total_words = progress_entries.aggregate(sum_words=Sum('words_learned'))['sum_words'] or 0
     total_highlights = Highlight.objects.filter(user=user).count()
 
-    # Map status to each media
-    media_statuses = {entry.media_id: entry.status for entry in UserMediaStatus.objects.filter(media__in=all_media, user=user)}
-
-    # Attach the status and formatted video length directly to each media object
-    for media in all_media:
-        media.status = media_statuses.get(media.id, "Not Available")
-        media.formatted_video_length = format_duration(media.video_length)
+    # Get the list of channels with the media count
+    channels = Channel.objects.annotate(media_count=Count('media'))
 
     context = {
         'media': all_media,
         'total_minutes': round(total_minutes, 2),
         'total_words': total_words,
         'total_highlights': total_highlights,
+        'channels': channels  # Include channels in the context
     }
 
     return render(request, 'media_list.html', context)
+
+
 
 def dictionary_lookup(request):
     word = request.GET.get('word', '')

@@ -49,7 +49,8 @@
   <a class="navbar-brand m-0" href="https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html" target="_blank">
     <svg class="navbar-brand-img h-100" viewBox="0 0 25.00 25.00" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffd700" stroke-width="2.5" transform="rotate(0)matrix(1, 0, 0, 1, 0, 0)"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="1.7"> <path d="M7.05005 15.81L10.6201 12.11C10.8201 11.9 11.1501 11.91 11.3401 12.12L12.14 12.98C12.34 13.19 12.6701 13.19 12.8701 12.98L14.94 10.81" stroke="#ffd700" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M16.88 12.86L16.95 9.41C16.95 9.1 16.7001 8.84 16.4001 8.84L12.9301 8.86" stroke="#ffd700" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 22C17.2467 22 21.5 17.7467 21.5 12.5C21.5 7.25329 17.2467 3 12 3C6.75329 3 2.5 7.25329 2.5 12.5C2.5 17.7467 6.75329 22 12 22Z" stroke="#ffd700" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path> </g><g id="SVGRepo_iconCarrier"> <path d="M7.05005 15.81L10.6201 12.11C10.8201 11.9 11.1501 11.91 11.3401 12.12L12.14 12.98C12.34 13.19 12.6701 13.19 12.8701 12.98L14.94 10.81" stroke="#ffd700" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M16.88 12.86L16.95 9.41C16.95 9.1 16.7001 8.84 16.4001 8.84L12.9301 8.86" stroke="#ffd700" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 22C17.2467 22 21.5 17.7467 21.5 12.5C21.5 7.25329 17.2467 3 12 3C6.75329 3 2.5 7.25329 2.5 12.5C2.5 17.7467 6.75329 22 12 22Z" stroke="#ffd700" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
 
-    <span class="ms-1 font-weight-bold">Language Tracker</span>
+    <span class="ms-1 font-weight-bold">Language Tracker </span>
+
   </a>
 </div>
    <hr class="horizontal dark mt-0">
@@ -132,10 +133,13 @@
             </li>
         </ul>
     </div>
+         <!--
    <div class="sidenav-footer mb-3 mx-3">
     <a class="btn bg-gradient-primary w-90" href="/join" style="margin-bottom: 0;">Upgrade to Pro</a>
     <a class="nav-link mt-1 text-center" href="/accounts/login/">Sign In</a>
+
 </div>
+-->
 
 
 </aside>
@@ -159,12 +163,13 @@
     </nav>
     <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
       <ul class="navbar-nav ms-auto d-flex align-items-center">
-         <li class="nav-item d-flex align-items-center">
-            <div class="btn btn-purple btn-sm mb-0 d-flex align-items-center compact-btn" id="unique-xp-display">
-              <div class="unique-xp-circle d-flex align-items-center justify-content-center me-2">XP</div>
-              <span id="unique-xp-points">{{ total_minutes_watched }}</span>
-            </div>
-          </li>
+    <li class="nav-item d-flex align-items-center">
+    <div class="btn btn-purple btn-sm mb-0 d-flex align-items-center compact-btn" id="unique-xp-display">
+        <div class="unique-xp-circle d-flex align-items-center justify-content-center me-2">XP</div>
+        <span id="unique-xp-points">{{ total_points }}</span>
+    </div>
+</li>
+
         <li class="nav-item d-flex align-items-center">
           <div class="ms-2" style="position: relative; top: -2px;" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Pro Subscription. Expires September 1.">
             <svg width="20px" height="20px" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffc40c" stroke-width="1.064">
@@ -338,33 +343,22 @@
                     </div>
                 </div>
                 <h6 class="ms-2 mt-4 mb-0"> Progress Tracker </h6>
-                <p class="text-sm ms-2"> (<span class="font-weight-bolder">+23%</span>) than last week </p>
                 <div class="container border-radius-lg">
                     <div class="row">
+
                         <div class="col-4 py-3 ps-0">
                             <div class="d-flex mb-2">
                                 <div class="icon icon-shape icon-xxs shadow border-radius-sm bg-gradient-primary text-center me-2 d-flex align-items-center justify-content-center">
                                     <!-- SVG for Users -->
                                 </div>
-                                <p class="text-xs mt-1 mb-0 font-weight-bold">Users</p>
+                                <p class="text-xs mt-1 mb-0 font-weight-bold">Points</p>
                             </div>
-                            <h4 class="font-weight-bolder">36K</h4>
+                            <h4 class="font-weight-bolder">{{ total_points }}</h4>
                             <div class="progress w-75">
                                 <div class="progress-bar bg-dark w-60" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                         </div>
-                        <div class="col-4 py-3 ps-0">
-                            <div class="d-flex mb-2">
-                                <div class="icon icon-shape icon-xxs shadow border-radius-sm bg-gradient-info text-center me-2 d-flex align-items-center justify-content-center">
-                                    <!-- SVG for Clicks -->
-                                </div>
-                                <p class="text-xs mt-1 mb-0 font-weight-bold">Clicks</p>
-                            </div>
-                            <h4 class="font-weight-bolder">2m</h4>
-                            <div class="progress w-75">
-                                <div class="progress-bar bg-dark w-90" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                                                        </div>
+
 
                     <div class="col-4 py-3 ps-0">
     <div class="d-flex mb-2">
@@ -396,10 +390,7 @@
           <div class="card z-index-2">
             <div class="card-header pb-0">
               <h6>Minutes Consumed</h6>
-              <p class="text-sm">
-                <i class="fa fa-arrow-up text-success"></i>
-                <span class="font-weight-bold">4% more</span> in 2021
-              </p>
+
                 <div class="btn-group" role="group" aria-label="Basic example">
                     <button type="button" class="btn btn-outline-primary" onclick="updateChartData('week'); updateStatsData('week')">Last Week</button>
 <button type="button" class="btn btn-outline-primary" onclick="updateChartData('month'); updateStatsData('month')">Last Month</button>
@@ -454,7 +445,7 @@
                     <div class="d-flex px-2 py-1">
                       <div>
                         <!-- Use the context variable default_image_url as a fallback -->
-                        <img src="{{ media.profile_image_url|default:default_image_url }}" class="avatar avatar-sm me-3" alt="media logo">
+        <img src="{{ media.profile_image_url|default:default_image_url }}" class="avatar avatar-sm me-3" alt="media logo">
                       </div>
                       <div class="d-flex flex-column justify-content-center">
                         <h6 class="mb-0 text-sm">
@@ -509,38 +500,7 @@
 
 <!-- Additional stats content below -->
 
-      <footer class="footer pt-3  ">
-        <div class="container-fluid">
-          <div class="row align-items-center justify-content-lg-between">
-            <div class="col-lg-6 mb-lg-0 mb-4">
-              <div class="copyright text-center text-sm text-muted text-lg-start">
-                © <script>
-                  document.write(new Date().getFullYear())
-                </script>,
-                made with <i class="fa fa-heart"></i> by
-                <a href="https://www.creative-tim.com" class="font-weight-bold" target="_blank">Creative Tim</a>
-                for a better web.
-              </div>
-            </div>
-            <div class="col-lg-6">
-              <ul class="nav nav-footer justify-content-center justify-content-lg-end">
-                <li class="nav-item">
-                  <a href="https://www.creative-tim.com" class="nav-link text-muted" target="_blank">Creative Tim</a>
-                </li>
-                <li class="nav-item">
-                  <a href="https://www.creative-tim.com/presentation" class="nav-link text-muted" target="_blank">About Us</a>
-                </li>
-                <li class="nav-item">
-                  <a href="https://www.creative-tim.com/blog" class="nav-link text-muted" target="_blank">Blog</a>
-                </li>
-                <li class="nav-item">
-                  <a href="https://www.creative-tim.com/license" class="nav-link pe-0 text-muted" target="_blank">License</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </footer>
+
     </div>
   </main>
   <div class="fixed-plugin">

@@ -26,10 +26,12 @@ class Profile(models.Model):
 
     def calculate_total_points(self):
         total_highlights_points = self.total_highlights // 2
-        total_minutes_points = self.total_minutes
+        total_minutes_points = round(self.total_minutes / 60)  # Divide minutes by 60 and round
         total_videos_points = self.finished_media.count()
-        return total_highlights_points + total_minutes_points + total_videos_points
-
+        total_points = total_highlights_points + total_minutes_points + total_videos_points
+        print(
+            f"Highlights Points: {total_highlights_points}, Minutes Points: {total_minutes_points}, Videos Points: {total_videos_points}, Total Points: {total_points}")
+        return total_points
     def calculate_total_minutes_watched(self):
         # Assuming `MediaProgress` model has a field `minutes_watched`
         total_minutes_watched = MediaProgress.objects.filter(profile=self).aggregate(total_minutes=Sum('minutes_watched'))['total_minutes']

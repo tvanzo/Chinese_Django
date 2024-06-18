@@ -132,10 +132,13 @@
             </li>
         </ul>
     </div>
+        <!--
    <div class="sidenav-footer mb-3 mx-3">
     <a class="btn bg-gradient-primary w-90" href="/join" style="margin-bottom: 0;">Upgrade to Pro</a>
     <a class="nav-link mt-1 text-center" href="/accounts/login/">Sign In</a>
+
 </div>
+-->
 
 
 </aside>
@@ -155,7 +158,7 @@
          <li class="nav-item d-flex align-items-center">
             <div class="btn btn-purple btn-sm mb-0 d-flex align-items-center compact-btn" id="unique-xp-display">
               <div class="unique-xp-circle d-flex align-items-center justify-content-center me-2">XP</div>
-              <span id="unique-xp-points">{{ total_minutes_watched }}</span>
+              <span id="unique-xp-points">{{ total_points }}</span>
             </div>
           </li>
         <li class="nav-item d-flex align-items-center">
@@ -188,128 +191,6 @@
   </div>
 </nav>
     <!-- End Navbar -->
-  <div class="container-fluid py-4">
-  <div class="row">
-    <!-- Total Highlights -->
-    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-      <div class="card">
-        <div class="card-body p-3">
-          <div class="row">
-            <div class="col-8">
-              <div class="numbers">
-                <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Highlights</p>
-                <h5 class="font-weight-bolder mb-0" id="total-highlights">
-                  Loading...
-                </h5>
-              </div>
-            </div>
-       <div class="col-4 text-end">
-             <div class="icon icon-shape shadow text-center border-radius-md" style="width: 48px; height: 48px; background: none;">
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
-        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-        <g id="SVGRepo_iconCarrier">
-            <path d="M18.4834 16.7674C17.8471 16.9195 17.1829 17 16.5 17C11.8056 17 8 13.1944 8 8.50001C8 8.01653 8.04036 7.54249 8.11791 7.08105C8.08172 7.11586 8.04432 7.14792 8.00494 7.17781C7.72433 7.39083 7.37485 7.46991 6.67589 7.62806L6.03954 7.77204C3.57986 8.32856 2.35002 8.60682 2.05742 9.54774C1.76482 10.4887 2.60325 11.4691 4.2801 13.4299L4.71392 13.9372C5.19042 14.4944 5.42868 14.773 5.53586 15.1177C5.64305 15.4624 5.60703 15.8341 5.53498 16.5776L5.4694 17.2544C5.21588 19.8706 5.08912 21.1787 5.85515 21.7602C6.62117 22.3417 7.77267 21.8116 10.0757 20.7512L10.6715 20.4768C11.3259 20.1755 11.6531 20.0249 12 20.0249C12.3469 20.0249 12.6741 20.1755 13.3285 20.4768L13.9243 20.7512C16.2273 21.8116 17.3788 22.3417 18.1449 21.7602C18.9109 21.1787 18.7841 19.8706 18.5306 17.2544L18.4834 16.7674Z" fill="#FFC10D"></path>
-            <path opacity="0.5" d="M9.15302 5.40838L8.82532 5.99623C8.46538 6.64194 8.28541 6.96479 8.0048 7.17781C8.04418 7.14791 8.08158 7.11586 8.11777 7.08105C8.04022 7.54249 7.99986 8.01653 7.99986 8.50001C7.99986 13.1944 11.8054 17 16.4999 17C17.1828 17 17.8469 16.9195 18.4833 16.7674L18.4649 16.5776C18.3928 15.8341 18.3568 15.4624 18.464 15.1177C18.5712 14.773 18.8094 14.4944 19.2859 13.9372L19.7198 13.4299C21.3966 11.4691 22.235 10.4886 21.9424 9.54773C21.6498 8.60682 20.42 8.32856 17.9603 7.77203L17.324 7.62805C16.625 7.4699 16.2755 7.39083 15.9949 7.17781C15.7143 6.96479 15.5343 6.64194 15.1744 5.99624L14.8467 5.40837C13.58 3.13612 12.9467 2 11.9999 2C11.053 2 10.4197 3.13613 9.15302 5.40838Z" fill="#FFC10D"></path>
-        </g>
-    </svg>
-</div>
-
-            </div>
-
-        </div>
-          </div>
-        </div>
-      </div>
-    <!-- Total Minutes -->
-    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-      <div class="card">
-        <div class="card-body p-3">
-          <div class="row">
-            <div class="col-8">
-              <div class="numbers">
-                <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Minutes</p>
-                <h5 class="font-weight-bolder mb-0" id="total-minutes">
-                  Loading...
-                </h5>
-              </div>
-            </div>
-            <div class="col-4 text-end">
-              <div class="icon icon-shape shadow text-center border-radius-md" style="width: 48px; height: 48px; background: none;">
-    <svg viewBox="0 0 24 24" fill="#2ca9bc" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
-        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-        <g id="SVGRepo_iconCarrier">
-            <path d="M12 17V12L14.5 10.5M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-        </g>
-    </svg>
-</div>
-
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Streak -->
-    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-      <div class="card">
-        <div class="card-body p-3">
-          <div class="row">
-            <div class="col-8">
-              <div class="numbers">
-                <p class="text-sm mb-0 text-capitalize font-weight-bold">Streak</p>
-                <h5 class="font-weight-bolder mb-0" id="streak">
-                  Loading...
-                </h5>
-              </div>
-            </div>
-               <div class="col-4 text-end">
-             <div class="icon icon-shape shadow text-center border-radius-md" style="width: 48px; height: 48px; background: none;">
-    <svg viewBox="0 0 392.598 392.598" xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width: 100%; height: 100%;">
-        <path fill="#FFC10D" d="M225.887,22.105c-53.269,0-79.644,22.238-100.978,84.945c-0.388,1.164-1.034,2.263-1.681,3.168 c-28.121,35.879-93.867,139.378-62.836,189.479c6.4,6.788,69.301,71.176,159.03,71.176c29.802,0,59.798-7.111,89.277-21.075 c10.602-2.715,21.075-3.038,31.612-0.453v-128.97c-7.499,5.495-15.838,12.024-24.889,19.653c-5.236,4.59-13.576,2.457-16.679-3.426 c-40.598-41.18-82.941-38.271-126.901,1.487l-10.214,12.347c-10.408,11.313-24.63-2.392-16.743-13.899l10.408-12.671l0,0 c0,0,0-0.065,0.065-0.065c0.388-0.453,11.572-15.192,5.301-46.545c-3.297-16.873-4.396-31.935-3.232-46.028 c0.905-11.572,3.879-46.933,26.634-47.127c22.949-0.259,42.085-4.461,56.954-12.671c14.222-7.822,18.554-24.566,12.541-38.659 C247.738,19.454,225.887,22.105,225.887,22.105z"/>
-    </svg>
-</div>
-
-
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Total Videos -->
-    <div class="col-xl-3 col-sm-6">
-      <div class="card">
-        <div class="card-body p-3">
-          <div class="row">
-            <div class="col-8">
-              <div class="numbers">
-                <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Videos</p>
-                <h5 class="font-weight-bolder mb-0" id="total-videos">
-                  Loading...
-                </h5>
-              </div>
-            </div>
-         <div class="col-4 text-end">
-            <div class="icon icon-shape shadow text-center border-radius-md" style="width: 48px; height: 48px; background: none;">
-    <!-- SVG code adjusted to fit and align in the existing icon shape container -->
-    <svg fill="#000000" viewBox="0 0 24 24" id="check-mark-square-2" xmlns="http://www.w3.org/2000/svg" class="icon line-color" style="width: 100%; height: 100%;">
-        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-        <g id="SVGRepo_iconCarrier">
-            <polyline points="21 5 12 14 8 10" style="fill: none; stroke: #2ca9bc; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"></polyline>
-            <path d="M21,11v9a1,1,0,0,1-1,1H4a1,1,0,0,1-1-1V4A1,1,0,0,1,4,3H16" style="fill: none; stroke: #000000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"></path>
-        </g>
-    </svg>
-</div>
-
-
-
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
 
 
 
@@ -319,57 +200,92 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="{% static 'js/stats.js' %}"></script>
 
 <div class="container-fluid py-4">
-    <div class="row">
-        {% for video in media %}
-        <div class="col-md-4 mb-4">
-            <div class="card video-card" style="color: inherit; text-decoration: none; position: relative;">
-                <a href="{% url 'video_detail' video.media_id %}" style="color: inherit; text-decoration: none;">
-                    <div class="image-container">
-                        <img src="{{ video.thumbnail_url }}" class="card-img-top" alt="{{ video.title }}">
-                        <div class="overlay-info">
-                            <div class="badge badge-highlight highlights-count">
-                                <svg fill="#ffd700" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" stroke="#ffd700" stroke-width="10.24" style="width: 1em; height: 1em; vertical-align: middle;">
-                                    <path d="..."></path>
-                                </svg>
-                                {{ video.user_highlights_count }} Highlights
-                            </div>
-                            <div class="badge badge-length video-length">{{ video.formatted_video_length }}</div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">{{ video.title }}</h5>
-                        <p class="card-text">{{ video.description|truncatechars:100 }}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="channel-name">{{ video.channel.name }}</span>
-                            <a href="{% url 'remove_from_log' video.id %}" class="remove-from-log" style="margin-left: auto;">
-                                <svg viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns" fill="#000000" style="width: 20px; height: 20px;">
-                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                                    <g id="SVGRepo_iconCarrier">
-                                        <title>minus-square</title>
-                                        <desc>Created with Sketch Beta.</desc>
-                                        <defs></defs>
-                                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
-                                            <g id="Icon-Set" sketch:type="MSLayerGroup" transform="translate(-100.000000, -1035.000000)" fill="#000000">
-                                                <path d="M130,1063 C130,1064.1 129.104,1065 128,1065 L104,1065 C102.896,1065 102,1064.1 102,1063 L102,1039 C102,1037.9 102.896,1037 104,1037 L128,1037 C129.104,1037 130,1037.9 130,1039 L130,1063 L130,1063 Z M128,1035 L104,1035 C101.791,1035 100,1036.79 100,1039 L100,1063 C100,1065.21 101.791,1067 104,1067 L128,1067 C130.209,1067 132,1065.21 132,1063 L132,1039 C132,1036.79 130.209,1035 128,1035 L128,1035 Z M122,1050 L110,1050 C109.448,1050 109,1050.45 109,1051 C109,1051.55 109.448,1052 110,1052 L122,1052 C122.552,1052 123,1051.55 123,1051 C123,1050.45 122.552,1050 122,1050 Z" id="minus-square" sketch:type="MSShapeGroup"></path>
-                                            </g>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-        {% empty %}
-            <p>No videos found.</p>
-        {% endfor %}
+    <!-- Sorting Buttons -->
+    <div class="d-flex justify-content-start mb-4">
+        <button class="btn btn-primary mx-2 filter-button" onclick="filterVideos('all', this)">All</button>
+        <button class="btn btn-primary mx-2 filter-button" onclick="filterVideos('in_progress', this)">In Progress</button>
+        <button class="btn btn-primary mx-2 filter-button" onclick="filterVideos('completed', this)">Completed</button>
     </div>
+
+<div class="row" id="video-list">
+    {% for video in media %}
+    <div class="col-md-4 mb-4 video-card" data-status="{{ video.status }}">
+        <div class="card" style="color: inherit; text-decoration: none; position: relative;">
+            <a href="{% url 'video_detail' video.media_id %}" style="color: inherit; text-decoration: none;">
+                <div class="image-container">
+                    <img src="{{ video.thumbnail_url }}" class="card-img-top" alt="{{ video.title }}">
+                    <div class="overlay-info">
+                        <div class="badge badge-highlight highlights-count">
+                            <svg fill="#ffd700" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" stroke="#ffd700" stroke-width="10.24" style="width: 1em; height: 1em; vertical-align: middle;">
+                                <path d="M224,120H164.2l22.9-22.9a12,12,0,0,0,0-17L175,68.9a12,12,0,0,0-17,0L128,98.9,98.9,69.8a12,12,0,0,0-17,0L69.8,80.2a12,12,0,0,0,0,17L92.7,120H32a12,12,0,0,0-12,12v12a12,12,0,0,0,12,12H92.7L69.8,179a12,12,0,0,0,0,17L80.2,209.1a12,12,0,0,0,17,0L128,187.1l29.1,29.1a12,12,0,0,0,17,0L186.2,196a12,12,0,0,0,0-17L163.3,156H224a12,12,0,0,0,12-12V132A12,12,0,0,0,224,120Z"></path>
+                            </svg>
+                            {{ video.user_highlights_count }} Highlights
+                        </div>
+                        <div class="badge badge-length video-length">{{ video.formatted_video_length }}</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ video.title }}</h5>
+                    <p class="card-text">{{ video.description|truncatechars:100 }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="channel-name">{{ video.channel.name }}</span>
+                        <a href="#" class="toggle-log" data-id="{{ video.id }}" data-action="remove" style="margin-left: auto;">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px;">
+                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                <g id="SVGRepo_iconCarrier">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M23 4C23 2.34315 21.6569 1 20 1H4C2.34315 1 1 2.34315 1 4V20C1 21.6569 2.34315 23 4 23H20C21.6569 23 23 21.6569 23 20V4ZM21 4C21 3.44772 20.5523 3 20 3H4C3.44772 3 3 3.44772 3 4V20C3 20.5523 3.44772 21 4 21H20C20.5523 21 21 20.5523 21 20V4Z" fill="#0F0F0F"></path>
+                                    <path d="M16 11C16.5523 11 17 11.4477 17 12C17 12.5523 16.5523 13 16 13H8C7.44772 13 7 12.5523 7 12C7 11.4477 7.44772 11 8 11H16Z" fill="#0F0F0F"></path>
+                                </g>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <p>No videos found.</p>
+    {% endfor %}
 </div>
+
+
+
+</div>
+
+<!-- JavaScript for Filtering -->
+<script>
+function filterVideos(status, element) {
+    const videos = document.querySelectorAll('.video-card');
+    videos.forEach(video => {
+        if (status === 'all' || video.getAttribute('data-status') === status) {
+            video.style.display = 'block';
+        } else {
+            video.style.display = 'none';
+        }
+    });
+
+    // Remove active class from all buttons
+    const buttons = document.querySelectorAll('.filter-button');
+    buttons.forEach(button => {
+        button.classList.remove('active');
+    });
+
+    // Add active class to the clicked button
+    element.classList.add('active');
+}
+</script>
+
+<!-- Additional Styles for Active Button -->
+<style>
+.filter-button.active {
+    background-color: #007bff;
+    color: white;
+}
+</style>
+
 
 
 
@@ -377,38 +293,7 @@
 
 <!-- Additional stats content below -->
 
-      <footer class="footer pt-3  ">
-        <div class="container-fluid">
-          <div class="row align-items-center justify-content-lg-between">
-            <div class="col-lg-6 mb-lg-0 mb-4">
-              <div class="copyright text-center text-sm text-muted text-lg-start">
-                © <script>
-                  document.write(new Date().getFullYear())
-                </script>,
-                made with <i class="fa fa-heart"></i> by
-                <a href="https://www.creative-tim.com" class="font-weight-bold" target="_blank">Creative Tim</a>
-                for a better web.
-              </div>
-            </div>
-            <div class="col-lg-6">
-              <ul class="nav nav-footer justify-content-center justify-content-lg-end">
-                <li class="nav-item">
-                  <a href="https://www.creative-tim.com" class="nav-link text-muted" target="_blank">Creative Tim</a>
-                </li>
-                <li class="nav-item">
-                  <a href="https://www.creative-tim.com/presentation" class="nav-link text-muted" target="_blank">About Us</a>
-                </li>
-                <li class="nav-item">
-                  <a href="https://www.creative-tim.com/blog" class="nav-link text-muted" target="_blank">Blog</a>
-                </li>
-                <li class="nav-item">
-                  <a href="https://www.creative-tim.com/license" class="nav-link pe-0 text-muted" target="_blank">License</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </footer>
+
     </div>
   </main>
   <div class="fixed-plugin">
@@ -500,6 +385,91 @@
     }
   </script>
 <script>
+   document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM fully loaded and parsed");
+
+    document.querySelectorAll('.toggle-log').forEach(button => {
+        console.log("Adding event listener to button:", button);
+
+        button.addEventListener('click', function(event) {
+            console.log("Button clicked:", button);
+
+            event.preventDefault();
+            const videoId = this.getAttribute('data-id');
+            const action = this.getAttribute('data-action');
+            console.log("Video ID:", videoId, "Action:", action);
+
+            const url = action === 'add' ? `/add_to_log/${videoId}/` : `/remove_from_log/${videoId}/`;
+            console.log("URL:", url);
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => {
+                console.log("Fetch response:", response);
+                return response.json();
+            })
+            .then(data => {
+                console.log("Fetch data:", data);
+
+                if (data.success) {
+                    if (action === 'add') {
+                        this.setAttribute('data-action', 'remove');
+                        this.innerHTML = `
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px;">
+                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                <g id="SVGRepo_iconCarrier">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M23 4C23 2.34315 21.6569 1 20 1H4C2.34315 1 1 2.34315 1 4V20C1 21.6569 2.34315 23 4 23H20C21.6569 23 23 21.6569 23 20V4ZM21 4C21 3.44772 20.5523 3 20 3H4C3.44772 3 3 3.44772 3 4V20C3 20.5523 3.44772 21 4 21H20C20.5523 21 21 20.5523 21 20V4Z" fill="#0F0F0F"></path>
+                                    <path d="M16 11C16.5523 11 17 11.4477 17 12C17 12.5523 16.5523 13 16 13H8C7.44772 13 7 12.5523 7 12C7 11.4477 7.44772 11 8 11H16Z" fill="#0F0F0F"></path>
+                                </g>
+                            </svg>
+                        `;
+                    } else {
+                        this.setAttribute('data-action', 'add');
+                        this.innerHTML = `
+                            <svg viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns" fill="#000000" style="width: 20px; height: 20px;">
+                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                <g id="SVGRepo_iconCarrier">
+                                    <title>plus-square</title>
+                                    <desc>Created with Sketch Beta.</desc>
+                                    <defs></defs>
+                                    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+                                        <g id="Icon-Set" sketch:type="MSLayerGroup" transform="translate(-100.000000, -1035.000000)" fill="#000000">
+                                            <path d="M130,1063 C130,1064.1 129.104,1065 128,1065 L104,1065 C102.896,1065 102,1064.1 102,1063 L102,1039 C102,1037.9 102.896,1037 104,1037 L128,1037 C129.104,1037 130,1037.9 130,1039 L130,1063 L130,1063 Z M128,1035 L104,1035 C101.791,1035 100,1036.79 100,1039 L100,1063 C100,1065.21 101.791,1067 104,1067 L128,1067 C130.209,1067 132,1065.21 132,1063 L132,1039 C132,1036.79 130.209,1035 128,1035 L128,1035 Z M122,1050 L117,1050 L117,1045 C117,1044.45 116.552,1044 116,1044 C115.448,1044 115,1044.45 115,1045 L115,1050 L110,1050 C109.448,1050 109,1050.45 109,1051 C109,1051.55 109.448,1052 110,1052 L115,1052 L115,1057 C115,1057.55 115.448,1058 116,1058 C116.552,1058 117,1057.55 117,1057 L117,1052 L122,1052 C122.552,1052 123,1051.55 123,1051 C123,1050.45 122.552,1050 122,1050 L122,1050 Z" id="plus-square" sketch:type="MSShapeGroup"></path>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg>
+                        `;
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; cookies.length > i; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+
 let cumulativeMinutesChart;
 let barChart;
 
@@ -687,16 +657,14 @@ function updateStatsData(timeSpan) {
     if (statsData[timeSpan]) {
         document.getElementById('total-highlights').innerText = statsData[timeSpan].total_highlights || '0';
         document.getElementById('total-minutes').innerText = statsData[timeSpan].total_minutes || '0';
-        document.getElementById('streak').innerText = {{streak}} || '0';
+        document.getElementById('streak').innerText = '{{streak}}' || '0';
         document.getElementById('total-videos').innerText = statsData[timeSpan].total_videos || '0';
-        document.getElementById('total-words').innerText = statsData[timeSpan].total_words|| '0';
-
-
-
+        document.getElementById('total-words').innerText = statsData[timeSpan].total_words || '0';
     } else {
         console.error("No totals data found for the time span:", timeSpan);
     }
 }
+
 
     console.log({{ highlight_data_json|safe }});
 // Initialize the charts and stats for 'week' as soon as the page loads

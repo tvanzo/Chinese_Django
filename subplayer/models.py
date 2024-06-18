@@ -2,6 +2,8 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import User
+import os
+
 
 class Channel(models.Model):
     channel_id = models.CharField(max_length=255, unique=True, blank=True, null=True)
