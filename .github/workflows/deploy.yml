@@ -24,11 +24,7 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run migrations
-      run: |
-        until python manage.py migrate; do
-          echo "Retrying migrations..."
-          sleep 5
-        done
+      run: python manage.py migrate
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
@@ -37,5 +33,19 @@ jobs:
         DEBUG: ${{ secrets.DEBUG }}
 
     - name: Collect static files
+      run: python manage.py collectstatic --noinput
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+        DEBUG: ${{ secrets.DEBUG }}
+
+    - name: Deploy to Render
       run: |
-        until python
+        curl -X POST \
+          -H "Accept: application/json" \
+          -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+          -H "Content-Type: application/json" \
+          --data '{"serviceId": "srv-cpoif12ju9rs738p174g"}' \
+          https://api.render.com/v1/services/srv-cpoif12ju9rs738p174g/deploys
