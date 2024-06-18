@@ -33,16 +33,14 @@ jobs:
         DEBUG: ${{ secrets.DEBUG }}
 
     - name: Collect static files
-      run: |
-        python manage.py collectstatic --noinput
-        echo "Static files collected"
-        ls -R staticfiles  # Log the collected static files
+      run: python manage.py collectstatic --noinput --verbosity 2
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
         DEBUG: ${{ secrets.DEBUG }}
+    
 
     - name: Deploy to Render
       run: |
