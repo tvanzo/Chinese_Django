@@ -32,15 +32,28 @@ jobs:
         ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
         DEBUG: ${{ secrets.DEBUG }}
 
-    - name: Collect static files
-      run: python manage.py collectstatic --noinput --verbosity 2
+    - name: Create superuser
+      run: |
+        python manage.py createsuperuser --noinput || true
+        python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='${{ secrets.DJANGO_SUPERUSER_USERNAME }}').update(is_superuser=True, is_staff=True)"
       env:
+        DJANGO_SUPERUSER_USERNAME: ${{ secrets.DJANGO_SUPERUSER_USERNAME }}
+        DJANGO_SUPERUSER_EMAIL: ${{ secrets.DJANGO_SUPERUSER_EMAIL }}
+        DJANGO_SUPERUSER_PASSWORD: ${{ secrets.DJANGO_SUPERUSER_PASSWORD }}
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
         DEBUG: ${{ secrets.DEBUG }}
 
+    - name: Collect static files
+      run: python manage.py collectstatic --noinput
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+        DEBUG: ${{ secrets.DEBUG }}
 
     - name: Deploy to Render
       run: |
