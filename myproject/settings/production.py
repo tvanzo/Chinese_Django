@@ -4,7 +4,9 @@ import dj_database_url
 DEBUG = env.bool('DEBUG', default=False)
 
 SECRET_KEY = env('SECRET_KEY')
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['chinese-django.onrender.com'])
+
+# Directly set the ALLOWED_HOSTS to include your domain
+ALLOWED_HOSTS = ['chinese-django.onrender.com', 'localhost', '127.0.0.1']
 
 # Database configuration
 DATABASES = {
