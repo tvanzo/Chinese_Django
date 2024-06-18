@@ -1,0 +1,84 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Soft UI Dashboard by Creative Tim</title>
+  
+  <!-- Fonts and icons -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
+  
+  <!-- Nucleo Icons -->
+  <link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+  
+  <!-- CSS Files -->
+  <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet">
+</head>
+
+<body class="g-sidenav-show bg-gray-100">
+  <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3" id="sidenav-main">
+    <div class="sidenav-header">
+      <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
+      <a class="navbar-brand m-0" href="https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html" target="_blank">
+        <img src="{% static 'accounts/img/logo-ct-dark.png' %}" class="navbar-brand-img h-100" alt="main_logo">
+        <span class="ms-1 font-weight-bold">Soft UI Dashboard</span>
+      </a>
+    </div>
+    <hr class="horizontal dark mt-0">
+    <div class="collapse navbar-collapse  w-auto" id="sidenav-collapse-main">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link active" href="../pages/dashboard.html">
+            <i class="ni ni-tv-2 text-primary"></i>
+            <span class="nav-link-text ms-1">Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../pages/profile.html">
+            <i class="ni ni-single-02 text-orange"></i>
+            <span class="nav-link-text ms-1">Profile</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../pages/tables.html">
+            <i class="ni ni-bullet-list-67 text-info"></i>
+            <span class="nav-link-text ms-1">Tables</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../pages/login.html">
+            <i class="ni ni-key-25 text-info"></i>
+            <span class="nav-link-text ms-1">Login</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../pages/register.html">
+            <i class="ni ni-circle-08 text-pink"></i>
+            <span class="nav-link-text ms-1">Register</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+    <!-- Your main content here -->
+  </main>
+
+  <!--   Core JS Files   -->
+  <script src="{% static 'accounts/js/core/popper.min.js' %}"></script>
+  <script src="{% static 'accounts/js/core/bootstrap.min.js' %}"></script>
+  <script src="{% static 'accounts/js/plugins/perfect-scrollbar.min.js' %}"></script>
+  <script src="{% static 'accounts/js/plugins/smooth-scrollbar.min.js' %}"></script>
+  <script src="{% static 'accounts/js/soft-ui-dashboard.min.js?v=1.0.7' %}"></script>
+</body>
+
+</html>

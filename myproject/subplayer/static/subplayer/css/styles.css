@@ -1,0 +1,290 @@
+@ -1,12 +1,16 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f8f9fa; /* Light background color for a modern, clean look */
+        font-family: Arial, sans-serif;
+
+}
+
+
+
+
+  #audiofile {
+    display: block;
+@ -15,24 +19,15 @@ body {
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+  }
+
+
+
+  #subtitles span {
+    padding: 2px 5px;
+    color: #2f302f;
+  }
+
+  #subtitles span.highlight {
+    color: yellow;
+    font-weight: bold;
+    background-color: #1a8cff;
+    padding: 2px 4px;
+@ -92,23 +87,20 @@ body {
+    transform: scale(1.05);
+  }
+
+
+
+#subtitles span.active-highlight {
+    background-color: #4285f4;
+    color: #fff;
+    padding: 3px 5px;
+    border-radius: 3px;
+    margin: 0 2px;
+}
+
+#subtitles span.perm-highlight {
+    background-color: #ffca28;
+    color: #333;
+}
+
+
+
+@ -131,7 +123,236 @@ span.active-highlight {
+    border-radius: 10px;
+    text-align: center;
+}
+/* Container for the search box to center it */
+.search-box {
+    max-width: 600px; /* Adjust based on your preference */
+    margin: 40px auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+/* Style for the input field */
+.search-box input[type="text"] {
+    width: 100%;
+    padding: 12px 20px;
+    border: 2px solid #d1d7dc; /* Light grey border */
+    border-right: none; /* Remove right border */
+    border-radius: 30px 0 0 30px; /* Rounded corners on the left side */
+    outline: none;
+    color: #5f6368; /* Dark grey text color */
+    font-size: 16px;
+    background-color: #fff; /* White background */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2); /* Subtle shadow for depth */
+    transition: border-color 0.2s; /* Smooth transition for focus effect */
+}
+
+/* Style for the input field when it is focused */
+.search-box input[type="text"]:focus {
+    border-color: #4285f4; /* Highlight color when focused */
+}
+
+/* Style for the submit button */
+.search-box button {
+    padding: 12px 20px;
+    border: 2px solid #4285f4; /* Matching the input focus border */
+    background-color: #4285f4; /* Button background */
+    color: #ffffff; /* Text color */
+    text-transform: uppercase; /* Uppercase text */
+    font-weight: bold;
+    border-radius: 0 30px 30px 0; /* Rounded corners on the right side */
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s; /* Smooth transition for hover effect */
+}
+
+/* Hover effect for button */
+.search-box button:hover {
+    background-color: #357ae8; /* Slightly darker blue on hover */
+    border-color: #357ae8;
+}
+
+
+#player, #subtitles {
+    width: 50%; /* Makes both the player and subtitles box take up 80% of their container's width */
+    margin: 20px auto; /* Centers both elements horizontally and adds space around them */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Adds a subtle shadow for depth */
+}
+
+
+
+
+
+
+.container {
+    width: 100%;
+    max-width: 1280px; /* Adjust this to control the maximum size of the content */
+    margin: auto; /* Center the container */
+}
+
+.player-wrapper {
+    position: relative;
+    width: 50%; /* Adjust this to control the width of the player */
+    padding-top: 28.125%; /* 16:9 Aspect Ratio (50% of width) */
+    margin: auto; /* Center the player wrapper */
+}
+
+#player {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#subtitles {
+    width: 50%; /* Match the player width */
+    margin: 20px auto; /* Center the subtitles box */
+    padding: 15px;
+    background-color: #ffffff; /* White background for subtitles */
+    color: #000; /* Black text for subtitles */
+    font-size: 20px; /* Adjust font size for readability */
+    border-radius: 5px; /* Rounded corners for subtitles box */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Shadow for depth */
+    text-align: center; /* Center text within subtitles box */
+}
+
+
+
+/* Root variables for easy theme management */
+:root {
+    --sidebar-width: 250px;
+    --transition-speed: 0.3s;
+    --sidebar-bg-color: #f9f9f9;
+    --content-bg-color: #ffffff;
+    --text-color: #333;
+    --hover-bg-color: #eaeaea;
+    --border-color: #eaeaea;
+}
+
+/* Adjustments for smaller screens */
+@media screen and (max-width: 768px) {
+    .player-wrapper, #subtitles {
+        width: 95%; /* Full width on smaller screens for better visibility */
+        padding-top: 53.25%; /* Adjust aspect ratio padding for full width */
+    }
+}
+
+.dashboard {
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+    font-size: 16px;
+}
+
+/* Sidebar styles */
+/* Adjusted Sidebar styles for sliding effect */
+.sidebar {
+    width: var(--sidebar-width);
+    background-color: var(--sidebar-bg-color);
+    border-right: 1px solid var(--border-color);
+    padding: 20px;
+    height: 100vh;
+    overflow-y: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    transition: transform var(--transition-speed) ease-in-out;
+    transform: translateX(0);
+}
+
+/* Toggle visibility with transform */
+.sidebar.hidden {
+    transform: translateX(-100%);
+}
+
+/* Adjust content area when sidebar is toggled */
+
+
+.content.sidebar-hidden {
+    margin-left: 0;
+}
+
+
+/* Content area styles */
+.content {
+    margin-left: var(--sidebar-width);
+    padding: 20px;
+    transition: margin-left var(--transition-speed) ease-in-out;;
+}
+
+/* Sidebar hide/show functionality */
+.sidebar.hidden {
+    transform: translateX(-100%);
+}
+
+.content.sidebar-hidden {
+    margin-left: 0;
+}
+
+/* Styling for sidebar headings and links */
+.sidebar h2 {
+    margin-bottom: 20px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li a {
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 10px;
+    display: block;
+    border-radius: 4px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.sidebar ul li a:hover {
+    background-color: var(--hover-bg-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-right: none;
+    }
+
+    .content {
+        margin-left: 0;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .sidebar.hidden {
+        left: 0;
+    }
+
+    .content.sidebar-hidden {
+        margin-left: 0;
+    }
+}
+
+/* Additional styles for buttons and other elements */
+button {
+    background-color: #007bff;
+    color: black;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Utility classes for hiding and showing elements */
+.hidden {
+    display: none !important;
+}

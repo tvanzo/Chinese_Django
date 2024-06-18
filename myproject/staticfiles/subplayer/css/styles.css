@@ -1,0 +1,243 @@
+
+.subplayer-page {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    font-family: Arial, sans-serif;
+}
+/* Header */
+header {
+    padding: 20px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Optional shadow for depth */
+    display: flex;
+    justify-content: space-between; /* Adjust based on your layout */
+    align-items: center; /* Vertically center everything in the header */
+}
+
+.header-container {
+    display: flex;
+    justify-content: flex-end; /* Aligns nav to the right */
+    align-items: center;
+    flex-grow: 1; /* Ensures it takes up available space */
+}
+
+header nav ul {
+    list-style-type: none;
+    display: flex;
+    align-items: center; /* Ensures vertical alignment */
+    margin: 0;
+    padding: 0;
+}
+
+header nav ul li {
+    margin-left: 30px; /* Adjust spacing between icons */
+}
+
+header nav ul li a {
+    display: flex;
+    align-items: center; /* Aligns icons and text vertically */
+    color: #333;
+    text-decoration: none;
+}
+
+header nav ul li a img {
+    height: 24px; /* Adjust based on your icon size */
+    width: auto;
+    margin-right: 8px; /* Space between icon and text */
+}
+
+
+
+header nav ul li a:hover img, header nav ul li a:focus img {
+    opacity: 0.7; /* Dim icons on hover/focus */
+}
+
+header nav ul li a::after {
+    content: attr(data-title);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50px);
+    background-color: #000;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+}
+
+header nav ul li a:hover::after, header nav ul li a:focus::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-60px);
+}
+
+/* Navigation Icons */
+.nav-icon {
+    position: relative;
+    display: inline-block;
+}
+
+.nav-icon img {
+    width: 30px; /* Adjust size as needed */
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.nav-icon:hover img {
+    transform: scale(1.1); /* Slight zoom effect on hover */
+}
+
+/* Tooltip Text */
+.nav-icon::after {
+    content: attr(data-text);
+    position: absolute;
+    bottom: -35px; /* Adjust based on icon size, ensure it's enough to not overlap */
+    left: 50%;
+    transform: translateX(-50%) translateY(10px); /* Adjust for better positioning */
+    background-color: black;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+}
+
+.nav-icon:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0); /* Remove the Y translation on hover */
+}
+
+
+
+/* Footer */
+footer {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    text-align: center;
+    padding: 20px 0;
+    border-top: 1px solid #eaeaea;
+}
+
+/* Existing styles for search box, media grid, etc., remain unchanged */
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    header nav ul {
+        flex-direction: column; /* Stack nav items vertically on smaller screens */
+    }
+
+    header nav ul li {
+        margin: 10px 0; /* Adjust margin for vertical layout */
+    }
+}
+
+
+/* Search Box */
+/* Assuming the search box is a common feature across multiple pages, keep this. */
+.search-container {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.search-box {
+    display: flex;
+    width: 100%;
+    max-width: 600px;
+}
+
+.search-box input[type="text"] {
+    flex-grow: 1;
+    padding: 10px 20px;
+    border: 2px solid #d1d7dc;
+    border-right: none;
+    border-radius: 30px 0 0 30px;
+    outline: none;
+    font-size: 16px;
+}
+
+.search-box button {
+    padding: 10px 20px;
+    border: 2px solid #007bff;
+    background-color: #007bff;
+    color: white;
+    border-radius: 0 30px 30px 0;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .content, .media-content {
+        margin-left: 0;
+        padding: 10px;
+    }
+}
+
+.content, .media-content {
+    flex: 1; /* Allows the content area to fill the available space */
+    padding-left: 20px; /* Adds some space between the sidebar and the content */
+}
+
+
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+   
+
+    .content, .media-content {
+        padding-left: 0; /* Removes the space between the sidebar and content on small screens */
+    }
+}
+/* Media Grid */
+.media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.media-item {
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+        position: relative;
+
+}
+
+.media-item:hover {
+    transform: translateY(-5px);
+}
+
+.thumbnail-container img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+.media-title {
+    padding: 10px;
+    font-size: 16px;
+    color: #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.media-item .button-group .media-status-icon {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    /* More styles as needed */
+}
+

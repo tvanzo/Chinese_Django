@@ -1,0 +1,29 @@
+  .media {
+    cursor: pointer;
+    background-color: #f0f0f0;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.highlights {
+    display: none; /* Initially hidden */
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+}
+
+.highlight {
+    margin-bottom: 5px;
+    padding: 5px;
+    border-bottom: 1px solid #eee;
+}
+
+.title-container{
+    display: flex;
+    align-items: center; /* Centers the title vertically */
+    height: 40px; /* Fixed height to ensure consistent alignment */
+    transform: translateY(-10%); /* Adjust vertical position to better align multi-line titles */
+}

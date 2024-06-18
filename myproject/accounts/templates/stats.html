@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>User Stats</h2>
+
+<canvas id="dailyHighlightsChart" width="400" height="400"></canvas>
+<canvas id="totalHighlightsChart" width="400" height="400"></canvas>
+<!-- Additional canvases for words and minutes charts -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Daily Highlights Chart
+const dailyHighlightsCtx = document.getElementById('dailyHighlightsChart').getContext('2d');
+const dailyHighlightsChart = new Chart(dailyHighlightsCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ dates_json|safe }},
+        datasets: [{
+            label: 'Daily Highlights',
+            data: {{ highlight_counts_json|safe }},
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Total Highlights Chart
+const totalHighlightsCtx = document.getElementById('totalHighlightsChart').getContext('2d');
+const totalHighlightsChart = new Chart(totalHighlightsCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Total Highlights'],
+        datasets: [{
+            label: 'Total Highlights',
+            data: [{{ total_highlights }}],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)'
+            ],
+            borderWidth: 1
+        }]
+    }
+});
+
+// Additional JS for words and minutes charts
+</script>
+{% endblock %}
