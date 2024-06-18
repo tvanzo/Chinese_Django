@@ -40,7 +40,7 @@ jobs:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
         ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
         DEBUG: ${{ secrets.DEBUG }}
-    
+
 
     - name: Deploy to Render
       run: |
