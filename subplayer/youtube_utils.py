@@ -171,9 +171,9 @@ def fetch_videos_from_channel_with_chinese_subtitles(channel_id):
     nextPageToken = None
     try:
         logger.info(f"Starting video fetch for channel ID: {channel_id}")
-        while len(videos) < 25:
+        while len(videos) < 3:
             response = youtube.search().list(
-                channelId=channel_id, part='id,snippet', maxResults=25, order='date', type='video',
+                channelId=channel_id, part='id,snippet', maxResults=3, order='date', type='video',
                 pageToken=nextPageToken
             ).execute()
             if 'items' not in response:
@@ -189,7 +189,7 @@ def fetch_videos_from_channel_with_chinese_subtitles(channel_id):
                         logger.info(f"Video {video_id} added with subtitles.")
                     else:
                         logger.info(f"Video {video_id} skipped, no subtitles.")
-                    if len(videos) == 25:
+                    if len(videos) == 3:
                         break
             nextPageToken = response.get('nextPageToken')
             if not nextPageToken:
