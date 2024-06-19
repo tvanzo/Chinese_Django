@@ -1,4 +1,4 @@
-name: Deploy to Render
+ok give me full deploy.yaml. here is current: name: Deploy to Render
 
 on:
   push:
