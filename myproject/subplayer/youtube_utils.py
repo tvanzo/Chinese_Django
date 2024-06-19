@@ -101,14 +101,17 @@ def process_and_save_subtitles(subtitles, video_id):
     os.makedirs(subtitles_dir, exist_ok=True)
     file_path = os.path.join(subtitles_dir, f"{video_id}_subtitles.json")
 
+    logger.info(f"Saving subtitles to: {file_path}")
+    logger.info(f"Subtitles directory exists: {os.path.isdir(subtitles_dir)}")
+    logger.info(f"MEDIA_ROOT: {settings.MEDIA_ROOT}")
+
     try:
         with open(file_path, 'w', encoding='utf-8') as file:
             json.dump(subtitles_data, file, ensure_ascii=False, indent=4)
 
         if os.path.exists(file_path):
             relative_path = os.path.relpath(file_path, start=settings.MEDIA_ROOT)
-            logger.info(
-                f"Successfully saved subtitles for video ID {video_id} at {relative_path} with word count of {word_count}")
+            logger.info(f"Successfully saved subtitles for video ID {video_id} at {relative_path} with word count of {word_count}")
             return relative_path, word_count
         else:
             logger.error(f"Subtitle file was not created at the expected path: {file_path}")
@@ -116,6 +119,7 @@ def process_and_save_subtitles(subtitles, video_id):
     except Exception as e:
         logger.error(f"Failed to save subtitles for video ID {video_id}: {e}")
         return None, 0
+
 
 
 def fetch_channel_details(url):
