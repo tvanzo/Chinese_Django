@@ -1,146 +1,245 @@
-from django.contrib import admin
-from django import forms
-from django.contrib import messages
-from django.conf import settings
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+from youtube_transcript_api import YouTubeTranscriptApi
+import re
 import os
+import json
+from django.conf import settings
 import logging
-
-from .models import Media, Channel
-from .youtube_utils import fetch_video_details, fetch_channel_details, fetch_videos_from_channel_with_chinese_subtitles
+from isodate import parse_duration
 
 logger = logging.getLogger(__name__)
 
-
-class MediaAdminForm(forms.ModelForm):
-    class Meta:
-        model = Media
-        fields = ['url']
+# Initialize YouTube API
+youtube = build('youtube', 'v3', developerKey='AIzaSyBbuGRULqUYyCxDBZyoHFgzHwseF-fnrwg')
 
 
-class MediaAdmin(admin.ModelAdmin):
-    form = MediaAdminForm
-    list_display = ('title', 'url', 'media_type', 'channel', 'media_id', 'category')
-    search_fields = ['title', 'url', 'channel__name']
-    list_filter = ['category']
+def fetch_subtitles(video_id, language='zh'):
+    try:
+        return YouTubeTranscriptApi.get_transcript(video_id, languages=['zh-CN', 'zh-Hans', 'zh-Hant', 'zh', 'zh-TW'])
+    except Exception as e:
+        logger.error(f"Failed to fetch subtitles for video ID {video_id}: {e}")
+        return None
 
-    def save_model(self, request, obj, form, change):
-        video_details = fetch_video_details(obj.url)
-        if video_details['status'] == 'valid':
-            # Fetch or create the associated channel
-            channel_url = f"https://www.youtube.com/channel/{video_details['channel_id']}"
-            channel_details = fetch_channel_details(channel_url)
-            if channel_details:
-                channel, created = Channel.objects.update_or_create(
-                    channel_id=channel_details['channel_id'],
-                    defaults={
-                        'name': channel_details.get('channel_name', 'Unnamed Channel'),
-                        'url': channel_url,
-                        'profile_pic_url': channel_details.get('profile_pic_url', '')
-                    }
-                )
-                obj.channel = channel
-            else:
-                messages.error(request, "Failed to fetch or update channel details.")
-                return
 
-            logger.info(f"Subtitles file path from video details: {video_details.get('subtitles_file_path')}")
-            obj.subtitle_file = video_details.get('subtitles_file_path')
-            logger.info(f"Assigned subtitle file: {obj.subtitle_file}")
+def fetch_video_details(url):
+    logger.debug(f"Fetching video details for URL: {url}")
+    # Check if the URL already contains a proper YouTube base URL
+    if "youtube.com" not in url and "youtu.be" not in url:
+        url = f"https://www.youtube.com/watch?v={url}"
+        logger.debug(f"Adjusted URL to: {url}")
 
-            # Confirm the file exists at this path before saving
-            file_path = os.path.join(settings.MEDIA_ROOT, obj.subtitle_file)
-            if os.path.isfile(file_path):
-                logger.info(f"File exists at: {file_path}")
-            else:
-                logger.error(f"File does NOT exist at: {file_path}")
+    video_id_match = re.search(r'(?<=v=)[^&#]+', url) or re.search(r'(?<=be/)[^&#]+', url)
+    video_id = video_id_match.group(0) if video_id_match else None
+    logger.error("URL provided: " + url)
 
-            obj.word_count = int(video_details.get('word_count', 0))
-            obj.title = video_details['title']
-            obj.media_type = 'video'
-            obj.media_id = video_details['video_id']
-            obj.youtube_video_id = video_details['video_id']
-            obj.video_length = video_details['video_length']
-            obj.category = video_details.get('category_id', 'Unknown')  # Ensure the category is assigned
+    if not video_id:
+        logger.error("Invalid YouTube URL provided: " + url)
+        return {'status': 'invalid', 'message': "Invalid YouTube URL."}
 
-            super().save_model(request, obj, form, change)
+    logger.debug(f"Using video ID: {video_id} to fetch details.")
+
+    try:
+        video_response = youtube.videos().list(id=video_id, part='snippet,contentDetails').execute()
+        if not video_response.get('items'):
+            logger.warning(f"No YouTube video exists for the provided ID: {video_id}")
+            return {'status': 'invalid', 'message': "YouTube video does not exist."}
+
+        video_item = video_response['items'][0]
+        video_title = video_item['snippet']['title']
+        thumbnail_url = video_item['snippet']['thumbnails']['high']['url']
+        channel_id = video_item['snippet']['channelId']
+        category_id = video_item['snippet']['categoryId']
+        duration = parse_duration(video_item['contentDetails']['duration'])
+        video_length_seconds = int(duration.total_seconds())
+
+        subtitles = fetch_subtitles(video_id)
+        subtitles_path = None
+        word_count = 0
+        if subtitles:
+            subtitles_path, word_count = process_and_save_subtitles(subtitles, video_id)
+
+        logger.info(f"Successfully fetched details for video ID: {video_id}")
+        return {
+            'status': 'valid',
+            'message': "Video details fetched successfully.",
+            'title': video_title,
+            'video_id': video_id,
+            'thumbnail_url': thumbnail_url,
+            'video_length': video_length_seconds,
+            'subtitles_file_path': subtitles_path,
+            'word_count': word_count,
+            'channel_id': channel_id,
+            'category_id': category_id
+        }
+    except HttpError as e:
+        logger.error(f"HTTP Error while fetching video details: {e}")
+        return {'status': 'invalid', 'message': f"An API error occurred: {e}"}
+
+
+def process_and_save_subtitles(subtitles, video_id):
+    if not subtitles:
+        logger.error(f"No subtitles data provided for video ID: {video_id}")
+        return None, 0
+
+    transcript = " ".join([sub.get('text', '') for sub in subtitles])
+    if not transcript:
+        logger.error(f"Transcript could not be constructed for video ID: {video_id}")
+        return None, 0
+
+    word_count = len(transcript.split())
+    subtitles_data = {
+        'transcript': transcript,
+        'words': [{
+            'startTime': sub['start'],
+            'endTime': sub['start'] + sub['duration'],
+            'word': word
+        } for sub in subtitles for word in sub.get('text', '').split()]
+    }
+
+    subtitles_dir = os.path.join(settings.MEDIA_ROOT, 'subtitles')
+    os.makedirs(subtitles_dir, exist_ok=True)
+    file_path = os.path.join(subtitles_dir, f"{video_id}_subtitles.json")
+
+    try:
+        with open(file_path, 'w', encoding='utf-8') as file:
+            json.dump(subtitles_data, file, ensure_ascii=False, indent=4)
+
+        if os.path.exists(file_path):
+            relative_path = os.path.relpath(file_path, start=settings.MEDIA_ROOT)
+            logger.info(
+                f"Successfully saved subtitles for video ID {video_id} at {relative_path} with word count of {word_count}")
+            return relative_path, word_count
         else:
-            messages.error(request, video_details.get('message', 'Failed to fetch video details.'))
+            logger.error(f"Subtitle file was not created at the expected path: {file_path}")
+            return None, 0
+    except Exception as e:
+        logger.error(f"Failed to save subtitles for video ID {video_id}: {e}")
+        return None, 0
 
 
-admin.site.register(Media, MediaAdmin)
+def fetch_channel_details(url):
+    try:
+        channel_id = None
+        username = None
+        # Try extracting channel ID from URL
+        match = re.search(r'youtube\.com/channel/([^/?]+)', url)
+        if match:
+            channel_id = match.group(1)
+            logger.debug(f"Extracted channel ID: {channel_id}")
+        else:
+            # Try extracting username from URL
+            match = re.search(r'youtube\.com/@([^/?]+)', url)
+            if match:
+                username = match.group(1)
+                logger.debug(f"Extracted username: {username}")
+                # Fetch channel ID using the username
+                response = youtube.channels().list(part='snippet', forUsername=username).execute()
+                logger.debug(f"Response for username {username}: {response}")
+                if response.get('items'):
+                    channel_id = response['items'][0]['id']
+                else:
+                    # Handle the case where username lookup fails
+                    search_response = youtube.search().list(part='snippet', q=username, type='channel').execute()
+                    logger.debug(f"Search response for username {username}: {search_response}")
+                    if search_response.get('items'):
+                        channel_id = search_response['items'][0]['snippet']['channelId']
+        if not channel_id:
+            logger.error("Channel ID could not be found or extracted from the URL.")
+            return None
+        # Fetch details using the channel ID
+        response = youtube.channels().list(id=channel_id, part='snippet').execute()
+        logger.debug(f"Response for channel ID {channel_id}: {response}")
+        if response.get('items'):
+            item = response['items'][0]
+            return {
+                'channel_id': item['id'],
+                'channel_name': item['snippet']['title'],
+                'profile_pic_url': item['snippet']['thumbnails']['default']['url']
+            }
+        else:
+            logger.error("No channel found for the given ID or username.")
+            return None
+    except Exception as e:
+        logger.error(f"An error occurred while fetching channel details: {e}")
+        return None
 
 
-class ChannelAdminForm(forms.ModelForm):
-    class Meta:
-        model = Channel
-        fields = ['url']
 
-    def clean(self):
-        cleaned_data = super().clean()
-        url = cleaned_data.get('url')
-        if not url:
-            raise forms.ValidationError({'url': "URL cannot be blank."})
-        logger.info(f"Fetching channel details for URL: {url}")
-        channel_details = fetch_channel_details(url)
-        if not channel_details or 'channel_id' not in channel_details or not channel_details['channel_id']:
-            logger.error(f"Failed to fetch channel details for URL: {url}")
-            raise forms.ValidationError(
-                "Failed to fetch channel details or channel ID not found. Please check the URL and try again.")
-
-        cleaned_data['channel_id'] = channel_details['channel_id']
-        cleaned_data['name'] = channel_details.get('channel_name', 'Unnamed Channel')
-        cleaned_data['profile_pic_url'] = channel_details.get('profile_pic_url', '')
-        logger.info(f"Channel details fetched and validated for: {cleaned_data['name']}")
-        return cleaned_data
-
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        instance.channel_id = self.cleaned_data['channel_id']
-        instance.name = self.cleaned_data['name']
-        instance.profile_pic_url = self.cleaned_data.get('profile_pic_url', '')
-        if commit:
-            instance.save()
-            logger.info(f"Channel '{instance.name}' saved successfully with ID: {instance.channel_id}")
-        return instance
-
-
-class ChannelAdmin(admin.ModelAdmin):
-    form = ChannelAdminForm
-    list_display = ('name', 'channel_id', 'url')
-    actions = ['fetch_videos']
-
-    def fetch_videos(self, request, queryset):
-        logger.info("Starting fetch_videos action in admin.")
-        for channel in queryset:
-            logger.info(f"Attempting to fetch videos for channel: {channel.name} (ID: {channel.channel_id})")
-            videos = fetch_videos_from_channel_with_chinese_subtitles(channel.channel_id)
-            if videos:
-                logger.info(f"Found {len(videos)} videos for channel: {channel.name}")
-                for video in videos:
-                    result, created = Media.objects.update_or_create(
-                        youtube_video_id=video['video_id'],
-                        defaults={
-                            'title': video['title'],
-                            'url': f"https://www.youtube.com/watch?v={video['video_id']}",
-                            'media_type': 'video',
-                            'subtitle_file': video.get('subtitles_file_path'),
-                            'word_count': video.get('word_count', 0),
-                            'video_length': video['video_length'],
-                            'channel': channel,
-                            'category': video['category_id'],
-                            'thumbnail_url': video.get('thumbnail_url'),
-                            'media_id': video['video_id']  # Ensure media_id is also set correctly
-                        }
-                    )
-                    if created:
-                        logger.info(f"Created new media object for video: {video['title']}")
+def fetch_videos_from_channel_with_chinese_subtitles(channel_id):
+    videos = []
+    nextPageToken = None
+    try:
+        logger.info(f"Starting video fetch for channel ID: {channel_id}")
+        while len(videos) < 25:
+            response = youtube.search().list(
+                channelId=channel_id, part='id,snippet', maxResults=25, order='date', type='video',
+                pageToken=nextPageToken
+            ).execute()
+            if 'items' not in response:
+                logger.warning("No items found in response from YouTube API.")
+                break
+            for item in response.get('items', []):
+                video_id = item['id']['videoId']
+                logger.info(f"Processing video ID: {video_id}")
+                details = fetch_video_details(video_id)
+                if details['status'] == 'valid':
+                    if details.get('subtitles_file_path'):
+                        videos.append(details)
+                        logger.info(f"Video {video_id} added with subtitles.")
                     else:
-                        logger.info(f"Updated existing media object for video: {video['title']}")
-            else:
-                logger.warning(f"No videos found or failed to fetch videos for channel: {channel.name}")
-                messages.warning(request, f"No videos found or failed to fetch videos for channel: {channel.name}")
+                        logger.info(f"Video {video_id} skipped, no subtitles.")
+                    if len(videos) == 25:
+                        break
+            nextPageToken = response.get('nextPageToken')
+            if not nextPageToken:
+                logger.info("No more pages to fetch.")
+                break
+    except Exception as e:
+        logger.error(f"Failed to fetch videos: {e}")
+    if not videos:
+        logger.warning("No suitable videos were found or added.")
+    else:
+        logger.info(f"Total videos fetched and added: {len(videos)}")
+    return videos
 
-    fetch_videos.short_description = "Fetch latest videos with Chinese subtitles"
 
+def get_channel_profile_pic(youtube_url):
+    try:
+        # Extract video ID from the URL
+        video_id_match = re.search(r'(?<=v=)[^&#]+', youtube_url) or re.search(r'(?<=be/)[^&#]+', youtube_url)
+        video_id = video_id_match.group(0) if video_id_match else None
 
-admin.site.register(Channel, ChannelAdmin)
+        if not video_id:
+            logger.error(f"Invalid YouTube URL provided: {youtube_url}")
+            return None
+
+        # Fetch channel ID
+        video_response = youtube.videos().list(
+            part="snippet",
+            id=video_id
+        ).execute()
+
+        if not video_response['items']:
+            logger.error(f"No video found with ID: {video_id}")
+            return None
+
+        channel_id = video_response["items"][0]["snippet"]["channelId"]
+
+        # Fetch profile picture
+        channel_response = youtube.channels().list(
+            part="snippet",
+            id=channel_id
+        ).execute()
+
+        if not channel_response['items']:
+            logger.error(f"No channel found with ID: {channel_id}")
+            return None
+
+        profile_pic_url = channel_response["items"][0]["snippet"]["thumbnails"]["default"]["url"]
+        logger.info(f"Profile picture URL fetched successfully for channel ID: {channel_id}")
+
+        return profile_pic_url
+    except Exception as e:
+        logger.error(f"An error occurred while fetching the channel profile picture: {e}")
+        return None

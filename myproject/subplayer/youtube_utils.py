@@ -11,7 +11,7 @@ from isodate import parse_duration
 logger = logging.getLogger(__name__)
 
 # Initialize YouTube API
-youtube = build('youtube', 'v3', developerKey=settings.YOUTUBE_API_KEY)
+youtube = build('youtube', 'v3', developerKey='AIzaSyBbuGRULqUYyCxDBZyoHFgzHwseF-fnrwg')
 
 
 def fetch_subtitles(video_id, language='zh'):
@@ -24,6 +24,7 @@ def fetch_subtitles(video_id, language='zh'):
 
 def fetch_video_details(url):
     logger.debug(f"Fetching video details for URL: {url}")
+    # Check if the URL already contains a proper YouTube base URL
     if "youtube.com" not in url and "youtu.be" not in url:
         url = f"https://www.youtube.com/watch?v={url}"
         logger.debug(f"Adjusted URL to: {url}")
@@ -58,7 +59,7 @@ def fetch_video_details(url):
         if subtitles:
             subtitles_path, word_count = process_and_save_subtitles(subtitles, video_id)
 
-        logger.info(f"Subtitles path: {subtitles_path}")
+        logger.info(f"Successfully fetched details for video ID: {video_id}")
         return {
             'status': 'valid',
             'message': "Video details fetched successfully.",
@@ -100,17 +101,14 @@ def process_and_save_subtitles(subtitles, video_id):
     os.makedirs(subtitles_dir, exist_ok=True)
     file_path = os.path.join(subtitles_dir, f"{video_id}_subtitles.json")
 
-    logger.info(f"Saving subtitles to: {file_path}")
-    logger.info(f"Subtitles directory exists: {os.path.isdir(subtitles_dir)}")
-    logger.info(f"MEDIA_ROOT: {settings.MEDIA_ROOT}")
-
     try:
         with open(file_path, 'w', encoding='utf-8') as file:
             json.dump(subtitles_data, file, ensure_ascii=False, indent=4)
 
         if os.path.exists(file_path):
             relative_path = os.path.relpath(file_path, start=settings.MEDIA_ROOT)
-            logger.info(f"Successfully saved subtitles for video ID {video_id} at {relative_path} with word count of {word_count}")
+            logger.info(
+                f"Successfully saved subtitles for video ID {video_id} at {relative_path} with word count of {word_count}")
             return relative_path, word_count
         else:
             logger.error(f"Subtitle file was not created at the expected path: {file_path}")
@@ -167,14 +165,15 @@ def fetch_channel_details(url):
         return None
 
 
+
 def fetch_videos_from_channel_with_chinese_subtitles(channel_id):
     videos = []
     nextPageToken = None
     try:
         logger.info(f"Starting video fetch for channel ID: {channel_id}")
-        while len(videos) < 25:
+        while len(videos) < 3:
             response = youtube.search().list(
-                channelId=channel_id, part='id,snippet', maxResults=25, order='date', type='video',
+                channelId=channel_id, part='id,snippet', maxResults=3, order='date', type='video',
                 pageToken=nextPageToken
             ).execute()
             if 'items' not in response:
@@ -190,7 +189,7 @@ def fetch_videos_from_channel_with_chinese_subtitles(channel_id):
                         logger.info(f"Video {video_id} added with subtitles.")
                     else:
                         logger.info(f"Video {video_id} skipped, no subtitles.")
-                    if len(videos) == 25:
+                    if len(videos) == 3:
                         break
             nextPageToken = response.get('nextPageToken')
             if not nextPageToken:
