@@ -9,7 +9,6 @@ from subplayer import views as subplayer_views
 from allauth.account.views import LoginView, LogoutView, SignupView
 from allauth.account.views import PasswordResetView
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', account_views.stats_view, name='stats_view'),
@@ -60,8 +59,9 @@ urlpatterns = [
     path('logout/', account_views.custom_logout_view, name='logout'),
     path('password/reset/', PasswordResetView.as_view(template_name='accounts/password_reset.html'),
          name='account_reset_password'),
-
 ]
 
 if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

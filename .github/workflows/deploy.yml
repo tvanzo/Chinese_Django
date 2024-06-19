@@ -63,4 +63,3 @@ jobs:
             -H "Content-Type: application/json" \
             --data '{"serviceId": "srv-cpoif12ju9rs738p174g"}' \
             https://api.render.com/v1/services/srv-cpoif12ju9rs738p174g/deploys
-    
