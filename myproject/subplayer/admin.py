@@ -17,11 +17,12 @@ class MediaAdminForm(forms.ModelForm):
         model = Media
         fields = ['url']
 
+
 class MediaAdmin(admin.ModelAdmin):
     form = MediaAdminForm
-    list_display = ('title', 'url', 'media_type', 'channel', 'media_id', 'category')  # Added 'category'
+    list_display = ('title', 'url', 'media_type', 'channel', 'media_id', 'category')
     search_fields = ['title', 'url', 'channel__name']
-    list_filter = ['category']  # Optional, for filtering by category
+    list_filter = ['category']
 
     def save_model(self, request, obj, form, change):
         video_details = fetch_video_details(obj.url)
@@ -43,7 +44,9 @@ class MediaAdmin(admin.ModelAdmin):
                 messages.error(request, "Failed to fetch or update channel details.")
                 return
 
+            logger.info(f"Subtitles file path from video details: {video_details.get('subtitles_file_path')}")
             obj.subtitle_file = video_details.get('subtitles_file_path')
+            logger.info(f"Assigned subtitle file: {obj.subtitle_file}")
             obj.word_count = int(video_details.get('word_count', 0))
             obj.title = video_details['title']
             obj.media_type = 'video'
@@ -51,13 +54,14 @@ class MediaAdmin(admin.ModelAdmin):
             obj.youtube_video_id = video_details['video_id']
             obj.video_length = video_details['video_length']
             obj.category = video_details.get('category_id', 'Unknown')  # Ensure the category is assigned
+
             super().save_model(request, obj, form, change)
         else:
             messages.error(request, video_details.get('message', 'Failed to fetch video details.'))
 
 
-
 admin.site.register(Media, MediaAdmin)
+
 
 class ChannelAdminForm(forms.ModelForm):
     class Meta:
@@ -73,7 +77,8 @@ class ChannelAdminForm(forms.ModelForm):
         channel_details = fetch_channel_details(url)
         if not channel_details or 'channel_id' not in channel_details or not channel_details['channel_id']:
             logger.error(f"Failed to fetch channel details for URL: {url}")
-            raise forms.ValidationError("Failed to fetch channel details or channel ID not found. Please check the URL and try again.")
+            raise forms.ValidationError(
+                "Failed to fetch channel details or channel ID not found. Please check the URL and try again.")
 
         cleaned_data['channel_id'] = channel_details['channel_id']
         cleaned_data['name'] = channel_details.get('channel_name', 'Unnamed Channel')
@@ -90,6 +95,7 @@ class ChannelAdminForm(forms.ModelForm):
             instance.save()
             logger.info(f"Channel '{instance.name}' saved successfully with ID: {instance.channel_id}")
         return instance
+
 
 class ChannelAdmin(admin.ModelAdmin):
     form = ChannelAdminForm

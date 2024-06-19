@@ -24,7 +24,6 @@ def fetch_subtitles(video_id, language='zh'):
 
 def fetch_video_details(url):
     logger.debug(f"Fetching video details for URL: {url}")
-    # Check if the URL already contains a proper YouTube base URL
     if "youtube.com" not in url and "youtu.be" not in url:
         url = f"https://www.youtube.com/watch?v={url}"
         logger.debug(f"Adjusted URL to: {url}")
@@ -59,7 +58,7 @@ def fetch_video_details(url):
         if subtitles:
             subtitles_path, word_count = process_and_save_subtitles(subtitles, video_id)
 
-        logger.info(f"Successfully fetched details for video ID: {video_id}")
+        logger.info(f"Subtitles path: {subtitles_path}")
         return {
             'status': 'valid',
             'message': "Video details fetched successfully.",
@@ -75,6 +74,7 @@ def fetch_video_details(url):
     except HttpError as e:
         logger.error(f"HTTP Error while fetching video details: {e}")
         return {'status': 'invalid', 'message': f"An API error occurred: {e}"}
+
 
 
 def process_and_save_subtitles(subtitles, video_id):
