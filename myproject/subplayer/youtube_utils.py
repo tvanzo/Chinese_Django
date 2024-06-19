@@ -11,7 +11,7 @@ from isodate import parse_duration
 logger = logging.getLogger(__name__)
 
 # Initialize YouTube API
-youtube = build('youtube', 'v3', developerKey='AIzaSyBbuGRULqUYyCxDBZyoHFgzHwseF-fnrwg')
+youtube = build('youtube', 'v3', developerKey=settings.YOUTUBE_API_KEY)
 
 
 def fetch_subtitles(video_id, language='zh'):
@@ -76,7 +76,6 @@ def fetch_video_details(url):
         return {'status': 'invalid', 'message': f"An API error occurred: {e}"}
 
 
-
 def process_and_save_subtitles(subtitles, video_id):
     if not subtitles:
         logger.error(f"No subtitles data provided for video ID: {video_id}")
@@ -119,7 +118,6 @@ def process_and_save_subtitles(subtitles, video_id):
     except Exception as e:
         logger.error(f"Failed to save subtitles for video ID {video_id}: {e}")
         return None, 0
-
 
 
 def fetch_channel_details(url):
@@ -167,7 +165,6 @@ def fetch_channel_details(url):
     except Exception as e:
         logger.error(f"An error occurred while fetching channel details: {e}")
         return None
-
 
 
 def fetch_videos_from_channel_with_chinese_subtitles(channel_id):
