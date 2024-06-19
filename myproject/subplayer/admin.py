@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django import forms
 from django.contrib import messages
-from django.core.files.base import ContentFile
 from django.conf import settings
 import os
 import logging
@@ -47,6 +46,14 @@ class MediaAdmin(admin.ModelAdmin):
             logger.info(f"Subtitles file path from video details: {video_details.get('subtitles_file_path')}")
             obj.subtitle_file = video_details.get('subtitles_file_path')
             logger.info(f"Assigned subtitle file: {obj.subtitle_file}")
+
+            # Confirm the file exists at this path before saving
+            file_path = os.path.join(settings.MEDIA_ROOT, obj.subtitle_file)
+            if os.path.isfile(file_path):
+                logger.info(f"File exists at: {file_path}")
+            else:
+                logger.error(f"File does NOT exist at: {file_path}")
+
             obj.word_count = int(video_details.get('word_count', 0))
             obj.title = video_details['title']
             obj.media_type = 'video'
