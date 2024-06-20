@@ -15,11 +15,9 @@ services:
       - key: SECRET_KEY
         fromSecret: SECRET_KEY
       - key: ALLOWED_HOSTS
-        value: "chinese-django.onrender.com"
+        value: "chinese-django.onrender.com/"
       - key: DEBUG
         value: "False"
-      - key: MEDIA_ROOT
-        value: "/var/data/media"  # This should match the disk mount path
     staticPublishPath: staticfiles
     routes:
       - type: rewrite
@@ -27,4 +25,4 @@ services:
         destination: "/staticfiles/$1"
       - type: rewrite
         source: "^/media/(.*)"
-        destination: "/var/data/media/$1"  # This should match the disk mount path
+        destination: "/var/data/media/$1"  # Ensure this matches the MEDIA_ROOT
