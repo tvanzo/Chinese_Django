@@ -141,7 +141,7 @@ MESSAGE_TAGS = {
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/data/media'
+MEDIA_ROOT = '/media'
 
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
