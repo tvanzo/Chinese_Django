@@ -8,6 +8,8 @@ from accounts import views as account_views
 from subplayer import views as subplayer_views
 from allauth.account.views import LoginView, LogoutView, SignupView
 from allauth.account.views import PasswordResetView
+from django.views.static import serve
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
