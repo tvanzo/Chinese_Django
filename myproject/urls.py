@@ -59,6 +59,8 @@ urlpatterns = [
     path('logout/', account_views.custom_logout_view, name='logout'),
     path('password/reset/', PasswordResetView.as_view(template_name='accounts/password_reset.html'),
          name='account_reset_password'),
+    path('media/<path:path>', serve, {'document_root': settings.MEDIA_ROOT}),
+
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
