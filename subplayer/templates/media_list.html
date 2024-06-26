@@ -16,83 +16,6 @@
   <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet" />
   <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
 
-  <style>
-.plus-one {
-  position: absolute;
-  color: #d00c9c;
-  font-size: 1.2rem;
-  font-weight: bold;
-  display: none;
-  animation: flyOffScreen 1s forwards;
-}
-
-@keyframes flyOffScreen {
-  0% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-200px) translateX(100px); /* Adjust values to control the direction and distance */
-  }
-}
-
-
-@keyframes fadeInOut {
-  0% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-}
-
-
-    .channel-card {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      height: 320px; /* Adjust height as needed */
-      margin: auto;
-      margin-bottom: 20px; /* Added space between rows */
-    }
-    .channel-card img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .channel-card .position-relative {
-      width: 140px;
-      height: 140px;
-      overflow: hidden;
-      margin: auto;
-    }
-    .channel-card .card-body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .channel-card .content {
-      flex: 1;
-    }
-    .channel-card .btn-container {
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-    }
-    .scrolling-wrapper {
-      display: flex;
-      overflow-x: auto;
-      padding: 1rem;
-    }
-    .scrolling-wrapper .channel-card {
-      flex: 0 0 auto;
-      margin-right: 1rem;
-    }
-  </style>
 </head>
 <body class="g-sidenav-show bg-gray-100">
   <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3" id="sidenav-main">
@@ -282,50 +205,6 @@
   </div>
 </div>
 
-<style>
-  .scrolling-wrapper {
-    display: flex;
-    overflow-x: auto;
-    gap: 10px; /* Adjust this value to reduce or increase the spacing between cards */
-    padding-bottom: 10px; /* Add some padding at the bottom for better spacing */
-  }
-
-  .scrolling-wrapper .channel-card {
-    flex: 0 0 auto;
-    width: 200px; /* Adjust width as needed */
-    margin: 0; /* Remove default margin */
-  }
-
-  .channel-card {
-    height: 250px; /* Adjust height as needed to make the cards not as tall */
-  }
-
-  .channel-card img {
-    height: 100px; /* Adjust height of the image to make the cards less tall */
-    object-fit: cover;
-  }
-
-  .card-body {
-    padding: 10px;
-  }
-
-  .card-body .content {
-    flex: 1;
-  }
-
-  .card-body h5 {
-    font-size: 1rem;
-    margin-bottom: 5px; /* Adjust margin for less spacing */
-  }
-
-  .card-body p {
-    margin-bottom: 5px; /* Adjust margin for less spacing */
-  }
-
-  .btn-container {
-    margin-top: 5px; /* Adjust margin for less spacing */
-  }
-</style>
 
       <!-- Hidden element to store data -->
       <div id="highlight-data" style="display: none;">{{ highlight_data_json|safe }}</div>
@@ -352,7 +231,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <h5 class="card-title">{{ video.subtitle_file }} </h5>
+                    <h5 class="card-title">{{ video.title }}</h5>
                     <p class="card-text">{{ video.description|truncatechars:100 }}</p>
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="channel-name">{{ video.channel.name }}</span>
@@ -492,8 +371,92 @@
     }
   </script>
 
-  <style>
+<style>
+    .plus-one {
+      position: absolute;
+      color: #d00c9c;
+      font-size: 1.2rem;
+      font-weight: bold;
+      display: none;
+      animation: flyOffScreen 1s forwards;
+    }
 
+    @keyframes flyOffScreen {
+      0% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-200px) translateX(100px);
+      }
+    }
+
+    .channel-card .card-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .channel-card .content {
+      flex: 1;
+    }
+    .channel-card .btn-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+    }
+    .scrolling-wrapper {
+      display: flex;
+      overflow-x: auto;
+      padding: 1rem;
+      gap: 10px; /* Adjust this value to reduce or increase the spacing between cards */
+      padding-bottom: 10px; /* Add some padding at the bottom for better spacing */
+    }
+    .scrolling-wrapper .channel-card {
+      flex: 0 0 auto;
+      margin-right: 1rem;
+      width: 200px; /* Adjust width as needed */
+      margin: 0; /* Remove default margin */
+    }
+    .channel-card {
+      height: 250px; /* Adjust height as needed to make the cards not as tall */
+    }
+ .channel-card .position-relative {
+  width: 140px;
+  height: 140px;
+  overflow: hidden;
+  margin: auto;
+  border-radius: 15px; /* Change to rounded edges */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+  border: none;
+}
+
+.channel-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 15px; /* Ensure the image fits the rounded container */
+}
+    .card-body {
+      padding: 10px;
+    }
+    .card-body .content {
+      flex: 1;
+    }
+    .card-body h5 {
+      font-size: 1rem;
+      margin-bottom: 5px; /* Adjust margin for less spacing */
+    }
+    .card-body p {
+      margin-bottom: 5px; /* Adjust margin for less spacing */
+    }
+    .btn-container {
+      margin-top: 5px; /* Adjust margin for less spacing */
+    }
     .text-warning { color: #dcb234; }
     .text-success { color: #3c763d; }
     .video-card {
@@ -639,72 +602,115 @@
       padding-bottom: 1rem;
     }
     .xp-points-bar {
-      background-color: #f8f9fa;
-      padding: 10px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      text-align: center;
-    }
-    .xp-circle {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background-color: #ffc40c; /* Adjust the color as needed */
-      color: #ffffff; /* Text color */
-      font-weight: bold;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    #xp-points {
-      font-size: 24px;
-      font-weight: bold;
-      color: #007bff;
-    }
-    .btn-purple {
-      background-color: #d00c9c;
-      color: #ffffff;
-      border-color: #6f42c1;
-    }
-    .compact-btn {
-      padding: 0.25rem 0.5rem; /* Less padding for a more compact button */
-    }
-    #unique-xp-display {
-      background-color: #d00c9c; /* Change the color to your preference */
-      color: white; /* Ensure the text color contrasts well */
-      padding: 3px 8px; /* Adjust padding to make it smaller */
-      border-radius: 8px; /* Increased border radius to make corners more rounded */
-    }
-    #unique-xp-display .unique-xp-circle {
-      background-color: #ffc40c; /* Change the color to your preference */
-      color: white; /* Ensure the text color contrasts well */
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 5px; /* Adjust margin as needed */
-    }
-    #unique-xp-points {
-      font-weight: bold;
-      font-size: 14px; /* Adjust font size as needed */
-    }
-    #sidenav-main {
-      background-color: #ffffff; /* White background */
-      border-radius: 12px; /* Adjust the border radius to your preference */
-      padding: 10px; /* Add padding if necessary */
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for better visibility */
-      margin-bottom: 20px; /* Add margin to ensure the bottom border is visible */
-      max-height: calc(100vh - 40px); /* Ensure the sidebar fits within the viewport */
-      overflow-y: auto; /* Add vertical scrolling if necessary */
-    }
+background-color: #f8f9fa;
+padding: 10px;
+border-radius: 10px;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+text-align: center;
+}
+.xp-circle {
+width: 32px;
+height: 32px;
+border-radius: 50%;
+background-color: #ffc40c; /* Adjust the color as needed /
+color: #ffffff; / Text color /
+font-weight: bold;
+font-size: 14px;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+#xp-points {
+font-size: 24px;
+font-weight: bold;
+color: #007bff;
+}
+.btn-purple {
+background-color: #d00c9c;
+color: #ffffff;
+border-color: #6f42c1;
+}
+.compact-btn {
+padding: 0.25rem 0.5rem; / Less padding for a more compact button /
+}
+#unique-xp-display {
+background-color: #d00c9c; / Change the color to your preference /
+color: white; / Ensure the text color contrasts well /
+padding: 3px 8px; / Adjust padding to make it smaller /
+border-radius: 8px; / Increased border radius to make corners more rounded /
+}
+#unique-xp-display .unique-xp-circle {
+background-color: #ffc40c; / Change the color to your preference /
+color: white; / Ensure the text color contrasts well /
+width: 20px;
+height: 20px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+margin-right: 5px; / Adjust margin as needed /
+}
+#unique-xp-points {
+font-weight: bold;
+font-size: 14px; / Adjust font size as needed /
+}
+#sidenav-main {
+background-color: #ffffff; / White background /
+border-radius: 12px; / Adjust the border radius to your preference /
+padding: 10px; / Add padding if necessary /
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); / Add a subtle shadow for better visibility /
+margin-bottom: 20px; / Add margin to ensure the bottom border is visible /
+max-height: calc(100vh - 40px); / Ensure the sidebar fits within the viewport /
+overflow-y: auto; / Add vertical scrolling if necessary */
+}
+.nav-item.position-relative {
+position: relative;
+}
+  .xp-points-bar {
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
 
-    .nav-item.position-relative {
-      position: relative;
-    }
+.xp-points-bar h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: normal;
+}
 
+.xp-points-bar #xp-points {
+  font-size: 20px;
+  font-weight: bold;
+  color: #007bff;
+}
+
+#unique-xp-display {
+  background-color: #d00c9c; /* Change the color to your preference */
+  color: white; /* Ensure the text color contrasts well */
+  padding: 3px 8px; /* Adjust padding to make it smaller */
+  border-radius: 8px; /* Increased border radius to make corners more rounded */
+  display: flex; /* Ensure the layout is flexible */
+  align-items: center; /* Center items vertically */
+}
+
+#unique-xp-display .unique-xp-circle {
+  background-color: #ffc40c; /* Change the color to your preference */
+  color: white; /* Ensure the text color contrasts well */
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 5px; /* Adjust margin as needed */
+}
+
+#unique-xp-points {
+  font-weight: bold;
+  font-size: 14px; /* Adjust font size as needed */
+}
 
   </style>
 

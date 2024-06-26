@@ -152,10 +152,13 @@ def fetch_channel_details(url):
         logger.debug(f"Response for channel ID {channel_id}: {response}")
         if response.get('items'):
             item = response['items'][0]
+            profile_pic_url = item['snippet']['thumbnails']['default']['url']
+            # Replace 's88' with 's176'
+            profile_pic_url = re.sub(r's88', 's176', profile_pic_url)
             return {
                 'channel_id': item['id'],
                 'channel_name': item['snippet']['title'],
-                'profile_pic_url': item['snippet']['thumbnails']['default']['url']
+                'profile_pic_url': profile_pic_url
             }
         else:
             logger.error("No channel found for the given ID or username.")
