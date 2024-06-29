@@ -20,8 +20,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/var/data/media'
 
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'subplayer/static'),
+    os.path.join(BASE_DIR, 'accounts/static'),
+]
 # Static files finders
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',

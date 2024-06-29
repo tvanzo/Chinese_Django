@@ -1,77 +1,75 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.core import serializers
-from django.http import JsonResponse
-from subplayer.forms import CustomUserCreationForm  # Import the custom form
-#test
+from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
-from accounts.models import Profile, MediaProgress
-from subplayer.models import Media, Highlight, UserMediaStatus
-import json, math  # <- Add this import at the top
-from youtube_transcript_api import YouTubeTranscriptApi
-from django.shortcuts import get_object_or_404
-from django.db.models import Count, Q
-from django.db.models.functions import TruncDay
-from django.db.models import Count, Sum
-from datetime import datetime, timedelta, date
-from django.shortcuts import render
-from django.utils import timezone
-from datetime import timedelta
+from django.utils.timezone import localtime, now
 from django.urls import reverse
-
-from django.db.models import Sum
-from django.contrib.auth.decorators import login_required
-import json
-from subplayer.views import format_duration  # Import the function from subplayer.views
-from django.http import HttpResponse
-
-import logging
+from django.conf import settings
+from django.db.models import Count, Q, Sum, F
+from django.db.models.functions import TruncDay
 from django.views.decorators.csrf import csrf_exempt
 from django.core.serializers import serialize
+from datetime import datetime, timedelta, date
+import json
+import logging
+from django.contrib.auth import authenticate, login
+from subplayer.forms import CustomUserCreationForm
+from accounts.models import Profile, MediaProgress
+from subplayer.models import Media, Highlight, UserMediaStatus
+from subplayer.views import format_duration  # Import the function from subplayer.views
 
 logger = logging.getLogger(__name__)
 
-from django.db.models import F
-
-
-
-
-
+from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
-from django.contrib import messages
-from subplayer.forms import CustomUserCreationForm  # Import the custom form
+from .forms import CustomUserCreationForm
 
-# views.py
+from django.contrib.auth import authenticate, login
+from django.shortcuts import render, redirect
+from .forms import CustomUserCreationForm
+from django.contrib import messages
+
+from django.contrib.auth import authenticate, login
+from django.shortcuts import render, redirect
+from .forms import CustomUserCreationForm
+from django.contrib import messages
+
+from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import CustomUserCreationForm
 
-# views.py
+from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import CustomUserCreationForm
 
+from django.contrib.auth import authenticate, login
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import CustomUserCreationForm
 
 def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            print("Form is valid. Invite code passed validation.")
-            form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f'Account created for {username}!')
-            return redirect('login')
+            user = form.save(request)  # Save the user and pass the request
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(email=user.email, password=raw_password)  # Use email for authentication
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'Account created for {user.email}!')
+                return redirect('/')
+            else:
+                messages.error(request, 'Authentication failed. Please try again.')
         else:
-            print("Form is invalid.")
-            print(form.errors)  # Print form errors to debug
             messages.error(request, 'Invalid form submission. Please correct the errors and try again.')
+            print(form.errors)  # Print form errors to debug
     else:
         form = CustomUserCreationForm()
-
     return render(request, 'accounts/register.html', {'form': form})
-
-
 @login_required
 def media_list(request):
     media_data = serializers.serialize('json', Media.objects.all())
@@ -100,7 +98,7 @@ def add_viewed_media(request):
         try:
             media = Media.objects.get(media_id=media_id)
             profile.viewed_media.add(media)
-            print(media_id )
+            print(media_id)
         except Media.DoesNotExist:
             print("Media not found")
             print(media_id)
@@ -121,11 +119,6 @@ def get_media_progress(request, media_id):
             return JsonResponse({'error': 'MediaProgress not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-
-
-
-
-from django.utils.timezone import localtime, now
 
 @login_required
 def update_media_progress(request):
@@ -205,9 +198,6 @@ def create_highlight(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-
-
-
 def delete_highlight(request, highlight_id):
     try:
         data = json.loads(request.body.decode('utf-8'))  # Parse JSON from the request body
@@ -226,8 +216,6 @@ def delete_highlight(request, highlight_id):
             return JsonResponse({'status': 'error', 'message': 'Permission denied'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
-
-
 
 def modify_highlight(request, highlight_id):
     if request.method == 'PUT':
@@ -261,7 +249,6 @@ def get_all_highlights(request):
     highlights = Highlight.objects.filter(user_id=request.user.id)
     highlights_data = serializers.serialize('json', highlights)
     return JsonResponse(highlights_data, safe=False)
-
 
 @login_required
 def highlights(request):

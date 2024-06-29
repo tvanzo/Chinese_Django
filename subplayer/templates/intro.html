@@ -108,11 +108,13 @@
       font-weight: bold;
       color: #1f4568;
     }
-    .card-description {
-      margin-top: 5px;
-      font-size: 16px;
-      color: #1f4568;
-    }
+   .card-description {
+  margin-top: 5px;
+  font-size: 16px;
+  color: #1f4568;
+  word-wrap: break-word;
+  white-space: normal;
+}
     .arrow-btn {
       position: absolute;
       top: 50%;
@@ -228,7 +230,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link active" href="/highlights">
+                <a class="nav-link" href="/highlights">
                     <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center" style="background-color: #FFFFFF; width: 48px; height: 48px;">
                         <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                             <title>credit-card</title>
@@ -249,10 +251,7 @@
             </li>
         </ul>
     </div>
-   <div class="sidenav-footer mb-3 mx-3">
-    <a class="btn bg-gradient-primary w-90" href="/join" style="margin-bottom: 0;">Upgrade to Pro</a>
-    <a class="nav-link mt-1 text-center" href="/accounts/login/">Sign In</a>
-</div>
+
 
 
 </aside>
@@ -269,37 +268,48 @@
           <div class="site">
             <h1 class="site__title">Your HQ for learning Chinese through video. </h1>
             <h2 class="site__subtitle">Highlight, Track, Review, Loop, and more on millions of Chinese Youtube content. </h2>
-            <div class="site__box-link">
-              <a class="btn btn--width" href="">Get Started</a>
-            </div>
+           <div class="site__box-link">
+  <a class="btn btn--width" href="{% url 'register' %}">Get Started</a>
+  <div style="margin-top: 5px;">
+    <a href="{% url 'login' %}" style="font-size: 14px; color: #8198ae; text-decoration: none;">Already have an account? <strong>Log In</strong></a>
+  </div>
+</div>
+<div style="margin-bottom: 20px;"></div>
             <div class="cards-wrapper">
   <div class="cards">
     <div class="card">
-      <div class="card-title">Analytics Dashboard</div>
-      <img src="{% static 'sublayer/1intro.png' %}" alt="Analytics Dashboard">
-      <div class="card-description">Feature 1: Detailed Analytics Dashboard</div>
+      <div class="card-title">Track your Progress</div>
+      <img src="{% static 'accounts/img/1intro.png' %}" alt="Analytics Dashboard">
+      <div class="card-description">Log all of your Chinese learning through video. Tracking everything you do is craz
+      </div>
     </div>
     <div class="card">
-      <div class="card-title">Real-time Visualization</div>
-      <img src="{% static 'sublayer/2intro.png' %}" alt="Real-time Visualization">
-      <div class="card-description">Feature 2: Real-time Data Visualization</div>
+      <div class="card-title">Optimized for Learning</div>
+      <img src="{% static 'accounts/img/3intro.png' %}" alt="Real-time Visualization">
+      <div class="card-description">Highlight subtitles, loop mode, loop through highlights, popup dictionary, and more. </div>
     </div>
     <div class="card">
-      <div class="card-title">Custom Reports</div>
-      <img src="{% static 'sublayer/3intro.png' %}" alt="Custom Reports">
-      <div class="card-description">Feature 3: Customizable Reports</div>
+      <div class="card-title">Library: 1+ million </div>
+      <img src="{% static 'accounts/img/2intro.png' %}" alt="Custom Reports">
+      <div class="card-description">Add any video available on Youtube, no need to learn language on Youtube again.  </div>
     </div>
     <div class="card">
-      <div class="card-title">User-friendly Interface</div>
-      <img src="https://image.ibb.co/c7grYb/image3015.png" alt="User-friendly Interface">
-      <div class="card-description">Feature 4: User-friendly Interface</div>
+      <div class="card-title">Highlighting</div>
+      <img src="{% static 'accounts/img/4intro.png' %}" alt="Custom Reports">
+      <div class="card-description">Your Notebook: Directly highlight subtitles for future review.</div>
     </div>
     <div class="card">
-      <div class="card-title">Seamless Integration</div>
-      <img src="https://image.ibb.co/c7grYb/image3015.png" alt="Seamless Integration">
-      <div class="card-description">Feature 5: Seamless Integration</div>
+      <div class="card-title">Download Highlights</div>
+      <img src="{% static 'accounts/img/5intro.png' %}" alt="Custom Reports">
+      <div class="card-description">Dowload all highlights to .txt for Anki or Pleco cards.</div>
+    </div>
+      <div class="card">
+      <div class="card-title">Data for AI</div>
+      <img src="{% static 'accounts/img/6intro.png' %}" alt="Custom Reports">
+      <div class="card-description">Download one .txt of all highlights and all transcripts to import to GPT for review practice.</div>
     </div>
   </div>
+
   <button class="arrow-btn arrow-btn-prev" tabindex="0">
     <svg viewBox="0 0 256 512">
       <path d="M31.7 239l136-136c9.4-9.4 24.6-9.4 33.9 0l22.6 22.6c9.4 9.4 9.4 24.6 0 33.9L127.9 256l96.4 96.4c9.4 9.4 9.4 24.6 0 33.9L201.7 409c-9.4 9.4-24.6 9.4-33.9 0l-136-136c-9.5-9.4-9.5-24.6-.1-34z" />
@@ -705,6 +715,85 @@
   max-height: calc(100vh - 40px); /* Ensure the sidebar fits within the viewport */
   overflow-y: auto; /* Add vertical scrolling if necessary */
 }
+
+    .cards {
+  display: flex;
+  transition: transform 0.75s ease;
+}
+
+.card {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  padding: 10px;
+  position: relative;
+  text-align: center;
+  width: 250px; /* Set a fixed width for the card */
+}
+
+.card img {
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.card-title {
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #1f4568;
+}
+
+.card-description {
+  margin-top: 5px;
+  font-size: 16px;
+  color: #1f4568;
+  word-wrap: break-word;
+  white-space: normal;
+  overflow-wrap: break-word; /* Ensure long words break to the next line */
+}
+    .cards {
+  display: flex;
+  transition: transform 0.75s ease;
+}
+
+.card {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  padding: 10px;
+  position: relative;
+  text-align: center;
+  width: 250px; /* Set a fixed width for the card */
+}
+
+.card:not(:last-child) {
+  margin-right: 15px; /* Add margin to create a gap between cards */
+}
+
+.card img {
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.card-title {
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #1f4568;
+}
+
+.card-description {
+  margin-top: 5px;
+  font-size: 16px;
+  color: #1f4568;
+  word-wrap: break-word;
+  white-space: normal;
+  overflow-wrap: break-word; /* Ensure long words break to the next line */
+}
   </style>
 
   <script>
@@ -774,4 +863,218 @@ document.addEventListener('DOMContentLoaded', (event) => {
   });
 });
 
+</script>
+
+   <style>
+  .cards-wrapper {
+    width: 100%;
+    max-width: 1000px;
+    overflow: hidden;
+    position: relative;
+    margin: 0 auto;
+  }
+  .cards {
+    display: flex;
+    transition: transform 0.75s ease;
+  }
+  .card {
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    padding: 10px;
+    position: relative;
+    text-align: center;
+    width: 300px; /* Increased width for larger cards */
+  }
+  .card:not(:last-child) {
+    margin-right: 15px; /* Add margin to create a gap between cards */
+  }
+  .card img {
+    width: 100%;
+    max-width: 480px;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+  .card-title {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #1f4568;
+  }
+  .card-description {
+    margin-top: 5px;
+    font-size: 16px;
+    color: #1f4568;
+    word-wrap: break-word;
+    white-space: normal;
+    overflow-wrap: break-word; /* Ensure long words break to the next line */
+  }
+  .arrow-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #fff;
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 6px 8px #00000030;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    z-index: 10;
+  }
+  .arrow-btn-prev {
+    left: 10px;
+  }
+  .arrow-btn-next {
+    right: 10px;
+  }
+  .arrow-btn svg {
+    fill: #333;
+    position: absolute;
+    height: 80%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', (event) => {
+    const arrowBtns = document.querySelectorAll('.arrow-btn');
+    const cards = document.querySelector('.cards');
+    const totalCards = document.querySelectorAll('.card').length;
+    const cardWidth = document.querySelector('.card').offsetWidth;
+    const visibleCardsCount = Math.floor(cards.parentElement.offsetWidth / (cardWidth + 15));
+    const maxTranslateX = -(cardWidth + 15) * (totalCards - visibleCardsCount); // Including gap
+    let currentTranslateX = 0;
+
+    function updateArrows() {
+      arrowBtns[0].style.display = currentTranslateX === 0 ? 'none' : 'block';
+      arrowBtns[1].style.display = currentTranslateX <= maxTranslateX ? 'none' : 'block';
+    }
+
+    arrowBtns.forEach((btn, i) => {
+      btn.onclick = () => {
+        if (i === 0 && currentTranslateX < 0) {
+          currentTranslateX += cardWidth + 15;
+        } else if (i === 1 && currentTranslateX > maxTranslateX) {
+          currentTranslateX -= cardWidth + 15;
+        }
+        cards.style.transform = `translateX(${currentTranslateX}px)`;
+        updateArrows();
+      };
+    });
+
+    updateArrows(); // Initial update for arrows visibility
+  });
+</script>
+
+   <style>
+  .cards-wrapper {
+    width: 100%;
+    max-width: 1000px;
+    overflow: hidden;
+    position: relative;
+    margin: 0 auto;
+  }
+  .cards {
+    display: flex;
+    transition: transform 0.75s ease;
+  }
+  .card {
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    padding: 10px;
+    position: relative;
+    text-align: center;
+    width: 300px; /* Increased width for larger cards */
+  }
+  .card:not(:last-child) {
+    margin-right: 15px; /* Add margin to create a gap between cards */
+  }
+  .card img {
+    width: 100%;
+    max-width: 480px;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+  .card-title {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #1f4568;
+  }
+  .card-description {
+    margin-top: 10px;
+    font-size: 14px; /* Slightly smaller font size */
+    color: #555; /* Darker color for better readability */
+    background-color: #f9f9f9; /* Light background color */
+    padding: 10px; /* Add padding */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    transition: background-color 0.3s, transform 0.3s; /* Smooth transition effects */
+  }
+  .card-description:hover {
+    background-color: #e0e0e0; /* Slightly darker background on hover */
+    transform: translateY(-2px); /* Slight lift on hover */
+  }
+  .arrow-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #fff;
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 6px 8px #00000030;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    z-index: 10;
+  }
+  .arrow-btn-prev {
+    left: 10px;
+  }
+  .arrow-btn-next {
+    right: 10px;
+  }
+  .arrow-btn svg {
+    fill: #333;
+    position: absolute;
+    height: 80%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', (event) => {
+    const arrowBtns = document.querySelectorAll('.arrow-btn');
+    const cards = document.querySelector('.cards');
+    const totalCards = document.querySelectorAll('.card').length;
+    const cardWidth = document.querySelector('.card').offsetWidth;
+    const visibleCardsCount = Math.floor(cards.parentElement.offsetWidth / (cardWidth + 15));
+    const maxTranslateX = -(cardWidth + 15) * (totalCards - visibleCardsCount); // Including gap
+    let currentTranslateX = 0;
+
+    function updateArrows() {
+      arrowBtns[0].style.display = currentTranslateX === 0 ? 'none' : 'block';
+      arrowBtns[1].style.display = currentTranslateX <= maxTranslateX ? 'none' : 'block';
+    }
+
+    arrowBtns.forEach((btn, i) => {
+      btn.onclick = () => {
+        if (i === 0 && currentTranslateX < 0) {
+          currentTranslateX += cardWidth + 15;
+        } else if (i === 1 && currentTranslateX > maxTranslateX) {
+          currentTranslateX -= cardWidth + 15;
+        }
+        cards.style.transform = `translateX(${currentTranslateX}px)`;
+        updateArrows();
+      };
+    });
+
+    updateArrows(); // Initial update for arrows visibility
+  });
 </script>
