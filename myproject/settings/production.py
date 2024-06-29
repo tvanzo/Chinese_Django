@@ -6,7 +6,7 @@ DEBUG = env.bool('DEBUG', default=False)
 SECRET_KEY = env('SECRET_KEY')
 
 # Directly set the ALLOWED_HOSTS to include your domain
-ALLOWED_HOSTS = ['chinese-django.onrender.com', 'localhost', '127.0.0.1', 'www.chineselog.com', 'chineselog.com]
+ALLOWED_HOSTS = ['chinese-django.onrender.com', 'localhost', '127.0.0.1', 'www.chineselog.com', 'chineselog.com']
 
 # Database configuration
 DATABASES = {
