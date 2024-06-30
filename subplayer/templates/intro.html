@@ -163,13 +163,11 @@
 
 <div class='app'>
 <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3" id="sidenav-main">
-    <div class="sidenav-header">
+   <div class="sidenav-header">
   <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
-  <a class="navbar-brand m-0" href="https://demos.creative-tim.com/soft-ui-dashboard/pages/dashboard.html" target="_blank">
-    <svg class="navbar-brand-img h-100" viewBox="0 0 25.00 25.00" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffd700" stroke-width="2.5" transform="rotate(0)matrix(1, 0, 0, 1, 0, 0)"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="1.7"> <path d="M7.05005 15.81L10.6201 12.11C10.8201 11.9 11.1501 11.91 11.3401 12.12L12.14 12.98C12.34 13.19 12.6701 13.19 12.8701 12.98L14.94 10.81" stroke="#ffd700" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M16.88 12.86L16.95 9.41C16.95 9.1 16.7001 8.84 16.4001 8.84L12.9301 8.86" stroke="#ffd700" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 22C17.2467 22 21.5 17.7467 21.5 12.5C21.5 7.25329 17.2467 3 12 3C6.75329 3 2.5 7.25329 2.5 12.5C2.5 17.7467 6.75329 22 12 22Z" stroke="#ffd700" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path> </g><g id="SVGRepo_iconCarrier"> <path d="M7.05005 15.81L10.6201 12.11C10.8201 11.9 11.1501 11.91 11.3401 12.12L12.14 12.98C12.34 13.19 12.6701 13.19 12.8701 12.98L14.94 10.81" stroke="#ffd700" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M16.88 12.86L16.95 9.41C16.95 9.1 16.7001 8.84 16.4001 8.84L12.9301 8.86" stroke="#ffd700" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M12 22C17.2467 22 21.5 17.7467 21.5 12.5C21.5 7.25329 17.2467 3 12 3C6.75329 3 2.5 7.25329 2.5 12.5C2.5 17.7467 6.75329 22 12 22Z" stroke="#ffd700" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
-
-    <span class="ms-1 font-weight-bold">Language Tracker</span>
-  </a>
+<a class=" m-0 d-flex justify-content-center align-items-center" href="/" style="padding-left: 0px;">
+  <img src="{% static 'subplayer/logo.png' %}" alt="Logo" class="custom-logo-size" style="height: 50px; width: auto; display: block; margin: auto;" />
+</a>
 </div>
     <hr class="horizontal dark mt-0">
     <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
@@ -936,6 +934,22 @@ document.addEventListener('DOMContentLoaded', (event) => {
     top: 50%;
     transform: translate(-50%, -50%);
   }
+         .custom-logo-size {
+  height: 50px !important; /* Increase by 20% from 80px */
+  /* If you also need to adjust width while maintaining aspect ratio, you can uncomment the following line */
+  /* width: auto; */
+}
+  .sidenav-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;  /* Adjust this height as needed */
+}
+
+.custom-logo-size {
+  max-height: 80%;
+  width: auto;
+}
 </style>
 
 <script>
