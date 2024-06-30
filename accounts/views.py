@@ -762,3 +762,10 @@ def custom_logout_view(request):
     logout(request)
     messages.success(request, "You have successfully logged out.")
     return redirect('login')  # Redirect to the login page after logging ou
+
+
+def home_redirect_view(request):
+    if request.user.is_authenticated:
+        return redirect('stats_view')  # or any other name you have for the dashboard view
+    else:
+        return redirect('intro')  # or any other name you have for the intro view

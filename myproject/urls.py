@@ -13,7 +13,7 @@ from django.views.static import serve
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', account_views.stats_view, name='stats_view'),
+    path('', account_views.home_redirect_view, name='home_redirect'),
     path('subplayer/', TemplateView.as_view(template_name='subplayer.html'), name='subplayer'),
     path('podcast/', subplayer_views.podcast_detail, name='podcast_view'),
     path('video/', subplayer_views.video_detail, name='video_view'),
@@ -25,6 +25,7 @@ urlpatterns = [
     path('channel/<str:channel_name>/', subplayer_views.channel_view, name='channel_view'),
     path('channels/', subplayer_views.channels_list, name='channels_list'),
     path('intro/', subplayer_views.intro_view, name='intro'),
+path('dashboard/', account_views.stats_view, name='stats_view'),
 
     # API paths
     path('api/user/viewed-media/add', account_views.add_viewed_media, name='add_viewed_media'),
