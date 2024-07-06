@@ -35,11 +35,18 @@ def format_duration(seconds):
 # Set up logging
 logger = logging.getLogger(__name__)
 @login_required
+@login_required
 def add_media(request):
     if request.method == 'POST':
-        youtube_url = request.POST.get('youtube_url')
-        logger.info(f"Fetching video details for URL: {youtube_url}")
+        try:
+            data = json.loads(request.body)
+            youtube_url = data.get('youtube_url')
+            if not youtube_url:
+                return JsonResponse({'status': 'error', 'message': 'No YouTube URL provided.'})
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'})
 
+        logger.info(f"Fetching video details for URL: {youtube_url}")
         video_details = fetch_video_details(youtube_url)
         if video_details['status'] == 'valid':
             channel_details = fetch_channel_details(f"https://www.youtube.com/channel/{video_details['channel_id']}")
@@ -58,8 +65,7 @@ def add_media(request):
                     logger.info(f"Channel updated: {channel.name} with ID {channel.channel_id}")
             else:
                 logger.error("Failed to fetch or update channel details.")
-                messages.error(request, "Failed to fetch or update channel details.")
-                return redirect('add_media')
+                return JsonResponse({'status': 'error', 'message': 'Failed to fetch or update channel details.'})
 
             try:
                 new_media = Media(
@@ -83,17 +89,19 @@ def add_media(request):
                     logger.info(f"Subtitles file saved for {youtube_url} at {full_path}")
 
                 new_media.save()
-                messages.success(request, 'Media added successfully!')
                 logger.info(f"Media added successfully: {new_media.title}")
-                return redirect('stats_view')
+
+                # Add the media to the user's added_media
+                request.user.added_media.add(new_media)
+
+                return JsonResponse({'status': 'success', 'redirect_url': '/user_videos'})
             except Exception as e:
                 logger.error(f"Failed to add new media for {youtube_url}: {e}")
-                messages.error(request, 'Failed to add new media.')
+                return JsonResponse({'status': 'error', 'message': 'Failed to add new media.'})
         else:
             logger.error(f"Failed to fetch video details for {youtube_url}: {video_details['message']}")
-            messages.error(request, video_details.get('message', 'Failed to fetch video details.'))
-
-    return render(request, 'add_media.html')
+            return JsonResponse({'status': 'error', 'message': video_details.get('message', 'Failed to fetch video details.')})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
 
 
 
@@ -201,7 +209,7 @@ def media_list(request):
     # Fetch all media and annotate with user_highlights_count and is_in_log
     all_media = Media.objects.annotate(
         user_highlights_count=Count('highlights', filter=Q(highlights__user=user)),
-        is_in_log=Exists(UserMediaStatus.objects.filter(media=OuterRef('pk'), user=user, status__in=["in_progress", "completed"])) |
+        is_in_log=Exists(UserMediaStatus.objects.filter(media=OuterRef('pk'), user=user)) |
                    Exists(user.added_media.filter(id=OuterRef('pk')))
     )
 

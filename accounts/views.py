@@ -275,6 +275,25 @@ def download_highlights(request):
 
     return response
 
+@login_required
+def download_subtitles(request):
+    user = request.user
+    profile = Profile.objects.get(user=user)
+    media_statuses = UserMediaStatus.objects.filter(user=user, status__in=['in_progress', 'completed'])
+
+    combined_text = ""
+    for media_status in media_statuses:
+        media = media_status.media
+        subtitle_path = media.subtitle_file.path
+        if os.path.exists(subtitle_path):
+            with open(subtitle_path, 'r', encoding='utf-8') as f:
+                subtitles = json.load(f)
+                transcript = "\n".join([word['word'] for word in subtitles.get('words', [])])
+                combined_text += f"{media.title}:\n{transcript}\n\n"
+
+    response = HttpResponse(combined_text, content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename="combined_subtitles.txt"'
+    return response
 
 @login_required
 def list_media_by_status(request, status):
@@ -501,6 +520,8 @@ from django.db.models.functions import TruncDay
 from django.contrib.auth.decorators import login_required
 import json
 from django.conf.urls.static import static
+import os
+
 
 
 @login_required

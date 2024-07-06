@@ -26,6 +26,7 @@ urlpatterns = [
     path('channels/', subplayer_views.channels_list, name='channels_list'),
     path('intro/', subplayer_views.intro_view, name='intro'),
 path('dashboard/', account_views.stats_view, name='stats_view'),
+    path('download_subtitles/', account_views.download_subtitles, name='download_subtitles'),
 
     # API paths
     path('api/user/viewed-media/add', account_views.add_viewed_media, name='add_viewed_media'),

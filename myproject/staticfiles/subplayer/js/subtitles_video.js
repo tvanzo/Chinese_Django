@@ -7,6 +7,18 @@ var player;
 var currentStatus=document.getElementById('media-status').getAttribute('data-status');
 var initialTimeSet = false; // This flag will help us ensure we only set the time once after the desired point
 let lastUpdateTime = 0;
+    let isPlayingHighlights = false; // Flag to control highlight playback
+
+function findCurrentSubtitleFrame(currentTime) {
+    for (const word of subtitleData.words) { // Iterate over the "words" array
+        if (currentTime >= word.startTime && currentTime <= word.endTime) {
+            return word;
+        }
+    }
+    console.log("ZZZ No matching word found for current time: " + currentTime);
+    return null;
+}
+
 
 function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
@@ -28,15 +40,15 @@ function onPlayerReady(event) {
   playerReady = true;
   console.log("Player is ready. Player ready state:", playerReady);
 
-  createSubtitles(); 
+  createSubtitles();
 
   if (media) {
     console.log("Media is defined, setting up progress saving and fetching media progress...");
-    setupProgressSaving(); 
+    setupProgressSaving();
 
     // Introduce a delay before fetching progress
-    setTimeout(() => { 
-      fetchMediaProgressAndSeek(); 
+    setTimeout(() => {
+      fetchMediaProgressAndSeek();
     }, 1000); // Delay of 1000 milliseconds (1 second)
 
     setInterval(updateProgress, 300);
@@ -123,12 +135,13 @@ let saveProgressInterval;
 // Set up interval to save progress every 5 seconds when the video is playing
 function onPlayerStateChange(event) {
     console.log("Player state changed:", event.data);
+    console.log("isplayinghiglights"+ isPlayingHighlights);
     if ((event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.PAUSED) && !mediaHasBeenPlayed) {
         mediaHasBeenPlayed = true;
         fetchMediaProgressAndSeek();
         console.log(event.data);
         console.log("Media is now playing for the first time.");
-        
+
         fetch('/api/user/viewed-media/add', {
             method: 'POST',
             headers: {
@@ -143,7 +156,7 @@ function onPlayerStateChange(event) {
           .catch(error => console.error("Error adding viewed media:", error));
     }
 
-   
+
 }
 
 function getCookie(name) {
@@ -209,7 +222,7 @@ function setupProgressSaving() {
             lastUpdateTime = currentTime; // Update lastUpdateTime to the current time after sending update
         }
 
-       
+
     }, saveInterval);
 }
 
@@ -309,6 +322,7 @@ function addHighlightToMap(frameIndex, sentenceIndex, charIndex, highlight) {
     startTime: parseFloat(highlight.start_time),
     endTime: parseFloat(highlight.end_time)
   });
+
 }
 
 function updateHighlightMap() {
@@ -325,68 +339,85 @@ function updateHighlightMap() {
     }
   });
 }
-
-
-function applyPermanentHighlight(frameIndex, charIndex) {
-  const sentenceElement = document.getElementById("s_" + frameIndex + "_" + charIndex);
-  if (sentenceElement) {
-    sentenceElement.classList.add('perm-highlight');
-  }
-}
-
-
-
-
-
+ function checkHighlightExistence() {
+        const ul = document.getElementById('highlight-list');
+        const noHighlightsMsg = document.getElementById('no-highlights');
+        if (ul.children.length === 0) {
+            if (!noHighlightsMsg) {
+                const li = document.createElement('li');
+                li.id = 'no-highlights';
+                li.textContent = 'No highlights found.';
+                ul.appendChild(li);
+            }
+        } else {
+            if (noHighlightsMsg) {
+                noHighlightsMsg.remove();
+            }
+        }
+    }
 
 function updateSidebarWithHighlight(highlight) {
-    const ul = document.getElementById('highlight-list'); // Assuming your UL has this ID
+    const ul = document.getElementById('highlight-list');
     const li = document.createElement('li');
+    li.className = 'highlight-item';
 
     const div = document.createElement('div');
     div.className = 'highlight-container';
 
     const a = document.createElement('a');
-    a.href = "#"; // Since you can't use Django template tags, set href to "#" or the actual link if available
-    a.setAttribute('data-start-time', highlight.start_time); // Set custom data attribute
+    a.href = "#";
     a.textContent = highlight.highlighted_text;
-    div.appendChild(a);
+    a.dataset.startTime = highlight.start_time.toString();
+    a.dataset.endTime = highlight.end_time.toString();  // Ensure end time is also set
+    a.dataset.frameIndex = highlight.frame_index;
+    a.dataset.startSentenceIndex = highlight.start_sentence_index;
+    a.dataset.startIndex = highlight.start_index;
 
-    // Create the delete icon for the new highlight
     const img = document.createElement('img');
-    // Ensure the path to the trash icon is correct for your static files setup
-    img.src = '/static/subplayer/trash.png'; // Adjust the path as needed
+    img.src = '/static/subplayer/trash.png';
     img.alt = "Delete";
     img.className = "delete-highlight";
-    img.setAttribute('data-highlight-id', highlight.id); // Use setAttribute for data attributes
-    img.style.cursor = "pointer";
-
-    // Attach the event listener for deletion
+    img.setAttribute('data-highlight-id', highlight.id);
     img.addEventListener('click', function() {
         deleteHighlight(this.dataset.highlightId);
     });
 
+    div.appendChild(a);
     div.appendChild(img);
     li.appendChild(div);
-    ul.appendChild(li);
+
+    // Find correct position based on frame index, sentence index, and start index
+    let inserted = false;
+    const existingHighlights = Array.from(ul.getElementsByClassName('highlight-item'));
+    for (let i = 0; i < existingHighlights.length; i++) {
+        const existingHighlight = existingHighlights[i];
+        const existingFrameIndex = parseInt(existingHighlight.querySelector('a').dataset.frameIndex);
+        const existingSentenceIndex = parseInt(existingHighlight.querySelector('a').dataset.startSentenceIndex);
+        const existingStartIndex = parseInt(existingHighlight.querySelector('a').dataset.startIndex);
+
+        if ((highlight.frame_index < existingFrameIndex) ||
+            (highlight.frame_index === existingFrameIndex && highlight.start_sentence_index < existingSentenceIndex) ||
+            (highlight.frame_index === existingFrameIndex && highlight.start_sentence_index === existingSentenceIndex && highlight.start_index < existingStartIndex)) {
+            ul.insertBefore(li, existingHighlight);
+            inserted = true;
+            break;
+        }
+    }
+
+    if (!inserted) {
+        ul.appendChild(li);
+    }
+
+    checkHighlightExistence();
+    setupHighlightLinks();  // Re-setup links to ensure new highlight is interactive
 }
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+function handleHighlightClick(e) {
+    e.preventDefault();
+}
 
 
 
@@ -402,26 +433,26 @@ function updateSidebarWithHighlight(highlight) {
 
 
 async function addHighlight(highlightData) {
-  const response = await fetch(`/api/user/create_highlight`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': csrftoken2 // Ensure you have the CSRF token
-    },
-    body: JSON.stringify(highlightData),
-  });
+    const response = await fetch(`/api/user/create_highlight`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken2
+        },
+        body: JSON.stringify(highlightData),
+    });
 
-  if (response.ok) {
-    console.log("Highlight added successfully!");
-    const addedHighlight = await response.json(); // Assuming the server returns the added highlight
-    updateSidebarWithHighlight(addedHighlight); // Update the sidebar with the new highlight
-    await fetchHighlights(highlightData.media); // Optionally refresh highlights if needed
-    createSubtitles(); // Recreate subtitles to include new highlights
-  } else {
-    console.error('Failed to add highlight:', await response.text());
-  }
+    if (response.ok) {
+        const addedHighlight = await response.json();
+        highlightData.id = addedHighlight.id;
+        updateSidebarWithHighlight(highlightData); // Adds the new highlight to the sidebar
+        await fetchHighlights(highlightData.media); // Refresh highlights data
+        createSubtitles(); // This needs to refresh or recreate subtitles based on new data
+        setupHighlightLinks(); // Re-setup links to ensure new highlights are interactive
+    } else {
+        console.error('Failed to add highlight:', await response.text());
+    }
 }
-
 
 
 
@@ -429,7 +460,14 @@ async function addHighlight(highlightData) {
 // Your other functions (updateProgress, createSubtitles, etc.) go here...
 // ...
 var y=0;
-      function findSubtitleIndex(time) {
+function findSubtitleIndex(time) {
+    if (framesArray.length === 0) return -1;
+
+    // Handle time before the start of the first frame
+    if (time < parseFloat(framesArray[0][0].startTime)) {
+        return 0; // Consider it as the first frame
+    }
+
     for (let i = 0; i < framesArray.length; i++) {
         let frameStartTime = parseFloat(framesArray[i][0].startTime);
         let frameEndTime = parseFloat(framesArray[i][framesArray[i].length - 1].endTime);
@@ -437,6 +475,7 @@ var y=0;
             return i;
         }
     }
+
     return -1; // Return -1 if no suitable index is found
 }
 
@@ -454,7 +493,7 @@ function createSubtitles() {
       element.setAttribute("id", "s_" + currentSubtitleIndex + "_" + i);
         element.classList.add('sentence-span'); // Add this line
 
-      
+
       // Begin new highlight processing
       let highlightedSentence = "";
       let sentence = currentFrame[i].sentence;
@@ -470,7 +509,7 @@ function createSubtitles() {
       }
       element.innerHTML = highlightedSentence;
       // End new highlight processing
-      
+
       subtitles.appendChild(element);
 
       // Save time information
@@ -492,7 +531,7 @@ function updateProgress() {
     const correctIndex = findSubtitleIndex(currentTime);
     if (correctIndex !== -1 && correctIndex !== currentSubtitleIndex) {
         currentSubtitleIndex = correctIndex;
-       
+
         createSubtitles();
     }
 
@@ -520,7 +559,6 @@ function updateProgress() {
 
 
 
-
 // Fetch highlights when the page loads
 fetchHighlights(mediaId);
 
@@ -540,11 +578,11 @@ fetchHighlights(mediaId);
 
     try {
   const response = await fetch(test2);
- 
+
   const data = await response.json();
   transcript = data.transcript;
   syncData5 = data.words;
-  
+
 } catch (error) {
   console.error('Erroreeeee:', error);
 }
@@ -553,18 +591,15 @@ fetchHighlights(mediaId);
     var syncData=syncData5;
     console.log("datga" + syncData);
       var syncData2 = []; // New array to track sentences
-      
+
   function createFramesArray(syncData) {
     let currentFrame = [];
     let currentFrameCharCount = 0;
     const charLimit = 60; // Character limit for each frame
 
     syncData.forEach(wordItem => {
-       
-
         let sentenceCharCount = wordItem.word.length;
         if ((currentFrameCharCount + sentenceCharCount) <= charLimit) {
-            // Add wordItem to the current frame if within char limit
             currentFrame.push({
                 startTime: wordItem.startTime,
                 endTime: wordItem.endTime,
@@ -572,7 +607,6 @@ fetchHighlights(mediaId);
             });
             currentFrameCharCount += sentenceCharCount;
         } else {
-            // Push the current frame to framesArray and start a new frame
             framesArray.push(currentFrame);
             currentFrame = [{
                 startTime: wordItem.startTime,
@@ -582,20 +616,27 @@ fetchHighlights(mediaId);
             currentFrameCharCount = sentenceCharCount;
         }
     });
-    // Don't forget to add the last frame if it has content
+
+    // Add the last frame if it has content
     if (currentFrame.length > 0) {
         framesArray.push(currentFrame);
     }
+
+    // Ensure the first frame starts at 0 seconds
+    if (framesArray.length > 0 && framesArray[0][0].startTime > 0) {
+        framesArray[0][0].startTime = 0;
+    }
 }
+
 
 // Call this function with your syncData
 createFramesArray(syncData);
 
-     
+
   var loopButton = doc.getElementById("loop-button");
 
 
-    
+
 createSubtitles();
 
 
@@ -605,10 +646,8 @@ createSubtitles();
   var selectedText = "";
   var frame_index;
 var isLoopMode = false;
+var isCmdPressed = false; // Track the Command/Control key state
 var loopingInterval = null;
-var audioSpeedDisplay = document.getElementById('audio-speed-display');
-
-
 
 function toggleLoopMode() {
     isLoopMode = !isLoopMode; // Toggle the state
@@ -617,6 +656,16 @@ function toggleLoopMode() {
     if (!isLoopMode && loopingInterval) {
         clearInterval(loopingInterval); // Clear the interval when turning loop mode off
         loopingInterval = null; // Reset the interval ID
+    }
+
+    if (isLoopMode) {
+        const currentTime = player.getCurrentTime();
+        const currentFrameIndex = findSubtitleIndex(currentTime);
+
+        if (currentFrameIndex === 0) {
+            player.seekTo(0, true); // Ensure it starts from the very beginning
+            player.playVideo();
+        }
     }
 }
 
@@ -631,82 +680,51 @@ function updateLoopIcon() {
     }
 }
 
-document.getElementById('loop-icon').addEventListener('click', toggleLoopMode);
-
-// Optional: Listen for Command key (or Control key for Windows) to toggle loop mode
+// Add event listeners for the Command/Control key
 document.addEventListener('keydown', function(event) {
-    if (event.key === "Meta" || event.key === "Control") { // Meta for Mac Command key, Control for Ctrl key
-        toggleLoopMode();
+    if ((event.key === "Meta" || event.key === "Control") && !isCmdPressed) { // Meta for Mac Command key, Control for Ctrl key
+        isCmdPressed = true;
+        if (!isLoopMode) {
+            toggleLoopMode(); // Enable loop mode when Command/Control key is pressed
+        }
     }
 });
 
-// Optional: Reset loop mode when key is released
 document.addEventListener('keyup', function(event) {
-    if (event.key === "Meta" || event.key === "Control") {
-        toggleLoopMode();
-    }
-});
-
-document.addEventListener('keydown', function(e) {
-    if (isLoopMode) {
-        if (e.keyCode === 38) { // Up key
-            // Increase speed
-            let currentRate = player.getPlaybackRate();
-            let availableRates = player.getAvailablePlaybackRates();
-            let newRateIndex = availableRates.indexOf(currentRate) + 1;
-            let newRate = availableRates[Math.min(newRateIndex, availableRates.length - 1)];
-            player.setPlaybackRate(newRate);
-        } else if (e.keyCode === 40) { // Down key
-            // Decrease speed
-            let currentRate = player.getPlaybackRate();
-            let availableRates = player.getAvailablePlaybackRates();
-            let newRateIndex = availableRates.indexOf(currentRate) - 1;
-            let newRate = availableRates[Math.max(newRateIndex, 0)];
-            player.setPlaybackRate(newRate);
+    if ((event.key === "Meta" || event.key === "Control") && isCmdPressed) {
+        isCmdPressed = false;
+        if (isLoopMode) {
+            toggleLoopMode(); // Disable loop mode when Command/Control key is released
         }
     }
 });
 
-
-
-document.addEventListener('keyup', function(e) {
-
-    if (e.keyCode === 91) { // Command key on Mac
-        isLoopMode = false;
-        player.setPlaybackRate(1); // reset speed to normal
-
-        if (loopingInterval) {
-            clearInterval(loopingInterval);
-            loopingInterval = null;
-        }
-    }
+document.getElementById('loop-icon').addEventListener('click', function() {
+    toggleLoopMode(); // Toggle loop mode when the loop button is clicked
 });
 
-//tried here
+// Existing code for mouseup event listener
 subtitles.addEventListener("mouseup", function() {
     if (isLoopMode) {
         const selection = window.getSelection();
         const selectedText = selection.toString().trim();
         if (!selectedText) return;
 
-        // Find the frame index that matches the current time
         const currentTime = player.getCurrentTime();
         const currentFrameIndex = findSubtitleIndex(currentTime);
-        if (currentFrameIndex === -1) return; // Exit if no matching frame found
 
-        // Attempt to match the selected text with the subtitles in the current frame
-        let startLoopTime = null;
-        let endLoopTime = null;
+        if (currentFrameIndex === -1) return;
 
         const frameSubtitles = framesArray[currentFrameIndex];
         let concatenatedSubtitles = frameSubtitles.map(sub => sub.sentence).join('');
-        
+
+        let startLoopTime = null;
+        let endLoopTime = null;
+
         if (concatenatedSubtitles.includes(selectedText)) {
-            // If the selected text matches part of the concatenated subtitles, set loop times
             startLoopTime = parseFloat(frameSubtitles[0].startTime);
             endLoopTime = parseFloat(frameSubtitles[frameSubtitles.length - 1].endTime);
 
-            // Adjust loop times if the selection is within a smaller range
             for (let i = 0; i < frameSubtitles.length; i++) {
                 if (frameSubtitles[i].sentence.includes(selectedText.slice(0, Math.floor(selectedText.length / 2)))) {
                     startLoopTime = Math.max(startLoopTime, parseFloat(frameSubtitles[i].startTime));
@@ -718,9 +736,10 @@ subtitles.addEventListener("mouseup", function() {
             }
         }
 
-        // Implement the looping based on the start and end times found
         if (startLoopTime !== null && endLoopTime !== null) {
-            if (loopingInterval) clearInterval(loopingInterval); // Clear existing interval
+            if (loopingInterval) {
+                clearInterval(loopingInterval);
+            }
 
             player.seekTo(startLoopTime, true);
             player.playVideo();
@@ -729,11 +748,10 @@ subtitles.addEventListener("mouseup", function() {
                 if (player.getCurrentTime() >= endLoopTime) {
                     player.seekTo(startLoopTime, true);
                 }
-            }, 100); // Check every 100ms to loop back if needed
+            }, 100);
         }
     }
 });
-
 
 
 
@@ -752,11 +770,7 @@ fetch('/api/user/viewed_media_list/read')
     .then(response => response.json())
     .then(data => {
         const container = document.getElementById('viewed-media-container');
-        data.viewed_media.forEach(mediaId => {
-            const span = document.createElement('span');
-            span.textContent = "mediaId:" + mediaId;
-            container.appendChild(span);
-        });
+
     });
 
 fetch(`/api/user/media_progress/${mediaId}/`, {
@@ -794,41 +808,38 @@ fetch(`/api/user/media_progress/${mediaId}/`, {
 })
 .catch(error => console.error('Error:', error));
 
-document.addEventListener('keydown', async function (event) {
-    if (event.shiftKey) {
-        let selection = window.getSelection();
+function handleHighlightCreation() {
+    let selection = window.getSelection();
 
-        if (selection.rangeCount === 0) return;
+    if (selection.rangeCount === 0) return;
 
-        let range = selection.getRangeAt(0);
-        let selectedText = selection.toString().trim();
+    let range = selection.getRangeAt(0);
+    let selectedText = selection.toString().trim();
 
-        if (!selectedText) return;
+    if (!selectedText) return;
 
-        let calculateOffset = function (container, offset, span) {
-            let walker = document.createTreeWalker(span, NodeFilter.SHOW_TEXT);
-            let totalOffset = 0;
-            let node;
-            while ((node = walker.nextNode())) {
-                if (node === container || node.contains(container)) {
-                    totalOffset += offset;
-                    break;
-                }
-                totalOffset += node.textContent.length;
+    let calculateOffset = function (container, offset, span) {
+        let walker = document.createTreeWalker(span, NodeFilter.SHOW_TEXT);
+        let totalOffset = 0;
+        let node;
+        while ((node = walker.nextNode())) {
+            if (node === container || node.contains(container)) {
+                totalOffset += offset;
+                break;
             }
-            return totalOffset;
-        };
-        // ... (rest of your existing code for handling text selection and highlighting) ...
+            totalOffset += node.textContent.length;
+        }
+        return totalOffset;
+    };
 
-
-let findParentWithClass = function (node, className) {
-      if (node.nodeType !== Node.ELEMENT_NODE) {
-        node = node.parentNode;
-      }
-      while (node && (!node.classList || !node.classList.contains(className))) {
-        node = node.parentNode;
-      }
-      return node;
+    let findParentWithClass = function (node, className) {
+        if (node.nodeType !== Node.ELEMENT_NODE) {
+            node = node.parentNode;
+        }
+        while (node && (!node.classList || !node.classList.contains(className))) {
+            node = node.parentNode;
+        }
+        return node;
     };
 
     let startSpan = findParentWithClass(range.startContainer, 'sentence-span');
@@ -845,56 +856,55 @@ let findParentWithClass = function (node, className) {
         end_char_index = '0' + end_char_index;
     }
 
-
-
-
-
     let highlightStartSentenceIndex = parseInt(startSpan.id.split('_')[2]);
     let highlightEndSentenceIndex = parseInt(endSpan.id.split('_')[2]);
     let highlightStartTime = subtitleTimes[highlightStartSentenceIndex].startTime;
     let highlightEndTime = subtitleTimes[highlightEndSentenceIndex].endTime;
     console.log("start " + start_char_index);
-        console.log("end " + end_char_index);
-
+    console.log("end " + end_char_index);
 
     // Check if the selection overlaps an existing highlight
-const overlappingHighlight = transformedArray.find(item =>
-    parseFloat(`${item.start_sentence_index}.${item.start_index.toString().padStart(2, '0')}`) <= parseFloat(`${highlightEndSentenceIndex}.${end_char_index}`) &&
-    parseFloat(`${item.end_sentence_index}.${item.end_index.toString().padStart(2, '0')}`) >= parseFloat(`${highlightStartSentenceIndex}.${start_char_index}`) &&
-    item.frame_index === currentSubtitleIndex
-);
+    const overlappingHighlight = transformedArray.find(item =>
+        parseFloat(`${item.start_sentence_index}.${item.start_index.toString().padStart(2, '0')}`) <= parseFloat(`${highlightEndSentenceIndex}.${end_char_index}`) &&
+        parseFloat(`${item.end_sentence_index}.${item.end_index.toString().padStart(2, '0')}`) >= parseFloat(`${highlightStartSentenceIndex}.${start_char_index}`) &&
+        item.frame_index === currentSubtitleIndex
+    );
 
-
-if (overlappingHighlight) {
-  if (overlappingHighlight.start_sentence_index!=overlappingHighlight.end_sentence_index){
-        console.log("first"+overlappingHighlight.start_sentence_index);
-        console.log(overlappingHighlight.end_sentence_index);
-        await deleteHighlight(overlappingHighlight.id);
-  }
-  // Check if the selection exactly matches the existing highlight
-  else if (overlappingHighlight.start_index === start_char_index &&
-      overlappingHighlight.end_index === end_char_index) {
-    // If it does, delete the entire highlight
-    await deleteHighlight(overlappingHighlight.id);
-    console.log("Deleted");
-  } else {
-        console.log("lo");
-    console.log(start_char_index + " "+ end_char_index);
-
-    // If it doesn't, split the highlight at the selected indices
-    await splitHighlight(overlappingHighlight.id, start_char_index, end_char_index);
-    console.log(start_char_index + ""+ end_char_index);
-  }
-} else {
-            console.log("low");
-
-  // Otherwise, create a new highlight
-  if (start_char_index !== null && end_char_index !== null && highlightStartTime !== null && highlightEndTime !== null) {
-    console.log("All indexes found");
-    createHighlight(selectedText, mediaId, start_char_index, end_char_index, highlightStartSentenceIndex, highlightEndSentenceIndex, highlightStartTime, highlightEndTime, currentSubtitleIndex);
-  }
+    if (overlappingHighlight) {
+        if (overlappingHighlight.start_sentence_index != overlappingHighlight.end_sentence_index) {
+            console.log("first" + overlappingHighlight.start_sentence_index);
+            console.log(overlappingHighlight.end_sentence_index);
+            deleteHighlight(overlappingHighlight.id);
+        } else if (overlappingHighlight.start_index === start_char_index &&
+            overlappingHighlight.end_index === end_char_index) {
+            deleteHighlight(overlappingHighlight.id);
+            console.log("Deleted");
+        } else {
+            console.log("lo");
+            console.log(start_char_index + " " + end_char_index);
+            splitHighlight(overlappingHighlight.id, start_char_index, end_char_index);
+            console.log(start_char_index + "" + end_char_index);
+        }
+    } else {
+        console.log("low");
+        if (start_char_index !== null && end_char_index !== null && highlightStartTime !== null && highlightEndTime !== null) {
+            console.log("All indexes found");
+            createHighlight(selectedText, mediaId, start_char_index, end_char_index, highlightStartSentenceIndex, highlightEndSentenceIndex, highlightStartTime, highlightEndTime, currentSubtitleIndex);
+        }
+    }
 }
-  }
+
+// Event listener for shift key down
+document.addEventListener('keydown', function (event) {
+    if (event.shiftKey) {
+        handleHighlightCreation();
+    }
+});
+
+// Event listener for highlight icon click
+document.getElementById('highlight-icon').addEventListener('click', function () {
+    console.log("fired");
+    handleHighlightCreation();
 });
 
 function createHighlight(selectedText, mediaId, highlightStartIndex, highlightEndIndex, highlightStartSentenceIndex, highlightEndSentenceIndex, startTime, endTime, frameIndex) {
@@ -1030,6 +1040,7 @@ async function splitHighlight(highlightId, splitStartIndex, splitEndIndex) {
 
   console.error('Invalid split indices for highlight:', originalHighlight);
 }
+
 
 
     })(window, document);

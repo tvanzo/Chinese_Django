@@ -22,8 +22,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="icon" type="image/png" href="{% static 'accounts/img/favicon.png' %}">
   <title>
-    Soft UI Dashboard by Creative Tim
-  </title>
+Chinese Log  </title>
   <!--     Fonts and icons     -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
   <!-- Nucleo Icons -->
@@ -38,7 +37,123 @@
   <!-- Nepcha Analytics (nepcha.com) -->
   <!-- Nepcha is a easy-to-use web analytics. No cookies and fully compliant with GDPR, CCPA and PECR. -->
   <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
-
+<style>
+.text-warning { color: #dcb234; } /* Custom dark yellow */
+.text-success { color: #3c763d; } /* Custom dark green */
+.title-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 50px; /* Adjusted height to provide more control */
+}
+.title-container p {
+    margin: 0;
+    line-height: 1.1; /* Tighter line spacing */
+    text-align: center;
+    white-space: pre-line; /* Ensures proper line breaking */
+    font-size: 0.75rem; /* Adjust size as needed */
+}
+.nav-link.active .icon svg {
+    fill: #FFD700 !important;
+    color: #FFD700 !important;
+}
+.xp-points-bar {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+.xp-points-bar h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: normal;
+}
+.xp-points-bar #xp-points {
+    font-size: 20px;
+    font-weight: bold;
+    color: #007bff;
+}
+.xp-circle {
+    width: 20px; /* Adjust size as needed */
+    height: 20px; /* Adjust size as needed */
+    border-radius: 50%;
+    background-color: #ffc40c; /* Yellow color */
+    color: #ffffff; /* White text */
+    font-weight: bold;
+    font-size: 12px; /* Adjust size as needed */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#xp-points {
+    font-size: 14px; /* Adjust size as needed */
+    font-weight: bold;
+    color: #ffffff; /* Adjust color as needed */
+}
+.btn-purple {
+    background-color: #d00c9c; /* Purple color */
+    color: #ffffff; /* White text */
+    border-color: #6f42c1;
+}
+.compact-btn {
+    padding: 0.25rem 0.5rem; /* Less padding for a more compact button */
+}
+#unique-xp-display {
+    background-color: #d00c9c; /* Change the color to your preference */
+    color: white; /* Ensure the text color contrasts well */
+    padding: 3px 8px; /* Adjust padding to make it smaller */
+    border-radius: 8px; /* Increased border radius to make corners more rounded */
+}
+#unique-xp-display .unique-xp-circle {
+    background-color: #ffc40c; /* Change the color to your preference */
+    color: white; /* Ensure the text color contrasts well */
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 5px; /* Adjust margin as needed */
+}
+#unique-xp-points {
+    font-weight: bold;
+    font-size: 14px; /* Adjust font size as needed */
+}
+#sidenav-main {
+    background-color: #ffffff; /* White background */
+    border-radius: 12px; /* Adjust the border radius to your preference */
+    padding: 10px; /* Add padding if necessary */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for better visibility */
+    margin-bottom: 20px; /* Add margin to ensure the bottom border is visible */
+    max-height: calc(100vh - 40px); /* Ensure the sidebar fits within the viewport */
+    overflow-y: auto; /* Add vertical scrolling if necessary */
+}
+@media (max-width: 1200px) {
+    #sidenav-main {
+        display: none;
+    }
+    #top-nav {
+        display: block;
+    }
+}
+@media (min-width: 1201px) {
+    #top-nav {
+        display: none;
+    }
+}
+.sidenav-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;  /* Adjust this height as needed */
+}
+.custom-logo-size {
+    height: 50px !important; /* Increase by 20% from 80px */
+    /* If you also need to adjust width while maintaining aspect ratio, you can uncomment the following line */
+    /* width: auto; */
+}
+</style>
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
@@ -606,232 +721,6 @@
 
 
 
-<style>
-    .text-warning { color: #dcb234; } /* Custom dark yellow */
-.text-success { color: #3c763d; } /* Custom dark green */
-.title-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 50px; /* Adjusted height to provide more control */
-}
-
-.title-container p {
-    margin: 0;
-    line-height: 1.1; /* Tighter line spacing */
-    text-align: center;
-    white-space: pre-line; /* Ensures proper line breaking */
-    font-size: 0.75rem; /* Adjust size as needed */
-}
-.nav-link.active .icon svg {
-  fill: #FFD700 !important;
-  color: #FFD700 !important;
-}
-.xp-points-bar {
-    background-color: #f8f9fa;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
-
-.xp-points-bar h2 {
-    margin: 0;
-    font-size: 24px;
-    font-weight: normal;
-}
-
-.xp-points-bar #xp-points {
-    font-weight: bold;
-    color: #007bff;
-}
-<style>
-.xp-points-bar {
-    background-color: #f8f9fa;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
-
-.xp-points-bar {
-    background-color: #f8f9fa;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
-
-.xp-points-bar #xp-points {
-    font-size: 20px;
-    font-weight: bold;
-    color: #007bff;
-}
-    <style>
-.xp-points-bar {
-    background-color: #f8f9fa;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
-
-.xp-points-bar {
-    background-color: #f8f9fa;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
-
-.xp-circle {
-    width: 32px; /* Reduced by 20% from 40px */
-    height: 32px; /* Reduced by 20% from 40px */
-    border-radius: 50%;
-    background-color: #ffc40c; /* Adjust the color as needed */
-    color: #ffffff; /* Text color */
-    font-weight: bold;
-    font-size: 14.4px; /* Reduced by 20% from 18px */
-}
-
-.xp-points-bar #xp-points {
-    font-size: 24px;
-    font-weight: bold;
-    color: #d00c9c;
-}
-    .xp-circle {
-    width: 20px; /* Adjust size as needed */
-    height: 20px; /* Adjust size as needed */
-    border-radius: 50%;
-    background-color: #ffc40c; /* Yellow color */
-    color: #ffffff; /* White text */
-    font-weight: bold;
-    font-size: 12px; /* Adjust size as needed */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#xp-points {
-    font-size: 14px; /* Adjust size as needed */
-    font-weight: bold;
-    color: #ffffff; /* Adjust color as needed */
-}
-    .btn-purple {
-  background-color: #d00c9c; /* Purple color */
-  color: #ffffff; /* White text */
-  border-color: #6f42c1;
-}
-
-.xp-circle {
-  width: 20px; /* Adjust size as needed */
-  height: 20px; /* Adjust size as needed */
-  border-radius: 50%;
-  background-color: #ffc40c; /* Yellow color */
-  color: #ffffff; /* White text */
-  font-weight: bold;
-  font-size: 12px; /* Adjust size as needed */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#xp-points {
-  font-size: 14px; /* Adjust size as needed */
-  font-weight: bold;
-  color: #ffffff; /* White text */
-}
-    .btn-purple {
-  background-color: #d00c9c; /* Purple color */
-  color: #ffffff; /* White text */
-  border-color: #6f42c1;
-}
-
-.compact-btn {
-  padding: 0.25rem 0.5rem; /* Less padding for a more compact button */
-}
-
-.xp-circle {
-  width: 20px; /* Adjust size as needed */
-  height: 20px; /* Adjust size as needed */
-  border-radius: 50%;
-  background-color: #ffc40c; /* Yellow color */
-  color: #ffffff; /* White text */
-  font-weight: bold;
-  font-size: 12px; /* Adjust size as needed */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#xp-points {
-  font-size: 14px; /* Adjust size as needed */
-  font-weight: bold;
-  color: #ffffff; /* White text */
-}
-      .sidenav {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-    }
-
-    .sidenav-footer {
-        margin-top: 135px;
-        padding-bottom: 1rem;
-    }
-    #unique-xp-display {
-  background-color: #d00c9c; /* Change the color to your preference */
-  color: white; /* Ensure the text color contrasts well */
-  padding: 3px 8px; /* Adjust padding to make it smaller */
-  border-radius: 8px; /* Increased border radius to make corners more rounded */
-}
-
-#unique-xp-display .unique-xp-circle {
-  background-color: #ffc40c; /* Change the color to your preference */
-  color: white; /* Ensure the text color contrasts well */
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 5px; /* Adjust margin as needed */
-}
-
-#unique-xp-points {
-  font-weight: bold;
-  font-size: 14px; /* Adjust font size as needed */
-}
-    #sidenav-main {
-  background-color: #ffffff; /* White background */
-  border-radius: 12px; /* Adjust the border radius to your preference */
-  padding: 10px; /* Add padding if necessary */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for better visibility */
-  margin-bottom: 20px; /* Add margin to ensure the bottom border is visible */
-  max-height: calc(100vh - 40px); /* Ensure the sidebar fits within the viewport */
-  overflow-y: auto; /* Add vertical scrolling if necessary */
-}
-@media (max-width: 991px) {
-  #sidenav-main {
-    display: none;
-  }
-  #top-nav {
-    display: block;
-  }
-}
-
-@media (min-width: 992px) {
-  #top-nav {
-    display: none;
-  }
-}
-
-
-</style>
-
-</style>
-
-</style>
 
 
   <!-- Github buttons -->
@@ -840,67 +729,8 @@
 <script src="{% static 'accounts/js/soft-ui-dashboard.min.js?v=1.0.7' %}"></script>
 
 
-<style>
-  @media (max-width: 991px) {
-    #sidenav-main {
-      display: none;
-    }
-    #top-nav {
-      display: block;
-    }
-  }
-
-  /* Show top-nav by default */
-  #top-nav {
-    display: block;
-  }
-
-  /* Hide top-nav on screens larger than 992px */
-  @media (min-width: 993px) {
-    #top-nav {
-      display: none;
-    }
-  }
-
-  /* Show top-nav on screens smaller than 993px */
-  @media (max-width: 1200px) {
-    #top-nav {
-      display: block;
-    }
-  }
-
-  /* Hide top-nav on screens larger than 992px */
-  @media (min-width: 1201px) {
-    #top-nav {
-      display: none;
-    }
-  }.sidenav-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100px;  /* Adjust this height as needed */
-}
-
-  .custom-logo-size {
-  height: 50px !important; /* Increase by 20% from 80px */
-  /* If you also need to adjust width while maintaining aspect ratio, you can uncomment the following line */
-  /* width: auto; */
-}
-  .sidenav-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100px;  /* Adjust this height as needed */
-}
-
-.custom-logo-size {
-  max-height: 80%;
-  width: auto;
-}
-</style>
 
 
-</style>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const sidenav = document.getElementById('sidenav-main');

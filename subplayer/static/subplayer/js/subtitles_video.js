@@ -808,41 +808,38 @@ fetch(`/api/user/media_progress/${mediaId}/`, {
 })
 .catch(error => console.error('Error:', error));
 
-document.addEventListener('keydown', async function (event) {
-    if (event.shiftKey) {
-        let selection = window.getSelection();
+function handleHighlightCreation() {
+    let selection = window.getSelection();
 
-        if (selection.rangeCount === 0) return;
+    if (selection.rangeCount === 0) return;
 
-        let range = selection.getRangeAt(0);
-        let selectedText = selection.toString().trim();
+    let range = selection.getRangeAt(0);
+    let selectedText = selection.toString().trim();
 
-        if (!selectedText) return;
+    if (!selectedText) return;
 
-        let calculateOffset = function (container, offset, span) {
-            let walker = document.createTreeWalker(span, NodeFilter.SHOW_TEXT);
-            let totalOffset = 0;
-            let node;
-            while ((node = walker.nextNode())) {
-                if (node === container || node.contains(container)) {
-                    totalOffset += offset;
-                    break;
-                }
-                totalOffset += node.textContent.length;
+    let calculateOffset = function (container, offset, span) {
+        let walker = document.createTreeWalker(span, NodeFilter.SHOW_TEXT);
+        let totalOffset = 0;
+        let node;
+        while ((node = walker.nextNode())) {
+            if (node === container || node.contains(container)) {
+                totalOffset += offset;
+                break;
             }
-            return totalOffset;
-        };
-        // ... (rest of your existing code for handling text selection and highlighting) ...
+            totalOffset += node.textContent.length;
+        }
+        return totalOffset;
+    };
 
-
-let findParentWithClass = function (node, className) {
-      if (node.nodeType !== Node.ELEMENT_NODE) {
-        node = node.parentNode;
-      }
-      while (node && (!node.classList || !node.classList.contains(className))) {
-        node = node.parentNode;
-      }
-      return node;
+    let findParentWithClass = function (node, className) {
+        if (node.nodeType !== Node.ELEMENT_NODE) {
+            node = node.parentNode;
+        }
+        while (node && (!node.classList || !node.classList.contains(className))) {
+            node = node.parentNode;
+        }
+        return node;
     };
 
     let startSpan = findParentWithClass(range.startContainer, 'sentence-span');
@@ -859,56 +856,55 @@ let findParentWithClass = function (node, className) {
         end_char_index = '0' + end_char_index;
     }
 
-
-
-
-
     let highlightStartSentenceIndex = parseInt(startSpan.id.split('_')[2]);
     let highlightEndSentenceIndex = parseInt(endSpan.id.split('_')[2]);
     let highlightStartTime = subtitleTimes[highlightStartSentenceIndex].startTime;
     let highlightEndTime = subtitleTimes[highlightEndSentenceIndex].endTime;
     console.log("start " + start_char_index);
-        console.log("end " + end_char_index);
-
+    console.log("end " + end_char_index);
 
     // Check if the selection overlaps an existing highlight
-const overlappingHighlight = transformedArray.find(item =>
-    parseFloat(`${item.start_sentence_index}.${item.start_index.toString().padStart(2, '0')}`) <= parseFloat(`${highlightEndSentenceIndex}.${end_char_index}`) &&
-    parseFloat(`${item.end_sentence_index}.${item.end_index.toString().padStart(2, '0')}`) >= parseFloat(`${highlightStartSentenceIndex}.${start_char_index}`) &&
-    item.frame_index === currentSubtitleIndex
-);
+    const overlappingHighlight = transformedArray.find(item =>
+        parseFloat(`${item.start_sentence_index}.${item.start_index.toString().padStart(2, '0')}`) <= parseFloat(`${highlightEndSentenceIndex}.${end_char_index}`) &&
+        parseFloat(`${item.end_sentence_index}.${item.end_index.toString().padStart(2, '0')}`) >= parseFloat(`${highlightStartSentenceIndex}.${start_char_index}`) &&
+        item.frame_index === currentSubtitleIndex
+    );
 
-
-if (overlappingHighlight) {
-  if (overlappingHighlight.start_sentence_index!=overlappingHighlight.end_sentence_index){
-        console.log("first"+overlappingHighlight.start_sentence_index);
-        console.log(overlappingHighlight.end_sentence_index);
-        await deleteHighlight(overlappingHighlight.id);
-  }
-  // Check if the selection exactly matches the existing highlight
-  else if (overlappingHighlight.start_index === start_char_index &&
-      overlappingHighlight.end_index === end_char_index) {
-    // If it does, delete the entire highlight
-    await deleteHighlight(overlappingHighlight.id);
-    console.log("Deleted");
-  } else {
-        console.log("lo");
-    console.log(start_char_index + " "+ end_char_index);
-
-    // If it doesn't, split the highlight at the selected indices
-    await splitHighlight(overlappingHighlight.id, start_char_index, end_char_index);
-    console.log(start_char_index + ""+ end_char_index);
-  }
-} else {
-            console.log("low");
-
-  // Otherwise, create a new highlight
-  if (start_char_index !== null && end_char_index !== null && highlightStartTime !== null && highlightEndTime !== null) {
-    console.log("All indexes found");
-    createHighlight(selectedText, mediaId, start_char_index, end_char_index, highlightStartSentenceIndex, highlightEndSentenceIndex, highlightStartTime, highlightEndTime, currentSubtitleIndex);
-  }
+    if (overlappingHighlight) {
+        if (overlappingHighlight.start_sentence_index != overlappingHighlight.end_sentence_index) {
+            console.log("first" + overlappingHighlight.start_sentence_index);
+            console.log(overlappingHighlight.end_sentence_index);
+            deleteHighlight(overlappingHighlight.id);
+        } else if (overlappingHighlight.start_index === start_char_index &&
+            overlappingHighlight.end_index === end_char_index) {
+            deleteHighlight(overlappingHighlight.id);
+            console.log("Deleted");
+        } else {
+            console.log("lo");
+            console.log(start_char_index + " " + end_char_index);
+            splitHighlight(overlappingHighlight.id, start_char_index, end_char_index);
+            console.log(start_char_index + "" + end_char_index);
+        }
+    } else {
+        console.log("low");
+        if (start_char_index !== null && end_char_index !== null && highlightStartTime !== null && highlightEndTime !== null) {
+            console.log("All indexes found");
+            createHighlight(selectedText, mediaId, start_char_index, end_char_index, highlightStartSentenceIndex, highlightEndSentenceIndex, highlightStartTime, highlightEndTime, currentSubtitleIndex);
+        }
+    }
 }
-  }
+
+// Event listener for shift key down
+document.addEventListener('keydown', function (event) {
+    if (event.shiftKey) {
+        handleHighlightCreation();
+    }
+});
+
+// Event listener for highlight icon click
+document.getElementById('highlight-icon').addEventListener('click', function () {
+    console.log("fired");
+    handleHighlightCreation();
 });
 
 function createHighlight(selectedText, mediaId, highlightStartIndex, highlightEndIndex, highlightStartSentenceIndex, highlightEndSentenceIndex, startTime, endTime, frameIndex) {

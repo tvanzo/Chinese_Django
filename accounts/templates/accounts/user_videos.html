@@ -22,8 +22,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="icon" type="image/png" href="{% static 'accounts/img/favicon.png' %}">
   <title>
-    Soft UI Dashboard by Creative Tim
-  </title>
+Chinese Log  </title>
   <!--     Fonts and icons     -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
   <!-- Nucleo Icons -->
@@ -38,7 +37,218 @@
   <!-- Nepcha Analytics (nepcha.com) -->
   <!-- Nepcha is a easy-to-use web analytics. No cookies and fully compliant with GDPR, CCPA and PECR. -->
   <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
-
+<style>
+  .btn-primary {
+    background-color: #3a9fff !important;
+    color: #fff !important;
+  }
+  .filter-button.active {
+    background-color: #007bff !important;
+    color: white !important;
+  }
+  .text-warning { color: #dcb234; }
+  .text-success { color: #3c763d; }
+  .video-card {
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  }
+  .video-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+  }
+  .image-container {
+    position: relative;
+    width: 100%;
+    height: 180px;
+  }
+  .card-img-top {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease-in-out;
+  }
+  .video-card:hover .card-img-top {
+    opacity: 0.9;
+  }
+  .overlay-info {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+  }
+  .badge-highlight, .badge-length {
+    background-color: #cb0ba0;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.75rem;
+    margin: 2px;
+  }
+  .card-body {
+    padding: 10px;
+  }
+  .card-title {
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    font-size: 1rem; /* Adjust based on preference */
+    line-height: 1.2; /* Ensure this is enough to fit two lines nicely */
+    height: 2.4rem; /* Based on font-size and line-height, adjust if needed */
+    margin-bottom: 5px; /* Reduced space between title and description */
+  }
+  .card-text {
+    font-size: 0.875rem; /* Slightly smaller font size for description */
+    margin-bottom: 5px; /* Reduced space between description and channel name */
+  }
+  .channel-info {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Add some space between the channel name and the "+" icon */
+  }
+  .channel-plus-container {
+    display: flex;
+    justify-content: space-between; /* Ensures maximum separation between elements */
+    align-items: center;
+    width: 100%;
+  }
+  .channel-name {
+    flex-grow: 1; /* Ensures the channel name occupies all available space to the left */
+  }
+  .add-to-log svg {
+    margin-left: auto; /* Forces the SVG icon to align to the right */
+    width: 20px; /* Set consistent icon size */
+    height: 20px;
+  }
+  .add-to-log {
+    display: flex;
+    align-items: center;
+  }
+  .container-fluid {
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+  .badge-highlight {
+    background-color: #cb0ba0; /* Purple similar to the button */
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.75rem;
+    text-align: center;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Space between icon and text */
+  }
+  .badge-highlight svg {
+    fill: #ffd700; /* Golden color for the SVG */
+    width: 1em; /* Size of the SVG */
+    height: 1em; /* Size of the SVG */
+  }
+  .nav-link.active .icon svg {
+    fill: #FFD700 !important;
+    color: #FFD700 !important;
+  }
+  .btn {
+    background-color: #3a9fff;
+    border-radius: 20px;
+    padding: 10px 25px;
+    color: #fff;
+    box-shadow: 0px 18px 13px -6px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s;
+  }
+  .btn:hover {
+    box-shadow: 0px 25px 18px -6px rgba(0, 0, 0, 0.2);
+    background-color: #63b2fc;
+    color: #fff;
+  }
+  .btn--revert {
+    background-color: transparent;
+    color: #8198ae;
+    box-shadow: none;
+    border: 1px solid #c9d9e9;
+  }
+  .btn--revert:hover {
+    background-color: transparent;
+    color: #1f4568;
+    box-shadow: none;
+    border: 1px solid #8198ae;
+  }
+  .sidenav {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  .sidenav-footer {
+    margin-top: 135px;
+    padding-bottom: 1rem;
+  }
+  #unique-xp-display {
+    background-color: #d00c9c; /* Change the color to your preference */
+    color: white; /* Ensure the text color contrasts well */
+    padding: 3px 8px; /* Adjust padding to make it smaller */
+    border-radius: 8px; /* Increased border radius to make corners more rounded */
+  }
+  #unique-xp-display .unique-xp-circle {
+    background-color: #ffc40c; /* Change the color to your preference */
+    color: white; /* Ensure the text color contrasts well */
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 5px; /* Adjust margin as needed */
+  }
+  #unique-xp-points {
+    font-weight: bold;
+    font-size: 14px; /* Adjust font size as needed */
+  }
+  #sidenav-main {
+    background-color: #ffffff; /* White background */
+    border-radius: 12px; /* Adjust the border radius to your preference */
+    padding: 10px; /* Add padding if necessary */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for better visibility */
+    margin-bottom: 20px; /* Add margin to ensure the bottom border is visible */
+    max-height: calc(100vh - 40px); /* Ensure the sidebar fits within the viewport */
+    overflow-y: auto; /* Add vertical scrolling if necessary */
+  }
+  @media (max-width: 1200px) {
+    #sidenav-main {
+      display: none;
+    }
+    #top-nav {
+      display: block;
+    }
+  }
+  @media (min-width: 1201px) {
+    #top-nav {
+      display: none;
+    }
+  }
+  .custom-logo-size {
+    height: 50px !important; /* Increase by 20% from 80px */
+    /* If you also need to adjust width while maintaining aspect ratio, you can uncomment the following line */
+    /* width: auto; */
+  }
+  .sidenav-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px; /* Adjust this height as needed */
+  }
+  .custom-logo-size {
+    max-height: 80%;
+    width: auto;
+  }
+</style>
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
@@ -220,12 +430,16 @@
 
 <div class="container-fluid py-4">
     <!-- Sorting Buttons -->
-    <div class="d-flex justify-content-start mb-4">
-        <button class="btn btn-primary mx-2 filter-button" onclick="filterVideos('all', this)">All</button>
-        <button class="btn btn-primary mx-2 filter-button" onclick="filterVideos('in_progress', this)">In Progress</button>
-        <button class="btn btn-primary mx-2 filter-button" onclick="filterVideos('completed', this)">Completed</button>
-    </div>
-
+<!-- Sorting Buttons -->
+<div class="d-flex justify-content-between mb-4">
+ <!-- Sorting Buttons -->
+  <div>
+    <button class="btn btn-primary mx-2 filter-button" style="background-color: #3a9fff; color: #fff;" onclick="filterVideos('all', this)">All</button>
+    <button class="btn btn-primary mx-2 filter-button" style="background-color: #3a9fff; color: #fff;" onclick="filterVideos('in_progress', this)">In Progress</button>
+    <button class="btn btn-primary mx-2 filter-button" style="background-color: #3a9fff; color: #fff;" onclick="filterVideos('completed', this)">Completed</button>
+  </div>
+  <button class="btn btn-primary mx-2" style="background-color: #3a9fff; color: #fff;" onclick="downloadSubtitles()">Download All Subtitles (.txt)</button>
+</div>
 <div class="row" id="video-list">
     {% for video in media %}
     <div class="col-md-4 mb-4 video-card" data-status="{{ video.status }}">
@@ -690,236 +904,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-</script>
 
 
-<style>
-.text-warning { color: #dcb234; }
-.text-success { color: #3c763d; }
-
-.video-card {
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-}
-
-.video-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-}
-
-.image-container {
-    position: relative;
-    width: 100%;
-    height: 180px;
-}
-
-.card-img-top {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: opacity 0.3s ease-in-out;
-}
-
-.video-card:hover .card-img-top {
-    opacity: 0.9;
-}
-
-.overlay-info {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    right: 10px;
-    display: flex;
-    justify-content: space-between;
-    padding: 5px;
-}
-
-.badge-highlight, .badge-length {
-    background-color: #cb0ba0;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 0.75rem;
-    margin: 2px;
-}
-
-.card-body {
-    padding: 10px;
-}
-
-.card-title {
-    white-space: normal;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    font-size: 1rem; /* Adjust based on preference */
-    line-height: 1.2; /* Ensure this is enough to fit two lines nicely */
-    height: 2.4rem; /* Based on font-size and line-height, adjust if needed */
-    margin-bottom: 5px; /* Reduced space between title and description */
-}
-
-.card-text {
-    font-size: 0.875rem; /* Slightly smaller font size for description */
-    margin-bottom: 5px; /* Reduced space between description and channel name */
-}
-
-.channel-info {
-    display: flex;
-    align-items: center;
-    gap: 10px; /* Add some space between the channel name and the "+" icon */
-}
-
-.channel-plus-container {
-    display: flex;
-    justify-content: space-between; /* Ensures maximum separation between elements */
-    align-items: center;
-    width: 100%;
-}
-
-.channel-name {
-    flex-grow: 1; /* Ensures the channel name occupies all available space to the left */
-}
-
-.add-to-log svg {
-    margin-left: auto; /* Forces the SVG icon to align to the right */
-    width: 20px; /* Set consistent icon size */
-    height: 20px;
-}
-
-.add-to-log {
-    display: flex;
-    align-items: center;
-}
-
-.container-fluid {
-    padding-right: 15px;
-    padding-left: 15px;
-}
-
-.badge-highlight {
-    background-color: #cb0ba0; /* Purple similar to the button */
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 0.75rem;
-    text-align: center;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 5px; /* Space between icon and text */
-}
-
-.badge-highlight svg {
-    fill: #ffd700; /* Golden color for the SVG */
-    width: 1em; /* Size of the SVG */
-    height: 1em; /* Size of the SVG */
-}
-.nav-link.active .icon svg {
-  fill: #FFD700 !important;
-  color: #FFD700 !important;
-}
-.btn {
-      background-color: #3a9fff;
-      border-radius: 20px;
-      padding: 10px 25px;
-      color: #fff;
-      box-shadow: 0px 18px 13px -6px rgba(0, 0, 0, 0.2);
-      transition: all 0.4s;
-    }
-    .btn:hover {
-      box-shadow: 0px 25px 18px -6px rgba(0, 0, 0, 0.2);
-      background-color: #63b2fc;
-      color: #fff;
-    }
-    .btn--revert {
-      background-color: transparent;
-      color: #8198ae;
-      box-shadow: none;
-      border: 1px solid #c9d9e9;
-    }
-    .btn--revert:hover {
-      background-color: transparent;
-      color: #1f4568;
-      box-shadow: none;
-      border: 1px solid #8198ae;
-    }
-  .sidenav {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-    }
-
-    .sidenav-footer {
-        margin-top: 135px;
-        padding-bottom: 1rem;
-    }
-   #unique-xp-display {
-  background-color: #d00c9c; /* Change the color to your preference */
-  color: white; /* Ensure the text color contrasts well */
-  padding: 3px 8px; /* Adjust padding to make it smaller */
-  border-radius: 8px; /* Increased border radius to make corners more rounded */
-}
-
-#unique-xp-display .unique-xp-circle {
-  background-color: #ffc40c; /* Change the color to your preference */
-  color: white; /* Ensure the text color contrasts well */
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 5px; /* Adjust margin as needed */
-}
-
-#unique-xp-points {
-  font-weight: bold;
-  font-size: 14px; /* Adjust font size as needed */
-}
-#sidenav-main {
-  background-color: #ffffff; /* White background */
-  border-radius: 12px; /* Adjust the border radius to your preference */
-  padding: 10px; /* Add padding if necessary */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for better visibility */
-  margin-bottom: 20px; /* Add margin to ensure the bottom border is visible */
-  max-height: calc(100vh - 40px); /* Ensure the sidebar fits within the viewport */
-  overflow-y: auto; /* Add vertical scrolling if necessary */
-}
-    @media (max-width: 1200px) {
-  #sidenav-main {
-    display: none;
-  }
-  #top-nav {
-    display: block;
-  }
-}
-
-@media (min-width: 1201px) {
-  #top-nav {
-    display: none;
-  }
-}
-     .custom-logo-size {
-  height: 50px !important; /* Increase by 20% from 80px */
-  /* If you also need to adjust width while maintaining aspect ratio, you can uncomment the following line */
-  /* width: auto; */
-}
-  .sidenav-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100px;  /* Adjust this height as needed */
-}
-
-.custom-logo-size {
-  max-height: 80%;
-  width: auto;
-}
-</style>
     <script>
 document.addEventListener('DOMContentLoaded', function() {
   const sidenav = document.getElementById('sidenav-main');
@@ -933,6 +919,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+</script>
+  <script>
+function downloadSubtitles() {
+    const url = "{% url 'download_subtitles' %}";
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'combined_subtitles.txt';
+    link.click();
+}
 </script>
 
   <!-- Github buttons -->
