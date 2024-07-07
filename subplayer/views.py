@@ -50,6 +50,19 @@ def add_media(request):
         logger.info(f"Fetching video details for URL: {youtube_url}")
         video_details = fetch_video_details(youtube_url)
         if video_details['status'] == 'valid':
+            video_id = video_details['video_id']
+
+            # Check if the video already exists in the database
+            existing_media = Media.objects.filter(media_id=video_id).first()
+            if existing_media:
+                # Check if the video is already in the user's added_media
+                if request.user.added_media.filter(id=existing_media.id).exists():
+                    return JsonResponse({'status': 'success', 'message': 'Video already in your library.'})
+                else:
+                    request.user.added_media.add(existing_media)
+                    return JsonResponse({'status': 'success', 'message': 'Video successfully added to your library.'})
+
+            # Fetch and save channel details
             channel_details = fetch_channel_details(f"https://www.youtube.com/channel/{video_details['channel_id']}")
             if channel_details:
                 channel, created = Channel.objects.update_or_create(
@@ -68,12 +81,13 @@ def add_media(request):
                 logger.error("Failed to fetch or update channel details.")
                 return JsonResponse({'status': 'error', 'message': 'Failed to fetch or update channel details.'})
 
+            # Save new media details
             try:
                 new_media = Media(
                     title=video_details['title'],
                     media_type='video',
-                    media_id=video_details['video_id'],
-                    youtube_video_id=video_details['video_id'],
+                    media_id=video_id,
+                    youtube_video_id=video_id,
                     url=youtube_url,
                     thumbnail_url=video_details['thumbnail_url'],
                     video_length=video_details['video_length'],
@@ -103,7 +117,6 @@ def add_media(request):
             logger.error(f"Failed to fetch video details for {youtube_url}: {video_details['message']}")
             return JsonResponse({'status': 'error', 'message': video_details.get('message', 'Failed to fetch video details.')})
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
-
 
 @login_required
 def myapp_view(request):

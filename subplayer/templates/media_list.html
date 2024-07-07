@@ -554,6 +554,36 @@ position: relative;
     z-index: 1000;
     font-size: 16px;
 }
+   .notification-bar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    color: white;
+    text-align: center;
+    padding: 16px;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    animation: slide-in 0.5s forwards;
+  }
+
+  .notification-bar.success {
+    background-color: #4caf50; /* Green background for success */
+  }
+
+  .notification-bar.error {
+    background-color: #f44336; /* Red background for error */
+  }
+
+  @keyframes slide-in {
+    from {
+      top: -50px;
+    }
+    to {
+      top: 0;
+    }
+  }
   </style>
 
 </head>
@@ -1200,6 +1230,8 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             notificationMessage.textContent = data.message;
+            notificationBar.classList.remove('success', 'error'); // Remove any existing classes
+            notificationBar.classList.add(data.status === 'success' ? 'success' : 'error');
             notificationBar.style.display = 'block';
             setTimeout(() => {
                 notificationBar.style.display = 'none';
@@ -1207,6 +1239,8 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             notificationMessage.textContent = 'An unexpected error occurred.';
+            notificationBar.classList.remove('success', 'error'); // Remove any existing classes
+            notificationBar.classList.add('error');
             notificationBar.style.display = 'block';
             setTimeout(() => {
                 notificationBar.style.display = 'none';
