@@ -24,7 +24,6 @@ def fetch_subtitles(video_id, language='zh'):
 
 def fetch_video_details(url):
     logger.debug(f"Fetching video details for URL: {url}")
-    # Check if the URL already contains a proper YouTube base URL
     if "youtube.com" not in url and "youtu.be" not in url:
         url = f"https://www.youtube.com/watch?v={url}"
         logger.debug(f"Adjusted URL to: {url}")
@@ -40,12 +39,18 @@ def fetch_video_details(url):
     logger.debug(f"Using video ID: {video_id} to fetch details.")
 
     try:
-        video_response = youtube.videos().list(id=video_id, part='snippet,contentDetails').execute()
+        video_response = youtube.videos().list(id=video_id, part='snippet,contentDetails,status').execute()
         if not video_response.get('items'):
             logger.warning(f"No YouTube video exists for the provided ID: {video_id}")
             return {'status': 'invalid', 'message': "YouTube video does not exist."}
 
         video_item = video_response['items'][0]
+
+        # Check if the video is embeddable
+        if video_item['status'].get('embeddable') is False:
+            logger.warning(f"Video ID {video_id} is not embeddable.")
+            return {'status': 'invalid', 'message': "Video is not embeddable."}
+
         video_title = video_item['snippet']['title']
         thumbnail_url = video_item['snippet']['thumbnails']['high']['url']
         channel_id = video_item['snippet']['channelId']
