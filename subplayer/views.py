@@ -50,6 +50,10 @@ def add_media(request):
         logger.info(f"Fetching video details for URL: {youtube_url}")
         video_details = fetch_video_details(youtube_url)
         if video_details['status'] == 'valid':
+            # Check if the video has Chinese subtitles
+            if not video_details.get('subtitles_file_path'):
+                return JsonResponse({'status': 'error', 'message': 'Video does not have Chinese subtitles.'})
+
             video_id = video_details['video_id']
 
             # Check if the video already exists in the database
