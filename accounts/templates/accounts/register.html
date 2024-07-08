@@ -119,7 +119,7 @@ Chinese Log  </title>
               <h5>Sign Up</h5>
             </div>
             <div class="card-body">
-              <form role="form text-left" method="post" action="{% url 'register' %}">
+             <form role="form text-left" method="post" action="{% url 'register' %}">
     {% csrf_token %}
     {{ form.non_field_errors }}
     <div class="mb-3">
@@ -131,12 +131,12 @@ Chinese Log  </title>
         {{ form.email.errors }}
     </div>
     <div class="mb-3">
-        <input type="password" class="form-control" placeholder="Password" name="password1" aria-label="Password" aria-describedby="password1-addon" required>
+        <input type="password" class="form-control" placeholder="Password" name="password1" id="password1" aria-label="Password" aria-describedby="password1-addon" required>
         <small class="form-text text-muted">Your password must contain at least 8 characters.</small>
         {{ form.password1.errors }}
     </div>
-    <div class="mb-3">
-        <input type="password" class="form-control" placeholder="Confirm Password" name="password2" aria-label="Password confirmation" aria-describedby="password2-addon" required>
+    <div class="mb-3 hidden">
+        <input type="password" class="form-control" placeholder="Confirm Password" name="password2" id="password2" aria-label="Password confirmation" aria-describedby="password2-addon" required>
         {{ form.password2.errors }}
     </div>
     <div class="mb-3">
@@ -148,6 +148,12 @@ Chinese Log  </title>
     </div>
     <p class="text-sm mt-3 mb-0">Already have an account? <a href="{% url 'login' %}" class="text-dark font-weight-bolder">Sign in</a></p>
 </form>
+
+<script>
+document.getElementById('password1').addEventListener('input', function() {
+    document.getElementById('password2').value = this.value;
+});
+</script>
             </div>
           </div>
         </div>

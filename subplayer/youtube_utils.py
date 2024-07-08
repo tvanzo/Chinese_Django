@@ -49,7 +49,7 @@ def fetch_video_details(url):
         # Check if the video is embeddable
         if video_item['status'].get('embeddable') is False:
             logger.warning(f"Video ID {video_id} is not embeddable.")
-            return {'status': 'invalid', 'message': "Video is not embeddable."}
+            return {'status': 'invalid', 'message': "Video not supported: Sorry,this is the rare case a youtuber has disabled embedding on this video. "}
 
         video_title = video_item['snippet']['title']
         thumbnail_url = video_item['snippet']['thumbnails']['high']['url']

@@ -584,6 +584,27 @@ position: relative;
       top: 0;
     }
   }
+ .channel-card .position-relative {
+  width: 140px;
+  height: 140px;
+  overflow: hidden;
+  margin: auto;
+  border-radius: 50%; /* Make the container a circle */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+  border: none;
+  flex-shrink: 0; /* Prevent the container from shrinking */
+}
+
+.channel-card img {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 50%; /* Ensure the image fits the circular container */
+  display: block;
+}
   </style>
 
 </head>
