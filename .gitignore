@@ -1,2 +1,9 @@
 .DS_Store
 myproject/.DS_Store
+
+
+# Ignore virtual environment
+venv/
+
+# Ignore cache files
+__pycache__/
