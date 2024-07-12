@@ -37,9 +37,10 @@ class Media(models.Model):
     video_length = models.PositiveIntegerField(blank=True, null=True, help_text="Length of the video in seconds.")
     word_count = models.IntegerField(default=0, blank=True, null=True, help_text="Estimated word count from video subtitles.")
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, related_name='media')
-    category = models.CharField(max_length=255,  default='Unknown')
+    category = models.CharField(max_length=255, default='Unknown')
     profile_image_url = models.URLField(null=True, blank=True)
-
+    created_at = models.DateTimeField(auto_now_add=True)  # Add this field
+#test
     def delete(self, *args, **kwargs):
         if self.subtitle_file:
             file_path = os.path.join(settings.MEDIA_ROOT, self.subtitle_file.name)
