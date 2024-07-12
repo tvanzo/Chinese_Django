@@ -11,8 +11,7 @@ from isodate import parse_duration
 logger = logging.getLogger(__name__)
 
 # Initialize YouTube API
-youtube = build('youtube', 'v3', developerKey='AIzaSyBbuGRULqUYyCxDBZyoHFgzHwseF-fnrwg')
-
+youtube = build('youtube', 'v3', GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY'))
 
 def fetch_subtitles(video_id, language='zh'):
     try:

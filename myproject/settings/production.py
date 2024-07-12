@@ -12,7 +12,7 @@ ALLOWED_HOSTS = ['chinese-django.onrender.com', 'localhost', '127.0.0.1', 'www.c
 DATABASES = {
     'default': dj_database_url.config(default=env('DATABASE_URL'))
 }
-
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 # Security settings
 SECURE_SSL_REDIRECT = env.bool('SECURE_SSL_REDIRECT', default=True)
 SESSION_COOKIE_SECURE = env.bool('SESSION_COOKIE_SECURE', default=True)
