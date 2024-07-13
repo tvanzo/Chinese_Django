@@ -172,7 +172,6 @@ def fetch_channel_details(url):
         return None
 
 
-
 def fetch_videos_from_channel_with_chinese_subtitles(channel_id):
     videos = []
     nextPageToken = None

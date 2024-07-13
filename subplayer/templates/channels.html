@@ -7,8 +7,7 @@
   <link rel="apple-touch-icon" sizes="76x76" href="{% static 'accounts/img/apple-icon.png' %}">
   <link rel="icon" type="image/png" href="{% static 'accounts/img/favicon.png' %}">
   <title>
-    Soft UI Dashboard by Creative Tim
-  </title>
+Chinese Log  </title>
   <!-- Fonts and icons -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
   <link id="pagestyle" href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet" />
@@ -16,7 +15,7 @@
   <link id="pagestyle" href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet" />
   <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet" />
   <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
-  <style>
+    <style>
     .channel-card {
       display: flex;
       flex-direction: column;
@@ -29,12 +28,14 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      border-radius: 50%; /* Makes the image circular */
     }
     .channel-card .position-relative {
       width: 140px;
       height: 140px;
       overflow: hidden;
       margin: auto;
+      border-radius: 50%; /* Makes the container circular */
     }
     .channel-card .card-body {
       flex: 1;
@@ -68,7 +69,7 @@
                                 <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-lg-0 mb-4">
                                     <div class="card card-blog card-plain channel-card">
                                         <div class="position-relative">
-                                            <a class="d-block shadow-xl border-radius-xl">
+                                            <a class="d-block shadow-xl border-radius-xl" href="{% url 'channel_view' channel.channel_id %}">
                                                 <img src="{{ channel.profile_pic_url }}" alt="Channel Logo" class="img-fluid shadow">
                                             </a>
                                         </div>
@@ -92,10 +93,8 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
-    <script src="{% static 'js/core/popper.min.js' %}"></script>
     <script src="{% static 'js/core/bootstrap.min.js' %}"></script>
     <script src="{% static 'js/plugins/perfect-scrollbar.min.js' %}"></script>
     <script src="{% static 'js/plugins/smooth-scrollbar.min.js' %}"></script>
