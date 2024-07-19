@@ -715,28 +715,27 @@ function createLineChart(data) {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-    y: {
-        beginAtZero: true,
-        suggestedMax: suggestedMax,
-        ticks: {
-            min: 0, // Ensure the y-axis doesn't go below 0
-            stepSize: 1,
-            color: '#9a9a9a'
-        },
-        grid: {
-            color: '#e7e7e7',
-            borderDash: [5, 5]
-        }
-    },
-    x: {
-        grid: {
-            display: false
-        },
-        ticks: {
-            color: '#9a9a9a'
-        }
-    }
-},
+                y: {
+                    beginAtZero: true,
+                    suggestedMax: suggestedMax,
+                    ticks: {
+                        stepSize: 1,
+                        color: '#9a9a9a'
+                    },
+                    grid: {
+                        color: '#e7e7e7',
+                        borderDash: [5, 5]
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#9a9a9a'
+                    }
+                }
+            },
             plugins: {
                 legend: {
                     display: false,
