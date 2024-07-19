@@ -261,41 +261,60 @@
     </nav>
     <!-- End Navbar -->
 
-   <div class="container-fluid py-4">
+  <div class="container-fluid py-4">
   <div class="row">
-    <!-- Single container for sliding bar -->
-    <div class="col-lg-12 mb-lg-0 mb-4">
-      <div class="card">
-        <div class="card-body p-3">
-          <h5 class="font-weight-bolder">Channels</h5>
-          <div class="scrolling-wrapper">
-            {% for channel in channels %}
-            <div class="card card-blog card-plain channel-card">
-              <div class="position-relative">
-                <a class="d-block shadow-xl border-radius-xl">
-                  <img src="{{ channel.profile_pic_url }}" alt="Channel Logo" class="img-fluid shadow">
-                </a>
-              </div>
-              <div class="card-body px-1 pb-0 text-center">
-                <div class="content">
-                  <p class="text-gradient text-dark mb-2 text-sm">{{ channel.media_count }} videos</p>
-                  <a href="{% url 'channel_view' channel.channel_id %}">
-                    <h5>{{ channel.name }}</h5>
-                  </a>
-                  <p class="mb-4 text-sm">{{ channel.description|truncatewords:20 }}</p>
-                </div>
-                <div class="btn-container">
-                  <a href="{% url 'channel_view' channel.channel_id %}" class="btn btn-outline-primary btn-sm mb-0">View Channel</a>
-                </div>
-              </div>
+    <!-- Total Highlights -->
+    <div class="row mt-4">
+        <div class="col-lg-6 mb-lg-0 mb-4">
+  <div class="card">
+    <div class="card-body p-3">
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="d-flex flex-column h-100">
+            <p class="mb-1 pt-2 text-bold">1 Channel Subscription</p>
+            <h5 class="font-weight-bolder">Subscribed to Eazy Mandarin</h5>
+            <p class="mb-5">From colors, cards, typography to complex elements, you will find the full documentation.</p>
+            <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto" href="javascript:;">
+              Read More
+              <i class="fas fa-arrow-right text-sm ms-1" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-5 ms-auto text-center d-flex align-items-center">
+          <div class="border-radius-lg w-100">
+            <div class="position-relative d-flex align-items-center justify-content-center h-100">
+              <img class="w-100 position-relative z-index-2 pt-4 pb-4" src="{% static 'accounts/img/eazy.png' %}" alt="rocket">
             </div>
-            {% endfor %}
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+<div class="col-lg-6">
+    <div class="card h-100 p-3">
+        <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100" style="background-image: url('https://wpimg.pixelied.com/blog/wp-content/uploads/2020/08/28041815/Youtube-Collage.jpg');">
+            <span class="mask bg-gradient-dark"></span>
+            <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
+                <div class="d-flex align-items-center mb-4 pt-2">
+                    <h5 class="text-white font-weight-bolder mb-0">Upgrade to Pro</h5>
+                    <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#eedf3a" stroke-width="0.00028" style="width: 1.5rem; height: 1.5rem; margin-left: 8px; align-self: center;">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <path d="M20.75 3C21.0557 3 21.3421 3.13962 21.5303 3.3746L21.6048 3.48102L25.8548 10.481C26.0556 10.8118 26.0459 11.2249 25.8395 11.5435L25.7634 11.6459L14.7634 24.6459C14.3906 25.0865 13.7317 25.1159 13.3207 24.7341L13.2366 24.6459L2.23662 11.6459C1.98663 11.3505 1.93182 10.941 2.08605 10.5941L2.14522 10.481L6.39522 3.48102C6.55388 3.21969 6.82182 3.04741 7.1204 3.00842L7.25001 3H20.75ZM17.515 12H10.484L13.999 20.672L17.515 12ZM22.844 12H19.673L16.756 19.195L22.844 12ZM8.326 12H5.155L11.242 19.193L8.326 12ZM9.674 5H7.81101L4.775 10H8.245L9.674 5ZM16.246 5H11.753L10.324 10H17.675L16.246 5ZM20.188 5H18.325L19.754 10H23.224L20.188 5Z" fill="#eedf3a"></path>
+                        </g>
+                    </svg>
+                </div>
+                <p class="text-white">Unlock millions of videos, now 50% for those with current single channel subscription.</p>
+                <a class="text-white text-sm font-weight-bold mb-0 icon-move-right mt-auto" href="javascript:;">
+                    Read More
+                    <i class="fas fa-arrow-right text-sm ms-1" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
 
 <style>
   .scrolling-wrapper {

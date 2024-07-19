@@ -639,7 +639,7 @@ Chinese Log  </title>
 
     </div>
   </main>
- 
+
   <!--   Core JS Files   -->
   <script src="{% static 'accounts/js/core/popper.min.js' %}"></script>
   <script src="{% static 'accounts/js/core/bootstrap.min.js' %}"></script>
@@ -715,27 +715,28 @@ function createLineChart(data) {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                y: {
-                    beginAtZero: true,
-                    suggestedMax: suggestedMax,
-                    ticks: {
-                        stepSize: 1,
-                        color: '#9a9a9a'
-                    },
-                    grid: {
-                        color: '#e7e7e7',
-                        borderDash: [5, 5]
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false
-                    },
-                    ticks: {
-                        color: '#9a9a9a'
-                    }
-                }
-            },
+    y: {
+        beginAtZero: true,
+        suggestedMax: suggestedMax,
+        ticks: {
+            min: 0, // Ensure the y-axis doesn't go below 0
+            stepSize: 1,
+            color: '#9a9a9a'
+        },
+        grid: {
+            color: '#e7e7e7',
+            borderDash: [5, 5]
+        }
+    },
+    x: {
+        grid: {
+            display: false
+        },
+        ticks: {
+            color: '#9a9a9a'
+        }
+    }
+},
             plugins: {
                 legend: {
                     display: false,
@@ -803,39 +804,40 @@ function createBarChart(data) {
                 mode: 'index',
             },
             scales: {
-                y: {
-                    grid: {
-                        drawBorder: false,
-                        display: false,
-                        drawOnChartArea: false,
-                        drawTicks: false,
-                    },
-                    ticks: {
-                        suggestedMin: 0,
-                        suggestedMax: Math.max(...data.highlights) * 1.2, // 20% above max for better scale visibility
-                        beginAtZero: true,
-                        padding: 15,
-                        font: {
-                            size: 14,
-                            family: "Open Sans",
-                            style: 'normal',
-                            lineHeight: 2
-                        },
-                        color: "#fff"
-                    },
-                },
-                x: {
-                    grid: {
-                        drawBorder: true,
-                        display: true,
-                        drawOnChartArea: true,
-                        drawTicks: true
-                    },
-                    ticks: {
-                        display: true
-                    },
-                },
+    y: {
+        grid: {
+            drawBorder: false,
+            display: false,
+            drawOnChartArea: false,
+            drawTicks: false,
+        },
+        ticks: {
+            min: 0, // Ensure the y-axis doesn't go below 0
+            suggestedMin: 0,
+            suggestedMax: Math.max(...data.highlights) * 1.2, // 20% above max for better scale visibility
+            beginAtZero: true,
+            padding: 15,
+            font: {
+                size: 14,
+                family: "Open Sans",
+                style: 'normal',
+                lineHeight: 2
             },
+            color: "#fff"
+        },
+    },
+    x: {
+        grid: {
+            drawBorder: true,
+            display: true,
+            drawOnChartArea: true,
+            drawTicks: true
+        },
+        ticks: {
+            display: true
+        },
+    },
+}
         },
     });
 }
