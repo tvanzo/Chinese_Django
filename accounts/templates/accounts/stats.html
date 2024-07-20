@@ -803,40 +803,39 @@ function createBarChart(data) {
                 mode: 'index',
             },
             scales: {
-    y: {
-        grid: {
-            drawBorder: false,
-            display: false,
-            drawOnChartArea: false,
-            drawTicks: false,
-        },
-        ticks: {
-            min: 0, // Ensure the y-axis doesn't go below 0
-            suggestedMin: 0,
-            suggestedMax: Math.max(...data.highlights) * 1.2, // 20% above max for better scale visibility
-            beginAtZero: true,
-            padding: 15,
-            font: {
-                size: 14,
-                family: "Open Sans",
-                style: 'normal',
-                lineHeight: 2
+                y: {
+                    grid: {
+                        drawBorder: false,
+                        display: false,
+                        drawOnChartArea: false,
+                        drawTicks: false,
+                    },
+                    ticks: {
+                        suggestedMin: 0,
+                        suggestedMax: Math.max(...data.highlights) * 1.2, // 20% above max for better scale visibility
+                        beginAtZero: true,
+                        padding: 15,
+                        font: {
+                            size: 14,
+                            family: "Open Sans",
+                            style: 'normal',
+                            lineHeight: 2
+                        },
+                        color: "#fff"
+                    },
+                },
+                x: {
+                    grid: {
+                        drawBorder: true,
+                        display: true,
+                        drawOnChartArea: true,
+                        drawTicks: true
+                    },
+                    ticks: {
+                        display: true
+                    },
+                },
             },
-            color: "#fff"
-        },
-    },
-    x: {
-        grid: {
-            drawBorder: true,
-            display: true,
-            drawOnChartArea: true,
-            drawTicks: true
-        },
-        ticks: {
-            display: true
-        },
-    },
-}
         },
     });
 }
