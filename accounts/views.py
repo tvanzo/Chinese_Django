@@ -650,7 +650,6 @@ def stats_view(request):
     }
 
     return render(request, 'accounts/stats.html', context)
-
 @login_required
 def update_progress(request):
     if request.method != 'POST':
