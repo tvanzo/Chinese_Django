@@ -176,7 +176,7 @@ def fetch_channel_details(url):
         logger.error(f"An error occurred while fetching channel details: {e}")
         return None
 
-#test
+#teste
 def fetch_videos_from_channel_with_chinese_subtitles(channel_id):
     videos = []
     nextPageToken = None
