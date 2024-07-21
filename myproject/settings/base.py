@@ -9,7 +9,7 @@ import dj_database_url
 env = environ.Env(
     DEBUG=(bool, False)
 )
-GOOGLE_API_KEY = env('GOOGLE_API_KEY')
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 # Read .env file
 environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent, '.env'))
