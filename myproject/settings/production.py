@@ -23,7 +23,7 @@ DATABASES = {
     'default': dj_database_url.config(default=env('DATABASE_URL'))
 }
 
-GOOGLE_API_KEY = env('GOOGLE_API_KEY')
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 # Security settings
 SECURE_SSL_REDIRECT = env.bool('SECURE_SSL_REDIRECT', default=True)
