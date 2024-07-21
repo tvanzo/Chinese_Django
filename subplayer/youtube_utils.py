@@ -7,11 +7,20 @@ import json
 from django.conf import settings
 import logging
 from isodate import parse_duration
+from google.auth.exceptions import DefaultCredentialsError
 
 logger = logging.getLogger(__name__)
 
 # Initialize YouTube API
-youtube = build('youtube', 'v3', developerKey = os.getenv('GOOGLE_API_KEY'))
+google_api_key = os.getenv('GOOGLE_API_KEY')
+if not google_api_key:
+    raise RuntimeError("GOOGLE_API_KEY environment variable is not set")
+
+try:
+    youtube = build('youtube', 'v3', developerKey=google_api_key)
+except DefaultCredentialsError as e:
+    logger.error("Failed to authenticate with Google API: %s", e)
+    raise RuntimeError("Failed to authenticate with Google API") from e
 
 def fetch_subtitles(video_id, language='zh'):
     try:
@@ -19,7 +28,6 @@ def fetch_subtitles(video_id, language='zh'):
     except Exception as e:
         logger.error(f"Failed to fetch subtitles for video ID {video_id}: {e}")
         return None
-
 
 def fetch_video_details(url):
     logger.debug(f"Fetching video details for URL: {url}")
@@ -29,7 +37,6 @@ def fetch_video_details(url):
 
     video_id_match = re.search(r'(?<=v=)[^&#]+', url) or re.search(r'(?<=be/)[^&#]+', url)
     video_id = video_id_match.group(0) if video_id_match else None
-    logger.error("URL provided: " + url)
 
     if not video_id:
         logger.error("Invalid YouTube URL provided: " + url)
@@ -48,7 +55,7 @@ def fetch_video_details(url):
         # Check if the video is embeddable
         if video_item['status'].get('embeddable') is False:
             logger.warning(f"Video ID {video_id} is not embeddable.")
-            return {'status': 'invalid', 'message': "Video not supported: Sorry,this is the rare case a youtuber has disabled embedding on this video. "}
+            return {'status': 'invalid', 'message': "Video not supported: Sorry, this is the rare case a YouTuber has disabled embedding on this video."}
 
         video_title = video_item['snippet']['title']
         thumbnail_url = video_item['snippet']['thumbnails']['high']['url']
@@ -79,7 +86,6 @@ def fetch_video_details(url):
     except HttpError as e:
         logger.error(f"HTTP Error while fetching video details: {e}")
         return {'status': 'invalid', 'message': f"An API error occurred: {e}"}
-
 
 def process_and_save_subtitles(subtitles, video_id):
     if not subtitles:
@@ -121,7 +127,6 @@ def process_and_save_subtitles(subtitles, video_id):
         logger.error(f"Failed to save subtitles for video ID {video_id}: {e}")
         return None, 0
 
-
 def fetch_channel_details(url):
     try:
         channel_id = None
@@ -147,7 +152,7 @@ def fetch_channel_details(url):
                     search_response = youtube.search().list(part='snippet', q=username, type='channel').execute()
                     logger.debug(f"Search response for username {username}: {search_response}")
                     if search_response.get('items'):
-                        channel_id = search_response['items'][0]['snippet']['channelId']
+                        channel_id = search_response.get('items')[0]['snippet']['channelId']
         if not channel_id:
             logger.error("Channel ID could not be found or extracted from the URL.")
             return None
