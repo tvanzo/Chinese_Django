@@ -28,7 +28,7 @@ def fetch_subtitles(video_id, language='zh'):
     except Exception as e:
         logger.error(f"Failed to fetch subtitles for video ID {video_id}: {e}")
         return None
-
+#d
 def fetch_video_details(url):
     logger.debug(f"Fetching video details for URL: {url}")
     if "youtube.com" not in url and "youtu.be" not in url:
