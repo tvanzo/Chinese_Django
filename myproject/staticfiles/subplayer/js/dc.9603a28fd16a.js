@@ -640,7 +640,7 @@ async function loadDictionary() {
 }
 // Execute the loadDictionary function when the document is fully loaded
 document.addEventListener('DOMContentLoaded', async () => {
-console.log("Dictionary loading inner...");
+console.log("Dictionary loading outter...");
 loadDictionary().then(() => {
   console.log("Dictionary loaded:", dictionary);
     // Assuming each entry is on a new line and format is "word - definition"
@@ -654,11 +654,11 @@ loadDictionary().then(() => {
 });    // You can add other initializations here...
 });
 
+    
 
 
 
-
-
+    
 
 
 
@@ -761,7 +761,11 @@ function hidePopup() {
     }
 }
 
+
 function onMouseMove(mouseMove) {
+    if (!dictionaryEnabled) {
+        return; // Exit early if the dictionary is not enabled
+    }
     if (mouseMove.target.nodeName === 'TEXTAREA' || mouseMove.target.nodeName === 'INPUT'
         || mouseMove.target.nodeName === 'DIV') {
 
@@ -899,7 +903,7 @@ function triggerSearch() {
 
 function processSearchResult(result) {
      console.log("processSearchResult called with result:", result);
-
+    
     // No need to check config existence here since we've directly initialized it
     const tonecolors = config.tonecolors; // Directly use it
 
