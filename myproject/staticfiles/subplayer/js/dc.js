@@ -640,7 +640,7 @@ async function loadDictionary() {
 }
 // Execute the loadDictionary function when the document is fully loaded
 document.addEventListener('DOMContentLoaded', async () => {
-console.log("Dictionary loading...");
+console.log("Dictionary loading inner...");
 loadDictionary().then(() => {
   console.log("Dictionary loaded:", dictionary);
     // Assuming each entry is on a new line and format is "word - definition"
