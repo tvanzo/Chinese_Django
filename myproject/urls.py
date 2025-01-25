@@ -9,6 +9,8 @@ from subplayer import views as subplayer_views
 from allauth.account.views import LoginView, LogoutView, SignupView
 from allauth.account.views import PasswordResetView
 from django.views.static import serve
+from accounts.views import stripe_webhook, create_checkout_session
+from django.views.generic import TemplateView
 
 
 urlpatterns = [
@@ -64,7 +66,16 @@ path('dashboard/', account_views.stats_view, name='stats_view'),
     path('password/reset/', PasswordResetView.as_view(template_name='accounts/password_reset.html'),
          name='account_reset_password'),
     path('media/<path:path>', serve, {'document_root': settings.MEDIA_ROOT}),
-
+    path('create-checkout-session/', create_checkout_session, name='create_checkout_session'),
+    path('stripe-webhook/', stripe_webhook, name='stripe_webhook'),
+    path('checkout/', TemplateView.as_view(template_name='accounts/checkout.html'), name='checkout'),
+    path('success/', TemplateView.as_view(template_name='accounts/success.html'), name='success'),
+    path('cancel/', TemplateView.as_view(template_name='accounts/cancel.html'), name='cancel'),
+    path('payment_success/', account_views.handle_payment_success, name='payment_success'),
+    path('account/', account_views.account_view, name='account'),
+    path('update-payment/', account_views.update_payment_view, name='update_payment'),
+    path('cancel-subscription/', account_views.cancel_subscription, name='cancel_subscription'),
+    path('reactivate-subscription/', account_views.reactivate_subscription, name='reactivate_subscription'),
+    path('upgrade/', account_views.upgrade_plan, name='upgrade_plan'),
 ]
-
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

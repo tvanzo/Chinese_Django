@@ -1,3 +1,9 @@
+from decouple import config
+import os
+
+print("GOOGLE_API_KEY (from config):", config("GOOGLE_API_KEY", default="NOT LOADED"))
+print("GOOGLE_API_KEY (from os.getenv):", os.getenv("GOOGLE_API_KEY", "NOT SET"))
+
 import os
 from pathlib import Path
 import environ
@@ -16,6 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Static and Media files
 STATIC_URL = '/static/'
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/var/data/media'
@@ -186,6 +193,12 @@ EMAIL_PORT = env('EMAIL_PORT', default=587)
 EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='your-email@example.com')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='your-email-password')
-
+import os
+print("GOOGLE_API_KEY:", os.getenv("GOOGLE_API_KEY"))
 # Custom settings
 INVITE_CODE = 'beta-cnforum'
+
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', 'default_secret_key_if_not_set')
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', 'default_publishable_key_if_not_set')
+STRIPE_SECRET_KEY = 'sk_test_51QZvTeDbaGsKLbbKJY70UvEZsqbycWsH5v5zycuvhHf1aiNuqR0DnMhPYv4SVB3FdEzjeCtremyTpIsx5keL1Kbo00Y83zAius'
+STRIPE_PUBLISHABLE_KEY = 'pk_test_51QZvTeDbaGsKLbbKLi5AsVcCSBxvSml9qgMbnYlARFaDefG3nuZZflcsWMJWSNJtxrh6MmsBAVNGYJlCrJdMVdVm00FiHNLn1y'

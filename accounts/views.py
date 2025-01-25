@@ -17,16 +17,18 @@ import json
 import logging
 from django.contrib.auth import authenticate, login
 from subplayer.forms import CustomUserCreationForm
-from accounts.models import Profile, MediaProgress
+from accounts.models import Profile, MediaProgress, Subscription
 from subplayer.models import Media, Highlight, UserMediaStatus
 from subplayer.views import format_duration  # Import the function from subplayer.views
 
 logger = logging.getLogger(__name__)
-
+import stripe
+from django.conf import settings
+from django.shortcuts import redirect
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from .forms import CustomUserCreationForm
-
+from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from .forms import CustomUserCreationForm
@@ -51,23 +53,50 @@ from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import CustomUserCreationForm
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save(request)  # Save the user and pass the request
+            user = form.save(request)
             raw_password = form.cleaned_data.get('password1')
-            user = authenticate(email=user.email, password=raw_password)  # Use email for authentication
-            if user is not None:
-                login(request, user)
-                messages.success(request, f'Account created for {user.email}!')
-                return redirect('/')
+            selected_plan = request.POST.get('selected_plan')
+
+            if selected_plan == 'premium':
+                # Create Stripe customer for premium users
+                customer = stripe.Customer.create(email=user.email, description=f"{user.email}")
+                profile = Profile.objects.get(user=user)
+                profile.stripe_customer_id = customer.id
+                profile.save()
+
+                session = stripe.checkout.Session.create(
+                    customer=customer.id,
+                    payment_method_types=['card'],
+                    line_items=[{
+                        'price': 'price_1Qie43DbaGsKLbbK3mkJlaON',
+                        'quantity': 1,
+                    }],
+                    mode='subscription',
+                    success_url=f"{request.build_absolute_uri('/payment_success/')}?session_id={{CHECKOUT_SESSION_ID}}",
+                    cancel_url=request.build_absolute_uri('/register/'),
+                )
+                request.session['new_user_id'] = user.id
+                return redirect(session.url, code=303)
             else:
-                messages.error(request, 'Authentication failed. Please try again.')
+                authenticated_user = authenticate(email=user.email, password=raw_password)
+                if authenticated_user is not None:
+                    login(request, authenticated_user)
+                    Subscription.objects.update_or_create(user=user, defaults={'tier': 'FREE'})
+                    messages.success(request, f'Welcome to the Free Plan, {user.email}!')
+                    return redirect('/')
+                else:
+                    messages.error(request, 'Authentication failed. Please try again.')
+                    user.delete()
         else:
             messages.error(request, 'Invalid form submission. Please correct the errors and try again.')
-            print(form.errors)  # Print form errors to debug
+            print(form.errors)
     else:
         form = CustomUserCreationForm()
     return render(request, 'accounts/register.html', {'form': form})
@@ -770,8 +799,22 @@ def remove_from_log(request, media_id):
     request.user.added_media.remove(media)
     return JsonResponse({'success': True})
 
+from django.shortcuts import render
+from .models import Subscription
+
 def join(request):
-    return render(request, 'accounts/join.html')
+    # Assuming 'Subscription' is your model with TIER_CHOICES defined
+    context = {
+        'Subscription': Subscription,  # Pass the Subscription model to the template
+    }
+
+    # If you need to check or load any user-specific subscription data:
+    if request.user.is_authenticated:
+        user_subscription = request.user.subscriptions.first()
+        if user_subscription:
+            context['current_subscription'] = user_subscription
+
+    return render(request, 'accounts/join.html', context)
 
 # In your views.py file
 
@@ -789,3 +832,356 @@ def home_redirect_view(request):
         return redirect('stats_view')  # or any other name you have for the dashboard view
     else:
         return redirect('intro')  # or any other name you have for the intro view
+
+
+
+@csrf_exempt
+def create_checkout_session(request):
+    try:
+        # Debugging: Log request method and data
+        print(f"Request Method: {request.method}")
+        print(f"GET Data: {request.GET}")
+        print(f"POST Data: {request.POST}")  # This will contain the form data
+
+        # Determine the protocol and host dynamically
+        protocol = 'https' if request.is_secure() else 'http'
+        host = request.get_host()  # This gets the host, including the port
+
+        # Retrieve parameters
+        subscription_type = request.POST.get('subscription_type')
+        coupon_code = request.POST.get('coupon_code')
+        print(f"Subscription Type: {subscription_type}, Coupon Code: {coupon_code}")
+
+        # Validate subscription type
+        price_mapping = {
+            'basic': 'price_1Qie3pDbaGsKLbbKH7DXZC9c',  # Replace with your actual Price IDs
+            'premium': 'price_1Qie43DbaGsKLbbK3mkJlaON',
+        }
+        price_id = price_mapping.get(subscription_type)
+        if not price_id:
+            print("Error: Invalid subscription type")
+            return JsonResponse({'error': 'Invalid subscription type'}, status=400)
+
+        # Validate coupon code if provided
+        discounts = []
+        if coupon_code:
+            try:
+                coupon = stripe.Coupon.retrieve(coupon_code)
+                discounts.append({'coupon': coupon.id})
+                print(f"Coupon applied: {coupon.id}")
+            except stripe.error.InvalidRequestError as e:
+                print(f"Invalid coupon code: {e}")
+                return JsonResponse({'error': 'Invalid coupon code'}, status=400)
+
+        # Create checkout session
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[
+                {
+                    'price': price_id,
+                    'quantity': 1,
+                },
+            ],
+            mode='subscription',
+            discounts=discounts,
+            success_url=f"{protocol}://{host}/success/",
+            cancel_url=f"{protocol}://{host}/cancel/",
+        )
+        print(f"Checkout Session Created: {checkout_session.id}")
+        return JsonResponse({'url': checkout_session.url})
+
+    except Exception as e:
+        print(f"Exception: {str(e)}")  # Log the exception
+        return JsonResponse({'error': 'Internal server error'}, status=500)
+@csrf_exempt
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    event = None
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e:
+        return HttpResponse(status=400)  # Invalid payload
+    except stripe.error.SignatureVerificationError as e:
+        return HttpResponse(status=400)  # Invalid signature
+
+    # Handle specific events
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        handle_checkout_session(session)
+
+    return HttpResponse(status=200)
+
+from django.contrib.auth import login
+from stripe.error import StripeError
+from django.urls import reverse
+from django.contrib.auth import login
+
+from django.contrib.auth import login
+from django.contrib import messages
+from django.urls import reverse
+
+from django.contrib.auth import login
+from django.contrib import messages
+from django.urls import reverse
+from django.shortcuts import redirect
+from stripe.error import StripeError
+
+from django.utils import timezone
+from datetime import datetime
+
+
+def handle_payment_success(request):
+    session_id = request.GET.get('session_id')
+    plan = request.GET.get('plan', 'premium')  # Default to 'premium' if no plan is specified
+
+    if session_id:
+        try:
+            # Retrieve the session
+            session = stripe.checkout.Session.retrieve(session_id)
+            print(f"Session Data: {session}")  # Debug: Print session data
+
+            # Check if payment was successful and a subscription was created
+            if session.payment_status == 'paid' and session.subscription:
+                # Retrieve the user's profile using the Stripe customer ID
+                profile = Profile.objects.get(stripe_customer_id=session.customer)
+                user = profile.user
+
+                # Retrieve the subscription to get the expiration date
+                subscription = stripe.Subscription.retrieve(session.subscription)
+                print(f"Subscription Data: {subscription}")  # Debug: Print subscription data
+
+                # Get the expiration date (current_period_end)
+                end_date = timezone.make_aware(datetime.fromtimestamp(subscription.current_period_end))
+                # Get the next billing date
+                next_billing_date = timezone.make_aware(datetime.fromtimestamp(subscription.current_period_end))
+
+                # Clear any old messages before adding a new one
+                storage = messages.get_messages(request)
+                for message in storage:
+                    pass
+
+                # Set the backend for the user
+                user.backend = 'allauth.account.auth_backends.AuthenticationBackend'
+
+                # Log in the user
+                login(request, user)
+
+                # Update or create the subscription with expiration date and next billing date in local database
+                Subscription.objects.update_or_create(
+                    user=user,
+                    defaults={
+                        'tier': plan.upper(),  # Use the plan parameter to set the tier
+                        'stripe_subscription_id': session.subscription,
+                        'end_date': end_date,
+                        'next_billing_date': next_billing_date
+                    }
+                )
+
+                # Add welcome message including next billing date
+                messages.success(request,
+                                 f"Welcome to the {plan.capitalize()} Plan, {user.email}! Your subscription expires on {end_date.strftime('%B %d, %Y')} and your next billing date is {next_billing_date.strftime('%B %d, %Y')}.")
+                print(f"Redirecting to Home: /")
+                return redirect('/')  # Redirect to home page
+            else:
+                # Clear messages and handle payment not completed
+                storage = messages.get_messages(request)
+                for message in storage:
+                    pass
+                messages.error(request, 'Payment was not completed successfully.')
+                print("Payment was not completed successfully")
+                return redirect('register')
+        except stripe.error.StripeError as e:
+            # Clear messages and add Stripe error message
+            storage = messages.get_messages(request)
+            for message in storage:
+                pass
+            messages.error(request, f'Stripe error: {str(e)}')
+            print(f"Stripe error: {str(e)}")
+            return redirect('register')
+    else:
+        # Clear messages and handle no session ID
+        storage = messages.get_messages(request)
+        for message in storage:
+            pass
+        messages.error(request, 'No session ID found.')
+        print("No session ID found in URL parameters")
+        return redirect('register')
+
+    # This line should not be reached if all conditions are handled, but just in case:
+    return redirect('register')
+@login_required
+def account_view(request):
+    try:
+        subscription = Subscription.objects.get(user=request.user)
+    except Subscription.DoesNotExist:
+        subscription, created = Subscription.objects.get_or_create(user=request.user, tier='FREE', defaults={'is_active': True})
+
+    profile = Profile.objects.get(user=request.user)
+    stripe_customer_id = profile.stripe_customer_id
+
+    user_payment_info = {
+        'card_last_four': '####',
+        'card_type': 'Unknown'
+    }
+
+    if stripe_customer_id:
+        try:
+            customer = stripe.Customer.retrieve(stripe_customer_id)
+            print(f"Stripe Customer Data: {customer}")  # Debug: Print customer data
+
+            # Fetch payment methods
+            payment_methods = stripe.PaymentMethod.list(customer=stripe_customer_id, type="card")
+            print(f"Customer Payment Methods: {payment_methods}")  # Debug: Print payment methods
+
+            if payment_methods.data:
+                # Use the first payment method if available
+                payment_method = payment_methods.data[0]  # Or find by criteria like last4
+                if hasattr(payment_method, 'card'):
+                    user_payment_info = {
+                        'card_last_four': payment_method.card.last4,
+                        'card_type': payment_method.card.brand
+                    }
+                else:
+                    print("Payment method does not have card details")
+            else:
+                print("No payment methods found for this customer.")
+        except stripe.error.StripeError as e:
+            print(f"Stripe Error in account view: {e}")
+
+    context = {
+        'subscription': subscription,
+        'user_payment_info': user_payment_info,
+        'user': request.user,
+        'expiration_date': subscription.end_date.strftime('%B %d, %Y') if subscription.end_date else 'N/A',
+        'next_billing_date': subscription.next_billing_date.strftime('%B %d, %Y') if subscription.next_billing_date else 'N/A'
+    }
+
+    return render(request, 'accounts/account.html', context)
+@login_required
+def update_payment_view(request):
+    profile = Profile.objects.get(user=request.user)
+    if profile.stripe_customer_id:
+        customer_portal_session = stripe.billing_portal.Session.create(
+            customer=profile.stripe_customer_id,
+            return_url=request.build_absolute_uri(reverse('account'))
+        )
+        return redirect(customer_portal_session.url)
+    else:
+        return redirect('account')  # or handle appropriately if no Stripe customer ID
+
+@login_required
+def cancel_subscription(request):
+    # Assuming each user has one subscription
+    subscription = request.user.subscriptions.first()
+
+    if request.method == 'POST':
+        if subscription and subscription.is_active:
+            try:
+                # Retrieve the Stripe subscription
+                stripe_subscription = stripe.Subscription.retrieve(subscription.stripe_subscription_id)
+                # Cancel at period end means the subscription will be active until the end of the current billing cycle
+                stripe_subscription.cancel_at_period_end = True
+                stripe_subscription.save()
+
+                # Update your model to reflect the change
+                subscription.is_active = False
+                subscription.end_date = timezone.make_aware(datetime.fromtimestamp(stripe_subscription.current_period_end))
+                subscription.save()
+
+                # Inform the user about the cancellation
+                messages.success(request, 'Your subscription has been scheduled for cancellation. You can still keep your subscription by clicking "Keep Subscription".')
+            except stripe.error.StripeError as e:
+                # Handle Stripe errors
+                messages.error(request, f'An error occurred while cancelling your subscription: {str(e)}')
+        else:
+            # Handle case where there's no active subscription
+            messages.error(request, 'No active subscription found or subscription has already expired.')
+
+        # Redirect back to the account page
+        return redirect('account')
+
+    # If it's a GET request, we're assuming this is an error or a redirect from an unintended source
+    messages.error(request, 'Invalid request method for cancelling subscription.')
+    return redirect('account')
+
+
+@login_required
+def reactivate_subscription(request):
+    if request.method == 'POST':
+        subscription = request.user.subscriptions.first()
+        if subscription and not subscription.is_active:
+            try:
+                # Retrieve the Stripe subscription
+                stripe_subscription = stripe.Subscription.retrieve(subscription.stripe_subscription_id)
+                # Reactivate the subscription
+                stripe_subscription.cancel_at_period_end = False
+                stripe_subscription.save()
+
+                # Update your model to reflect the change
+                subscription.is_active = True
+                subscription.save()
+
+                messages.success(request, 'Your subscription has been reactivated.')
+            except stripe.error.StripeError as e:
+                messages.error(request, f'An error occurred while reactivating your subscription: {str(e)}')
+        else:
+            messages.error(request, 'No subscription found to reactivate or subscription is already active.')
+
+        return redirect('account')
+    else:
+        messages.error(request, 'Invalid request method for reactivating subscription.')
+        return redirect('account')
+
+
+@login_required
+def upgrade_plan(request):
+    # Get the plan from the query parameters
+    plan = request.GET.get('plan', 'premium')  # Default to 'premium' if no plan is specified
+
+    # Map the plan to the corresponding Stripe price ID
+    price_mapping = {
+        'basic': 'price_1Qie3pDbaGsKLbbKH7DXZC9c',  # Replace with your actual BASIC plan price ID
+        'premium': 'price_1Qie43DbaGsKLbbK3mkJlaON',  # Replace with your actual PREMIUM plan price ID
+    }
+
+    # Get the price ID for the selected plan
+    price_id = price_mapping.get(plan)
+    if not price_id:
+        messages.error(request, 'Invalid plan selected.')
+        return redirect('join')
+
+    # Get or create the user's profile and subscription
+    subscription, created = Subscription.objects.get_or_create(user=request.user, defaults={'tier': 'FREE'})
+    profile = Profile.objects.get(user=request.user)
+
+    # Check if the user has a Stripe customer ID, if not, create one
+    if not profile.stripe_customer_id:
+        try:
+            customer = stripe.Customer.create(email=request.user.email)
+            profile.stripe_customer_id = customer.id
+            profile.save()
+        except stripe.error.StripeError as e:
+            messages.error(request, f'An error occurred while setting up your payment profile: {str(e)}')
+            return redirect('account')
+
+    # Create a Stripe checkout session for the selected plan
+    try:
+        session = stripe.checkout.Session.create(
+            customer=profile.stripe_customer_id,
+            payment_method_types=['card'],
+            line_items=[{
+                'price': price_id,
+                'quantity': 1,
+            }],
+            mode='subscription',
+            success_url=request.build_absolute_uri(reverse('payment_success')) + f'?session_id={{CHECKOUT_SESSION_ID}}&plan={plan}',  # Pass session_id and plan
+            cancel_url=request.build_absolute_uri(reverse('join')),
+        )
+        return redirect(session.url, code=303)
+    except stripe.error.StripeError as e:
+        messages.error(request, f'An error occurred while upgrading your plan: {str(e)}')
+        return redirect('join')

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+  <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
+    <h1 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Complete Your Subscription</h1>
+
+    <!-- Subscription Plan Info -->
+    <div class="text-center mb-4">
+      <p id="selected-plan" class="text-lg font-medium text-gray-700">Basic Plan ($8/month)</p>
+      <p class="text-sm text-gray-500">Unlimited access to premium content.</p>
+    </div>
+
+    <!-- Form -->
+    <form id="checkout-form" class="space-y-4">
+      <input type="hidden" name="subscription_type" id="subscription-type" value="basic">
+
+      <!-- Promo Code Toggle -->
+      <div id="promo-section">
+        <p
+          id="promo-toggle"
+          class="text-sm text-indigo-600 cursor-pointer hover:underline text-center"
+        >
+          Have a promo code?
+        </p>
+        <div id="promo-field" class="hidden">
+          <label for="coupon_code" class="block text-gray-700 font-medium mt-4">Promo Code</label>
+          <input
+            type="text"
+            name="coupon_code"
+            id="coupon_code"
+            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="Enter your code"
+          >
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      >
+        Proceed to Payment
+      </button>
+    </form>
+
+    <!-- Error Message -->
+    <p id="error-message" class="mt-4 text-red-500 text-sm hidden">Error message goes here</p>
+
+    <!-- Support -->
+    <div class="text-center mt-6">
+      <p class="text-sm text-gray-500">Need help? <a href="/contact" class="text-indigo-600 hover:underline">Contact us</a></p>
+    </div>
+  </div>
+
+  <script>
+    // Get the selected plan from query parameters
+    const params = new URLSearchParams(window.location.search);
+    const selectedPlan = params.get('plan');
+
+    // Map plan names to display and backend values
+    const planMapping = {
+      'free': { display: 'Free Plan ($0/month)', backend: 'free' },
+      'basic': { display: 'Basic Plan ($8/month)', backend: 'basic' },
+      'premium': { display: 'Premium Plan ($16/month)', backend: 'premium' }
+    };
+
+    // Update the checkout page based on the selected plan
+    const errorMessage = document.getElementById('error-message');
+    if (planMapping[selectedPlan]) {
+      document.getElementById('selected-plan').textContent = planMapping[selectedPlan].display;
+      document.getElementById('subscription-type').value = planMapping[selectedPlan].backend;
+    } else {
+      errorMessage.textContent = 'Invalid plan selected. Redirecting to the plans page...';
+      errorMessage.style.display = 'block';
+      setTimeout(() => {
+        window.location.href = '/plans/';
+      }, 3000); // Redirect after 3 seconds
+      document.getElementById('checkout-form').style.display = 'none';
+    }
+
+    // Toggle promo code field visibility
+    document.getElementById('promo-toggle').addEventListener('click', () => {
+      const promoField = document.getElementById('promo-field');
+      promoField.classList.toggle('hidden');
+    });
+
+    // Form submission logic
+    const form = document.getElementById('checkout-form');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      try {
+        const response = await fetch('/create-checkout-session/', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.url) {
+          window.location.href = data.url; // Redirect to Stripe Checkout
+        } else {
+          throw new Error(data.error || 'Unknown error occurred.');
+        }
+      } catch (error) {
+        // Display error on the page
+        errorMessage.textContent = error.message;
+        errorMessage.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

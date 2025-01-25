@@ -1,0 +1,207 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Open Sans', sans-serif;
+            display: flex;
+        }
+
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100vh;
+            background-color: #fff;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            width: calc(100% - 250px);
+        }
+
+        .container {
+            max-width: 100%;
+            margin-top: 50px;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #eee;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background-color: #bd2130;
+            border-color: #b21f2d;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+        .header__title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .icon-link {
+            display: inline-flex;
+            align-items: center;
+            padding: 0;
+        }
+
+        .icon-link > .bi {
+            flex-shrink: 0;
+            margin-right: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            #sidebar {
+                width: 100px;
+            }
+            .main-content {
+                margin-left: 100px;
+                width: calc(100% - 100px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <aside id="sidebar">
+        {% include 'accounts/sidebar.html' %}
+    </aside>
+    <div class="main-content">
+        {% include 'accounts/navbar.html' %}
+        <div class="container">
+            <header class="header">
+                <h1 class="header__title">Account Settings</h1>
+            </header>
+
+         <!-- Plan Overview -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h3>Plan Overview</h3>
+    </div>
+    <div class="card-body">
+        <p><strong>Current Plan:</strong>
+            {{ subscription.tier }}
+            {% if subscription.tier != 'FREE' and not subscription.is_active %}
+                (You have access to Premium Plan until {{ expiration_date }})
+            {% endif %}
+        </p>
+        {% if subscription.tier != 'FREE' %}
+            {% if subscription.is_active %}
+                <p><strong>Next Billing Date:</strong>
+                    {% if subscription.stripe_subscription_id %}
+                    {{ next_billing_date }}
+                    {% else %}
+                    Monthly on the day you subscribed
+                    {% endif %}
+                </p>
+                <form method="post" action="{% url 'cancel_subscription' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel your subscription?')">Cancel Subscription</button>
+                </form>
+            {% else %}
+                <!-- Show this when the subscription is scheduled for cancellation -->
+                <p><strong>Plan ends:</strong> {{ expiration_date }}</p>
+                <form method="post" action="{% url 'reactivate_subscription' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">Keep Subscription</button>
+                </form>
+            {% endif %}
+        {% else %}
+          <!-- Replace the existing upgrade button with this -->
+<form method="get" action="{% url 'join' %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Upgrade</button>
+</form>
+        {% endif %}
+    </div>
+</div>
+            <!-- Payment Information -->
+           <!-- Payment Information -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h3>Payment Information</h3>
+    </div>
+    <div class="card-body">
+        <p><strong>Payment Method:</strong>
+            {% if user_payment_info.card_last_four %}
+            **** **** **** {{ user_payment_info.card_last_four }} ({{ user_payment_info.card_type }})
+            {% else %}
+            Not set
+            {% endif %}
+        </p>
+        <div class="d-flex gap-2">
+            <a href="{% url 'update_payment' %}" class="btn btn-secondary">Update Payment Method</a>
+
+        </div>
+    </div>
+</div>
+
+            <!-- Account Details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Account Details</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Email Address:</strong> {{ user.email }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
