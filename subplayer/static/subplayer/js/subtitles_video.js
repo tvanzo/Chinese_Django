@@ -368,7 +368,7 @@ function updateSidebarWithHighlight(highlight) {
     a.href = "#";
     a.textContent = highlight.highlighted_text;
     a.dataset.startTime = highlight.start_time.toString();
-    a.dataset.endTime = highlight.end_time.toString();  // Ensure end time is also set
+    a.dataset.endTime = highlight.end_time.toString();
     a.dataset.frameIndex = highlight.frame_index;
     a.dataset.startSentenceIndex = highlight.start_sentence_index;
     a.dataset.startIndex = highlight.start_index;
@@ -381,6 +381,8 @@ function updateSidebarWithHighlight(highlight) {
     img.addEventListener('click', function() {
         deleteHighlight(this.dataset.highlightId);
     });
+
+
 
     div.appendChild(a);
     div.appendChild(img);
@@ -445,15 +447,11 @@ async function addHighlight(highlightData) {
     if (response.ok) {
         const addedHighlight = await response.json();
         highlightData.id = addedHighlight.id;
-        updateSidebarWithHighlight(highlightData); // Adds the new highlight to the sidebar
-        await fetchHighlights(highlightData.media); // Refresh highlights data
-        createSubtitles(); // This needs to refresh or recreate subtitles based on new data
-        setupHighlightLinks(); // Re-setup links to ensure new highlights are interactive
+        return addedHighlight;
     } else {
-        console.error('Failed to add highlight:', await response.text());
+        throw new Error('Failed to add highlight: ' + await response.text());
     }
 }
-
 
 
 
@@ -931,8 +929,37 @@ function createHighlight(selectedText, mediaId, highlightStartIndex, highlightEn
         end_time: endTime,
         frame_index: frameIndex,
     };
-    addHighlight(highlightData);
-    console.log("here " + highlightData.start_index);
+
+    // Immediately update the UI with the new highlight
+    updateSidebarWithHighlight(highlightData);
+
+    // Send the request to the server
+    addHighlight(highlightData).then(() => {
+        // If the server request is successful, refresh the highlights
+        fetchHighlights(mediaId).then(() => {
+            createSubtitles(); // Recreate subtitles after fetching new highlights
+        });
+    }).catch(error => {
+        console.error('Error adding highlight:', error);
+        // Revert UI changes if the server request fails
+        removeHighlightFromUI(highlightData);
+    });
+}
+
+function removeHighlightFromUI(highlightData) {
+    const ul = document.getElementById('highlight-list');
+    const highlights = ul.getElementsByClassName('highlight-item');
+    for (let i = 0; i < highlights.length; i++) {
+        const highlight = highlights[i];
+        const a = highlight.querySelector('a');
+        if (a.dataset.startTime === highlightData.start_time.toString() &&
+            a.dataset.endTime === highlightData.end_time.toString() &&
+            a.dataset.frameIndex === highlightData.frame_index.toString()) {
+            highlight.remove();
+            break;
+        }
+    }
+    checkHighlightExistence();
 }
 async function deleteHighlight(highlightId) {
   try {
