@@ -28,15 +28,15 @@ function onPlayerReady(event) {
   playerReady = true;
   console.log("Player is ready. Player ready state:", playerReady);
 
-  createSubtitles(); 
+  createSubtitles();
 
   if (media) {
     console.log("Media is defined, setting up progress saving and fetching media progress...");
-    setupProgressSaving(); 
+    setupProgressSaving();
 
     // Introduce a delay before fetching progress
-    setTimeout(() => { 
-      fetchMediaProgressAndSeek(); 
+    setTimeout(() => {
+      fetchMediaProgressAndSeek();
     }, 1000); // Delay of 1000 milliseconds (1 second)
 
     setInterval(updateProgress, 300);
@@ -128,7 +128,7 @@ function onPlayerStateChange(event) {
         fetchMediaProgressAndSeek();
         console.log(event.data);
         console.log("Media is now playing for the first time.");
-        
+
         fetch('/api/user/viewed-media/add', {
             method: 'POST',
             headers: {
@@ -143,7 +143,7 @@ function onPlayerStateChange(event) {
           .catch(error => console.error("Error adding viewed media:", error));
     }
 
-   
+
 }
 
 function getCookie(name) {
@@ -209,7 +209,7 @@ function setupProgressSaving() {
             lastUpdateTime = currentTime; // Update lastUpdateTime to the current time after sending update
         }
 
-       
+
     }, saveInterval);
 }
 
@@ -454,7 +454,7 @@ function createSubtitles() {
       element.setAttribute("id", "s_" + currentSubtitleIndex + "_" + i);
         element.classList.add('sentence-span'); // Add this line
 
-      
+
       // Begin new highlight processing
       let highlightedSentence = "";
       let sentence = currentFrame[i].sentence;
@@ -470,7 +470,7 @@ function createSubtitles() {
       }
       element.innerHTML = highlightedSentence;
       // End new highlight processing
-      
+
       subtitles.appendChild(element);
 
       // Save time information
@@ -492,7 +492,7 @@ function updateProgress() {
     const correctIndex = findSubtitleIndex(currentTime);
     if (correctIndex !== -1 && correctIndex !== currentSubtitleIndex) {
         currentSubtitleIndex = correctIndex;
-       
+
         createSubtitles();
     }
 
@@ -540,11 +540,11 @@ fetchHighlights(mediaId);
 
     try {
   const response = await fetch(test2);
- 
+
   const data = await response.json();
   transcript = data.transcript;
   syncData5 = data.words;
-  
+
 } catch (error) {
   console.error('Erroreeeee:', error);
 }
@@ -553,14 +553,14 @@ fetchHighlights(mediaId);
     var syncData=syncData5;
     console.log("datga" + syncData);
       var syncData2 = []; // New array to track sentences
-      
+
   function createFramesArray(syncData) {
     let currentFrame = [];
     let currentFrameCharCount = 0;
     const charLimit = 60; // Character limit for each frame
 
     syncData.forEach(wordItem => {
-       
+
 
         let sentenceCharCount = wordItem.word.length;
         if ((currentFrameCharCount + sentenceCharCount) <= charLimit) {
@@ -591,11 +591,11 @@ fetchHighlights(mediaId);
 // Call this function with your syncData
 createFramesArray(syncData);
 
-     
+
   var loopButton = doc.getElementById("loop-button");
 
 
-    
+
 createSubtitles();
 
 
@@ -700,7 +700,7 @@ subtitles.addEventListener("mouseup", function() {
 
         const frameSubtitles = framesArray[currentFrameIndex];
         let concatenatedSubtitles = frameSubtitles.map(sub => sub.sentence).join('');
-        
+
         if (concatenatedSubtitles.includes(selectedText)) {
             // If the selected text matches part of the concatenated subtitles, set loop times
             startLoopTime = parseFloat(frameSubtitles[0].startTime);

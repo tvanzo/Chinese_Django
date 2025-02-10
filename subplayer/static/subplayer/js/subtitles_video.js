@@ -368,7 +368,7 @@ function updateSidebarWithHighlight(highlight) {
     a.href = "#";
     a.textContent = highlight.highlighted_text;
     a.dataset.startTime = highlight.start_time.toString();
-    a.dataset.endTime = highlight.end_time.toString();  // Ensure end time is also set
+    a.dataset.endTime = highlight.end_time.toString();
     a.dataset.frameIndex = highlight.frame_index;
     a.dataset.startSentenceIndex = highlight.start_sentence_index;
     a.dataset.startIndex = highlight.start_index;
@@ -381,6 +381,8 @@ function updateSidebarWithHighlight(highlight) {
     img.addEventListener('click', function() {
         deleteHighlight(this.dataset.highlightId);
     });
+
+
 
     div.appendChild(a);
     div.appendChild(img);
@@ -437,13 +439,15 @@ async function addHighlight(highlightData) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken2,
+            'X-CSRFToken': csrftoken2
         },
         body: JSON.stringify(highlightData),
     });
 
     if (response.ok) {
-        return await response.json(); // Return the added highlight data
+        const addedHighlight = await response.json();
+        highlightData.id = addedHighlight.id;
+        return addedHighlight;
     } else {
         throw new Error('Failed to add highlight: ' + await response.text());
     }
@@ -914,7 +918,6 @@ function createHighlight(selectedText, mediaId, highlightStartIndex, highlightEn
         highlightEndIndex = "0" + highlightEndIndex;
     }
 
-    // Create the highlight data object
     let highlightData = {
         highlighted_text: selectedText,
         media: mediaId,
@@ -931,23 +934,18 @@ function createHighlight(selectedText, mediaId, highlightStartIndex, highlightEn
     updateSidebarWithHighlight(highlightData);
 
     // Send the request to the server
-    addHighlight(highlightData)
-        .then((addedHighlight) => {
-            console.log("Highlight added successfully:", addedHighlight);
-            // Update the highlight data with the ID returned from the server
-            highlightData.id = addedHighlight.id;
-
-            // Refresh the highlights and subtitles
-            fetchHighlights(mediaId).then(() => {
-                createSubtitles(); // Recreate subtitles after fetching new highlights
-            });
-        })
-        .catch((error) => {
-            console.error('Error adding highlight:', error);
-            // Revert UI changes if the server request fails
-            removeHighlightFromUI(highlightData);
+    addHighlight(highlightData).then(() => {
+        // If the server request is successful, refresh the highlights
+        fetchHighlights(mediaId).then(() => {
+            createSubtitles(); // Recreate subtitles after fetching new highlights
         });
+    }).catch(error => {
+        console.error('Error adding highlight:', error);
+        // Revert UI changes if the server request fails
+        removeHighlightFromUI(highlightData);
+    });
 }
+
 function removeHighlightFromUI(highlightData) {
     const ul = document.getElementById('highlight-list');
     const highlights = ul.getElementsByClassName('highlight-item');
@@ -961,7 +959,7 @@ function removeHighlightFromUI(highlightData) {
             break;
         }
     }
-    checkHighlightExistence(); // Update the UI to reflect the removal
+    checkHighlightExistence();
 }
 async function deleteHighlight(highlightId) {
   try {

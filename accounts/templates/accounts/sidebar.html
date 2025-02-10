@@ -1,99 +1,325 @@
 {% load static %}
 
-<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 " id="sidenav-main">
-  <div class="sidenav-header">
-  <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
-<a class=" m-0 d-flex justify-content-center align-items-center" href="/" style="padding-left: 0px;">
-  <img src="{% static 'subplayer/logo.png' %}" alt="Logo" class="custom-logo-size" style="height: 50px; width: auto; display: block; margin: auto;" />
-</a>
-</div>
-   <hr class="horizontal dark mt-0">
-    <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
+
+<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3" id="sidenav-main">
+  <div class="sidenav-inner">
+    <!-- Logo Header -->
+    <div class="sidenav-header">
+      <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
+      <a class="m-0 d-flex justify-content-center align-items-center" href="/" style="padding-left: 0px; text-decoration: none;">
+        <span class="logo-text" style="font-size: 22px; font-weight: 700; background: linear-gradient(135deg, #1a1f36 0%, #3a9fff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 0px;">Chinese<span class="logo-accent" style="background: linear-gradient(135deg, #3a9fff 0%, #3a72ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Log</span></span>
+        <span class="logo-dot" style="position: relative; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: linear-gradient(135deg, #3a9fff 0%, #3a72ff 100%); animation: pulse 2s infinite; vertical-align: middle; margin-left: 5px; top: -2px;"></span>
+      </a>
+    </div>
+
+    <hr class="horizontal dark mt-0">
+
+    <!-- Navigation Menu - Wrap this in a div with flex-grow: 1 -->
+    <div class="flex-grow-1">
+      <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
         <ul class="navbar-nav">
-            <li class="nav-item">
+         <li class="nav-item">
                 <a class="nav-link {% if 'dashboard' in request.path %}active{% endif %}" href="/">
                     <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center" style="background-color: #FFFFFF; width: 48px; height: 48px; color: #000000;">
-                        <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="fill: #000000; color: #000000;">
-                            <title>shop</title>
-                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g transform="translate(-1716.000000, -439.000000)" fill="#000000" fill-rule="nonzero">
-                                    <g transform="translate(1716.000000, 291.000000)">
-                                        <g transform="translate(0.000000, 148.000000)">
-                                            <path class="color-background opacity-6" d="M46.7199583,10.7414583 L40.8449583,0.949791667 C40.4909749,0.360605034 39.8540131,0 39.1666667,0 L7.83333333,0 C7.1459869,0 6.50902508,0.360605034 6.15504167,0.949791667 L0.280041667,10.7414583 C0.0969176761,11.0460037 -1.23209662e-05,11.3946378 -1.23209662e-05,11.75 C-0.00758042603,16.0663731 3.48367543,19.5725301 7.80004167,19.5833333 L7.81570833,19.5833333 C9.75003686,19.5882688 11.6168794,18.8726691 13.0522917,17.5760417 C16.0171492,20.2556967 20.5292675,20.2556967 23.494125,17.5760417 C26.4604562,20.2616016 30.9794188,20.2616016 33.94575,17.5760417 C36.2421905,19.6477597 39.5441143,20.1708521 42.3684437,18.9103691 C45.1927731,17.649886 47.0084685,14.8428276 47.0000295,11.75 C47.0000295,11.3946378 46.9030823,11.0460037 46.7199583,10.7414583 Z" style="fill: #000000;"></path>
-                                            <path class="color-background" d="M39.198,22.4912623 C37.3776246,22.4928106 35.5817531,22.0149171 33.951625,21.0951667 L33.92225,21.1107282 C31.1430221,22.6838032 27.9255001,22.9318916 24.9844167,21.7998837 C24.4750389,21.605469 23.9777983,21.3722567 23.4960833,21.1018359 L23.4745417,21.1129513 C20.6961809,22.6871153 17.4786145,22.9344611 14.5386667,21.7998837 C14.029926,21.6054643 13.533337,21.3722507 13.0522917,21.1018359 C11.4250962,22.0190609 9.63246555,22.4947009 7.81570833,22.4912623 C7.16510551,22.4842162 6.51607673,22.4173045 5.875,22.2911849 L5.875,44.7220845 C5.875,45.9498589 6.7517757,46.9451667 7.83333333,46.9451667 L19.5833333,46.9451667 L19.5833333,33.6066734 L27.4166667,33.6066734 L27.4166667,46.9451667 L39.1666667,46.9451667 C40.2482243,46.9451667 41.125,45.9498589 41.125,44.7220845 L41.125,22.2822926 C40.4887822,22.4116582 39.8442868,22.4815492 39.198,22.4912623 Z" style="fill: #000000;"></path>
-                                        </g>
-                                    </g>
-                                </g>
-                            </g>
-                        </svg>
+                       <svg width="18px" height="18px" viewBox="-1 0 24 24" id="meteor-icon-kit__solid-analytics" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path fill-rule="evenodd" clip-rule="evenodd" d="M3 13C4.65685 13 6 14.3431 6 16V21C6 22.6569 4.65685 24 3 24C1.34315 24 0 22.6569 0 21V16C0 14.3431 1.34315 13 3 13zM11 0C12.6569 0 14 1.34315 14 3V21C14 22.6569 12.6569 24 11 24C9.3431 24 8 22.6569 8 21V3C8 1.34315 9.3431 0 11 0zM19 7C20.6569 7 22 8.34315 22 10V21C22 22.6569 20.6569 24 19 24C17.3431 24 16 22.6569 16 21V10C16 8.34315 17.3431 7 19 7z" fill="#000000"></path></g></svg>
                     </div>
-                    <span class="nav-link-text ms-1">Dashboard</span>
+                    <span class="nav-link-text ms-1 d-lg-block d-none">Dashboard</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if 'media' in request.path %}active{% endif %}" href="/media_list">
+    <a class="nav-link {% if 'watch' in request.path or 'video' in request.path %}active{% endif %}" href="/watch">
                     <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center" style="background-color: #FFFFFF; width: 48px; height: 48px; color: #000000;">
-                        <svg width="12px" height="12px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="fill: #000000; color: #000000;">
-                            <title>Search</title>
-                            <g fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="11" cy="11" r="8" stroke="#000000" stroke-width="2"></circle>
-                                <path d="M21 21l-4.35-4.35" stroke="#000000" stroke-width="2"></path>
-                            </g>
-                        </svg>
-                    </div>
-                    <span class="nav-link-text ms-1">Search</span>
+<svg width="18px" height="18px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <style type="text/css"> .st0{fill:#000000;} </style> <g> <path class="st0" d="M256,0C114.625,0,0,114.625,0,256c0,141.374,114.625,256,256,256c141.374,0,256-114.626,256-256 C512,114.625,397.374,0,256,0z M351.062,258.898l-144,85.945c-1.031,0.626-2.344,0.657-3.406,0.031 c-1.031-0.594-1.687-1.702-1.687-2.937v-85.946v-85.946c0-1.218,0.656-2.343,1.687-2.938c1.062-0.609,2.375-0.578,3.406,0.031 l144,85.962c1.031,0.586,1.641,1.718,1.641,2.89C352.703,257.187,352.094,258.297,351.062,258.898z"></path> </g> </g></svg>                    </div>
+                    <span class="nav-link-text ms-1 d-lg-block d-none">Watch</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if 'videos' in request.path %}active{% endif %}" href="/user_videos">
-                    <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center" style="background-color: #FFFFFF; width: 48px; height: 48px; color: #000000;">
-                        <svg width="12px" height="12px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="fill: #000000; color: #000000;">
-                            <title>box-3d-50</title>
-                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g transform="translate(-2319.000000, -291.000000)" fill="#000000" fill-rule="nonzero">
-                                    <g transform="translate(1716.000000, 291.000000)">
-                                        <g transform="translate(603.000000, 0.000000)">
-                                            <path class="color-background" d="M22.7597136,19.3090182 L38.8987031,11.2395234 C39.3926816,10.9925342 39.592906,10.3918611 39.3459167,9.89788265 C39.249157,9.70436312 39.0922432,9.5474453 38.8987261,9.45068056 L20.2741875,0.1378125 L20.2741875,0.1378125 C19.905375,-0.04725 19.469625,-0.04725 19.0995,0.1378125 L3.1011696,8.13815822 C2.60720568,8.38517662 2.40701679,8.98586148 2.6540352,9.4798254 C2.75080129,9.67332903 2.90771305,9.83023153 3.10122239,9.9269862 L21.8652864,19.3090182 C22.1468139,19.4497819 22.4781861,19.4497819 22.7597136,19.3090182 Z" style="fill: #000000;"></path>
-                                            <path class="color-background opacity-6" d="M23.625,22.429159 L23.625,39.8805372 C23.625,40.4328219 24.0727153,40.8805372 24.625,40.8805372 C24.7802551,40.8805372 24.9333778,40.8443874 25.0722402,40.7749511 L41.2741875,32.673375 L41.2741875,32.673375 C41.719125,32.4515625 42,31.9974375 42,31.5 L42,14.241659 C42,13.6893742 41.5522847,13.241659 41,13.241659 C40.8447549,13.241659 40.6916418,13.2778041 40.5527864,13.3472318 L24.1777864,21.5347318 C23.8390024,21.7041238 23.625,22.0503869 23.625,22.429159 Z" style="fill: #000000;"></path>
-                                            <path class="color-background opacity-6" d="M20.4472136,21.5347318 L1.4472136,12.0347318 C0.953235098,11.7877425 0.352562058,11.9879669 0.105572809,12.4819454 C0.0361450918,12.6208008 6.47121774e-16,12.7739139 0,12.929159 L0,30.1875 L0,30.1875 C0,30.6849375 0.280875,31.1390625 0.7258125,31.3621875 L19.5528096,40.7750766 C20.0467945,41.0220531 20.6474623,40.8218132 20.8944388,40.3278283 C20.963859,40.1889789 21,40.0358742 21,39.8806379 L21,22.429159 C21,22.0503869 20.7859976,21.7041238 20.4472136,21.5347318 Z" style="fill: #000000;"></path>
-                                        </g>
-                                    </g>
-                                </g>
-                            </g>
-                        </svg>
+                <a class="nav-link {% if 'library' in request.path %}active{% endif %}" href="/library">
+                    <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; color: green;">
+                      <svg width="18px" height="18px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <rect width="24" height="24" fill="none"></rect> <path fill-rule="evenodd" clip-rule="evenodd" d="M22 11.9342C22 11.956 22 11.978 22 12L22 16.0658C22 16.9523 22.0001 17.7161 21.9179 18.3278C21.8297 18.9833 21.631 19.6117 21.1213 20.1213C20.6117 20.631 19.9833 20.8297 19.3278 20.9179C18.7161 21.0001 17.9523 21.0001 17.0658 21L6.93416 21C6.04768 21.0001 5.28386 21.0001 4.6722 20.9179C4.01669 20.8297 3.38834 20.631 2.87867 20.1213C2.36901 19.6117 2.17027 18.9833 2.08213 18.3278C1.9999 17.7161 1.99994 16.9523 1.99999 16.0658L1.99999 11.9342C1.99994 11.0477 1.9999 10.2839 2.08213 9.67221C2.17027 9.0167 2.36901 8.38835 2.87867 7.87868C3.38834 7.36902 4.01669 7.17028 4.6722 7.08215C5.28386 6.99991 6.04768 6.99995 6.93417 7L17 7C17.022 7 17.044 7 17.0658 7C17.9523 6.99995 18.7161 6.99991 19.3278 7.08215C19.9833 7.17028 20.6117 7.36902 21.1213 7.87868C21.631 8.38835 21.8297 9.0167 21.9179 9.67221C22.0001 10.2839 22 11.0477 22 11.9342Z" fill="#323232"></path> <path d="M19 6.04361V5.71429C19 4.21523 17.7848 3 16.2857 3H7.71429C6.21523 3 5 4.21523 5 5.71429V6.0436C5.57491 5.99987 6.22076 5.99994 6.88123 6.00001L17.1187 6.00001C17.7792 5.99994 18.4251 5.99987 19 6.04361Z" fill="#323232"></path> </g></svg>
                     </div>
-                    <span class="nav-link-text ms-1">My Library</span>
+                    <span class="nav-link-text ms-1 d-lg-block d-none">My Library</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link {% if 'highlights' in request.path %}active{% endif %}" href="/highlights">
                     <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center" style="background-color: #FFFFFF; width: 48px; height: 48px;">
-                        <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                            <title>credit-card</title>
-                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g transform="translate(-2169.000000, -745.000000)" fill="currentColor" fill-rule="nonzero">
-                                    <g transform="translate(1716.000000, 291.000000)">
-                                        <g transform="translate(453.000000, 454.000000)">
-                                            <path class="color-background opacity-6" d="M43,10.7482083 L43,3.58333333 C43,1.60354167 41.3964583,0 39.4166667,0 L3.58333333,0 C1.60354167,0 0,1.60354167 0,3.58333333 L0,10.7482083 L43,10.7482083 Z" style="fill: currentColor;"></path>
-                                            <path class="color-background" d="M0,16.125 L0,32.25 C0,34.2297917 1.60354167,35.8333333 3.58333333,35.8333333 L39.4166667,35.8333333 C41.3964583,35.8333333 43,34.2297917 43,32.25 L43,16.125 L0,16.125 Z M19.7083333,26.875 L7.16666667,26.875 L7.16666667,23.2916667 L19.7083333,23.2916667 L19.7083333,26.875 Z M35.8333333,26.875 L28.6666667,26.875 L28.6666667,23.2916667 L35.8333333,23.2916667 L35.8333333,26.875 Z" style="fill: currentColor;"></path>
-                                        </g>
-                                    </g>
-                                </g>
-                            </g>
-                        </svg>
+                                               <svg width="18px" height="18px" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>highlight-filled</title> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="drop" fill="#000000" transform="translate(64.000000, 44.956885)"> <path d="M405.333333,381.709781 L362.666667,424.376448 L85.3333333,424.376448 L128,381.709781 L405.333333,381.709781 Z M41.168,299.372 L103.67,361.874 L42.6666667,392.376448 L1.42108547e-14,403.043115 L10.6666667,360.376448 L41.168,299.372 Z M61.1,191.304 L212.137,342.341 L206.971557,347.655494 L201.097332,347.365048 L194.94444,347.269241 C184.457401,347.271762 172.809254,348.085275 160,349.709781 L151.970104,350.837434 L144.123951,352.129117 L136.61735,353.518237 L127.387,355.421 L48.9491375,276.983016 C50.507182,270.709588 52.0860762,262.939495 53.3333333,253.709781 C55.8645145,234.979019 56.7941068,216.011107 56.1221103,196.806047 L59.4284876,193.08414 L61.1,191.304 Z M282.327442,7.10542736e-15 L403.006999,120.679557 L384.970948,143.928809 L352.415716,185.42913 L333.317316,209.393653 L316.302987,230.396289 L304.909911,244.204529 L291.542704,260.023864 L282.884971,269.944627 L275.399527,278.199329 L269.086373,284.787971 L254.094195,299.615469 L227.035,327.069 L75.976,176.01 L78.5389897,173.389008 L116.39305,135.764502 L128.060065,124.568671 L141.033549,112.687653 L152.352994,102.689504 L164.50858,92.2528346 L177.500305,81.3776459 L191.328171,70.0639374 L205.992177,58.3117091 L229.55595,39.8611422 L246.310307,27.0126145 L263.900804,13.7255671 L282.327442,7.10542736e-15 Z" id="Combined-Shape"> </path> </g> </g> </g></svg>
+
                     </div>
-                    <span class="nav-link-text ms-1">Highlights</span>
+                    <span class="nav-link-text ms-1 d-lg-block d-none">Highlights</span>
                 </a>
             </li>
         </ul>
+      </div>
     </div>
-         <!--
-   <div class="sidenav-footer mb-3 mx-3">
-    <a class="btn bg-gradient-primary w-90" href="/join" style="margin-bottom: 0;">Upgrade to Pro</a>
-    <a class="nav-link mt-1 text-center" href="/accounts/login/">Sign In</a>
 
+    <!-- Profile Section - This will now stick to the bottom -->
+   <!-- Profile Section -->
+<div class="sidenav-footer">
+  <div class="profile-container">
+    <div class="profile-image-wrapper">
+      <svg viewBox="0 0 300 300" id="piranha" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <polygon points=" 204,184 232,192 232,212 196,220 " style="fill-rule:evenodd;clip-rule:evenodd;fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"></polygon> <circle cx="128" cy="172" r="88" style="fill-rule:evenodd;clip-rule:evenodd;fill:#595959;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"></circle> <path d=" M252.186,252C235.371,242.6,224,224.627,224,204s11.371-38.6,28.186-48c-0.456,2.847-0.691,5.768-0.691,8.744 c0,15.378,6.32,29.281,16.505,39.256c-10.185,9.975-16.505,23.878-16.505,39.256C251.495,246.232,251.731,249.152,252.186,252z" style="fill-rule:evenodd;clip-rule:evenodd;fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"></path> <circle cx="92" cy="140" r="20" style="fill-rule:evenodd;clip-rule:evenodd;fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"></circle> <circle cx="92" cy="140" r="8" style="fill-rule:evenodd;clip-rule:evenodd;fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"></circle> <path d=" M40,176.888C42.504,223.215,80.386,260,126.747,260c23.899,0,45.548-9.776,61.253-25.596 c-23.587-18.019-74.15-54.444-105.209-60.764C65.657,170.153,51.14,172.695,40,176.888z" style="fill-rule:evenodd;clip-rule:evenodd;fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"></path> <line style="fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" x1="76" x2="76" y1="176" y2="240"></line> <line style="fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" x1="104" x2="104" y1="184" y2="252"></line> <line style="fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" x1="132" x2="132" y1="196" y2="260"></line> <path d=" M112,80c0,0,28.812-45.979,48.446-27.708C180.075,70.562,112,80,112,80z" style="fill-rule:evenodd;clip-rule:evenodd;fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"></path> <path d=" M108,80c0,0-28.796-45.842-48.441-27.79S108,80,108,80z" style="fill-rule:evenodd;clip-rule:evenodd;fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"></path> </g> </g></svg>
+    </div>
+    <div class="profile-info">
+<span class="profile-name">
+  {% if request.user.is_authenticated %}
+    {{ request.user.username }}
+  {% else %}
+    Guest
+  {% endif %}
+</span>
+
+
+
+      <span class="profile-level">Level 1</span>
+    </div>
+  </div>
 </div>
--->
-
-
 </aside>
+
+
+<style>
+/* Sidebar */
+.sidenav {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.sidenav-inner {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Ensure that the content takes up remaining space */
+}
+
+/* Header Section */
+.sidenav-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+}
+
+.custom-logo-size {
+    height: 50px !important;
+    width: auto;
+}
+
+/* Footer Section */
+.sidenav-footer {
+    margin-top: auto; /* Push footer down to the bottom */
+    padding-bottom: 1rem;
+}
+
+/* Profile Section */
+.profile-container {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    width: 100%;
+}
+
+.profile-image-wrapper {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: white;
+    border: 2px solid BLACK;
+}
+
+.profile-image-wrapper svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-name {
+    color: #344767;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-left: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Active Link Styling */
+.nav-link.active .icon svg {
+    fill: #FFD700 !important;
+    color: #FFD700 !important;
+}
+    .sidenav {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-height: 100vh;
+}
+
+.sidenav-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.sidenav-header {
+    flex-shrink: 0;
+    padding: 1rem;
+}
+
+.flex-grow-1 {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.sidenav-footer {
+    margin-top: auto;
+    padding: 1rem;
+}
+    .logo-text {
+        font-size: 26px; /* Slightly reduced font size */
+        font-weight: 700; /* Reduced font weight */
+        background: linear-gradient(135deg, #1a1f36 0%, #3a9fff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 0px; /* Adjusted letter spacing */
+        text-decoration: none; /* Ensure no underline */
+    }
+
+    .logo-accent {
+        background: linear-gradient(135deg, #3a9fff 0%, #3a72ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .logo-dot {
+        position: relative;
+        display: inline-block; /* Ensure inline-block for vertical alignment */
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3a9fff 0%, #3a72ff 100%);
+        animation: pulse 2s infinite;
+        vertical-align: middle; /* Vertically align with text */
+        margin-left: 5px; /* Adjust spacing from text */
+        top: -2px; /* Minor adjustment for vertical centering */
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.2);
+            opacity: 0.8;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+    /* Update only these specific styles, keep all other existing styles */
+.profile-container {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    margin: 0 1rem;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    margin-left: 0.75rem;
+}
+
+.profile-name {
+    color: #344767;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.profile-level {
+    color: #3a9fff;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.2;
+}
+    <!-- Keep all the previous HTML code the same, just update the CSS below -->
+
+<style>
+/* Keep all previous styles and update/add these specific styles */
+
+.profile-container {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    margin: 0 1rem;
+    gap: 0.75rem; /* Adds consistent spacing between elements */
+}
+
+.profile-image-wrapper {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: white;
+    border: 2px solid BLACK;
+    flex-shrink: 0; /* Prevents image from shrinking */
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px; /* Adds consistent spacing between name and level */
+}
+
+.profile-name {
+    color: #344767;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1;
+    margin: 0; /* Remove any default margins */
+}
+
+.profile-level {
+    color: #3a9fff;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1;
+    margin: 0; /* Remove any default margins */
+}
+/* Sidebar navigation link hover effect */
+.nav-link {
+    transition: background-color 0.2s ease-in-out;
+}
+
+.nav-link:hover {
+    background-color: rgba(128, 128, 128, 0.1); /* Slight gray hover effect */
+}
+
+/* Keep all other existing styles the same */
+/* Active Navigation Link */
+.nav-link.active {
+    background: linear-gradient(135deg, #1a1f36 0%, #3a9fff 100%);
+    color: white !important;
+}
+
+.nav-link.active .icon svg {
+    fill: white !important;
+    color: white !important;
+}
+
+</style>
+</style>
+

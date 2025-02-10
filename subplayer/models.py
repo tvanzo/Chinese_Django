@@ -40,6 +40,7 @@ class Media(models.Model):
     category = models.CharField(max_length=255, default='Unknown')
     profile_image_url = models.URLField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)  # Add this field
+    youtube_upload_time = models.DateTimeField()
 #test
     def delete(self, *args, **kwargs):
         if self.subtitle_file:

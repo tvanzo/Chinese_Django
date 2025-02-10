@@ -20,7 +20,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="icon" type="image/png" href="{% static 'accounts/img/favicon.png' %}">
+        <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
   <title>
 Chinese Log  </title>
   <!--     Fonts and icons     -->
@@ -38,6 +38,10 @@ Chinese Log  </title>
   <!-- Nepcha is a easy-to-use web analytics. No cookies and fully compliant with GDPR, CCPA and PECR. -->
   <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
 <style>
+    body{
+      transition: padding-top 0.3s ease-in-out; /* Smooth transition for padding change */
+
+    }
 .text-warning { color: #dcb234; } /* Custom dark yellow */
 .text-success { color: #3c763d; } /* Custom dark green */
 .title-container {
@@ -229,9 +233,17 @@ Chinese Log  </title>
 <div id="welcome-banner" class="alert alert-light fade show fixed-top" role="alert" style="z-index: 1060;">
   <div class="container-fluid py-2">
     <div class="d-flex align-items-center justify-content-between">
-      {% for message in messages %}
-      <span class="text-dark font-weight-bold">{{ message }}</span>
-      {% endfor %}
+     {% if messages %}
+    {% for message in messages %}
+        {% if forloop.last %}
+
+
+                {{ message }}
+
+
+        {% endif %}
+    {% endfor %}
+{% endif %}
       <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">×</span>
       </button>
@@ -239,6 +251,8 @@ Chinese Log  </title>
   </div>
 </div>
 {% endif %}
+ {% include 'accounts/navbar.html' %}
+
  {% include 'accounts/sidebar.html' %}
 
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
@@ -250,7 +264,6 @@ Chinese Log  </title>
 <!-- Navbar -->
 <!-- Navbar -->
 <!-- Navbar -->
-{% include 'accounts/navbar.html' %}
 
 <!-- End Navbar -->
 
@@ -799,42 +812,41 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
    document.addEventListener('DOMContentLoaded', function() {
-    var banner = document.getElementById('welcome-banner');
-    var body = document.body;
+  var banner = document.getElementById('welcome-banner');
+  var body = document.body;
 
-    function adjustPadding() {
-        if (banner && !banner.classList.contains('d-none')) {
-            // Assuming the banner height is 50px, adjust this as needed
-            body.style.paddingTop = '50px';
-        } else {
-            body.style.paddingTop = '0';
-        }
-    }
+  function adjustPadding() {
+      if (banner && !banner.classList.contains('d-none')) {
+          body.style.paddingTop = banner.offsetHeight + 'px'; // Adjust based on banner height
+      } else {
+          body.style.paddingTop = '0'; // Reset to 0 or whatever your default padding is
+      }
+  }
 
-    // Check for banner on load
-    adjustPadding();
+  // Check for banner on load
+  adjustPadding();
 
-    // Listen for when the banner is closed
-    if (banner) {
-        // Use a MutationObserver to watch for changes in the banner's attributes
-        var observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'attributes') {
-                    adjustPadding();
-                }
-            });
-        });
+  // Listen for when the banner is closed
+  if (banner) {
+      // Use a MutationObserver to watch for changes in the banner's attributes
+      var observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+              if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                  adjustPadding();
+              }
+          });
+      });
 
-        observer.observe(banner, {
-            attributes: true,
-            attributeFilter: ['class'] // Only observe changes to the 'class' attribute
-        });
+      observer.observe(banner, {
+          attributes: true,
+          attributeFilter: ['class'] // Only observe changes to the 'class' attribute
+      });
 
-        // Also, listen for the closed event as a backup
-        banner.addEventListener('closed.bs.alert', function() {
-            adjustPadding();
-        });
-    }
+      // Also, listen for the closed event as a backup
+      banner.addEventListener('closed.bs.alert', function() {
+          adjustPadding();
+      });
+  }
 });
 </script>
 </body>

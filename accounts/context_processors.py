@@ -1,5 +1,6 @@
 # accounts/context_processors.py
 from accounts.models import Profile
+from subplayer.models import Highlight
 
 def total_minutes_watched(request):
     if request.user.is_authenticated:
@@ -13,14 +14,17 @@ def total_minutes_watched(request):
     return {'total_minutes_watched': total_minutes}
 
 def total_points(request):
+    total_points = 0
     if request.user.is_authenticated:
         try:
             profile = Profile.objects.get(user=request.user)
-            total_points = profile.calculate_total_points()  # Calculate total points using method
+            total_minutes = round(profile.total_minutes / 60)  # Convert seconds to minutes and round
+            total_highlights = Highlight.objects.filter(user=request.user).count()
+            total_points = total_minutes + total_highlights
             print(f"Total points calculated: {total_points}")  # Debug print
         except Profile.DoesNotExist:
-            total_points = 0
+            print("Profile does not exist for user.")
     else:
-        total_points = 0
+        print("User not authenticated.")
     print(f"Total points in context: {total_points}")  # Debug print
     return {'total_points': total_points}

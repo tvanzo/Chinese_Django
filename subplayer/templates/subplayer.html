@@ -1,461 +1,203 @@
-{% block content %}
+ {% block content %}
 {% load static %}
 
 <!DOCTYPE html>
+
 <html>
+
 <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="{% static 'subplayer/css/sidebar.css' %}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chinese Log</title>
-    <style>
-        body {
-            margin: 0;
-        }
 
-        .dashboard {
-            display: flex;
-            flex-direction: row;
-        }
+<meta charset="UTF-8">
 
-        .media-content {
-            flex-grow: 1;
-            padding: 20px;
-            margin-left: 200px;
-            transition: margin-left 0.3s ease-in-out;
-        }
+  <!-- Fonts and icons -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
+  <!-- Nucleo Icons -->
+  <link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
 
-        .sidebar.collapsed + .media-content {
-            margin-left: 0;
-            width: 100%;
-        }
+  <!-- CSS Files -->
+  <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet">
 
-        .video-container {
-            margin: 0 auto;
-            height: 70vh;
-            text-align: center;
-            overflow: hidden;
-            max-width: calc(178vh * 0.7);
-        }
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
 
-        iframe {
-            height: 100%;
-            width: 100%;
-        }
+<title>Chinese Log</title>
 
-        .subtitles-container {
-            margin: 0 auto;
-            width: 100%;
-            max-width: calc(178vh * 0.7);
-            text-align: center;
-            font-size: calc(1vw + 1vh);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            overflow-y: auto;
-            max-height: 24vh;
-            padding: 10px;
-            box-sizing: border-box;
-            background-color: #fff;
-        }
+<style>
 
-        .subtitles-container span {
-            display: inline-block;
-            padding: 2px 5px;
-        }
 
-        #subtitles span {
-            display: inline-block;
-            padding: 2px 5px;
-            color: #2f302f;
-        }
 
-        #subtitles span.highlight,
-        #subtitles span.active-highlight,
-        #subtitles span.perm-highlight {
-            font-weight: bold;
-            padding: 2px 4px;
-            border-radius: 5px;
-        }
-
-        #subtitles span.highlight {
-            color: #fff;
-            background-color: yellow;
-        }
-
-        #subtitles span.active-highlight {
-            background-color: #4285f4;
-            color: #fff;
-        }
-
-        #subtitles span.perm-highlight {
-            background-color: rgba(255, 255, 0, 0.5);
-            color: #333;
-            font-weight: bold;
-        }
-
-        .icon-button {
-            width: 30px;
-            height: 30px;
-            cursor: pointer;
-            margin: 0 5px;
-            transition: opacity 0.3s ease;
-        }
-
-        .icon-button:hover {
-            transform: scale(1.1);
-        }
-
-        .subplayer-page {
-            background-color: #F9F8FA;
-        }
-
-        .buttons-container {
-            display: flex;
-            justify-content: center;
-            align-items: center; /* Aligns items vertically */
-            gap: 10px;
-            margin-top: 20px;
-            padding-bottom: 20px;
-        }
-
-        .button-group {
-            position: relative;
-            display: inline-flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .tooltip-text {
-            visibility: hidden;
-            width: 120px;
-            background-color: black;
-            color: white;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px 0;
-            position: absolute;
-            z-index: 1;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.6s;
-        }
-
-        .button-group:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        .button-group img {
-            width: 40px;
-            height: auto;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-
-        .button-group img:last-child {
-            margin-right: 0;
-        }
-
-        #highlighter-icon {
-            filter: brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) hue-rotate(93deg) brightness(93%) contrast(88%);
-            transition: filter 0.3s ease;
-        }
-
-        .play-all-button {
-            background-color: #007BFF;
-            color: #fff;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            width: 100%;
-        }
-
-        .play-all-button:hover {
-            background-color: #0056b3;
-        }
-
-        .highlight-container a.active-highlight {
-            background-color: #007BFF;
-            color: #fff;
-            font-weight: bold;
-            border-left: 5px solid #007BFF;
-        }
-
-        @media (max-width: 768px) {
-            .dashboard {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: -200px;
-                height: 100vh;
-                width: 200px;
-                transition: left 0.3s ease-in-out;
-            }
-
-            .sidebar.collapsed {
-                left: 0;
-            }
-
-            .media-content {
-                margin-left: 0;
-                width: 100%;
-            }
-
-            .video-container {
-                padding-bottom: 75%;
-            }
-
-            .subtitles-container {
-                max-height: 150px;
-            }
-
-            .button-group img {
-                width: 30px;
-            }
-        }
-
-        .dictionary-button {
-            background-color: #CCCCCC; /* Default inactive background color */
-            color: #666666; /* Default inactive text color */
-            border: 1px solid #007BFF; /* Border color */
-            padding: 5px 10px; /* Narrower padding */
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, color 0.3s ease;
-            width: auto; /* Automatic width based on content */
-            display: inline-block; /* Aligns with other inline elements */
-            margin-top: 0; /* Ensures no extra margin on top */
-        }
-
-        .dictionary-button.active {
-            background-color: #007BFF; /* Active background color */
-            color: #FFFFFF; /* Active text color */
-        }
-
-        /* Bottom buttons container */
-        .bottom-buttons {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px; /* Adjust spacing between elements */
-            margin-bottom: 5px; /* Adjust bottom margin */
-            padding-bottom: 10px; /* Add padding at the bottom */
-        }
-
-        .button-xp-container {
-            display: flex;
-            width: 100%;
-            justify-content: center; /* Center the button */
-            align-items: center; /* Center items vertically */
-            gap: 10px; /* Adjust spacing between button and XP section if necessary */
-        }
-
-        .play-all-button {
-            flex: 1; /* Take up full width */
-            background-color: #007BFF;
-            color: #fff;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center; /* Center text vertically */
-            height: 40px; /* Ensure same height as XP circle */
-            margin-bottom: 0; /* Remove bottom margin */
-        }
-
-        .play-all-button:hover {
-            background-color: #0056b3;
-        }
-
-        .xp-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px; /* Adjust spacing between circle and points if necessary */
-        }
-
-        .xp-circle {
-            width: 40px; /* Adjust size */
-            height: 40px; /* Adjust size */
-            border-radius: 50%;
-            background-color: #ffc40c;
-            color: #ffffff;
-            font-weight: bold;
-            font-size: 14px; /* Adjust font size */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .bottom-buttons-row {
-            display: flex;
-            justify-content: space-between; /* Space out the buttons evenly */
-            align-items: center;
-            padding: 0 20px; /* Add padding inside the container for side spacing */
-            margin-left: 20px;
-            gap: 15px; /* Adjust spacing between buttons */
-            margin-bottom: 0; /* Move row closer to bottom of sidebar */
-        }
-
-        .bottom-buttons-row li {
-            padding: 10px;
-            flex: 1; /* Ensure all list items take equal space */
-            display: flex;
-            justify-content: center; /* Center the content within each list item */
-        }
-
-        .bottom-buttons-row li img,
-        .bottom-buttons-row li .xp-circle {
-            width: 32px; /* Adjust size of images and XP circle to fit four elements */
-            height: 32px; /* Maintain aspect ratio */
-        }
-
-        .sidebar-toggle.outside-toggle {
-            position: fixed;
-            top: 20px;
-            left: 200px; /* Original sidebar width */
-            transition: left 0.3s ease-in-out;
-        }
-
-        .sidebar.collapsed + .sidebar-toggle.outside-toggle {
-            left: 20px; /* Adjust left position when sidebar is collapsed */
-        }
-
-    </style>
+</style>
 </head>
 
+
 <body class="subplayer-page">
-    <div class="dashboard">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <button class="sidebar-toggle" onclick="toggleSidebar()" id="sidebar-toggle-icon">
-                    <svg viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#000000">
-                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                        <g id="SVGRepo_iconCarrier">
-                            <path d="M64 192h896v76.8H64V192z m0 281.6h896v76.8H64V473.6z m0 281.6h896V832H64v-76.8z" fill="#000000"></path>
-                        </g>
-                    </svg>
-                </button>
-            </div>
-            <div class="highlight-list-container">
-                <ul id="highlight-list">
-                    {% for highlight in highlights %}
-                    <li class="highlight-item">
-                        <div class="highlight-container">
-                            <a href="#"
-                               data-start-time="{{ highlight.start_time }}"
-                               data-end-time="{{ highlight.end_time }}"
-                               data-frame-index="{{ highlight.frame_index }}"
-                               data-start-sentence-index="{{ highlight.start_sentence_index }}"
-                               data-start-index="{{ highlight.start_index }}">
-                                {{ highlight.highlighted_text }}
-                            </a>
-                            <img src="{% static 'subplayer/trash.png' %}" alt="Delete" class="delete-highlight" data-highlight-id="{{ highlight.id }}">
-                        </div>
-                    </li>
-                    {% empty %}
-                    <li id="no-highlights">No highlights found.</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <div class="bottom-buttons">
-                <div class="button-xp-container">
-                    <button id="play-all-btn" class="play-all-button">Play All Highlights</button>
-                </div>
-                <nav class="sidebar-nav">
-                    <ul class="bottom-buttons-row">
-                        <li>
-                            <a href="{% url 'stats_view' %}" title="Home">
-                                <img src="{% static 'subplayer/house_icon.jpeg' %}" alt="Home">
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'highlights' %}" title="Highlights">
-                                <img src="{% static 'subplayer/highlight_icon.png' %}" alt="Highlights">
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'my_media' %}" title="My Media">
-                                <img src="{% static 'subplayer/saved_icon.png' %}" alt="My Media">
-                            </a>
-                        </li>
-                        <li>
-                            <div class="xp-circle">{{ total_points }}</div>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-        </aside>
-        <button class="sidebar-toggle outside-toggle" onclick="toggleSidebar()">
-            <svg viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#000000">
-                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                <g id="SVGRepo_iconCarrier">
-                    <path d="M64 192h896v76.8H64V192z m0 281.6h896v76.8H64V473.6z m0 281.6h896V832H64v-76.8z" fill="#000000"></path>
-                </g>
-            </svg>
-        </button>
-        <div class="media-content">
-            <audio id="audiofile" controls="controls" type="audio/mp3"></audio>
-            <div class="video-container">
-                <div id="player"></div>
-            </div>
-            <div class="subtitles-container" id="subtitles"></div>
-            <div class="buttons-container">
-                <div class="button-group">
-                    <img id="status-icon" src="{% static 'subplayer/status.png' %}" alt="Set Status" class="icon-button" data-status="set-status">
-                    <span class="tooltip-text" id="status-tooltip">Set Status</span>
-                </div>
-                <div class="button-group">
-                    <img id="loop-icon" src="{% static 'subplayer/loopoff.png' %}" alt="Loop Off" class="icon-button" style="cursor:pointer;">
-                    <span class="tooltip-text">Loop Mode: Select Text, Turn on Loop Mode (CMD Key)</span>
-                </div>
-                <div class="button-group">
-                    <img id="highlight-icon" src="{% static 'subplayer/black-high.png' %}" alt="Highlighter" class="icon-button" style="cursor:pointer;">
-                    <span class="tooltip-text">Highlight Mode: Select Text Then Click Shift</span>
-                </div>
-                <button id="toggleDictionary" class="dictionary-button" onclick="toggleDictionary()">Dictionary</button>
-            </div>
-            <div id="viewed-media-container"></div>
-            <div id="highlight-display"></div>
-        </div>
 
-        <div id="viewed-media-container"></div>
-        <div id="highlight-display"></div>
+<div class="dashboard">
+ <aside class="sidebar left-sidebar">
+    {% include 'accounts/sidebar.html' %}
+ <button class="sidebar-toggle" onclick="toggleLeftSidebar('collapse')">
+    <div class="toggle-button-inner">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 18l-6-6 6-6"/>
+        </svg>
     </div>
+</button>
+<button class="sidebar-expand" onclick="toggleLeftSidebar('expand')" style="display: none;">
+    <div class="toggle-button-inner">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 6l6 6-6 6"/>
+        </svg>
+    </div>
+</button>
+</aside>
 
-    <div id="media-status" data-status="{{ media_status }}"></div>
+<aside class="sidebar right-sidebar">
+ <div class="sidebar-header">
+    <li class="nav-item d-flex align-items-center">
+        <div class="btn btn-purple btn-sm mb-0 d-flex align-items-center compact-btn" id="unique-xp-display">
+            <div class="unique-xp-circle d-flex align-items-center justify-content-center me-2">XP</div>
+            <span id="unique-xp-points">{{ total_points }}</span>
+        </div>
+    </li>
+</div>
 
-    <script>
-        let dictionaryEnabled = false; // Track if the dictionary is enabled
+<!-- rest of the sidebar content -->
+<div class="highlight-list-container">
 
-        var media = JSON.parse('{{ media_json|escapejs }}');
-        var mediaId = media.media_id;
-        var test2 = media.url;
-        console.log("location" + test2);
-        const mediaType = media.media_type;
-        const audioPlayer = document.getElementById('audiofile');
-        var userId = "{{ request.user.id }}";
-        var profileId = "{{ request.user.profile.id }}";
+<ul id="highlight-list">
 
-        if (mediaType === 'audio') {
-            audioPlayer.src = "{% static 'subplayer/audio/' %}" + media.media_id + ".mp3";
-        } else {
-            console.log("23434");
-            document.getElementById('audiofile').style.display = 'none';
-        }
+{% for highlight in highlights %}
 
-        // Setup Highlight Links
+<li class="highlight-item">
+
+<div class="highlight-container">
+
+<a href="#"
+
+data-start-time="{{ highlight.start_time }}"
+
+data-end-time="{{ highlight.end_time }}"
+
+data-frame-index="{{ highlight.frame_index }}"
+
+data-start-sentence-index="{{ highlight.start_sentence_index }}"
+
+data-start-index="{{ highlight.start_index }}">
+
+{{ highlight.highlighted_text }}
+
+</a>
+
+<img src="{% static 'subplayer/trash.png' %}" alt="Delete" class="delete-highlight" data-highlight-id="{{ highlight.id }}">
+
+</div>
+
+</li>
+
+{% empty %}
+
+<li id="no-highlights">No highlights found.</li>
+
+{% endfor %}
+
+</ul>
+
+</div>
+
+<div class="bottom-buttons">
+
+<div class="button-xp-container">
+
+<button id="play-all-btn" class="play-all-button">Play All Highlights</button>
+
+</div>
+
+
+
+</div>
+
+</aside>
+
+
+
+
+<div class="media-content">
+    <audio id="audiofile" controls="controls" type="audio/mp3"></audio>
+    <div class="video-container">
+        <div id="player"></div>
+    </div>
+    <div class="subtitles-container" id="subtitles"></div>
+    <div class="buttons-container">
+        <div class="button-group">
+            <img id="status-icon" src="{% static 'subplayer/status.png' %}" alt="Set Status" class="icon-button" data-status="set-status">
+            <span class="tooltip-text" id="status-tooltip">Set Status</span>
+        </div>
+        <div class="button-group">
+            <img id="loop-icon" src="{% static 'subplayer/loopoff.png' %}" alt="Loop Off" class="icon-button" style="cursor:pointer;">
+            <span class="tooltip-text">Loop Mode: Select Text, Turn on Loop Mode (CMD Key)</span>
+        </div>
+        <div class="button-group">
+            <img id="highlight-icon" src="{% static 'subplayer/black-high.png' %}" alt="Highlighter" class="icon-button" style="cursor:pointer;">
+            <span class="tooltip-text">Highlight Mode: Select Text Then Click Shift</span>
+        </div>
+        <button id="toggleDictionary" class="dictionary-button" onclick="toggleDictionary()">Dictionary</button>
+
+        <div class="button-group">
+    <button class="icon-button" onclick="toggleSidebar()">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+            <g id="SVGRepo_iconCarrier">
+                <rect width="48" height="48" fill="white" fill-opacity="0.01"></rect>
+                <path d="M16 40H6C4.89543 40 4 39.1046 4 38V10C4 8.89543 4.89543 8 6 8H42C43.1046 8 44 8.89543 44 10V16" stroke="#000000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+                <rect x="24" y="24" width="20" height="16" rx="2" fill="#2F88FF" stroke="#000000" stroke-width="4" stroke-linejoin="round"></rect>
+            </g>
+        </svg>
+    </button>
+    <span class="tooltip-text">Toggle Sidebar</span>
+</div>
+
+    <div id="viewed-media-container"></div>
+    <div id="highlight-display"></div>
+</div>
+<div id="media-status" data-status="{{ media_status }}"></div>
+
+
+<script>
+    let dictionaryEnabled = false; // Track if the dictionary is enabled
+
+    var media = JSON.parse('{{ media_json|escapejs }}');
+    var mediaId = media.media_id;
+    var test2 = media.url;
+    console.log("location" + test2);
+    const mediaType = media.media_type;
+    const audioPlayer = document.getElementById('audiofile');
+    var userId = "{{ request.user.id }}";
+    var profileId = "{{ request.user.profile.id }}";
+
+    if (mediaType === 'audio') {
+        audioPlayer.src = "{% static 'subplayer/audio/' %}" + media.media_id + ".mp3";
+    } else {
+        console.log("23434");
+        document.getElementById('audiofile').style.display = 'none';
+    }
+
+    // Setup Highlight Links
+    const highlights = document.querySelectorAll('#highlight-list a');
+    highlights.forEach(highlight => {
+        highlight.addEventListener('click', function(e) {
+            e.preventDefault();
+            const startTime = parseFloat(this.getAttribute('data-start-time'));
+            if (player && !isNaN(startTime)) {
+                player.seekTo(startTime, true);
+            }
+        });
+    });
+
+    function setupHighlightLinks() {
         const highlights = document.querySelectorAll('#highlight-list a');
         highlights.forEach(highlight => {
             highlight.addEventListener('click', function(e) {
@@ -466,300 +208,2429 @@
                 }
             });
         });
+    }
 
-        function setupHighlightLinks() {
-            const highlights = document.querySelectorAll('#highlight-list a');
-            highlights.forEach(highlight => {
-                highlight.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const startTime = parseFloat(this.getAttribute('data-start-time'));
-                    if (player && !isNaN(startTime)) {
-                        player.seekTo(startTime, true);
-                    }
-                });
-            });
+    setupHighlightLinks();
+
+function toggleSidebar() {
+    const leftSidebar = document.querySelector('.left-sidebar');
+    const rightSidebar = document.querySelector('.right-sidebar');
+    const mediaContent = document.querySelector('.media-content');
+
+    // Toggle both sidebars
+    leftSidebar.classList.toggle('collapsed');
+    rightSidebar.classList.toggle('collapsed');
+
+    // Update the media content margins
+    if (leftSidebar.classList.contains('collapsed')) {
+        mediaContent.style.marginLeft = '40px';
+    } else {
+        mediaContent.style.marginLeft = '240px';
+    }
+    if (rightSidebar.classList.contains('collapsed')) {
+        mediaContent.style.marginRight = '0';
+    } else {
+        mediaContent.style.marginRight = '250px';
+    }
+
+    // Update toggle buttons visibility
+    const leftCollapseButton = document.querySelector('.left-sidebar .sidebar-toggle');
+    const leftExpandButton = document.querySelector('.left-sidebar .sidebar-expand');
+    if (leftSidebar.classList.contains('collapsed')) {
+        leftCollapseButton.style.display = 'none';
+        leftExpandButton.style.display = 'flex';
+    } else {
+        leftCollapseButton.style.display = 'flex';
+        leftExpandButton.style.display = 'none';
+    }
+
+    // Save sidebars state
+    localStorage.setItem('bothSidebars', leftSidebar.classList.contains('collapsed') ? 'collapsed' : 'expanded');
+}
+
+// Option to restore state on page load for both sidebars
+document.addEventListener('DOMContentLoaded', function() {
+    const bothSidebarsState = localStorage.getItem('bothSidebars');
+    if (bothSidebarsState === 'collapsed') {
+        toggleSidebar(); // This will toggle both sidebars to collapsed state
+    }
+});
+
+// Keep the separate toggle for the left sidebar if you want individual control
+function toggleLeftSidebar(action) {
+    const leftSidebar = document.querySelector('.left-sidebar');
+    const collapseButton = document.querySelector('.left-sidebar .sidebar-toggle');
+    const expandButton = document.querySelector('.left-sidebar .sidebar-expand');
+    const mediaContent = document.querySelector('.media-content');
+
+    if (action === 'collapse') {
+        leftSidebar.classList.add('collapsed');
+        collapseButton.style.display = 'none';
+        expandButton.style.display = 'block';
+        mediaContent.style.marginLeft = '40px';
+    } else if (action === 'expand') {
+        leftSidebar.classList.remove('collapsed');
+        collapseButton.style.display = 'block';
+        expandButton.style.display = 'none';
+        mediaContent.style.marginLeft = '240px';
+    }
+
+    // Save the state if needed
+    localStorage.setItem('leftSidebar', leftSidebar.classList.contains('collapsed') ? 'collapsed' : 'expanded');
+}
+    document.getElementById('play-all-btn').addEventListener('click', playAllHighlights);
+
+    async function playAllHighlights() {
+        const highlights = document.querySelectorAll('#highlight-list a');
+        let currentHighlightIndex = 0;
+        await playHighlights(currentHighlightIndex, highlights);
+    }
+
+    async function playHighlights(currentHighlightIndex, highlights) {
+        if (currentHighlightIndex < highlights.length) {
+            const highlight = highlights[currentHighlightIndex];
+            const startTime = parseFloat(highlight.getAttribute('data-start-time'));
+            const endTime = parseFloat(highlight.getAttribute('data-end-time'));
+
+            if (!isNaN(startTime) && !isNaN(endTime)) {
+                await seekAndPlay(startTime);
+                updateActiveHighlight(highlight);
+
+                const highlightDuration = (endTime - startTime) * 1000;
+                await new Promise(resolve => setTimeout(resolve, highlightDuration));
+
+                currentHighlightIndex++;
+                playHighlights(currentHighlightIndex, highlights);
+            }
+        } else {
+            console.log('All highlights have been played.');
+            player.pauseVideo();
         }
+    }
 
-        setupHighlightLinks();
+    async function seekAndPlay(startTime) {
+        player.seekTo(startTime, true);
+        await new Promise(resolve => setTimeout(resolve, 500)); // Wait for 500ms to ensure seeking is complete
+        player.playVideo();
+    }
 
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const sidebarToggleIcon = document.getElementById('sidebar-toggle-icon');
-            sidebar.classList.toggle('collapsed');
-            if (sidebar.classList.contains('collapsed')) {
-                sidebarToggleIcon.src = "{% static 'subplayer/expand.svg' %}";
+    function updateActiveHighlight(activeElement) {
+        document.querySelectorAll('#highlight-list a').forEach(highlight => {
+            highlight.classList.remove('played-highlight');
+            highlight.classList.remove('active-highlight');
+        });
+        activeElement.classList.add('played-highlight');
+        activeElement.classList.add('active-highlight');
+    }
+
+    function removeHighlightActiveStates() {
+        document.querySelectorAll('#highlight-list a').forEach(highlight => {
+            highlight.classList.remove('played-highlight');
+        });
+    }
+
+    async function deleteHighlight(highlightId) {
+        try {
+            const response = await fetch(`/api/user/delete_highlight/${highlightId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken2
+                },
+                body: JSON.stringify({ highlight_id: highlightId }),
+            });
+
+            if (response.ok) {
+                console.log("Highlight deleted successfully!");
+                await fetchHighlights(mediaId);
+                createSubtitles();
             } else {
-                sidebarToggleIcon.src = "{% static 'subplayer/collapse.svg' %}";
+                console.error('Failed to delete highlight:', await response.text());
             }
+        } catch (error) {
+            console.error('Error during delete highlight:', error);
         }
+    }
 
-        document.getElementById('play-all-btn').addEventListener('click', playAllHighlights);
-
-        async function playAllHighlights() {
-            const highlights = document.querySelectorAll('#highlight-list a');
-            let currentHighlightIndex = 0;
-            await playHighlights(currentHighlightIndex, highlights);
-        }
-
-        async function playHighlights(currentHighlightIndex, highlights) {
-            if (currentHighlightIndex < highlights.length) {
-                const highlight = highlights[currentHighlightIndex];
-                const startTime = parseFloat(highlight.getAttribute('data-start-time'));
-                const endTime = parseFloat(highlight.getAttribute('data-end-time'));
-
-                if (!isNaN(startTime) && !isNaN(endTime)) {
-                    await seekAndPlay(startTime);
-                    updateActiveHighlight(highlight);
-
-                    const highlightDuration = (endTime - startTime) * 1000;
-                    await new Promise(resolve => setTimeout(resolve, highlightDuration));
-
-                    currentHighlightIndex++;
-                    playHighlights(currentHighlightIndex, highlights);
-                }
-            } else {
-                console.log('All highlights have been played.');
-                player.pauseVideo();
-            }
-        }
-
-        async function seekAndPlay(startTime) {
-            player.seekTo(startTime, true);
-            await new Promise(resolve => setTimeout(resolve, 500)); // Wait for 500ms to ensure seeking is complete
-            player.playVideo();
-        }
-
-        function updateActiveHighlight(activeElement) {
-            document.querySelectorAll('#highlight-list a').forEach(highlight => {
-                highlight.classList.remove('played-highlight');
-                highlight.classList.remove('active-highlight');
-            });
-            activeElement.classList.add('played-highlight');
-            activeElement.classList.add('active-highlight');
-        }
-
-        function removeHighlightActiveStates() {
-            document.querySelectorAll('#highlight-list a').forEach(highlight => {
-                highlight.classList.remove('played-highlight');
-            });
-        }
-
-        async function deleteHighlight(highlightId) {
-            try {
-                const response = await fetch(`/api/user/delete_highlight/${highlightId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrftoken2
-                    },
-                    body: JSON.stringify({ highlight_id: highlightId }),
-                });
-
-                if (response.ok) {
-                    console.log("Highlight deleted successfully!");
-                    await fetchHighlights(mediaId);
-                    createSubtitles();
-                } else {
-                    console.error('Failed to delete highlight:', await response.text());
-                }
-            } catch (error) {
-                console.error('Error during delete highlight:', error);
-            }
-        }
-
-        function setupHighlightDeletion() {
-            const deleteButtons = document.querySelectorAll('.delete-highlight');
-            deleteButtons.forEach(button => {
-                button.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    const highlightId = this.getAttribute('data-highlight-id');
-                    deleteHighlight(highlightId).then(() => {
-                        this.closest('li').remove();
-                    });
+    function setupHighlightDeletion() {
+        const deleteButtons = document.querySelectorAll('.delete-highlight');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.preventDefault();
+                const highlightId = this.getAttribute('data-highlight-id');
+                deleteHighlight(highlightId).then(() => {
+                    this.closest('li').remove();
                 });
             });
-        }
+        });
+    }
 
-        function toggleHighlightMode() {
-            document.addEventListener('keydown', function(event) {
-                if (event.key === "Shift") {
-                    document.getElementById('highlight-icon').src = '{% static "subplayer/yellow-high.png" %}';
-                }
-            });
-
-            document.addEventListener('keyup', function(event) {
-                if (event.key === "Shift") {
-                    document.getElementById('highlight-icon').src = '{% static "subplayer/black-high.png" %}';
-                }
-            });
-        }
-
-        function initializeStatusUI() {
-            console.log('Initializing status UI');
-            const mediaStatusElement = document.getElementById('media-status');
-            const initialStatus = mediaStatusElement.getAttribute('data-status');
-            console.log('Initial status:', initialStatus);
-            updateSingleStatusIcon(initialStatus);
-        }
-
-        function attachSingleStatusIconEventListener() {
-            const statusIcon = document.getElementById('status-icon');
-            statusIcon.addEventListener('click', function() {
-                let newStatus;
-                switch (this.dataset.status) {
-                    case 'in_progress':
-                        newStatus = 'completed';
-                        break;
-                    case 'completed':
-                        newStatus = 'set-status';
-                        break;
-                    case 'set-status':
-                    default:
-                        newStatus = 'in_progress';
-                        break;
-                }
-                toggleStatus(newStatus);
-            });
-        }
-
-        async function toggleStatus(newStatus) {
-            console.log("Toggle status called:", newStatus);
-            const mediaId = '{{ media.media_id }}';
-            const currentTime = player.getCurrentTime();
-            currentStatus = newStatus;
-            if (currentStatus === 'set-status') {
-                lastUpdateTime = 0;
+    function toggleHighlightMode() {
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Shift") {
+                document.getElementById('highlight-icon').src = '{% static "subplayer/yellow-high.png" %}';
             }
-            try {
-                let url = `/media/update_status/${mediaId}/${newStatus}/`;
-                let data = { status: newStatus, current_time: currentTime };
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                console.log("Response received from updateMediaStatus:" + newStatus, result);
-
-                if (result && result.status === 'success') {
-                    updateSingleStatusIcon(newStatus);
-                } else {
-                    console.error('Failed to update status. Response:', result);
-                }
-            } catch (error) {
-                console.error('Error updating media status:', error);
-            }
-        }
-
-        function updateSingleStatusIcon(status) {
-            console.log("updatedstatusicon")
-            const statusIcon = document.getElementById('status-icon');
-            const statusTooltip = document.getElementById('status-tooltip');
-
-            switch (status) {
-                case 'in_progress':
-                    statusIcon.src = '{% static "subplayer/in-prog.png" %}';
-                    statusTooltip.textContent = 'In Progress';
-                    break;
-                case 'completed':
-                    statusIcon.src = '{% static "subplayer/complete-check.png" %}';
-                    statusTooltip.textContent = 'Completed';
-                    break;
-                default:
-                    statusIcon.src = '{% static "subplayer/status.png" %}';
-                    statusTooltip.textContent = 'Set Status';
-                    break;
-            }
-            statusIcon.dataset.status = status;
-        }
-
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const highlightList = document.getElementById('highlight-list');
-
-            highlightList.addEventListener('click', function(event) {
-                let deleteBtn = event.target.closest('.delete-highlight');
-                if (deleteBtn) {
-                    event.preventDefault();
-                    const highlightId = deleteBtn.getAttribute('data-highlight-id');
-                    deleteHighlight(highlightId).then(() => {
-                        deleteBtn.closest('li').remove();
-                        checkHighlightExistence();
-                    });
-                }
-            });
-
-            setupHighlightLinks();
-            toggleHighlightMode();
-            initializeStatusUI();
-            attachSingleStatusIconEventListener();
         });
 
-        async function deleteHighlight(highlightId) {
-            try {
-                const response = await fetch(`/api/user/delete_highlight/${highlightId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrftoken2
-                    },
-                    body: JSON.stringify({ highlight_id: highlightId }),
-                });
+        document.addEventListener('keyup', function(event) {
+            if (event.key === "Shift") {
+                document.getElementById('highlight-icon').src = '{% static "subplayer/black-high.png" %}';
+            }
+        });
+    }
 
-                if (response.ok) {
-                    console.log("Highlight deleted successfully!");
-                    await fetchHighlights(mediaId);
-                    createSubtitles();
-                } else {
-                    console.error('Failed to delete highlight:', await response.text());
+    function initializeStatusUI() {
+        console.log('Initializing status UI');
+        const mediaStatusElement = document.getElementById('media-status');
+        const initialStatus = mediaStatusElement.getAttribute('data-status');
+        console.log('Initial status:', initialStatus);
+        updateSingleStatusIcon(initialStatus);
+    }
+
+    function attachSingleStatusIconEventListener() {
+        const statusIcon = document.getElementById('status-icon');
+        statusIcon.addEventListener('click', function() {
+            let newStatus;
+            switch (this.dataset.status) {
+                case 'in_progress':
+                    newStatus = 'completed';
+                    break;
+                case 'completed':
+                    newStatus = 'set-status';
+                    break;
+                case 'set-status':
+                default:
+                    newStatus = 'in_progress';
+                    break;
+            }
+            toggleStatus(newStatus);
+        });
+    }
+
+    async function toggleStatus(newStatus) {
+        console.log("Toggle status called:", newStatus);
+        const mediaId = '{{ media.media_id }}';
+        const currentTime = player.getCurrentTime();
+        currentStatus = newStatus;
+        if (currentStatus === 'set-status') {
+            lastUpdateTime = 0;
+        }
+        try {
+            let url = `/media/update_status/${mediaId}/${newStatus}/`;
+            let data = { status: newStatus, current_time: currentTime };
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log("Response received from updateMediaStatus:" + newStatus, result);
+
+            if (result && result.status === 'success') {
+                updateSingleStatusIcon(newStatus);
+            } else {
+                console.error('Failed to update status. Response:', result);
+            }
+        } catch (error) {
+            console.error('Error updating media status:', error);
+        }
+    }
+
+    function updateSingleStatusIcon(status) {
+        console.log("updatedstatusicon")
+        const statusIcon = document.getElementById('status-icon');
+        const statusTooltip = document.getElementById('status-tooltip');
+
+        switch (status) {
+            case 'in_progress':
+                statusIcon.src = '{% static "subplayer/in-prog.png" %}';
+                statusTooltip.textContent = 'In Progress';
+                break;
+            case 'completed':
+                statusIcon.src = '{% static "subplayer/complete-check.png" %}';
+                statusTooltip.textContent = 'Completed';
+                break;
+            default:
+                statusIcon.src = '{% static "subplayer/status.png" %}';
+                statusTooltip.textContent = 'Set Status';
+                break;
+        }
+        statusIcon.dataset.status = status;
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
                 }
-            } catch (error) {
-                console.error('Error during delete highlight:', error);
             }
         }
+        return cookieValue;
+    }
 
-        function toggleDictionary() {
-            const dictionaryButton = document.getElementById('toggleDictionary');
-            dictionaryButton.classList.toggle('active');
-            dictionaryEnabled = dictionaryButton.classList.contains('active'); // Update dictionaryEnabled
+    document.addEventListener('DOMContentLoaded', function() {
+        const highlightList = document.getElementById('highlight-list');
 
-            if (!dictionaryEnabled) {
-                hidePopup(); // Hide the popup if the dictionary is disabled
+        highlightList.addEventListener('click', function(event) {
+            let deleteBtn = event.target.closest('.delete-highlight');
+            if (deleteBtn) {
+                event.preventDefault();
+                const highlightId = deleteBtn.getAttribute('data-highlight-id');
+                deleteHighlight(highlightId).then(() => {
+                    deleteBtn.closest('li').remove();
+                    checkHighlightExistence();
+                });
             }
+        });
+
+        setupHighlightLinks();
+        toggleHighlightMode();
+        initializeStatusUI();
+        attachSingleStatusIconEventListener();
+    });
+
+    async function deleteHighlight(highlightId) {
+        try {
+            const response = await fetch(`/api/user/delete_highlight/${highlightId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken2
+                },
+                body: JSON.stringify({ highlight_id: highlightId }),
+            });
+
+            if (response.ok) {
+                console.log("Highlight deleted successfully!");
+                await fetchHighlights(mediaId);
+                createSubtitles();
+            } else {
+                console.error('Failed to delete highlight:', await response.text());
+            }
+        } catch (error) {
+            console.error('Error during delete highlight:', error);
         }
+    }
 
-    </script>
+    function toggleDictionary() {
+        const dictionaryButton = document.getElementById('toggleDictionary');
+        dictionaryButton.classList.toggle('active');
+        dictionaryEnabled = dictionaryButton.classList.contains('active'); // Update dictionaryEnabled
 
-    {% if media.media_type == 'audio' %}
-        {% include 'subtitles.html' with media=media %}
-    {% else %}
-        <script src="{% static 'subplayer/js/subtitles_video.js' %}"></script>
-        <script src="{% static 'subplayer/js/dc.js' %}"></script>
-    {% endif %}
-    <script>var DICT_BASE_PATH = "{% static 'subplayer/pop_dic/' %}";</script>
+        if (!dictionaryEnabled) {
+            hidePopup(); // Hide the popup if the dictionary is disabled
+        }
+    }
+function toggleLeftSidebar(action) {
+    const leftSidebar = document.querySelector('.left-sidebar');
+    const collapseButton = document.querySelector('.left-sidebar .sidebar-toggle');
+    const expandButton = document.querySelector('.left-sidebar .sidebar-expand');
+    const mediaContent = document.querySelector('.media-content');
+
+    if (action === 'collapse') {
+        leftSidebar.classList.add('collapsed');
+        collapseButton.style.display = 'none';
+        expandButton.style.display = 'block';
+        mediaContent.style.marginLeft = '40px';
+    } else if (action === 'expand') {
+        leftSidebar.classList.remove('collapsed');
+        collapseButton.style.display = 'block';
+        expandButton.style.display = 'none';
+        mediaContent.style.marginLeft = '240px';
+    }
+
+    // Save the state if needed
+    localStorage.setItem('leftSidebar', leftSidebar.classList.contains('collapsed') ? 'collapsed' : 'expanded');
+}
+</script>
+
+{% if media.media_type == 'audio' %}
+    {% include 'subtitles.html' with media=media %}
+{% else %}
+    <script src="{% static 'subplayer/js/subtitles_video.js' %}"></script>
+    <script src="{% static 'subplayer/js/dc.js' %}"></script>
+{% endif %}
+<script>var DICT_BASE_PATH = "{% static 'subplayer/pop_dic/' %}";</script>
 </body>
+<style>
+body {
+
+margin: 0;
+
+}
+
+
+    .dashboard {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .media-content {
+        flex-grow: 1;
+        padding: 20px;
+        margin-left: 200px;
+        transition: margin-left 0.3s ease-in-out;
+    }
+
+    .sidebar.collapsed + .media-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .video-container {
+        margin: 0 auto;
+        height: 70vh;
+        text-align: center;
+        overflow: hidden;
+        max-width: calc(178vh * 0.7);
+    }
+
+    iframe {
+        height: 100%;
+        width: 100%;
+    }
+
+    .subtitles-container {
+        margin: 0 auto;
+        width: 100%;
+        max-width: calc(178vh * 0.7);
+        text-align: center;
+        font-size: calc(1vw + 1vh);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        overflow-y: auto;
+        max-height: 24vh;
+        padding: 10px;
+        box-sizing: border-box;
+        background-color: #fff;
+    }
+
+    .subtitles-container span {
+        display: inline-block;
+        padding: 2px 5px;
+    }
+
+    #subtitles span {
+        display: inline-block;
+        padding: 2px 5px;
+        color: #2f302f;
+    }
+
+    #subtitles span.highlight,
+    #subtitles span.active-highlight,
+    #subtitles span.perm-highlight {
+        font-weight: bold;
+        padding: 2px 4px;
+        border-radius: 5px;
+    }
+
+    #subtitles span.highlight {
+        color: #fff;
+        background-color: yellow;
+    }
+
+    #subtitles span.active-highlight {
+        background-color: #4285f4;
+        color: #fff;
+    }
+
+    #subtitles span.perm-highlight {
+        background-color: rgba(255, 255, 0, 0.5);
+        color: #333;
+        font-weight: bold;
+    }
+
+    .icon-button {
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        margin: 0 5px;
+        transition: opacity 0.3s ease;
+    }
+
+    .icon-button:hover {
+        transform: scale(1.1);
+    }
+
+    .subplayer-page {
+        background-color: #F9F8FA;
+    }
+
+    .buttons-container {
+        display: flex;
+        justify-content: center;
+        align-items: center; /* Aligns items vertically */
+        gap: 10px;
+        margin-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    .button-group {
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .tooltip-text {
+        visibility: hidden;
+        width: 120px;
+        background-color: black;
+        color: white;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        position: absolute;
+        z-index: 1;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.6s;
+    }
+
+    .button-group:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .button-group img {
+        width: 40px;
+        height: auto;
+        cursor: pointer;
+        margin-right: 10px;
+    }
+
+    .button-group img:last-child {
+        margin-right: 0;
+    }
+
+    #highlighter-icon {
+        filter: brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) hue-rotate(93deg) brightness(93%) contrast(88%);
+        transition: filter 0.3s ease;
+    }
+
+    .play-all-button {
+        background-color: #007BFF;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        width: 100%;
+    }
+
+    .play-all-button:hover {
+        background-color: #0056b3;
+    }
+
+    .highlight-container a.active-highlight {
+        background-color: #007BFF;
+        color: #fff;
+        font-weight: bold;
+        border-left: 5px solid #007BFF;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard {
+            flex-direction: column;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -200px;
+            height: 100vh;
+            width: 200px;
+            transition: left 0.3s ease-in-out;
+        }
+
+        .sidebar.collapsed {
+            left: 0;
+        }
+
+        .media-content {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .video-container {
+            padding-bottom: 75%;
+        }
+
+        .subtitles-container {
+            max-height: 150px;
+        }
+
+        .button-group img {
+            width: 30px;
+        }
+    }
+
+    .dictionary-button {
+        background-color: #CCCCCC; /* Default inactive background color */
+        color: #666666; /* Default inactive text color */
+        border: 1px solid #007BFF; /* Border color */
+        padding: 5px 10px; /* Narrower padding */
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, color 0.3s ease;
+        width: auto; /* Automatic width based on content */
+        display: inline-block; /* Aligns with other inline elements */
+        margin-top: 0; /* Ensures no extra margin on top */
+    }
+
+    .dictionary-button.active {
+        background-color: #007BFF; /* Active background color */
+        color: #FFFFFF; /* Active text color */
+    }
+
+    /* Bottom buttons container */
+    .bottom-buttons {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px; /* Adjust spacing between elements */
+        margin-bottom: 5px; /* Adjust bottom margin */
+        padding-bottom: 10px; /* Add padding at the bottom */
+    }
+
+    .button-xp-container {
+        display: flex;
+        width: 100%;
+        justify-content: center; /* Center the button */
+        align-items: center; /* Center items vertically */
+        gap: 10px; /* Adjust spacing between button and XP section if necessary */
+    }
+
+    .play-all-button {
+        flex: 1; /* Take up full width */
+        background-color: #007BFF;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center; /* Center text vertically */
+        height: 40px; /* Ensure same height as XP circle */
+        margin-bottom: 0; /* Remove bottom margin */
+    }
+
+    .play-all-button:hover {
+        background-color: #0056b3;
+    }
+
+    .xp-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px; /* Adjust spacing between circle and points if necessary */
+    }
+
+    .xp-circle {
+        width: 40px; /* Adjust size */
+        height: 40px; /* Adjust size */
+        border-radius: 50%;
+        background-color: #ffc40c;
+        color: #ffffff;
+        font-weight: bold;
+        font-size: 14px; /* Adjust font size */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .bottom-buttons-row {
+        display: flex;
+        justify-content: space-between; /* Space out the buttons evenly */
+        align-items: center;
+        padding: 0 20px; /* Add padding inside the container for side spacing */
+        margin-left: 20px;
+        gap: 15px; /* Adjust spacing between buttons */
+        margin-bottom: 0; /* Move row closer to bottom of sidebar */
+    }
+
+    .bottom-buttons-row li {
+        padding: 10px;
+        flex: 1; /* Ensure all list items take equal space */
+        display: flex;
+        justify-content: center; /* Center the content within each list item */
+    }
+
+    .bottom-buttons-row li img,
+    .bottom-buttons-row li .xp-circle {
+        width: 32px; /* Adjust size of images and XP circle to fit four elements */
+        height: 32px; /* Maintain aspect ratio */
+    }
+
+    .sidebar-toggle.outside-toggle {
+        position: fixed;
+        top: 20px;
+        left: 200px; /* Original sidebar width */
+        transition: left 0.3s ease-in-out;
+    }
+
+    .sidebar.collapsed + .sidebar-toggle.outside-toggle {
+        left: 20px; /* Adjust left position when sidebar is collapsed */
+    }
+.buttons-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin: 20px auto;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    max-width: calc(178vh * 0.7);
+}
+
+.button-group {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.icon-button {
+    width: 36px;
+    height: 36px;
+    padding: 8px;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.icon-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.tooltip-text {
+    visibility: hidden;
+    width: 140px;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+    font-size: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.button-group:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+.dictionary-button {
+    background-color: white;
+    color: #333;
+    border: 2px solid #e0e0e0;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dictionary-button:hover {
+    border-color: #007BFF;
+    color: #007BFF;
+    transform: translateY(-2px);
+}
+
+.dictionary-button.active {
+    background-color: #007BFF;
+    color: white;
+    border-color: #007BFF;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+    .buttons-container {
+        padding: 10px;
+        gap: 15px;
+    }
+
+    .icon-button {
+        width: 32px;
+        height: 32px;
+        padding: 6px;
+    }
+
+    .dictionary-button {
+        padding: 6px 12px;
+        height: 32px;
+        font-size: 14px;
+    }
+}
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Aligns content to the top */
+    height: 100vh;
+    position: fixed;
+    right: 0; /* Changed from left: 0 to right: 0 */
+    top: 0;
+    overflow-y: auto;
+    background-color: #FFFFFF; /* Sidebar background color */
+    padding: 20px;
+    padding-bottom: 10px;
+    box-sizing: border-box;
+    z-index: 1000; /* Ensure the sidebar is above other content */
+    transition: transform 0.3s ease-in-out;
+    width: 280px; /* Increased width */
+}
+
+.sidebar.collapsed {
+    transform: translateX(100%); /* Changed from -100% to 100% */
+}
+
+.media-content {
+    flex-grow: 1;
+    padding: 20px;
+    margin-right: 280px; /* Changed from margin-left to margin-right */
+    transition: margin-right 0.3s ease-in-out; /* Changed from margin-left to margin-right */
+}
+
+.sidebar.collapsed ~ .media-content {
+    margin-right: 0; /* Changed from margin-left to margin-right */
+    width: 100%;
+}
+
+/* Sidebar header */
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.sidebar-header h3 {
+    margin: 0;
+}
+
+/* Sidebar toggle button */
+.sidebar-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-toggle .icon {
+    width: 100%;
+    height: 100%;
+}
+
+/* Highlight list container */
+.highlight-list-container {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* Highlight list styles */
+#highlight-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.highlight-item {
+    margin-bottom: 10px;
+}
+
+.highlight-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, border-left-color 0.3s ease;
+}
+
+.highlight-container a {
+    text-decoration: none;
+    color: #333;
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+.highlight-container:hover {
+    background-color: #f0f0f0;
+}
+
+.delete-highlight {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    visibility: hidden;
+    transition: visibility 0.2s ease-in-out;
+}
+
+.highlight-container:hover .delete-highlight {
+    visibility: visible;
+}
+
+.played-highlight {
+    background-color: #e0f7fa; /* Active highlight background color */
+    border-left: 5px solid #007BFF; /* Active highlight left border */
+}
+
+/* Bottom buttons container */
+.bottom-buttons {
+    margin-top: 20px;
+    text-align: center; /* Center the buttons */
+    padding-bottom: 10px; /* Add padding at the bottom */
+}
+
+/* Sidebar navigation styles */
+.sidebar-nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: space-between; /* Space out the buttons evenly */
+    padding: 0 10px; /* Adjust padding for side spacing */
+    gap: 10px; /* Adjust spacing between buttons */
+}
+
+.sidebar-nav li {
+    display: flex;
+    justify-content: center; /* Center the content within each list item */
+}
+
+.sidebar-nav a {
+    display: block;
+    width: 30px;
+    height: 30px;
+    position: relative;
+}
+
+.sidebar-nav img,
+.sidebar-nav .xp-circle {
+    width: 30px; /* Adjust size of images and XP circle to fit four elements */
+    height: 30px; /* Maintain aspect ratio */
+    object-fit: contain;
+}
+
+/* Tooltip styling */
+.sidebar-nav a::after {
+    content: attr(title); /* Use the title attribute as the tooltip content */
+    position: absolute;
+    bottom: 100%; /* Position above the icon */
+    left: 50%; /* Center the tooltip */
+    transform: translateX(-50%) translateY(-5px); /* Adjust horizontal position and add a little space above the icon */
+    white-space: nowrap; /* Prevents the tooltip from wrapping */
+    z-index: 999;
+    background-color: black;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    opacity: 0; /* Initially hidden */
+    visibility: hidden; /* Initially not visible */
+    transition: opacity 0.3s, visibility 0.3s, transform 0.3s; /* Smooth transition for the tooltip appearance */
+}
+
+.sidebar-nav a:hover::after {
+    opacity: 1; /* Show the tooltip */
+    visibility: visible; /* Make it visible */
+    transform: translateX(-50%) translateY(-10px); /* Adjust the position to move slightly above */
+}
+    .dashboard {
+    display: flex;
+    flex-direction: row;
+}
+
+.sidebar {
+    width: 180px; /* Adjust width as needed */
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    overflow-y: auto;
+    background-color: #FFFFFF;
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+    transition: transform 0.3s ease-in-out;
+}
+
+.left-sidebar {
+    left: 0;
+    width: 140px; /* Reduced width for the left sidebar */
+    transform: translateX(-100%);
+}
+
+.right-sidebar {
+    right: 0;
+}
+
+.media-content {
+    flex-grow: 1;
+    padding: 20px;
+    margin-left: 280px; /* Adjust margin to match the left sidebar width */
+    margin-right: 280px; /* Adjust margin to match the right sidebar width */
+    transition: margin-left 0.3s ease-in-out, margin-right 0.3s ease-in-out;
+}
+
+.sidebar.collapsed ~ .media-content {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+}
+
+/* Additional styles for the left sidebar if needed */
+.left-sidebar .sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.left-sidebar .sidebar-header h3 {
+    margin: 0;
+}
+
+.left-sidebar .sidebar-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.left-sidebar .sidebar-toggle .icon {
+    width: 100%;
+    height: 100%;
+}
+    @media (max-width: 768px) {
+    .dashboard {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -280px; /* Hide the left sidebar by default on small screens */
+        height: 100vh;
+        width: 280px;
+        transition: left 0.3s ease-in-out;
+    }
+
+    .sidebar.collapsed {
+        left: 0;
+    }
+
+    .media-content {
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
+    }
+
+    .sidebar.collapsed ~ .media-content {
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
+    }
+}
+.dashboard {
+    display: flex;
+    flex-direction: row;
+}
+
+.sidebar {
+    width: 280px; /* Adjust width as needed */
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    overflow-y: auto;
+    background-color: #FFFFFF;
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+    transition: transform 0.3s ease-in-out;
+}
+
+.left-sidebar {
+    left: 0;
+    width: 250px; /* Adjust width as needed */
+
+    transform: translateX(-100%);
+}
+
+.right-sidebar {
+    right: 0;
+        width: 250px; /* Adjust width as needed */
+
+    transform: translateX(100%);
+}
+
+.media-content {
+    flex-grow: 1;
+    padding: 20px;
+    margin-left: 280px; /* Adjust margin to match the left sidebar width */
+    margin-right: 280px; /* Adjust margin to match the right sidebar width */
+    transition: margin-left 0.3s ease-in-out, margin-right 0.3s ease-in-out;
+}
+
+.sidebar.collapsed ~ .media-content {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+}
+
+.left-sidebar.collapsed {
+    transform: translateX(0);
+}
+
+.right-sidebar.collapsed {
+    transform: translateX(0);
+}
+
+.video-container {
+    margin: 0 auto;
+    height: 70vh;
+    text-align: center;
+    overflow: hidden;
+    max-width: calc(178vh * 0.7);
+}
+
+iframe {
+    height: 100%;
+    width: 100%;
+}
+/* Update these CSS rules */
+.left-sidebar {
+    left: 0;
+    width: 240px;
+    transition: width 0.3s ease-in-out;
+    transform: none !important; /* Remove the transform property */
+}
+
+.left-sidebar.collapsed {
+    width: 40px;
+    overflow: hidden;
+}
+
+.right-sidebar {
+    right: 0;
+    width: 250px;
+    transform: translateX(0);
+    transition: transform 0.3s ease-in-out;
+}
+
+.right-sidebar.collapsed {
+    transform: translateX(100%);
+}
+
+/* Media content adjustments */
+.media-content {
+    margin-left: 240px;
+    margin-right: 250px;
+    transition: margin 0.3s ease-in-out;
+}
+
+.left-sidebar.collapsed ~ .media-content {
+    margin-left: 40px;
+}
+
+.right-sidebar.collapsed ~ .media-content {
+    margin-right: 0;
+}
+
+/* Toggle button styles */
+.left-sidebar-toggle {
+    position: absolute;
+    bottom: 20px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    background-color: #f3f4f6;
+    transition: transform 0.3s ease-in-out;
+    z-index: 1001;
+}
+
+.left-sidebar.collapsed .left-sidebar-toggle {
+    transform: rotate(180deg);
+}
+
+/* Navigation items */
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    white-space: nowrap;
+}
+
+.nav-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+}
+
+.nav-text {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.left-sidebar.collapsed .nav-text {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .left-sidebar {
+        transform: translateX(-100%);
+        z-index: 1000;
+    }
+
+    .left-sidebar.collapsed {
+        transform: translateX(-100%);
+    }
+
+    .left-sidebar.expanded {
+        transform: translateX(0);
+        width: 240px;
+    }
+
+    .media-content {
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
+
+.left-sidebar {
+    width: 240px; /* Default width */
+    transition: width 0.3s ease-in-out;
+}
+
+.left-sidebar.collapsed {
+    width: 40px;
+    overflow: hidden;
+}
+
+.left-sidebar .sidebar-toggle {
+    position: absolute;
+    bottom: 20px;
+    left: 5px;
+    display: block;
+}
+
+.left-sidebar .sidebar-expand {
+    position: absolute;
+    bottom: 20px;
+    left: 5px;
+    display: none;
+}
+
+.left-sidebar.collapsed .sidebar-expand {
+    display: block;
+}
+
+.left-sidebar.collapsed .sidebar-toggle {
+    display: none;
+}
+
+/* Hide text when sidebar is collapsed */
+.left-sidebar.collapsed .nav-text {
+    display: none;
+}
+
+/* Adjust content margin when sidebar is collapsed */
+.media-content {
+    margin-left: 240px; /* When sidebar is open */
+    transition: margin-left 0.3s ease-in-out;
+}
+
+.left-sidebar.collapsed ~ .media-content {
+    margin-left: 40px;
+}
+    .left-sidebar.collapsed {
+    width: 40px;
+    overflow: hidden;
+}
+
+/* Assuming there's a container for your sidebar content */
+.left-sidebar.collapsed .sidebar-content {
+    display: none;
+}
+
+/* If you can't or don't want to use a specific class for the content */
+.left-sidebar.collapsed > *:not(.sidebar-toggle):not(.sidebar-expand) {
+    display: none;
+}
+
+/* Ensure the toggle button is always visible at the bottom */
+.left-sidebar .sidebar-toggle,
+.left-sidebar .sidebar-expand {
+    position: absolute;
+    bottom: 20px;
+    left: 5px;
+    width: 30px;  /* Adjust as necessary */
+    height: 30px; /* Adjust as necessary */
+}
+    .left-sidebar.collapsed {
+    width: 40px;
+    overflow: hidden;
+}
+
+/* Hide all elements inside the sidebar except for the toggle buttons */
+.left-sidebar.collapsed .sidenav {
+    display: none;
+}
+
+/* Make sure the toggle buttons are visible */
+.left-sidebar .sidebar-toggle,
+.left-sidebar .sidebar-expand {
+    position: absolute;
+    bottom: 20px;
+    left: 5px;
+    z-index: 1001; /* Ensure it's above any potential overlay */
+    display: block;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    background-color: #f3f4f6;
+}
+
+.left-sidebar.collapsed .sidebar-toggle {
+    display: none;
+}
+
+.left-sidebar.collapsed .sidebar-expand {
+    display: block;
+}
+
+/* Adjust content margin when sidebar is collapsed */
+.media-content {
+    margin-left: 240px; /* When sidebar is open */
+    transition: margin-left 0.3s ease-in-out;
+}
+
+.left-sidebar.collapsed ~ .media-content {
+    margin-left: 40px;
+}
+    .right-sidebar .sidebar-header .sidebar-toggle {
+    display: block;
+}
+
+.right-sidebar .sidebar-header .sidebar-expand {
+    display: none;
+    position: absolute;
+    top: 20px;
+    right: 20px; /* Adjust as needed */
+}
+
+.right-sidebar.collapsed .sidebar-header .sidebar-toggle {
+    display: none;
+}
+
+.right-sidebar.collapsed .sidebar-header .sidebar-expand {
+    display: block;
+}
+    .right-sidebar .sidebar-header .sidebar-toggle {
+    display: block;
+}
+
+.right-sidebar .sidebar-header .sidebar-expand {
+    display: none;
+    position: absolute;
+    top: 20px;
+    right: 20px; /* Adjust as needed */
+}
+
+.right-sidebar.collapsed .sidebar-header .sidebar-toggle {
+    display: none;
+}
+
+.right-sidebar.collapsed .sidebar-header .sidebar-expand {
+    display: block;
+}
+.right-sidebar .sidebar-header .sidebar-toggle {
+    /* Keep this as is */
+    display: block;
+}
+
+.right-sidebar .sidebar-header .sidebar-expand {
+    display: none;
+    position: fixed; /* Changed from absolute to fixed to keep it in place */
+    top: 20px;
+    right: 20px; /* Adjust as needed */
+    z-index: 1001; /* Ensure it's above other elements */
+}
+
+.right-sidebar.collapsed .sidebar-header .sidebar-toggle {
+    display: none;
+}
+
+.right-sidebar.collapsed .sidebar-header .sidebar-expand {
+    display: block;
+}
+    .right-sidebar .sidebar-header {
+    position: relative;
+}
+
+.right-sidebar .sidebar-header .sidebar-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px; /* Ensure this matches your desired position */
+}
+.right-sidebar {
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100vh;
+    width: 250px;
+    transition: width 0.3s ease-in-out, transform 0.3s ease-in-out;
+    z-index: 1000;
+}
+
+.right-sidebar.collapsed {
+    width: 0;
+    transform: translateX(100%);
+}
+
+.right-sidebar .sidebar-header {
+    position: relative;
+    padding: 20px; /* Ensure there's space for the buttons */
+}
+
+.right-sidebar .sidebar-header .sidebar-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1002; /* Above sidebar content */
+}
+
+.right-sidebar .sidebar-header .sidebar-expand {
+    position: fixed; /* Use fixed to ensure it stays in place even when sidebar is hidden */
+    top: 20px;
+    right: 20px;
+    z-index: 1003; /* Ensure it's above everything else */
+    display: none;
+}
+
+.right-sidebar.collapsed .sidebar-header .sidebar-toggle {
+    display: none;
+}
+
+.right-sidebar.collapsed .sidebar-header .sidebar-expand {
+    display: block;
+}
+    /* Move the 'expand' button to the upper right corner of the page */
+.right-sidebar .sidebar-header {
+    position: relative;
+}
+
+.right-sidebar .sidebar-header .sidebar-expand {
+    position: absolute;
+    top: 20px; /* Adjust top distance */
+    right: 20px; /* Adjust right distance */
+    display: none;
+}
+
+.right-sidebar.collapsed .sidebar-header .sidebar-expand {
+    display: block;
+}
+
+/* Keep the collapse button at its original position in the sidebar header */
+.right-sidebar .sidebar-header .sidebar-toggle {
+    position: relative;
+    display: block;
+}
+/* Right sidebar must be fixed to the right of the screen */
+.right-sidebar {
+    position: fixed;  /* Fix the sidebar in place */
+    right: 0;  /* Align it to the right */
+    top: 0;  /* Align it to the top */
+    width: 280px;  /* Sidebar width */
+    height: 100vh; /* Full height */
+    background-color: #ffffff;
+    padding: 20px;
+    z-index: 1000;
+}
+
+/* Position the expand button at the top-right corner of the page */
+.right-sidebar .sidebar-header {
+    position: relative;
+}
+
+.right-sidebar .sidebar-header .sidebar-expand {
+    position: absolute;
+    top: 10px;  /* Adjust top distance */
+    right: 10px;  /* Adjust right distance */
+    display: none;
+}
+
+/* Ensure the expand button only shows when sidebar is collapsed */
+.right-sidebar.collapsed .sidebar-header .sidebar-expand {
+    display: block;
+}
+
+/* Ensure the collapse button remains in its original location in the sidebar */
+.right-sidebar .sidebar-header .sidebar-toggle {
+    position: relative;
+    display: block;
+}
+/* Right sidebar must be fixed to the right of the screen */
+.right-sidebar {
+    position: fixed;  /* Fix the sidebar in place */
+    right: 0;  /* Align it to the right */
+    top: 0;  /* Align it to the top */
+    width: 250px;  /* Sidebar width */
+    height: 100vh; /* Full height */
+    background-color: #ffffff;
+    padding: 20px;
+    z-index: 1000;
+}
+
+/* Sidebar header should be relative for proper positioning of the expand button */
+.right-sidebar .sidebar-header {
+    position: relative;
+}
+
+/* Position the expand button at the top-right corner of the page */
+.right-sidebar .sidebar-header .sidebar-expand {
+    position: absolute;
+    top: 10px;  /* Adjust top distance */
+    right: 10px;  /* Adjust right distance */
+    display: none; /* Hide by default */
+}
+
+/* Show the expand button when the sidebar is collapsed */
+.right-sidebar.collapsed .sidebar-header .sidebar-expand {
+    display: block;
+}
+
+/* Ensure the collapse button stays in its original position in the sidebar */
+.right-sidebar .sidebar-header .sidebar-toggle {
+    position: relative;
+    display: block;
+}
+/* Base styles */
+body {
+    margin: 0;
+}
+
+/* Dashboard layout */
+.dashboard {
+    display: flex;
+    flex-direction: row;
+}
+
+/* Sidebar base styles */
+.sidebar {
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    overflow-y: auto;
+    background-color: #FFFFFF;
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Left sidebar specific */
+.left-sidebar {
+    left: 0;
+    width: 240px;
+}
+
+.left-sidebar.collapsed {
+    width: 40px;
+    overflow: hidden;
+}
+
+/* Right sidebar specific */
+.right-sidebar {
+    right: 0;
+    width: 250px;
+    transform: translateX(0);
+}
+
+.right-sidebar.collapsed {
+    transform: translateX(250px);
+}
+
+/* Toggle buttons */
+.sidebar-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    z-index: 1002;
+}
+
+/* Right sidebar toggle button positioning */
+.right-sidebar .sidebar-toggle {
+    top: 20px;
+    right: 20px;
+}
+
+/* Outside toggle button for collapsed right sidebar */
+.outside-toggle {
+    position: fixed;
+    top: 20px;
+    right: 270px; /* Positioned just outside the sidebar */
+    transition: right 0.3s ease-in-out;
+    background-color: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 999;
+}
+
+.right-sidebar.collapsed ~ .outside-toggle {
+    right: 20px;
+}
+
+/* Main content area */
+.media-content {
+    flex-grow: 1;
+    padding: 20px;
+    margin-left: 240px;
+    margin-right: 250px;
+    transition: all 0.3s ease-in-out;
+}
+
+.left-sidebar.collapsed ~ .media-content {
+    margin-left: 40px;
+}
+
+.right-sidebar.collapsed ~ .media-content {
+    margin-right: 0;
+}
+
+/* Video and iframe containers */
+.video-container {
+    margin: 0 auto;
+    height: 70vh;
+    text-align: center;
+    overflow: hidden;
+    max-width: calc(178vh * 0.7);
+}
+
+iframe {
+    height: 100%;
+    width: 100%;
+}
+
+/* Subtitles styling */
+.subtitles-container {
+    margin: 0 auto;
+    width: 100%;
+    max-width: calc(178vh * 0.7);
+    text-align: center;
+    font-size: calc(1vw + 1vh);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+    max-height: 24vh;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: #fff;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .dashboard {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+
+    .media-content {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .outside-toggle {
+        top: 10px;
+        right: 10px;
+    }
+}
+/* Add these styles to your existing CSS */
+.left-sidebar .sidebar-toggle,
+.left-sidebar .sidebar-expand {
+    position: absolute;
+    bottom: 20px;
+    left: 10px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.left-sidebar .sidebar-toggle:hover,
+.left-sidebar .sidebar-expand:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.left-sidebar .sidebar-toggle svg,
+.left-sidebar .sidebar-expand svg {
+    width: 20px;
+    height: 20px;
+    stroke: #6b7280;
+}
+    /* Add these styles to your existing CSS */
+
+/* When both sidebars are collapsed */
+.left-sidebar.collapsed + .right-sidebar.collapsed ~ .media-content {
+    margin-left: 40px; /* Adjust as needed */
+    margin-right: 0;
+    width: calc(100% - 40px); /* Adjust as needed */
+}
+
+/* Video container should take up most of the vertical space */
+.left-sidebar.collapsed + .right-sidebar.collapsed ~ .media-content .video-container {
+    height: 80vh; /* Increase height */
+    max-width: 100%; /* Allow it to take full width */
+}
+
+/* Subtitles container should also take up more space */
+.left-sidebar.collapsed + .right-sidebar.collapsed ~ .media-content .subtitles-container {
+    max-height: 30vh; /* Increase height */
+    max-width: 100%; /* Allow it to take full width */
+}
+
+/* Move the buttons-container to a vertical sidebar on the side */
+.left-sidebar.collapsed + .right-sidebar.collapsed ~ .media-content .buttons-container {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    flex-direction: column;
+    gap: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 8px 0 0 8px;
+    box-shadow: -2px 0 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+/* Adjust the button styles for the vertical sidebar */
+.left-sidebar.collapsed + .right-sidebar.collapsed ~ .media-content .buttons-container .button-group {
+    flex-direction: column;
+    align-items: center;
+}
+
+.left-sidebar.collapsed + .right-sidebar.collapsed ~ .media-content .buttons-container .icon-button {
+    margin: 5px 0;
+}
+
+/* Ensure the buttons container is visible and properly aligned */
+.left-sidebar.collapsed + .right-sidebar.collapsed ~ .media-content .buttons-container {
+    display: flex;
+}
+    <style>
+/* Styles for the sidebar toggle buttons */
+.sidebar-toggle,
+.sidebar-expand {
+    position: absolute;
+    bottom: 20px;
+    left: 10px;
+    width: 32px;  /* Ensure the button has a fixed size */
+    height: 32px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+
+/* SVG within the toggle buttons */
+.sidebar-toggle svg,
+.sidebar-expand svg {
+    width: 20px;  /* Make sure the SVG fits within the button */
+    height: 20px;
+    stroke: #6b7280;
+}
+
+/* Specific to the left sidebar */
+.left-sidebar .sidebar-toggle,
+.left-sidebar .sidebar-expand {
+    left: 10px;  /* Adjust if necessary */
+    bottom: 20px;  /* Adjust if necessary */
+}
+
+/* Specific to the right sidebar */
+.right-sidebar .sidebar-toggle,
+.right-sidebar .sidebar-expand {
+    right: 10px;  /* Adjust for right positioning */
+    left: auto;
+}
+
+/* Ensure the SVG is centered within its circular button */
+.sidebar-toggle svg path,
+.sidebar-expand svg path {
+    fill: none;  /* If your paths need to be empty */
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Visibility of expand/collapse buttons */
+.sidebar-toggle {
+    display: block;
+}
+
+.sidebar-expand {
+    display: none;
+}
+
+.collapsed .sidebar-toggle {
+    display: none;
+}
+
+.collapsed .sidebar-expand {
+    display: block;
+}
+</style>
+<style>
+/* Styles for the sidebar toggle buttons */
+.sidebar-toggle,
+.sidebar-expand {
+    position: absolute;
+    bottom: 20px;
+    left: 10px;
+    width: 32px;  /* Ensure the button has a fixed size */
+    height: 32px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 50%;  /* Changed to 50% for a circular button */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+
+
+/* SVG within the toggle buttons */
+.sidebar-toggle svg,
+.sidebar-expand svg {
+    width: 20px;  /* Make sure the SVG fits within the button */
+    height: 20px;
+    stroke: #6b7280;
+}
+
+/* Specific to the left sidebar */
+.left-sidebar .sidebar-toggle,
+.left-sidebar .sidebar-expand {
+    left: 10px;  /* Adjust if necessary */
+    bottom: 20px;  /* Adjust if necessary */
+}
+
+/* Specific to the right sidebar */
+.right-sidebar .sidebar-toggle,
+.right-sidebar .sidebar-expand {
+    right: 10px;  /* Adjust for right positioning */
+    left: auto;
+}
+
+/* Ensure the SVG is centered within its button */
+.sidebar-toggle svg path,
+.sidebar-expand svg path {
+    fill: none;  /* If your paths need to be empty */
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Visibility of expand/collapse buttons */
+.sidebar-toggle {
+    display: block;
+}
+
+.sidebar-expand {
+    display: none;
+}
+
+.collapsed .sidebar-toggle {
+    display: none;
+}
+
+.collapsed .sidebar-expand {
+    display: block;
+}
+    /* Ensure all icon buttons have consistent styling */
+.buttons-container .icon-button {
+    width: 36px;
+    height: 36px;
+    padding: 0; /* Remove any padding that might throw off centering */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Specific styling for the toggle button */
+.buttons-container button.icon-button svg {
+    width: 100%; /* Make SVG fill its container */
+    height: 100%;
+    /* Ensure SVG content scales correctly */
+    preserveAspectRatio: "xMidYMid meet";
+}
+
+/* If the SVG viewBox is disproportionate, you might need to adjust this */
+.buttons-container button.icon-button[onclick="toggleSidebar()"] svg {
+    /* Adjust viewBox to match dimensions or scale appropriately */
+    viewBox: "0 0 24 24"; /* Example, adjust based on your actual SVG dimensions */
+}
+
+/* If there's additional padding or margin on the SVG itself */
+.buttons-container button.icon-button svg {
+    margin: 0; /* Remove any margin */
+    padding: 0; /* Remove any padding */
+}
+    .buttons-container .icon-button {
+    border: 2px solid #e0e0e0; /* or whatever color you want */
+}
+    /* Toggle Button Styling */
+.sidebar-toggle, .sidebar-expand {
+    background-color: #f9f9f9;
+    border: 2px solid #e0e0e0;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+
+
+/* Adjust the SVG icon size */
+.sidebar-toggle svg, .sidebar-expand svg {
+    width: 20px;
+    height: 20px;
+    stroke: #6b7280;
+}
+
+/* Toggle button position adjustments */
+.left-sidebar .sidebar-toggle,
+.left-sidebar .sidebar-expand {
+    position: absolute;
+    bottom: 20px;
+    left: 10px;
+}
+
+.right-sidebar .sidebar-toggle,
+.right-sidebar .sidebar-expand {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+/* Show the expand button when collapsed */
+.collapsed .sidebar-toggle {
+    display: none;
+}
+
+.collapsed .sidebar-expand {
+    display: block;
+}
+    /* Toggle Button Styling */
+.sidebar-toggle, .sidebar-expand {
+    background-color: #f9f9f9;
+    border: 2px solid #e0e0e0;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+
+
+/* Adjust the SVG icon size */
+.sidebar-toggle svg, .sidebar-expand svg {
+    width: 20px;
+    height: 20px;
+    stroke: #6b7280;
+}
+
+/* Toggle button position adjustments */
+.left-sidebar .sidebar-toggle,
+.left-sidebar .sidebar-expand {
+    position: absolute;
+    bottom: 20px;
+    left: 10px;
+}
+
+.right-sidebar .sidebar-toggle,
+.right-sidebar .sidebar-expand {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+/* Show the expand button when collapsed */
+.collapsed .sidebar-toggle {
+    display: none;
+}
+ .collapsed .sidebar-expand {
+    display: block;
+}
+
+
+/* Toggle Button Styling - Without Circle */
+.sidebar-toggle, .sidebar-expand {
+    background-color: transparent;
+    border: none;
+    width: 30px;  /* Adjust the width and height of the icon directly */
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+
+/* Adjust the SVG icon size */
+.sidebar-toggle svg, .sidebar-expand svg {
+    width: 20px;  /* Adjust size of the lines */
+    height: 20px;
+    stroke: #6b7280;
+}
+
+/* Positioning of the button remains the same */
+.left-sidebar .sidebar-toggle,
+.left-sidebar .sidebar-expand {
+    position: absolute;
+    bottom: 20px;
+    left: 10px;
+}
+
+.right-sidebar .sidebar-toggle,
+.right-sidebar .sidebar-expand {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+/* Show the expand button when collapsed */
+.collapsed .sidebar-toggle {
+    display: none;
+}
+
+.collapsed .sidebar-expand {
+    display: block;
+}
+/* Toggle Button Styling - Without Circle */
+.sidebar-toggle, .sidebar-expand {
+    background-color: transparent;  /* No background color */
+    border: none;  /* No border */
+    width: 30px;  /* Adjust the width of the icon */
+    height: 30px;  /* Adjust the height of the icon */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Adjust the SVG icon size */
+.sidebar-toggle svg, .sidebar-expand svg {
+    width: 20px;  /* Size of the lines */
+    height: 20px;
+    stroke: #6b7280;  /* Icon color */
+}
+
+/* Positioning of the button remains the same */
+.left-sidebar .sidebar-toggle,
+.left-sidebar .sidebar-expand {
+    position: absolute;
+    bottom: 20px;
+    left: 10px;
+}
+
+.right-sidebar .sidebar-toggle,
+.right-sidebar .sidebar-expand {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+/* Show the expand button when collapsed */
+.collapsed .sidebar-toggle {
+    display: none;
+}
+
+.collapsed .sidebar-expand {
+    display: block;
+}
+    .sidebar-toggle, .sidebar-expand {
+    background-color: transparent;  /* No background color */
+    border: none;  /* No border */
+    width: 30px;  /* Adjust the width */
+    height: 30px;  /* Adjust the height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: none;  /* Remove the shadow */
+    border-radius: 0%;  /* Remove the rounded corners, making it a square */
+}
+/* When only the left sidebar is collapsed */
+.left-sidebar.collapsed:not(.right-sidebar.collapsed) ~ .media-content {
+    margin-left: 40px; /* Space for the collapsed left sidebar */
+    margin-right: 250px; /* Space for the open right sidebar */
+    width: calc(100% - 290px); /* Total width minus both sidebars */
+}
+
+/* Adjust the elements inside media-content */
+.left-sidebar.collapsed:not(.right-sidebar.collapsed) ~ .media-content .video-container,
+.left-sidebar.collapsed:not(.right-sidebar.collapsed) ~ .media-content .subtitles-container,
+.left-sidebar.collapsed:not(.right-sidebar.collapsed) ~ .media-content .buttons-container {
+    max-width: 100%; /* Allow these to take full width within media-content */
+}
+
+/* Ensure the video container grows appropriately */
+.left-sidebar.collapsed:not(.right-sidebar.collapsed) ~ .media-content .video-container {
+    height: 75vh; /* Increase height slightly if needed */
+}
+
+/* Adjust subtitles and buttons if necessary */
+.left-sidebar.collapsed:not(.right-sidebar.collapsed) ~ .media-content .subtitles-container {
+    max-height: 25vh; /* Adjust max height if subtitles need more space */
+}
+
+.left-sidebar.collapsed:not(.right-sidebar.collapsed) ~ .media-content .buttons-container {
+    max-width: 100%; /* Ensure buttons can span full width */
+    justify-content: center; /* Center the buttons if needed */
+}
+/* Ensure the toggle button is properly centered and clickable */
+.sidebar-toggle, .sidebar-expand {
+    background-color: transparent;
+    border: none;
+    width: 40px;  /* Adjust the width */
+    height: 40px;  /* Adjust the height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;  /* Remove padding */
+    margin: 0;  /* Remove margin */
+    position: absolute;
+    bottom: 20px;
+    left: 10px;
+}
+
+/* Ensure the SVG icon is centered */
+.sidebar-toggle svg, .sidebar-expand svg {
+    width: 20px;  /* Adjust the size of the icon */
+    height: 20px;
+    stroke: #6b7280;  /* Icon color */
+    margin: 0;  /* Remove margin */
+    padding: 0;  /* Remove padding */
+}
+
+/* Show the expand button when collapsed */
+.collapsed .sidebar-toggle {
+    display: none;
+}
+
+.collapsed .sidebar-expand {
+    display: block;
+}
+    .subplayer-page .navbar {
+    z-index: 1001; /* Higher than the sidebar's z-index */
+    position: fixed; /* Keep it fixed if you want it to stay at the top */
+    width: 100%;
+    top: 0;
+    left: 0;
+}
+.nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: start; /* Ensures icons and text are aligned */
+    padding: 12px 16px; /* Ensure padding consistency */
+    width: 100%; /* Prevent shrinking */
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+.nav-link.active {
+    background-color: #007BFF !important; /* Ensure active state has correct background */
+    color: white !important;
+    width: 100% !important; /* Prevents width shrinking */
+    padding: 12px 16px !important; /* Ensures no padding change */
+    box-sizing: border-box; /* Ensures it respects width without overflow */
+}
+
+/* Ensure icon container does not shrink */
+.nav-link .icon {
+    min-width: 48px; /* Ensure consistent icon size */
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ensure text does not shrink */
+.nav-link span {
+    white-space: nowrap;
+    flex-grow: 1;
+}
+/* Sidebar Toggle Button */
+.sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Ensures the icon is centered */
+    width: 40px; /* Adjust button size */
+    height: 40px; /* Ensure button is a perfect circle */
+    background-color: #f9f9f9;
+    border: 2px solid #e0e0e0;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    padding: 0; /* Remove any unwanted padding */
+}
+
+/* Ensures the SVG inside stays centered */
+.sidebar-toggle .toggle-button-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%; /* Ensure it fills the button */
+    height: 100%;
+}
+
+/* Ensures the SVG itself is centered */
+.sidebar-toggle svg {
+    width: 24px;
+    height: 24px;
+    stroke: #6b7280;
+    margin: auto;
+    display: block; /* Prevents any unwanted flex effects */
+}
+/* Ensure default padding remains, but prevent blue background from touching the right edge */
+.left-sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    padding-left: 12px; /* Keep default left padding */
+    padding-right: 12px; /* Ensure consistent padding */
+    width: calc(100% - 10px); /* Reduce width slightly to add right spacing */
+    margin-right: 5px; /* Ensures right gap */
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+/* Default styling for sidebar links */
+.left-sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    padding-left: 12px; /* Keep default left padding */
+    padding-right: 12px; /* Keep default right padding */
+    max-width: 95%; /* Ensures it doesn't reach the right edge */
+    box-sizing: border-box; /* Prevents overflow issues */
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+/* Active state */
+.left-sidebar .nav-link.active {
+    background-color: #007BFF !important;
+    color: white !important;
+    max-width: 95% !important; /* Keeps a slight right gap */
+    box-sizing: border-box; /* Prevents border overflow */
+}
+
+/* Hover state */
+.left-sidebar .nav-link:hover {
+    background-color: rgba(0, 123, 255, 0.15); /* Light blue hover */
+    color: #007BFF;
+    max-width: 95%; /* Ensures it doesn't touch the right edge */
+    box-sizing: border-box;
+}
+/* Base style for sidebar links */
+.left-sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    padding-left: 12px; /* Maintain standard left padding */
+    padding-right: 16px; /* Add small padding to create gap */
+    width: calc(100% - 10px); /* Slightly reduce width to prevent touching the right edge */
+    box-sizing: border-box; /* Ensure proper sizing */
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    border-radius: 4px; /* Slight rounding */
+}
+
+/* Active state with a gap */
+.left-sidebar .nav-link.active {
+    background-color: #007BFF !important;
+    color: white !important;
+    padding-right: 20px !important; /* Increase padding to create space */
+    border-radius: 4px;
+}
+
+/* Navigation Links */
+.nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    padding-left: 12px; /* Maintain left padding */
+    padding-right: 8px; /* Add a small right gap */
+    max-width: calc(100% - 8px); /* Prevents touching the right edge */
+    box-sizing: border-box; /* Prevents unwanted overflow */
+    border-radius: 8px; /* Optional: Makes rounded corners */
+    transition: background-color 0.2s ease-in-out;
+}
+
+/* Active Navigation Link */
+.nav-link.active {
+    background: linear-gradient(135deg, #1a1f36 0%, #3a9fff 100%);
+    color: white !important;
+    max-width: calc(100% - 8px) !important; /* Keeps right padding consistent */
+}
+
+/* Hover Effect */
+.nav-link:hover {
+    background-color: rgba(128, 128, 128, 0.1);
+    max-width: calc(100% - 8px); /* Ensures the right gap remains */
+}
+/* Ensure the sidebar items have padding on the right */
+.navbar-nav {
+    padding-right: 8px; /* Adds a small gap on the right */
+}
+
+/* Ensure individual nav items don't stretch fully */
+.nav-item {
+    margin-right: 8px; /* Creates the right-side gap */
+}
+
+
+</style>
+<style>
+/* XP Button Styling */
+#unique-xp-display {
+    background: linear-gradient(135deg, #1a1f36 0%, #3a9fff 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(58, 159, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+#unique-xp-display:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(58, 159, 255, 0.3);
+}
+
+#unique-xp-display .unique-xp-circle {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+/* Align XP element further to the right */
+.sidebar-header {
+    display: flex;
+    justify-content: flex-end; /* Push XP element to the right */
+    align-items: center;
+    padding-right: 0px; /* Add some right padding for further alignment */
+}
+
+/* Ensure XP display does not shrink */
+#unique-xp-display {
+    margin-left: auto; /* Ensures it moves all the way to the right */
+}
+
+
+</style>
 </html>
 
 {% endblock %}

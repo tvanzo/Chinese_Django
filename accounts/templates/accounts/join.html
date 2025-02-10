@@ -1,864 +1,300 @@
+{% extends 'accounts/base.html' %}
+
 {% load static %}
+{% block content %}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>Chinese Log</title>
-
-  <!-- Fonts and icons -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
-  <!-- Nucleo Icons -->
-  <link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet">
-  <link href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet">
-  <!-- Font Awesome Icons -->
-  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-
-  <!-- CSS Files -->
-  <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet">
-</head>
-
-<body class="g-sidenav-show bg-gray-100">
-  <div class="app">
-    {% include 'accounts/sidebar.html' %}
-
-    <!-- Main content -->
-    {% block content %}
-    <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
-      {% include 'accounts/navbar.html' %}
-
-      <header class="header">
-        <h1 class="header__title">Membership</h1>
-      </header>
-
-      <div class="content">
-        <div class="container">
-          {% if user.is_authenticated %}
-            <!-- Logged in users see their current plan and options to upgrade or cancel -->
-            {% for tier, tier_name in Subscription.TIER_CHOICES %}
-              <div class="card">
-                <div class="card__content" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%; padding-top: 20px;">
-                  <div class="card__icon" style="height: 120px; width: 120px; margin: 0 auto;">
-                    {% if tier == 'FREE' %}
-                      {% include 'accounts/svg/free_tier_svg.html' %}
-                    {% elif tier == 'BASIC' %}
-                      <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 340 300">
-                        <path id="<Path>" class="s0" d="m149.2 17.4c-64-5.4-102.7-35.7-134.7 0-32 35.7-17 153.4 112.1 183.6 129.5 30.3 194.9-58.1 198.4-108.7 3.5-50.6-19.8-89.3-68-89.8-50.6-0.5-78.3 17.4-107.8 14.9z"/>
-                      </svg>
-                      <img src="https://assets.codepen.io/3341051/ice-cream.svg" alt="Ice Cream Icon" />
-                    {% elif tier == 'PREMIUM' %}
-                      {% include 'accounts/svg/pro_svg.html' %}
-                    {% endif %}
-                  </div>
-                  <div class="card__title" style="margin-top: 40px;">
-                    <h3>{{ tier_name }}</h3>
-                  </div>
-                  <div class="card__descr">
-                    {% if tier == 'FREE' %}
-                      <p>Access the latest 3 videos from one channel for free.</p>
-                    {% elif tier == 'BASIC' %}
-                      <p>Full access to Dashu Mandarin, the top intermediate Chinese learning channel.</p>
-                    {% elif tier == 'PREMIUM' %}
-                      <p>Unlimited access to over 3 million videos + any YouTube (CC)</p>
-                    {% endif %}
-                  </div>
-                  <div class="card__price">
-                    {% if tier == 'FREE' %}
-                      <span>Free</span>
-                    {% elif tier == 'BASIC' %}
-                      <span>$10</span>
-                      <span> Per Month</span>
-                    {% elif tier == 'PREMIUM' %}
-                      <span>$20</span>
-                      <span> Per Month</span>
-                    {% endif %}
-                  </div>
-                  <div class="card__btn-wrapper">
-                    {% if request.user.subscriptions.first.tier == tier %}
-                      <span class="current-plan">Your Current Plan</span>
-                    {% else %}
-                     <button class="card__btn" type="button" onclick="location.href='{% url 'upgrade_plan' %}?plan={{ tier.lower }}'">
-    {% if request.user.subscriptions.first.tier == 'FREE' %}Upgrade{% else %}Select Plan{% endif %}
-</button>
-                    {% endif %}
-                  </div>
-                </div>
-              </div>
-            {% endfor %}
-            <!-- Option to cancel subscription for logged-in users -->
-            <a href="{% url 'join' %}" onclick="return confirm('Are you sure you want to cancel your subscription?')">Cancel Subscription</a>
-          {% else %}
-            <!-- Non-logged-in users see options to join -->
-            {% for tier, tier_name in Subscription.TIER_CHOICES %}
-              <div class="card">
-                <div class="card__content" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%; padding-top: 20px;">
-                  <div class="card__icon" style="height: 120px; width: 120px; margin: 0 auto;">
-                    {% if tier == 'FREE' %}
-                      {% include 'accounts/svg/free_tier_svg.html' %}
-                    {% elif tier == 'BASIC' %}
-                      <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 340 300">
-                        <path id="<Path>" class="s0" d="m149.2 17.4c-64-5.4-102.7-35.7-134.7 0-32 35.7-17 153.4 112.1 183.6 129.5 30.3 194.9-58.1 198.4-108.7 3.5-50.6-19.8-89.3-68-89.8-50.6-0.5-78.3 17.4-107.8 14.9z"/>
-                      </svg>
-                      <img src="https://assets.codepen.io/3341051/ice-cream.svg" alt="Ice Cream Icon" />
-                    {% elif tier == 'PREMIUM' %}
-                      {% include 'accounts/svg/pro_svg.html' %}
-                    {% endif %}
-                  </div>
-                  <div class="card__title" style="margin-top: 40px;">
-                    <h3>{{ tier_name }}</h3>
-                  </div>
-                  <div class="card__descr">
-                    {% if tier == 'FREE' %}
-                      <p>Access the latest 3 videos from one channel for free.</p>
-                    {% elif tier == 'BASIC' %}
-                      <p>Full access to Dashu Mandarin, the top intermediate Chinese learning channel.</p>
-                    {% elif tier == 'PREMIUM' %}
-                      <p>Unlimited access to over 3 million videos + any YouTube (CC)</p>
-                    {% endif %}
-                  </div>
-                  <div class="card__price">
-                    {% if tier == 'FREE' %}
-                      <span>Free</span>
-                    {% elif tier == 'BASIC' %}
-                      <span>$10</span>
-                      <span> Per Month</span>
-                    {% elif tier == 'PREMIUM' %}
-                      <span>$20</span>
-                      <span> Per Month</span>
-                    {% endif %}
-                  </div>
-                  <div class="card__btn-wrapper">
-                    <button class="card__btn" type="button" onclick="location.href='{% url 'register' %}?plan={{ tier.lower }}'">
-                      {% if tier == 'FREE' %}Try Now{% else %}Select Plan{% endif %}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            {% endfor %}
-          {% endif %}
-        </div>
-      </div>
-    </main>
-    {% endblock %}
-  </div>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Plan - Chinese Log</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,500,600,700,800&display=swap">
     <style>
-      :root {
-    --transition-duration: .2s;
-    --transition-timing-function: linear;
-    --transition-delay: 0s;
-
-    --text-color-demo-dark: #2c2c2c;
-    --text-color-demo-light: #fff;
-
-    --bg-demo-light: #fff;
-    --bg-demo-dark: #2c2c2c;
-
-}
-
-html,
-body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    font-family: "Raleway", sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 400;
-    font-style: normal;
-    color: var(--text-color-demo-dark);
-}
-
-/* DEMO STYLES: YOU DON'T NEED THEM!!! */
-body a {
-    color: inherit;
-    text-decoration: none;
-}
-
-.header {
-    max-width: 500px;
-    padding-top: 50px;
-    margin: 0 auto;
-    text-align: center;
-}
-
-.header__btns {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 30px;
-}
-
-.header__btn {
-    --btn-border-color: #2c2c2c;
-
-    transition:
-            all
-            var(--transition-duration)
-            var(--transition-timing-function)
-            var(--transition-delay);
-    padding: 10px 20px;
-    margin-right: 10px;
-    background-color: var(--bg-demo-light);
-    border: 2px solid var(--btn-border-color);
-    border-radius: 3px;
-    cursor: pointer;
-    outline: none;
-}
-
-.header__btn:hover,
-.header__btn.js-active {
-    color: var(--text-color-demo-light);
-    background-color: var(--bg-demo-dark);
-}
-
-.header__title {
-    margin-bottom: 10px;
-    font-weight: 600;
-}
-
-.content {
-    margin: 80px auto 60px;
-    width: 100%;
-}
-
-.subtitle {
-    margin-top: 0;
-    margin-bottom: 50px;
-    text-align: center;
-}
-
-.container {
-    display: grid;
-    width: 80%;
-    max-width: 350px;
-    margin: 0 auto;
-    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-    gap: 30px;
-}
-
-.footer {
-    margin-top: auto;
-    padding: 15px;
-    color: var(--text-color-demo-light);
-    text-align: center;
-    background-color: var(--bg-demo-dark);
-}
-
-.footer__content p:first-child {
-    margin-top: 0;
-}
-
-.footer__content p:last-child {
-    margin-bottom: 0;
-}
-
-.footer__content a {
-    text-decoration: underline;
-}
-
-/* CARDS STYLES: YOU NEED THEM!!! */
-.card {
-    --card-text-color: #fff;
-
-    position: relative;
-    background-image: linear-gradient(to right bottom, var(--card-gradient-start), var(--card-gradient-end));
-    border-radius: 10px;
-}
-
-.card:before {
-    position: absolute;
-    top: 5%;
-    left: 5%;
-    display: block;
-    width: 90%;
-    height: 95%;
-    margin: auto;
-    content: '';
-    background-image: linear-gradient(to right, var(--card-shadow-gradient-start), var(--card-shadow-gradient-end));
-    filter: blur(10px);
-    z-index: -1;
-}
-
-
-.card:nth-child(1) {
-    --card-gradient-start: #FAAC7A;
-    --card-gradient-end: #F64D82;
-
-    --btn-gradient-start: #FDC905;
-    --btn-gradient-end: #FEB036;
-    --btn-text-color: #FF3B8C;
-
-    --card-shadow-gradient-start: #deaf00;
-    --card-shadow-gradient-end: #FF3B8C;
-
-    --icon-decorations-gradient: #FDC905;
-}
-
-.card:nth-child(2) {
-    --card-gradient-start: #5BAEDD;
-    --card-gradient-end: #644EDC;
-
-    --btn-gradient-start: #89FDFD;
-    --btn-gradient-end: #57DDE0;
-    --btn-text-color: #184BB0;
-
-    --card-shadow-gradient-start: #644EDC;
-    --card-shadow-gradient-end: #57DDE0;
-
-    --icon-decorations-gradient: #29faff;
-}
-
-.card:nth-child(3) {
-    --card-gradient-start: #8C3FAE;
-    --card-gradient-end: #3B0E61;
-
-    --btn-gradient-start: #D367FF;
-    --btn-gradient-end: #9738FF;
-    --btn-text-color: #3A0D60;
-
-    --card-shadow-gradient-start: #3B0E61;
-    --card-shadow-gradient-end: #D367FF;
-
-    --icon-decorations-gradient: #d97bff;
-}
-
-.card__content {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0px;
-    padding: 40px 20px;
-    font-size: 17px;
-    font-weight: 500;
-    color: var(--card-text-color);
-    text-align: center;
-    overflow: hidden;
-}
-
-.card__content:before,
-.card__content:after {
-    --rotation: -101deg;
-
-    position: absolute;
-    top: 0;
-    right: -250px;
-    display: block;
-    width: var(--dimensions);
-    height: var(--dimensions);
-    content: '';
-    background-image: conic-gradient(from 90deg, rgba(255, 255, 255, .2), transparent);
-    border-radius: 50%;
-    transform: rotate(var(--rotation));
-}
-
-.card__content:before {
-    --dimensions: 400px;
-}
-
-
-.card__content:after {
-    --dimensions: 370px;
-}
-
-.card__icon {
-    position: relative;
-    width: 200px;
-    height: 150px;
-}
-
-.card__icon:before {
-    position: absolute;
-    top: 0;
-    left: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-    content: '';
-    background-image:
-            radial-gradient(circle closest-side, var(--icon-decorations-gradient) 100%, rgba(255,255,255,0) 0),
-            radial-gradient(circle closest-side, var(--icon-decorations-gradient) 100%, rgba(255,255,255,0) 0),
-            radial-gradient(circle closest-side, var(--icon-decorations-gradient) 100%, rgba(255,255,255,0) 0);
-    background-size: 15px 15px, 20px 20px, 15px 15px;
-    background-position: 20px 20px, 160px 60px, 40px 90px;
-    background-repeat: no-repeat;
-    z-index: 1;
-}
-
-.card__icon svg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    fill: rgba(255, 255, 255, .1);
-    backdrop-filter: blur(7px);
-    z-index: 2;
-}
-
-.card__icon img {
-    position: relative;
-    width: 70%;
-    z-index: 3;
-}
-
-.card__title {
-    position: relative;
-    font-size: 20px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    z-index: 2;
-}
-
-.card__title h3 {
-    margin: 0;
-}
-
-.card__descr p:first-child {
-    margin-top: 0;
-}
-
-.card__descr p:last-child {
-    margin-bottom: 0;
-}
-
-.card__price {
-    font-size: 40px;
-    font-weight: bold;
-    letter-spacing: 2px;
-}
-
-.card__btn-wrapper {
-    margin-top: 10px;
-}
-
-.card__btn {
-    padding: 15px 70px;
-    color: var(--btn-text-color);
-    font-size: 22px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    transition: transform 0.2s linear 0s;
-    border: none;
-    border-radius: 100px;
-    background-image: linear-gradient(to right, var(--btn-gradient-start), var(--btn-gradient-end));
-    background-color: transparent;
-    cursor: pointer;
-}
-
-.card__btn:hover {
-    transform: scale(1.05);
-}
-</style>
-
-
-  <!--   Core JS Files   -->
-  <!-- CSS Files -->
-<link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}?v=1.0.7" rel="stylesheet">
-
-<!-- JS Files -->
-<script src="{% static 'accounts/js/core/popper.min.js' %}"></script>
-<script src="{% static 'accounts/js/core/bootstrap.min.js' %}"></script>
-<script src="{% static 'accounts/js/plugins/perfect-scrollbar.min.js' %}"></script>
-<script src="{% static 'accounts/js/plugins/smooth-scrollbar.min.js' %}"></script>
-<script src="{% static 'accounts/js/soft-ui-dashboard.min.js' %}?v=1.0.7"></script>
-
-</div>
-
-</div>
-
-<style>
-:root {
-     --bg: #f9f9fa;
-     --header: #fbf4f6;
-     --text: #2e2e2f;
-     --white: #fff;
-     --light-grey: #c4cad3;
-     --tag-1: #ceecfd;
-     --tag-1-text: #2e87ba;
-     --tag-2: #d6ede2;
-     --tag-2-text: #13854e;
-     --tag-3: #ceecfd;
-     --tag-3-text: #2d86ba;
-     --tag-4: #f2dcf5;
-     --tag-4-text: #a734ba;
-     --purple: #7784ee;
-}
- * {
-     margin: 0;
-     padding: 0;
-     box-sizing: border-box;
-     font-family: 'Open Sans', sans-serif;
-}
- body {
-     color: var(--text);
-}
- .app {
-     background-color: var(--bg);
-     width: 100%;
-     min-height: 100vh;
-}
- h1 {
-     font-size: 30px;
-}
- .project {
-     padding: 2rem;
-     max-width: 75%;
-     width: 100%;
-     display: inline-block;
-}
- .project-info {
-     padding: 2rem 0;
-     display: flex;
-     width: 100%;
-     justify-content: space-between;
-     align-items: center;
-}
- .project-participants {
-     display: flex;
-     align-items: center;
-}
- .project-participants span, .project-participants__add {
-     width: 30px;
-     height: 30px;
-     display: inline-block;
-     background: var(--purple);
-     border-radius: 100rem;
-     margin: 0 0.2rem;
-}
- .project-participants__add {
-     background: transparent;
-     border: 1px dashed #969696;
-     font-size: 0;
-     cursor: pointer;
-     position: relative;
-}
- .project-participants__add:after {
-     content: "+";
-     font-size: 15px;
-     color: #969696;
-}
- .project-tasks {
-     display: grid;
-     grid-template-columns: repeat(4, 1fr);
-     width: 100%;
-     grid-column-gap: 1.5rem;
-}
- .project-column-heading {
-     margin-bottom: 1rem;
-     display: flex;
-     align-items: center;
-     justify-content: space-between;
-}
- .project-column-heading__title {
-     font-size: 20px;
-}
- .project-column-heading__options {
-     background: transparent;
-     color: var(--light-grey);
-     font-size: 18px;
-     border: 0;
-     cursor: pointer;
-}
- .task {
-     cursor: move;
-     background-color: var(--white);
-     padding: 1rem;
-     border-radius: 8px;
-     width: 100%;
-     box-shadow: rgba(99, 99, 99, 0.1) 0px 2px 8px 0px;
-     margin-bottom: 1rem;
-     border: 3px dashed transparent;
-}
- .task:hover {
-     box-shadow: rgba(99, 99, 99, 0.3) 0px 2px 8px 0px;
-     border-color: rgba(162, 179, 207, 0.2) !important;
-}
- .task p {
-     font-size: 15px;
-     margin: 1.2rem 0;
-}
- .task__tag {
-     border-radius: 100px;
-     padding: 2px 13px;
-     font-size: 12px;
-}
- .task__tag--copyright {
-     color: var(--tag-4-text);
-     background-color: var(--tag-4);
-}
- .task__tag--design {
-     color: var(--tag-3-text);
-     background-color: var(--tag-3);
-}
- .task__tag--illustration {
-     color: var(--tag-2-text);
-     background-color: var(--tag-2);
-}
- .task__tags {
-     width: 100%;
-     display: flex;
-     align-items: center;
-     justify-content: space-between;
-}
- .task__options {
-     background: transparent;
-     border: 0;
-     color: var(--light-grey);
-     font-size: 17px;
-}
- .task__stats {
-     position: relative;
-     width: 100%;
-     color: var(--light-grey);
-     font-size: 12px;
-}
- .task__stats span:not(:last-of-type) {
-     margin-right: 1rem;
-}
- .task__stats svg {
-     margin-right: 5px;
-}
- .task__owner {
-     width: 25px;
-     height: 25px;
-     border-radius: 100rem;
-     background: var(--purple);
-     position: absolute;
-     display: inline-block;
-     right: 0;
-     bottom: 0;
-}
- .task-hover {
-     border: 3px dashed var(--light-grey) !important;
-}
- .task-details {
-     width: 24%;
-     border-left: 1px solid #d9e0e9;
-     display: inline-block;
-     height: 100%;
-     vertical-align: top;
-     padding: 3rem 2rem;
-}
- .tag-progress {
-     margin: 1.5rem 0;
-}
- .tag-progress h2 {
-     font-size: 16px;
-     margin-bottom: 1rem;
-}
- .tag-progress p {
-     display: flex;
-     width: 100%;
-     justify-content: space-between;
-}
- .tag-progress p span {
-     color: #b4b4b4;
-}
- .tag-progress .progress {
-     width: 100%;
-     -webkit-appearance: none;
-     appearance: none;
-     border: none;
-     border-radius: 10px;
-     height: 10px;
-}
- .tag-progress .progress::-webkit-progress-bar, .tag-progress .progress::-webkit-progress-value {
-     border-radius: 10px;
-}
- .tag-progress .progress--copyright::-webkit-progress-bar {
-     background-color: #ecd8e6;
-}
- .tag-progress .progress--copyright::-webkit-progress-value {
-     background: #d459e8;
-}
- .tag-progress .progress--illustration::-webkit-progress-bar {
-     background-color: #dee7e3;
-}
- .tag-progress .progress--illustration::-webkit-progress-value {
-     background-color: #46bd84;
-}
- .tag-progress .progress--design::-webkit-progress-bar {
-     background-color: #d8e7f4;
-}
- .tag-progress .progress--design::-webkit-progress-value {
-     background-color: #08a0f7;
-}
- .task-activity h2 {
-     font-size: 16px;
-     margin-bottom: 1rem;
-}
- .task-activity li {
-     list-style: none;
-     margin: 1rem 0;
-     padding: 0rem 1rem 1rem 3rem;
-     position: relative;
-}
- .task-activity time {
-     display: block;
-     color: var(--light-grey);
-}
- .task-icon {
-     width: 30px;
-     height: 30px;
-     border-radius: 100rem;
-     position: absolute;
-     top: 0;
-     left: 0;
-     display: flex;
-     align-items: center;
-     justify-content: center;
-}
- .task-icon svg {
-     font-size: 12px;
-     color: var(--white);
-}
- .task-icon--attachment {
-     background-color: #fba63c;
-}
- .task-icon--comment {
-     background-color: #5dc983;
-}
- .task-icon--edit {
-     background-color: #7784ee;
-}
- @media only screen and (max-width: 1300px) {
-     .project {
-         max-width: 100%;
-    }
-     .task-details {
-         width: 100%;
-         display: flex;
-    }
-     .tag-progress, .task-activity {
-         flex-basis: 50%;
-         background: var(--white);
-         padding: 1rem;
-         border-radius: 8px;
-         margin: 1rem;
-    }
-}
- @media only screen and (max-width: 1000px) {
-     .project-column:nth-child(2), .project-column:nth-child(3) {
-         display: none;
-    }
-     .project-tasks {
-         grid-template-columns: 1fr 1fr;
-    }
-}
- @media only screen and (max-width: 600px) {
-     .project-column:nth-child(4) {
-         display: none;
-    }
-     .project-tasks {
-         grid-template-columns: 1fr;
-    }
-     .task-details {
-         flex-wrap: wrap;
-         padding: 3rem 1rem;
-    }
-     .tag-progress, .task-activity {
-         flex-basis: 100%;
-    }
-     h1 {
-         font-size: 25px;
-    }
-}
- .nav-link.active .icon svg {
-  fill: #FFD700 !important;
-  color: #FFD700 !important;
-}
-    .custom-logo-size {
-  height: 50px !important; /* Increase by 20% from 80px */
-  /* If you also need to adjust width while maintaining aspect ratio, you can uncomment the following line */
-  /* width: auto; */
-}
-  .sidenav-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100px;  /* Adjust this height as needed */
-}
-
-.custom-logo-size {
-  max-height: 80%;
-  width: auto;
-}
-.card__price {
-    font-size: 24px;  /* Adjust this down from whatever it was */
-}
-
-.card__price span {
-    font-size: 18px;  /* Adjust this down from whatever it was */
-}
-  </style>
-
-  <script>
-document.addEventListener('DOMContentLoaded', (event) => {
-
-  var dragSrcEl = null;
-
-  function handleDragStart(e) {
-    this.style.opacity = '0.1';
-    this.style.border = '3px dashed #c4cad3';
-
-    dragSrcEl = this;
-
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', this.innerHTML);
-  }
-
-  function handleDragOver(e) {
-    if (e.preventDefault) {
-      e.preventDefault();
-    }
-
-    e.dataTransfer.dropEffect = 'move';
-
-    return false;
-  }
-
-  function handleDragEnter(e) {
-    this.classList.add('task-hover');
-  }
-
-  function handleDragLeave(e) {
-    this.classList.remove('task-hover');
-  }
-
-  function handleDrop(e) {
-    if (e.stopPropagation) {
-      e.stopPropagation(); // stops the browser from redirecting.
-    }
-
-    if (dragSrcEl != this) {
-      dragSrcEl.innerHTML = this.innerHTML;
-      this.innerHTML = e.dataTransfer.getData('text/html');
-    }
-
-    return false;
-  }
-
-  function handleDragEnd(e) {
-    this.style.opacity = '1';
-    this.style.border = 0;
-
-    items.forEach(function (item) {
-      item.classList.remove('task-hover');
-    });
-  }
-
-
-  let items = document.querySelectorAll('.task');
-  items.forEach(function(item) {
-    item.addEventListener('dragstart', handleDragStart, false);
-    item.addEventListener('dragenter', handleDragEnter, false);
-    item.addEventListener('dragover', handleDragOver, false);
-    item.addEventListener('dragleave', handleDragLeave, false);
-    item.addEventListener('drop', handleDrop, false);
-    item.addEventListener('dragend', handleDragEnd, false);
-  });
-});
-
-</script>
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f6f9fc 0%, #ffffff 100%);
+            min-height: 100vh;
+            color: #1a1f36;
+        }
+
+        .nav-header {
+            padding: 24px 20px;
+            position: relative;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(58, 159, 255, 0.1);
+            display: flex;
+            justify-content: center;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            position: relative;
+            padding: 4px 8px;
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1a1f36 0%, #3a9fff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-accent {
+            background: linear-gradient(135deg, #3a9fff 0%, #3a72ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-dot {
+            position: absolute;
+            right: -4px;
+            top: 6px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3a9fff 0%, #3a72ff 100%);
+            animation: pulse 2s infinite;
+        }
+
+        .content {
+            max-width: 1200px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+
+        .plans-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .plans-title {
+            font-size: 42px;
+            font-weight: 800;
+            margin: 0 0 20px;
+            background: linear-gradient(135deg, #1a1f36 0%, #3a9fff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .plans-subtitle {
+            font-size: 20px;
+            color: #64748b;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .plans-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 20px 0;
+        }
+
+        .plan-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            position: relative;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+            border: 1px solid rgba(58, 159, 255, 0.1);
+        }
+
+        .plan-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(58, 159, 255, 0.12);
+            border-color: rgba(58, 159, 255, 0.2);
+        }
+
+        .plan-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3a9fff, #3a72ff);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .plan-card:hover::before {
+            opacity: 1;
+        }
+
+        .plan-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 10px;
+            color: #1a1f36;
+        }
+
+        .plan-price {
+            font-size: 48px;
+            font-weight: 800;
+            color: #3a9fff;
+            margin: 20px 0;
+        }
+
+        .plan-price span {
+            font-size: 20px;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .plan-features {
+            margin: 30px 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .plan-features li {
+            margin: 15px 0;
+            color: #64748b;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .plan-features li::before {
+            content: '✓';
+            color: #3a9fff;
+            font-weight: bold;
+        }
+
+        .plan-button {
+            background: linear-gradient(135deg, #3a9fff 0%, #3a72ff 100%);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 16px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 200px;
+            margin-top: auto;
+        }
+
+        .plan-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(58, 159, 255, 0.15);
+        }
+
+        .plan-card.popular {
+            background: linear-gradient(135deg, #3a9fff 0%, #3a72ff 100%);
+            color: white;
+        }
+
+        .plan-card.popular .plan-name,
+        .plan-card.popular .plan-price {
+            color: white;
+        }
+
+        .plan-card.popular .plan-features li {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .plan-card.popular .plan-features li::before {
+            color: white;
+        }
+
+        .plan-card.popular .plan-button {
+            background: white;
+            color: #3a9fff;
+        }
+
+        @media (max-width: 768px) {
+            .plans-title {
+                font-size: 32px;
+            }
+
+            .plans-subtitle {
+                font-size: 18px;
+            }
+
+            .plan-card {
+                padding: 30px 20px;
+            }
+
+            .plan-price {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-header">
+        <div class="container">
+            <a href="/" class="logo">
+                <span class="logo-text">Chinese<span class="logo-accent">Log</span></span>
+                <span class="logo-dot"></span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="content">
+        <div class="plans-header">
+            <h1 class="plans-title">Choose Your Learning Journey</h1>
+            <p class="plans-subtitle">Select the plan that best fits your Chinese learning goals</p>
+        </div>
+
+        <div class="plans-container">
+            {% for tier, tier_name in Subscription.TIER_CHOICES %}
+            <div class="plan-card{% if tier == 'PREMIUM' %} popular{% endif %}">
+                <h2 class="plan-name">{{ tier_name }}</h2>
+                <div class="plan-price">
+                    {% if tier == 'FREE' %}
+                        $0<span>/mo</span>
+                    {% elif tier == 'BASIC' %}
+                        $8<span>/mo</span>
+                    {% elif tier == 'PREMIUM' %}
+                        $16<span>/mo</span>
+                    {% endif %}
+                </div>
+                <ul class="plan-features">
+                    {% if tier == 'FREE' %}
+                        <li>Access to 3 most recent videos</li>
+                        <li>Basic tracking features</li>
+                        <li>Standard subtitle support</li>
+                    {% elif tier == 'BASIC' %}
+                        <li>Full access to 1 channel</li>
+                        <li>Advanced tracking features</li>
+                        <li>Enhanced learning tools</li>
+                        <li>Priority support</li>
+                    {% elif tier == 'PREMIUM' %}
+                        <li>Access to all channels</li>
+                        <li>Premium features</li>
+                        <li>Advanced analytics</li>
+                        <li>Priority support</li>
+                        <li>Exclusive content</li>
+                    {% endif %}
+                </ul>
+                <button class="plan-button" onclick="location.href='{% if user.is_authenticated %}{% url 'upgrade_plan' %}?plan={{ tier.lower }}{% else %}{% url 'register' %}?plan={{ tier.lower }}{% endif %}'">
+                    {% if tier == 'FREE' %}Start Free
+                    {% elif tier == 'BASIC' %}Select Plan
+                    {% else %}Go Pro{% endif %}
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
+{% endblock %}

@@ -29,6 +29,8 @@ class MediaAdmin(admin.ModelAdmin):
             # Fetch or create the associated channel
             channel_url = f"https://www.youtube.com/channel/{video_details['channel_id']}"
             channel_details = fetch_channel_details(channel_url)
+            obj.youtube_upload_time = video_details['upload_time']  # Use YouTube's upload time
+
             if channel_details:
                 channel, created = Channel.objects.update_or_create(
                     channel_id=channel_details['channel_id'],

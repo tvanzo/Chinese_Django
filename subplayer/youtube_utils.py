@@ -8,6 +8,7 @@ from django.conf import settings
 import logging
 from isodate import parse_duration
 from google.auth.exceptions import DefaultCredentialsError
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +65,10 @@ def fetch_video_details(url):
         duration = parse_duration(video_item['contentDetails']['duration'])
         video_length_seconds = int(duration.total_seconds())
 
+        # Capture the upload time
+        published_at = video_item['snippet']['publishedAt']
+        upload_time = datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+
         subtitles = fetch_subtitles(video_id)
         subtitles_path = None
         word_count = 0
@@ -81,7 +86,8 @@ def fetch_video_details(url):
             'subtitles_file_path': subtitles_path,
             'word_count': word_count,
             'channel_id': channel_id,
-            'category_id': category_id
+            'category_id': category_id,
+            'upload_time': upload_time  # Added this line for upload time
         }
     except HttpError as e:
         logger.error(f"HTTP Error while fetching video details: {e}")
@@ -182,9 +188,9 @@ def fetch_videos_from_channel_with_chinese_subtitles(channel_id):
     nextPageToken = None
     try:
         logger.info(f"Starting video fetch for channel ID: {channel_id}")
-        while len(videos) < 3:
+        while len(videos) < 5:
             response = youtube.search().list(
-                channelId=channel_id, part='id,snippet', maxResults=3, order='date', type='video',
+                channelId=channel_id, part='id,snippet', maxResults=5, order='date', type='video',
                 pageToken=nextPageToken
             ).execute()
             if 'items' not in response:
@@ -200,7 +206,7 @@ def fetch_videos_from_channel_with_chinese_subtitles(channel_id):
                         logger.info(f"Video {video_id} added with subtitles.")
                     else:
                         logger.info(f"Video {video_id} skipped, no subtitles.")
-                    if len(videos) == 3:
+                    if len(videos) == 5:
                         break
             nextPageToken = response.get('nextPageToken')
             if not nextPageToken:

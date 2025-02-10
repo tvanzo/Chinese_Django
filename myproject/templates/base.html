@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Your Site Title{% endblock %}</title>
-    <!-- Additional head elements can be added here -->
+ <title>{% block title %}My Website{% endblock %}</title>
+     {% load static %}     <!-- Additional head elements can be added here -->
+    <link rel="icon" type="image/svg+xml" href="{% static 'icons/favicon.svg' %}">
 </head>
 <body>
     <!-- Include the sidebar -->
-    <aside>
-        {% include 'sidebar.html' %}
-    </aside>
+
+    <link rel="icon" type="image/svg+xml" href="{% static 'icons/favicon.svg' %}">
 
     <!-- Main content area where child templates will render -->
     <main>

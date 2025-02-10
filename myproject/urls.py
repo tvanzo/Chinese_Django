@@ -21,7 +21,7 @@ urlpatterns = [
     path('video/', subplayer_views.video_detail, name='video_view'),
     path('podcast/<str:media_id>/', subplayer_views.podcast_detail, name='podcast_detail'),
     path('video/<str:media_id>/', subplayer_views.video_detail, name='video_detail'),
-    path('media_list/', subplayer_views.media_list, name='media_list'),
+    path('watch/', subplayer_views.media_list, name='media_list'),
     path('add_media/', subplayer_views.add_media, name='add_media'),
     path('search/', subplayer_views.search, name='search'),
     path('channel/<str:channel_name>/', subplayer_views.channel_view, name='channel_view'),
@@ -53,7 +53,7 @@ path('dashboard/', account_views.stats_view, name='stats_view'),
     path('media/remove_status/<int:media_id>/', account_views.remove_media_status, name='remove_media_status'),
 
     # User management
-    path('user_videos/', account_views.user_videos, name='user_videos'),
+    path('library/', account_views.user_videos, name='user_videos'),
     path('remove_from_log/<int:media_id>/', account_views.remove_from_log, name='remove_from_log'),
     path('add_to_log/<int:media_id>/', account_views.add_to_log, name='add_to_log'),
     path('join/', account_views.join, name='join'),

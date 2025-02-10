@@ -25,7 +25,16 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Count, Q
 
-
+from django.shortcuts import get_object_or_404, render
+from django.core.serializers import serialize
+from django.db.models import Sum, Count, Q, Subquery, OuterRef
+from django.db.models.functions import TruncDay
+from django.utils import timezone
+import json
+from django.shortcuts import get_object_or_404, render
+from django.core.serializers import serialize
+from django.db.models import Count
+import json
 def format_duration(seconds):
     """Helper function to convert seconds to 'minutes:seconds' format."""
     minutes = seconds // 60
@@ -153,6 +162,14 @@ def podcast_detail(request, media_id):
     return render(request, 'subplayer.html', context)
 
 @login_required
+@login_required
+
+@login_required
+
+
+@login_required
+@login_required
+@login_required
 def video_detail(request, media_id):
     media = get_object_or_404(Media, media_id=media_id, media_type='video')
     highlights = Highlight.objects.filter(media=media, user=request.user)
@@ -177,14 +194,10 @@ def video_detail(request, media_id):
 
     media_json = json.dumps(media_dict)
 
-    # Get the user's total points
-    total_points = request.user.profile.total_points
-
-    # Get the user's total minutes
-    total_minutes = request.user.profile.total_minutes   # Convert seconds to minutes
+    profile = request.user.profile
 
     # Get the user's last media progress for the current media
-    last_media_progress = MediaProgress.objects.filter(profile=request.user.profile, media=media).last()
+    last_media_progress = MediaProgress.objects.filter(profile=profile, media=media).last()
 
     context = {
         'media': media,
@@ -193,9 +206,8 @@ def video_detail(request, media_id):
         'has_status': user_media_status is not None,
         'media_status': media_status,
         'hide_nav': True,
-        'total_points': total_points,  # Add total points to the context
-        'total_minutes': total_minutes,  # Add total minutes to the context
-        'last_media_progress': last_media_progress,  # Add last media progress to the context
+        'total_minutes': profile.total_minutes / 60,  # Keep this if used elsewhere
+        'last_media_progress': last_media_progress,
     }
 
     return render(request, 'subplayer.html', context)
@@ -240,6 +252,8 @@ def media_list(request):
     for media in all_media:
         media.status = media_statuses.get(media.id, "Not Available")
         media.formatted_video_length = format_duration(media.video_length)
+        media.time_ago = time_ago(media.youtube_upload_time)
+
 
     progress_filters = {'profile': user.profile}
     if start_date:
@@ -261,7 +275,7 @@ def media_list(request):
         'channels': channels  # Include channels in the context
     }
 
-    return render(request, 'media_list.html', context)
+    return render(request, 'watch.html', context)
 
 
 
@@ -361,3 +375,38 @@ def intro_view(request):
 
 # Set up logging
 logger = logging.getLogger(__name__)
+
+from django.utils import timezone
+
+from django.utils import timezone
+from datetime import datetime
+
+def time_ago(datetime_str):
+    # First, convert the string to a datetime object if it's not already one
+    if isinstance(datetime_str, str):
+        # Assuming the string is in ISO 8601 format with 'Z' at the end
+        datetime_obj = datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M:%SZ")
+        # Ensure the datetime is timezone-aware, converting from UTC
+        datetime_obj = timezone.make_aware(datetime_obj, timezone=timezone.utc)
+    else:
+        # If it's already a datetime object, use it directly
+        datetime_obj = datetime_str
+
+    now = timezone.now()
+    diff = now - datetime_obj
+
+    if diff.days == 0 and diff.seconds < 60:
+        return "just now"
+    elif diff.days == 0:
+        if diff.seconds < 3600:
+            return f"{diff.seconds // 60} minutes ago"
+        else:
+            return f"{diff.seconds // 3600} hours ago"
+    elif diff.days < 30:
+        return f"{diff.days} days ago"
+    elif diff.days < 365:
+        months = diff.days // 30
+        return f"{months} month{'s' if months > 1 else ''} ago"
+    else:
+        years = diff.days // 365
+        return f"{years} year{'s' if years > 1 else ''} ago"

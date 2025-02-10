@@ -1,0 +1,1149 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="apple-touch-icon" sizes="76x76" href="{% static 'accounts/img/apple-icon.png' %}">
+        <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
+  <title>Chinese Log</title>
+
+  <!-- Fonts and icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link id="pagestyle" href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet" />
+  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+  <link id="pagestyle" href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet" />
+  <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet" />
+
+  <style>
+    :root {
+      --primary-color: #3a9fff;
+      --accent-color: #d00c9c;
+      --text-dark: #2c3e50;
+      --text-light: #7f8c8d;
+      --bg-light: #f8f9fa;
+    }
+
+    body {
+      background-color: var(--bg-light);
+      color: var(--text-dark);
+      font-family: 'Open Sans', sans-serif;
+    }
+
+    .main-content {
+      padding: 20px;
+    }
+
+    h2 {
+      color: var(--text-dark);
+      font-weight: 700;
+      margin-bottom: 2rem;
+      position: relative;
+      text-align: center;
+      padding-bottom: 0.5rem;
+    }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background-color: var(--primary-color);
+    }
+
+    /* Category Filter */
+    .category-filter {
+      display: flex;
+      gap: 8px;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .category-item {
+      background: white;
+      border: 1px solid #e9ecef;
+      padding: 8px 20px;
+      border-radius: 24px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .category-item.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    /* Video Grid */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      padding: 1rem;
+    }
+
+    /* Video Card */
+    .video-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+    }
+
+    .video-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .image-container {
+      position: relative;
+      padding-top: 56.25%; /* 16:9 aspect ratio */
+      background: #f0f2f5;
+    }
+
+    .card-img-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .overlay-info {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .badge {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(4px);
+    }
+
+    .badge-highlight {
+      background: rgba(208, 12, 156, 0.9);
+      color: white;
+    }
+
+    .badge-length {
+      background: rgba(44, 62, 80, 0.9);
+      color: white;
+    }
+
+    .card-body {
+      padding: 1rem 1.25rem 2rem; /* Increased bottom padding to ensure space for + button */
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-top: 0.75rem;
+      margin-bottom: 0.5rem;
+      padding: 0 0.5rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      color: var(--text-dark);
+    }
+
+    .card-text {
+      font-size: 0.875rem;
+      color: var(--text-light);
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+    }
+
+    .channel-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0.25rem 0.5rem 0; /* Adjusted padding for channel info */
+      margin-top: 0; /* No top margin to push it up slightly */
+      border-top: 1px solid #f0f2f5;
+    }
+
+    .channel-meta {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-grow: 1;
+      min-width: 0;
+      padding-right: 8px;
+    }
+
+    .channel-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0 0.5rem;
+    }
+
+    .time-ago {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      white-space: nowrap;
+      margin-left: 8px;
+    }
+
+    .toggle-log {
+      background: #f0f2f5;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      position: absolute;
+      top: calc(100% - 16px); /* Position at the top of card-body with some offset */
+      right: 1rem; /* More space from right edge */
+      z-index: 1;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .video-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      }
+
+      .category-filter {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+
+      .toggle-log {
+        right: 0.5rem; /* Adjust for smaller screens */
+      }
+
+      .channel-name {
+        margin-right: 2rem; /* Adjust for smaller screens */
+      }
+    }
+
+    /* Loading State */
+    .skeleton-loader {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+  </style>
+      <style>
+    :root {
+      --primary-color: #3a9fff;
+      --accent-color: #d00c9c;
+      --text-dark: #2c3e50;
+      --text-light: #7f8c8d;
+      --bg-light: #f8f9fa;
+    }
+
+    body {
+      background-color: var(--bg-light);
+      color: var(--text-dark);
+      font-family: 'Open Sans', sans-serif;
+    }
+
+    .main-content {
+      padding: 20px;
+    }
+
+    h2 {
+      color: var(--text-dark);
+      font-weight: 700;
+      margin-bottom: 2rem;
+      position: relative;
+      text-align: center;
+      padding-bottom: 0.5rem;
+    }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background-color: var(--primary-color);
+    }
+
+    /* Category Filter */
+    .category-filter {
+      display: flex;
+      gap: 8px;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .category-item {
+      background: white;
+      border: 1px solid #e9ecef;
+      padding: 8px 20px;
+      border-radius: 24px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .category-item.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    /* Video Grid */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      padding: 1rem;
+    }
+
+    /* Video Card */
+    .video-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+    }
+
+    .video-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .image-container {
+      position: relative;
+      padding-top: 56.25%; /* 16:9 aspect ratio */
+      background: #f0f2f5;
+    }
+
+    .card-img-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .overlay-info {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .badge {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(4px);
+    }
+
+    .badge-highlight {
+      background: rgba(208, 12, 156, 0.9);
+      color: white;
+    }
+
+    .badge-length {
+      background: rgba(44, 62, 80, 0.9);
+      color: white;
+    }
+
+    .card-body {
+      padding: 1rem 1.25rem 2.5rem; /* Increased bottom padding to ensure space for the 'x' button */
+      position: relative;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-top: 0.75rem;
+      margin-bottom: 0.5rem;
+      padding: 0 0.5rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      color: var(--text-dark);
+    }
+
+    .card-text {
+      font-size: 0.875rem;
+      color: var(--text-light);
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+    }
+
+    .channel-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0.25rem 0.5rem 0; /* Adjusted padding for channel info */
+      margin-top: 0; /* No top margin to push it up slightly */
+      border-top: 1px solid #f0f2f5;
+    }
+
+    .channel-meta {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-grow: 1;
+      min-width: 0;
+      padding-right: 8px;
+    }
+
+    .channel-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0 0.5rem;
+    }
+
+    .time-ago {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      white-space: nowrap;
+      margin-left: 8px;
+    }
+
+    .toggle-log {
+      background: #f0f2f5;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      position: absolute;
+      top: calc(100% - 20px); /* Adjust 'x' button position to be higher */
+      right: 1rem; /* More space from right edge */
+      z-index: 1;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .video-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      }
+
+      .category-filter {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+
+      .toggle-log {
+        right: 0.5rem; /* Adjust for smaller screens */
+      }
+
+      .channel-name {
+        margin-right: 2rem; /* Adjust for smaller screens */
+      }
+    }
+
+    /* Loading State */
+    .skeleton-loader {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+  </style>
+     <style>
+    /* Previous :root and body styles remain unchanged */
+
+    .card-body {
+      padding: 1rem 1.25rem 3rem; /* Increased bottom padding for button space */
+      position: relative;
+    }
+
+    .toggle-log {
+      background: #f0f2f5;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      position: absolute;
+      top: auto; /* Remove vertical positioning */
+      bottom: 1rem; /* Position from bottom */
+      right: 1rem;
+      z-index: 1;
+    }
+
+    .toggle-log:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    /* Adjust responsive positioning */
+    @media (max-width: 768px) {
+      .toggle-log {
+        bottom: 0.75rem;
+        right: 0.75rem;
+      }
+    }
+          .card-body {
+    padding: 1rem 1.25rem 1.5rem; /* Reduced bottom padding since button is now inline */
+    position: relative;
+  }
+
+  .channel-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0.5rem 0.5rem 0.75rem; /* Added bottom padding to channel info */
+    margin-top: 0.5rem; /* Added spacing above channel info */
+    border-top: 1px solid #f0f2f5;
+  }
+
+
+  .toggle-log {
+    background: #f0f2f5;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    position: static; /* Remove absolute positioning */
+    margin-left: auto; /* Push to right side */
+  }
+       .text-warning { color: #dcb234; } /* Custom dark yellow */
+.text-success { color: #3c763d; } /* Custom dark green */
+.title-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 50px; /* Adjusted height to provide more control */
+}
+.title-container p {
+    margin: 0;
+    line-height: 1.1; /* Tighter line spacing */
+    text-align: center;
+    white-space: pre-line; /* Ensures proper line breaking */
+    font-size: 0.75rem; /* Adjust size as needed */
+}
+.nav-link.active .icon svg {
+    fill: #FFD700 !important;
+    color: #FFD700 !important;
+}
+.xp-points-bar {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+.xp-points-bar h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: normal;
+}
+.xp-points-bar #xp-points {
+    font-size: 20px;
+    font-weight: bold;
+    color: #007bff;
+}
+.xp-circle {
+    width: 20px; /* Adjust size as needed */
+    height: 20px; /* Adjust size as needed */
+    border-radius: 50%;
+    background-color: #ffc40c; /* Yellow color */
+    color: #ffffff; /* White text */
+    font-weight: bold;
+    font-size: 12px; /* Adjust size as needed */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#xp-points {
+    font-size: 14px; /* Adjust size as needed */
+    font-weight: bold;
+    color: #ffffff; /* Adjust color as needed */
+}
+.btn-purple {
+    background-color: #d00c9c; /* Purple color */
+    color: #ffffff; /* White text */
+    border-color: #6f42c1;
+}
+.compact-btn {
+    padding: 0.25rem 0.5rem; /* Less padding for a more compact button */
+}
+#unique-xp-display {
+    background-color: #d00c9c; /* Change the color to your preference */
+    color: white; /* Ensure the text color contrasts well */
+    padding: 3px 8px; /* Adjust padding to make it smaller */
+    border-radius: 8px; /* Increased border radius to make corners more rounded */
+}
+#unique-xp-display .unique-xp-circle {
+    background-color: #ffc40c; /* Change the color to your preference */
+    color: white; /* Ensure the text color contrasts well */
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 5px; /* Adjust margin as needed */
+}
+#unique-xp-points {
+    font-weight: bold;
+    font-size: 14px; /* Adjust font size as needed */
+}
+#sidenav-main {
+    background-color: #ffffff; /* White background */
+    border-radius: 12px; /* Adjust the border radius to your preference */
+    padding: 10px; /* Add padding if necessary */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for better visibility */
+    margin-bottom: 20px; /* Add margin to ensure the bottom border is visible */
+    max-height: calc(100vh - 40px); /* Ensure the sidebar fits within the viewport */
+    overflow-y: auto; /* Add vertical scrolling if necessary */
+}
+@media (max-width: 1200px) {
+    #sidenav-main {
+        display: none;
+    }
+    #top-nav {
+        display: block;
+    }
+}
+@media (min-width: 1201px) {
+    #top-nav {
+        display: none;
+    }
+}
+#welcome-banner {
+  background-color: #e9ecef; /* Light grey background */
+  border-radius: 0 0 10px 10px; /* Rounded bottom corners */
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow */
+  text-align: left;
+  width: 100%; /* Full width */
+}
+
+#welcome-banner .alert-heading {
+  font-weight: 700;
+  color: #28a745; /* Green color for success */
+}
+
+#welcome-banner button.btn-close {
+  background: transparent;
+  border: none;
+  color: #6c757d;
+}
+
+#welcome-banner button.btn-close:hover {
+  color: #343a40;
+}
+
+
+.sidenav-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;  /* Adjust this height as needed */
+}
+.custom-logo-size {
+    height: 50px !important; /* Increase by 20% from 80px */
+    /* If you also need to adjust width while maintaining aspect ratio, you can uncomment the following line */
+    /* width: auto; */
+}
+#welcome-banner {
+  background-color: #f8f9fa; /* Light grey for a subtle modern look */
+  color: #344767; /* Darker text for contrast */
+  border: none;
+  border-bottom: 2px solid #e9ecef; /* A bit more pronounced bottom line */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Subtle shadow for depth */
+  padding: 10px 15px; /* Adjust for a thinner, modern look */
+  font-size: 14px; /* Smaller text size for a cleaner appearance */
+  width: 100%;
+  text-align: left;
+}
+
+#welcome-banner .close {
+  background: transparent;
+  border: none;
+  color: #6c757d;
+  padding: 0;
+  font-size: 20px; /* Size of the 'X' */
+  line-height: 1;
+  opacity: 0.5;
+  transition: opacity 0.15s ease-in-out;
+}
+
+#welcome-banner .close:hover {
+  opacity: 1;
+}
+
+#welcome-banner .close:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+
+    #welcome-banner .close:hover {
+  opacity: 1;
+}
+
+#welcome-banner .close:focus {
+  outline: none;
+  box-shadow: none;
+}
+       /* Video Grid and Card Styles */
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.video-card {
+  background: #FFFFFF;
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+
+.video-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.image-container {
+  position: relative;
+  padding-top: 56.25%;
+  background: #f8f9fa;
+}
+
+.card-img-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.overlay-info {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  z-index: 1;
+}
+
+.badge {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.badge-highlight {
+  background: rgba(58, 159, 255, 0.9);
+  color: white;
+}
+
+.badge-length {
+  background: rgba(26, 31, 54, 0.9);
+  color: white;
+}
+
+.card-body {
+  padding: 1.25rem;
+  position: relative;
+}
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 0.75rem;
+  color: #344767;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-text {
+  font-size: 0.875rem;
+  color: #7f8c8d;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.channel-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f0f2f5;
+}
+
+.channel-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.channel-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #3a9fff;
+}
+
+.time-ago {
+  font-size: 0.75rem;
+  color: #7f8c8d;
+}
+
+.toggle-log {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.toggle-log:hover {
+  background: #3a9fff;
+  color: white;
+}
+
+/* Category Filter */
+.category-filter {
+  display: flex;
+  gap: 0.75rem;
+  margin: 2rem 1.5rem;
+  flex-wrap: wrap;
+}
+
+.category-item {
+  background: white;
+  border: 1px solid #e9ecef;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #344767;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-item.active {
+  background: #3a9fff;
+  color: white;
+  border-color: #3a9fff;
+}
+
+.category-item:hover:not(.active) {
+  background: #f8f9fa;
+  border-color: #3a9fff;
+  color: #3a9fff;
+}
+  </style>
+</head>
+<body class="g-sidenav-show bg-gray-100">
+  <div id="notification-bar" class="notification-bar">
+  </div>
+      {% include 'accounts/navbar.html' %}
+
+  {% include 'accounts/sidebar.html' %}
+
+  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+
+    <div class="container-fluid py-4">
+      <h2>Explore Videos</h2>
+
+      <!-- Category Filter -->
+      <div class="category-filter">
+        <div class="category-item active" data-category="all">All</div>
+        <div class="category-item" data-category="finance">Finance</div>
+        <div class="category-item" data-category="entrepreneurship">Entrepreneurship</div>
+        <div class="category-item" data-category="daily-life">Daily Life</div>
+        <div class="category-item" data-category="science">Science</div>
+        <div class="category-item" data-category="culture">Culture</div>
+      </div>
+
+      <!-- Video Grid -->
+      <div class="video-grid">
+        {% for video in media %}
+          <div class="video-card" data-category="{{ video.category|lower }}">
+            <a href="{% url 'video_detail' video.media_id %}" class="card-link">
+              <div class="image-container">
+                <img src="{{ video.thumbnail_url }}" class="card-img-top" alt="{{ video.title }}">
+                <div class="overlay-info">
+                  <div class="badge badge-highlight">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <!-- Star icon -->
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                    </svg>
+                    {{ video.user_highlights_count }}
+                  </div>
+                  <div class="badge badge-length">{{ video.formatted_video_length }}</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <h5 class="card-title">{{ video.title }}</h5>
+                <p class="card-text">{{ video.description|truncatechars:100 }}</p>
+
+                <div class="channel-info">
+                  <div class="channel-meta">
+                    <span class="channel-name">{{ video.channel.name }}</span>
+                    <span class="time-ago">{{ video.time_ago }}</span>
+                  </div>
+                  <a href="#" class="toggle-log" data-id="{{ video.id }}" data-action="{% if video.is_in_log %}remove{% else %}add{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="{% if video.is_in_log %}active{% endif %}">
+                      <path d="{% if video.is_in_log %}M5 12h14{% else %}M12 5v14M5 12h14{% endif %}"/>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </a>
+          </div>
+        {% empty %}
+          <div class="no-results text-center py-5">
+            <p>No videos found matching your criteria</p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Category filtering
+      const categoryItems = document.querySelectorAll('.category-item');
+      const videoCards = document.querySelectorAll('.video-card');
+
+      categoryItems.forEach(item => {
+        item.addEventListener('click', function() {
+          const category = this.dataset.category;
+
+          categoryItems.forEach(i => i.classList.remove('active'));
+          this.classList.add('active');
+
+          videoCards.forEach(card => {
+            const cardCategory = card.dataset.category;
+            if (category === 'all' || cardCategory === category) {
+              card.style.display = 'block';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      });
+
+      // Hover effects
+      document.querySelectorAll('.video-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+          this.style.transform = 'translateY(-5px)';
+        });
+
+        card.addEventListener('mouseleave', function() {
+          this.style.transform = 'translateY(0)';
+        });
+      });
+
+      // Ensure initial state of toggle buttons matches server data
+      document.querySelectorAll('.toggle-log').forEach(button => {
+        const action = button.dataset.action;
+        let svg = button.querySelector('svg');
+        svg.innerHTML = action === 'remove' ?
+          '<path d="M5 12h14"></path>' :
+          '<path d="M12 5v14M5 12h14"></path>';
+        if (action === 'remove') svg.classList.add('active');
+        else svg.classList.remove('active');
+      });
+
+      // Toggle log functionality
+  document.querySelectorAll('.toggle-log').forEach(button => {
+    button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const videoId = this.dataset.id;
+        const action = this.dataset.action;
+        const url = action === 'add' ? `/add_to_log/${videoId}/` : `/remove_from_log/${videoId}/`;
+
+        console.log(`Sending ${action} request for video ID:`, videoId); // Debugging
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => {
+            console.log('Response received:', response);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+
+            if (data.success) {
+                console.log(`Updating UI for video ID: ${videoId}, action: ${action}`);
+
+                // Toggle the action attribute
+                this.dataset.action = action === 'add' ? 'remove' : 'add';
+
+                // Toggle SVG icon
+                let svg = this.querySelector('svg');
+                svg.innerHTML = action === 'add' ?
+                    '<path d="M5 12h14"></path>' :  // Minus sign when added
+                    '<path d="M12 5v14M5 12h14"></path>'; // Plus sign when removed
+                svg.classList.toggle('active');
+
+                // Ensure UI update is enforced
+                this.closest('.video-card').classList.toggle('logged', action === 'add');
+
+                // Update highlight count
+                let badge = this.closest('.video-card').querySelector('.badge-highlight');
+                if (badge) {
+                    let currentCount = parseInt(badge.textContent.match(/\d+/)[0]) || 0;
+                    badge.textContent = `${action === 'add' ? currentCount + 1 : Math.max(0, currentCount - 1)} Highlights`;
+                }
+
+                // Show +1 animation for add action
+                if (action === 'add') {
+                    showPlusOneAnimation(this);
+                }
+
+                showNotification(data.message, 'success');
+            } else {
+                console.error('Error from server:', data.error);
+                showNotification(data.error || 'An error occurred', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            showNotification('An error occurred', 'error');
+        });
+    });
+});
+
+
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+      function showPlusOneAnimation(element) {
+        const plusOne = document.getElementById('plus-one-animation');
+        const rect = element.getBoundingClientRect();
+        plusOne.style.left = `${rect.left + rect.width}px`;
+        plusOne.style.top = `${rect.top}px`;
+        plusOne.style.display = 'block';
+        plusOne.style.animation = 'flyOffScreen 1s forwards';
+
+        plusOne.addEventListener('animationend', () => {
+          plusOne.style.display = 'none';
+          plusOne.style.animation = '';
+        });
+      }
+
+      function showNotification(message, type) {
+        const notificationBar = document.getElementById('notification-bar');
+        const notificationMessage = document.getElementById('notification-message');
+
+        notificationMessage.textContent = message;
+        notificationBar.className = `notification-bar ${type}`;
+        notificationBar.style.display = 'block';
+
+        setTimeout(() => {
+          notificationBar.style.display = 'none';
+        }, 5000);
+      }
+    });
+  </script>
+  <div id="plus-one-animation" class="plus-one">+1</div>
+</body>
+</html>

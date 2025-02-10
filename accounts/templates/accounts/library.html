@@ -20,7 +20,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="icon" type="image/png" href="{% static 'accounts/img/favicon.png' %}">
+        <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
   <title>
 Chinese Log  </title>
   <!--     Fonts and icons     -->
@@ -249,109 +249,65 @@ Chinese Log  </title>
     width: auto;
   }
 </style>
+    <style>
+/* Add these new styles */
+.video-card {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    transform: translateY(0);
+}
+
+.video-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.video-card:hover .image-container img {
+    transform: scale(1.05);
+}
+
+.filter-button {
+    background: transparent;
+    color: #666;
+    border: none;
+}
+
+.filter-button:hover, .filter-button.active {
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-download:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+.gradient-overlay {
+    backdrop-filter: blur(4px);
+}
+
+.channel-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f0f0;
+    color: #666;
+}
+
+.toggle-log:hover {
+    background: #e9ecef;
+    transform: rotate(90deg);
+    transition: transform 0.3s ease;
+}
+</style>
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
-  <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3" id="sidenav-main">
-  <div class="sidenav-header">
-  <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
-<a class=" m-0 d-flex justify-content-center align-items-center" href="/" style="padding-left: 0px;">
-  <img src="{% static 'subplayer/logo.png' %}" alt="Logo" class="custom-logo-size" style="height: 50px; width: auto; display: block; margin: auto;" />
-</a>
-</div>
-    <hr class="horizontal dark mt-0">
-    <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link" href="/">
-                    <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center" style="background-color: #FFFFFF; width: 48px; height: 48px; color: #000000;">
-                        <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="fill: #000000; color: #000000;">
-                            <title>shop</title>
-                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g transform="translate(-1716.000000, -439.000000)" fill="#000000" fill-rule="nonzero">
-                                    <g transform="translate(1716.000000, 291.000000)">
-                                        <g transform="translate(0.000000, 148.000000)">
-                                            <path class="color-background opacity-6" d="M46.7199583,10.7414583 L40.8449583,0.949791667 C40.4909749,0.360605034 39.8540131,0 39.1666667,0 L7.83333333,0 C7.1459869,0 6.50902508,0.360605034 6.15504167,0.949791667 L0.280041667,10.7414583 C0.0969176761,11.0460037 -1.23209662e-05,11.3946378 -1.23209662e-05,11.75 C-0.00758042603,16.0663731 3.48367543,19.5725301 7.80004167,19.5833333 L7.81570833,19.5833333 C9.75003686,19.5882688 11.6168794,18.8726691 13.0522917,17.5760417 C16.0171492,20.2556967 20.5292675,20.2556967 23.494125,17.5760417 C26.4604562,20.2616016 30.9794188,20.2616016 33.94575,17.5760417 C36.2421905,19.6477597 39.5441143,20.1708521 42.3684437,18.9103691 C45.1927731,17.649886 47.0084685,14.8428276 47.0000295,11.75 C47.0000295,11.3946378 46.9030823,11.0460037 46.7199583,10.7414583 Z" style="fill: #000000;"></path>
-                                            <path class="color-background" d="M39.198,22.4912623 C37.3776246,22.4928106 35.5817531,22.0149171 33.951625,21.0951667 L33.92225,21.1107282 C31.1430221,22.6838032 27.9255001,22.9318916 24.9844167,21.7998837 C24.4750389,21.605469 23.9777983,21.3722567 23.4960833,21.1018359 L23.4745417,21.1129513 C20.6961809,22.6871153 17.4786145,22.9344611 14.5386667,21.7998837 C14.029926,21.6054643 13.533337,21.3722507 13.0522917,21.1018359 C11.4250962,22.0190609 9.63246555,22.4947009 7.81570833,22.4912623 C7.16510551,22.4842162 6.51607673,22.4173045 5.875,22.2911849 L5.875,44.7220845 C5.875,45.9498589 6.7517757,46.9451667 7.83333333,46.9451667 L19.5833333,46.9451667 L19.5833333,33.6066734 L27.4166667,33.6066734 L27.4166667,46.9451667 L39.1666667,46.9451667 C40.2482243,46.9451667 41.125,45.9498589 41.125,44.7220845 L41.125,22.2822926 C40.4887822,22.4116582 39.8442868,22.4815492 39.198,22.4912623 Z" style="fill: #000000;"></path>
-                                        </g>
-                                    </g>
-                                </g>
-                            </g>
-                        </svg>
-                    </div>
-                    <span class="nav-link-text ms-1">Dashboard</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/media_list">
-                    <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center" style="background-color: #FFFFFF; width: 48px; height: 48px; color: #000000;">
-                        <svg width="12px" height="12px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="fill: #000000; color: #000000;">
-                            <title>Search</title>
-                            <g fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="11" cy="11" r="8" stroke="#000000" stroke-width="2"></circle>
-                                <path d="M21 21l-4.35-4.35" stroke="#000000" stroke-width="2"></path>
-                            </g>
-                        </svg>
-                    </div>
-                    <span class="nav-link-text ms-1">Search</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link active" href="/user_videos">
-                    <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center" style="background-color: #FFFFFF; width: 48px; height: 48px; color: #000000;">
-                        <svg width="12px" height="12px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="fill: #000000; color: #000000;">
-                            <title>box-3d-50</title>
-                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g transform="translate(-2319.000000, -291.000000)" fill="#000000" fill-rule="nonzero">
-                                    <g transform="translate(1716.000000, 291.000000)">
-                                        <g transform="translate(603.000000, 0.000000)">
-                                            <path class="color-background" d="M22.7597136,19.3090182 L38.8987031,11.2395234 C39.3926816,10.9925342 39.592906,10.3918611 39.3459167,9.89788265 C39.249157,9.70436312 39.0922432,9.5474453 38.8987261,9.45068056 L20.2741875,0.1378125 L20.2741875,0.1378125 C19.905375,-0.04725 19.469625,-0.04725 19.0995,0.1378125 L3.1011696,8.13815822 C2.60720568,8.38517662 2.40701679,8.98586148 2.6540352,9.4798254 C2.75080129,9.67332903 2.90771305,9.83023153 3.10122239,9.9269862 L21.8652864,19.3090182 C22.1468139,19.4497819 22.4781861,19.4497819 22.7597136,19.3090182 Z" style="fill: #000000;"></path>
-                                            <path class="color-background opacity-6" d="M23.625,22.429159 L23.625,39.8805372 C23.625,40.4328219 24.0727153,40.8805372 24.625,40.8805372 C24.7802551,40.8805372 24.9333778,40.8443874 25.0722402,40.7749511 L41.2741875,32.673375 L41.2741875,32.673375 C41.719125,32.4515625 42,31.9974375 42,31.5 L42,14.241659 C42,13.6893742 41.5522847,13.241659 41,13.241659 C40.8447549,13.241659 40.6916418,13.2778041 40.5527864,13.3472318 L24.1777864,21.5347318 C23.8390024,21.7041238 23.625,22.0503869 23.625,22.429159 Z" style="fill: #000000;"></path>
-                                            <path class="color-background opacity-6" d="M20.4472136,21.5347318 L1.4472136,12.0347318 C0.953235098,11.7877425 0.352562058,11.9879669 0.105572809,12.4819454 C0.0361450918,12.6208008 6.47121774e-16,12.7739139 0,12.929159 L0,30.1875 L0,30.1875 C0,30.6849375 0.280875,31.1390625 0.7258125,31.3621875 L19.5528096,40.7750766 C20.0467945,41.0220531 20.6474623,40.8218132 20.8944388,40.3278283 C20.963859,40.1889789 21,40.0358742 21,39.8806379 L21,22.429159 C21,22.0503869 20.7859976,21.7041238 20.4472136,21.5347318 Z" style="fill: #000000;"></path>
-                                        </g>
-                                    </g>
-                                </g>
-                            </g>
-                        </svg>
-                    </div>
-                    <span class="nav-link-text ms-1">My Library</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/highlights">
-                    <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center" style="background-color: #FFFFFF; width: 48px; height: 48px;">
-                        <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                            <title>credit-card</title>
-                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g transform="translate(-2169.000000, -745.000000)" fill="currentColor" fill-rule="nonzero">
-                                    <g transform="translate(1716.000000, 291.000000)">
-                                        <g transform="translate(453.000000, 454.000000)">
-                                            <path class="color-background opacity-6" d="M43,10.7482083 L43,3.58333333 C43,1.60354167 41.3964583,0 39.4166667,0 L3.58333333,0 C1.60354167,0 0,1.60354167 0,3.58333333 L0,10.7482083 L43,10.7482083 Z" style="fill: currentColor;"></path>
-                                            <path class="color-background" d="M0,16.125 L0,32.25 C0,34.2297917 1.60354167,35.8333333 3.58333333,35.8333333 L39.4166667,35.8333333 C41.3964583,35.8333333 43,34.2297917 43,32.25 L43,16.125 L0,16.125 Z M19.7083333,26.875 L7.16666667,26.875 L7.16666667,23.2916667 L19.7083333,23.2916667 L19.7083333,26.875 Z M35.8333333,26.875 L28.6666667,26.875 L28.6666667,23.2916667 L35.8333333,23.2916667 L35.8333333,26.875 Z" style="fill: currentColor;"></path>
-                                        </g>
-                                    </g>
-                                </g>
-                            </g>
-                        </svg>
-                    </div>
-                    <span class="nav-link-text ms-1">Highlights</span>
-                </a>
-            </li>
-        </ul>
-    </div>
-        <!--
-   <div class="sidenav-footer mb-3 mx-3">
-    <a class="btn bg-gradient-primary w-90" href="/join" style="margin-bottom: 0;">Upgrade to Pro</a>
-    <a class="nav-link mt-1 text-center" href="/accounts/login/">Sign In</a>
+ {% include 'accounts/navbar.html' %}
+ {% include 'accounts/sidebar.html' %}
 
-</div>
--->
-
-
-</aside>
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
     <!-- Navbar -->
- {% include 'accounts/navbar.html' %}
 
     <!-- End Navbar -->
 
@@ -367,60 +323,266 @@ Chinese Log  </title>
 <div class="container-fluid py-4">
     <!-- Sorting Buttons -->
 <!-- Sorting Buttons -->
-<div class="d-flex justify-content-between mb-4">
- <!-- Sorting Buttons -->
-  <div>
-    <button class="btn btn-primary mx-2 filter-button" style="background-color: #3a9fff; color: #fff;" onclick="filterVideos('all', this)">All</button>
-    <button class="btn btn-primary mx-2 filter-button" style="background-color: #3a9fff; color: #fff;" onclick="filterVideos('in_progress', this)">In Progress</button>
-    <button class="btn btn-primary mx-2 filter-button" style="background-color: #3a9fff; color: #fff;" onclick="filterVideos('completed', this)">Completed</button>
-  </div>
-  <button class="btn btn-primary mx-2" style="background-color: #3a9fff; color: #fff;" onclick="downloadSubtitles()">Download All Subtitles (.txt)</button>
+<!-- Replace the existing buttons div with this -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+   <div class="filter-group">
+       <button class="btn-filter active" onclick="filterVideos('all', this)">
+           <span class="btn-text">All Videos</span>
+           <span class="btn-count">{{ all_media_count }}</span>
+       </button>
+       <button class="btn-filter" onclick="filterVideos('in_progress', this)">
+           <span class="btn-text">In Progress</span>
+           <span class="btn-count">{{ in_progress_count }}</span>
+       </button>
+       <button class="btn-filter" onclick="filterVideos('completed', this)">
+           <span class="btn-text">Completed</span>
+           <span class="btn-count">{{ completed_count }}</span>
+       </button>
+   </div>
+   <!-- Download Button Positioned on Right -->
+   <button class="btn-download" onclick="downloadSubtitles()">Download Subtitles</button>
 </div>
+
+
+<style>
+.filter-group {
+    display: flex;
+    gap: 1rem;
+    background: #f8f9fa;
+    padding: 0.5rem;
+    border-radius: 12px;
+}
+
+.btn-filter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #64748b;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-filter:hover {
+    background: rgba(99, 102, 241, 0.1);
+    color: #4f46e5;
+}
+
+.btn-filter.active {
+    background: #4f46e5;
+    color: white;
+}
+
+.btn-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.1);
+    font-size: 0.75rem;
+}
+
+.btn-filter.active .btn-count {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-download {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: #4f46e5;
+    color: white;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-download:hover {
+    background: #4338ca;
+    transform: translateY(-1px);
+}
+
+.btn-download svg {
+    transition: transform 0.2s ease;
+}
+
+.btn-download:hover svg {
+    transform: translateY(2px);
+}
+</style>
 <div class="row" id="video-list">
-    {% for video in media %}
-    <div class="col-md-4 mb-4 video-card" data-status="{{ video.status }}">
-        <div class="card" style="color: inherit; text-decoration: none; position: relative;">
-            <a href="{% url 'video_detail' video.media_id %}" style="color: inherit; text-decoration: none;">
-                <div class="image-container">
-                    <img src="{{ video.thumbnail_url }}" class="card-img-top" alt="{{ video.title }}">
-                    <div class="overlay-info">
-                        <div class="badge badge-highlight highlights-count">
-                            <svg fill="#ffd700" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" stroke="#ffd700" stroke-width="10.24" style="width: 1em; height: 1em; vertical-align: middle;">
-                                <path d="M224,120H164.2l22.9-22.9a12,12,0,0,0,0-17L175,68.9a12,12,0,0,0-17,0L128,98.9,98.9,69.8a12,12,0,0,0-17,0L69.8,80.2a12,12,0,0,0,0,17L92.7,120H32a12,12,0,0,0-12,12v12a12,12,0,0,0,12,12H92.7L69.8,179a12,12,0,0,0,0,17L80.2,209.1a12,12,0,0,0,17,0L128,187.1l29.1,29.1a12,12,0,0,0,17,0L186.2,196a12,12,0,0,0,0-17L163.3,156H224a12,12,0,0,0,12-12V132A12,12,0,0,0,224,120Z"></path>
-                            </svg>
-                            {{ video.user_highlights_count }} Highlights
+    {% if media %}
+        {% for video in media %}
+        <div class="col-md-4 mb-4">
+            <div class="video-card" data-status="{{ video.status|default:'all' }}">
+                <a href="{% url 'video_detail' video.media_id %}" class="video-card-link">
+                    <div class="thumbnail-container">
+                        <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}" class="thumbnail">
+                        <div class="overlay">
+                            <div class="stats">
+                                <span class="stat-item">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                                    </svg>
+                                    {{ video.user_highlights_count }}
+                                </span>
+                                <span class="stat-item">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <polyline points="12 6 12 12 16 14"/>
+                                    </svg>
+                                    {{ video.formatted_video_length }}
+                                </span>
+                            </div>
                         </div>
-                        <div class="badge badge-length video-length">{{ video.formatted_video_length }}</div>
                     </div>
-                </div>
-                <div class="card-body">
-                    <h5 class="card-title">{{ video.title }}</h5>
-                    <p class="card-text">{{ video.description|truncatechars:100 }}</p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="channel-name">{{ video.channel.name }}</span>
-                        <a href="#" class="toggle-log" data-id="{{ video.id }}" data-action="remove" style="margin-left: auto;">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px;">
-                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                                <g id="SVGRepo_iconCarrier">
-                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M23 4C23 2.34315 21.6569 1 20 1H4C2.34315 1 1 2.34315 1 4V20C1 21.6569 2.34315 23 4 23H20C21.6569 23 23 21.6569 23 20V4ZM21 4C21 3.44772 20.5523 3 20 3H4C3.44772 3 3 3.44772 3 4V20C3 20.5523 3.44772 21 4 21H20C20.5523 21 21 20.5523 21 20V4Z" fill="#0F0F0F"></path>
-                                    <path d="M16 11C16.5523 11 17 11.4477 17 12C17 12.5523 16.5523 13 16 13H8C7.44772 13 7 12.5523 7 12C7 11.4477 7.44772 11 8 11H16Z" fill="#0F0F0F"></path>
-                                </g>
-                            </svg>
-                        </a>
+                    <div class="content">
+                        <h3 class="title">{{ video.title }}</h3>
+                        <p class="description">{{ video.description|truncatechars:100 }}</p>
+                        <div class="footer">
+                            <span class="channel">{{ video.channel.name }}</span>
+                            <button class="btn-action toggle-log" data-id="{{ video.id }}" data-action="remove">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </a>
+                </a>
+            </div>
         </div>
-    </div>
-    {% empty %}
-    <p>No videos found.</p>
-    {% endfor %}
+        {% endfor %}
+    {% else %}
+        <div class="col-12 text-center py-5">
+            <p>No videos found.</p>
+        </div>
+    {% endif %}
 </div>
 
+<style>
+.video-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
 
+.video-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
 
-</div>
+.video-card-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.thumbnail-container {
+    position: relative;
+    padding-top: 56.25%;
+    overflow: hidden;
+}
+
+.thumbnail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.video-card:hover .thumbnail {
+    transform: scale(1.05);
+}
+
+.overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    color: white;
+}
+
+.stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.stat-item svg {
+    width: 16px;
+    height: 16px;
+}
+
+.content {
+    padding: 1.25rem;
+}
+
+.title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.description {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.channel {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.btn-action {
+    padding: 0.5rem;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    color: #64748b;
+    transition: all 0.2s ease;
+}
+
+.btn-action:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #4f46e5;
+}
+</style>
+
 
 <!-- JavaScript for Filtering -->
 <script>
@@ -435,7 +597,7 @@ function filterVideos(status, element) {
     });
 
     // Remove active class from all buttons
-    const buttons = document.querySelectorAll('.filter-button');
+    const buttons = document.querySelectorAll('.btn-filter');
     buttons.forEach(button => {
         button.classList.remove('active');
     });
@@ -871,7 +1033,250 @@ function downloadSubtitles() {
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
 <script src="{% static 'accounts/js/soft-ui-dashboard.min.js?v=1.0.7' %}"></script>
 
+<style>
+/* Updated color scheme and shared styles */
+:root {
+  --primary-color: #4f46e5;
+  --secondary-color: #64748b;
+  --accent-color: #cb0ba0;
+  --background-color: #f8f9fa;
+  --card-color: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-radius: 12px;
+}
 
+/* Navigation styles update */
+.nav-link {
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  border-radius: var(--border-radius);
+  padding: 0.75rem 1.25rem;
+}
+
+
+
+.btn-purple {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.btn-purple:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(203, 11, 160, 0.2);
+}
+
+/* XP Display update */
+#unique-xp-display {
+  background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#unique-xp-display .unique-xp-circle {
+  background-color: rgba(255, 255, 255, 0.2);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Content area updates */
+.filter-group {
+  background: var(--card-color);
+  border-radius: var(--border-radius);
+  padding: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.btn-filter {
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--border-radius) - 4px);
+  padding: 0.75rem 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.btn-filter:hover,
+.btn-filter.active {
+  background: var(--primary-color);
+  color: white;
+}
+
+.video-card {
+  background: var(--card-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.video-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  #sidenav-main {
+    display: none;
+  }
+  #top-nav {
+    display: block;
+  }
+}
+
+@media (min-width: 1201px) {
+  #top-nav {
+    display: none;
+  }
+}
+    .btn-filter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #64748b;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-filter:hover {
+    background: rgba(99, 102, 241, 0.1);
+    color: #4f46e5;
+}
+
+.btn-filter.active {
+    background: #4f46e5;
+    color: white;
+}
+
+.btn-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.1);
+    font-size: 0.75rem;
+}
+
+.btn-filter.active .btn-count {
+    background: rgba(255, 255, 255, 0.2);
+}
+    /* Primary Button */
+.btn-primary {
+    background-color: #3a9fff !important;
+    border-color: #3a9fff !important;
+    color: #ffffff !important;
+}
+
+.btn-primary:hover {
+    background-color: #3a72ff !important;
+    border-color: #3a72ff !important;
+    color: #ffffff !important;
+}
+
+/* General Buttons */
+.btn {
+    background-color: #3a9fff !important;
+    color: white !important;
+    border-radius: 12px;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #3a72ff !important;
+    box-shadow: 0 4px 12px rgba(58, 159, 255, 0.3);
+}
+
+/* Filter Buttons */
+.btn-filter {
+    background-color: #3a9fff !important;
+    color: white !important;
+    border-radius: 8px;
+    padding: 10px 15px;
+    transition: all 0.3s ease;
+}
+
+.btn-filter:hover,
+.btn-filter.active {
+    background-color: #3a72ff !important;
+    color: white !important;
+}
+
+/* Download Buttons */
+.btn-download {
+    background-color: #3a9fff !important;
+    color: white !important;
+    border-radius: 12px;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+}
+
+.btn-download:hover {
+    background-color: #3a72ff !important;
+    box-shadow: 0 4px 12px rgba(58, 159, 255, 0.3);
+}
+
+/* Action Buttons (e.g., Add/Remove from Log) */
+.btn-action {
+    background-color: #3a9fff !important;
+    color: white !important;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-action:hover {
+    background-color: #3a72ff !important;
+    box-shadow: 0 4px 12px rgba(58, 159, 255, 0.3);
+}
+
+/* Sidebar Buttons */
+.sidenav-footer .btn {
+    background-color: #3a9fff !important;
+    color: white !important;
+}
+
+.sidenav-footer .btn:hover {
+    background-color: #3a72ff !important;
+}
+    /* Button and Active State Styling */
+.btn-primary,
+.btn-filter.active,
+.btn-download {
+    background: linear-gradient(135deg, #3a9fff 0%, #3a72ff 100%) !important;
+    border: none;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(58, 159, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover,
+.btn-filter.active:hover,
+.btn-download:hover {
+    background: linear-gradient(135deg, #3a72ff 0%, #3a9fff 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(58, 159, 255, 0.3);
+}
+
+</style>
 </body>
 
 </html>

@@ -1,207 +1,392 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Settings</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Open Sans', sans-serif;
-            display: flex;
-        }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Account Settings</title>
 
-        #sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 250px;
-            height: 100vh;
-            background-color: #fff;
-            padding: 20px;
-            overflow-y: auto;
-        }
+  <!-- Fonts and icons -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
+  <!-- Nucleo Icons -->
+  <link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
 
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
-            width: calc(100% - 250px);
-        }
+  <!-- CSS Files -->
+  <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet">
 
-        .container {
-            max-width: 100%;
-            margin-top: 50px;
-        }
+  <style>
+    /* CSS from your previous example */
+    :root {
+      --transition-duration: .2s;
+      --transition-timing-function: linear;
+      --transition-delay: 0s;
 
-        .card {
-            border: none;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-            transition: transform 0.2s;
-        }
+      --text-color-demo-dark: #2c2c2c;
+      --text-color-demo-light: #fff;
 
-        .card:hover {
-            transform: translateY(-5px);
-        }
+      --bg-demo-light: #fff;
+      --bg-demo-dark: #2c2c2c;
+    }
 
-        .card-header {
-            background-color: #fff;
-            border-bottom: 1px solid #eee;
-            padding: 1.25rem 1.5rem;
-        }
+    /* ... rest of your CSS here ... */
 
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
+    @media only screen and (max-width: 600px) {
+      .project-column:nth-child(4) {
+        display: none;
+      }
+      .project-tasks {
+        grid-template-columns: 1fr;
+      }
+      .task-details {
+        flex-wrap: wrap;
+        padding: 3rem 1rem;
+      }
+      .tag-progress, .task-activity {
+        flex-basis: 100%;
+      }
+      h1 {
+        font-size: 25px;
+      }
+    }
 
-        .btn-primary:hover {
-            background-color: #0069d9;
-            border-color: #0062cc;
-        }
+    .nav-link.active .icon svg {
+      fill: #FFD700 !important;
+      color: #FFD700 !important;
+    }
 
-        .btn-danger {
-            background-color: #dc3545;
-            border-color: #dc3545;
-        }
+    .custom-logo-size {
+      height: 50px !important; /* Increase by 20% from 80px */
+    }
 
-        .btn-danger:hover {
-            background-color: #bd2130;
-            border-color: #b21f2d;
-        }
+    .sidenav-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100px;  /* Adjust this height as needed */
+    }
 
-        .btn-success {
-            background-color: #28a745;
-            border-color: #28a745;
-        }
+    .custom-logo-size {
+      max-height: 80%;
+      width: auto;
+    }
 
-        .btn-success:hover {
-            background-color: #218838;
-            border-color: #1e7e34;
-        }
+    .card__price {
+      font-size: 24px;  /* Adjust this down from whatever it was */
+    }
 
-        .header__title {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
+    .card__price span {
+      font-size: 18px;  /* Adjust this down from whatever it was */
+    }
+      .card-body p {
+    font-size: 14px; /* Adjust this value as needed */
+}
 
-        .icon-link {
-            display: inline-flex;
-            align-items: center;
-            padding: 0;
-        }
+.card-body strong {
+    font-size: 14px; /* If you want strong text to match the smaller size */
+}
 
-        .icon-link > .bi {
-            flex-shrink: 0;
-            margin-right: 0.5rem;
-            font-size: 1.5rem;
-        }
+.header__title {
+    font-size: 24px; /* Adjust the header title if you want it smaller too */
+}
+      .header {
+    max-width: 500px;
+    margin: 0 auto; /* This centers the header */
+    padding-top: 50px; /* Adjust padding as needed */
+    text-align: center; /* This ensures the text is centered */
+}
 
-        @media (max-width: 768px) {
-            #sidebar {
-                width: 100px;
-            }
-            .main-content {
-                margin-left: 100px;
-                width: calc(100% - 100px);
-            }
-        }
-    </style>
+.header__title {
+    font-size: 24px; /* Or whatever size you decided for smaller text */
+    margin-bottom: 2rem; /* Keep this if you want space below the title */
+}
+     .toggle-log {
+      background: #f0f2f5;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      margin-left: auto;
+      margin-top: -16px; /* Move the button up into the card body */
+      position: relative;
+      z-index: 1; /* Ensure button is above other content */
+    }
+       .toggle-log {
+      background: #f0f2f5;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+
+      /* Positioning the button within the card */
+      position: absolute;
+      top: -16px; /* This moves the button up into the card body */
+      right: 16px; /* Adjust this to position from the right */
+      z-index: 1; /* Ensure button is above other content */
+    }
+
+    .card-body {
+      padding: 1rem 1.25rem 2rem; /* Increased bottom padding to accommodate the button */
+    }
+
+  </style>
 </head>
 
-<body>
-    <aside id="sidebar">
-        {% include 'accounts/sidebar.html' %}
-    </aside>
-    <div class="main-content">
-        {% include 'accounts/navbar.html' %}
+<body class="g-sidenav-show bg-gray-100">
+  <div class="app">
+    {% include 'accounts/sidebar.html' %}
+
+    <!-- Main content -->
+    <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+      {% include 'accounts/navbar.html' %}
+
+      <header class="header">
+        <h1 class="header__title">Account Settings</h1>
+      </header>
+
+      <div class="content">
         <div class="container">
-            <header class="header">
-                <h1 class="header__title">Account Settings</h1>
-            </header>
-
-         <!-- Plan Overview -->
-<div class="card mb-4">
-    <div class="card-header">
-        <h3>Plan Overview</h3>
-    </div>
-    <div class="card-body">
-        <p><strong>Current Plan:</strong>
-            {{ subscription.tier }}
-            {% if subscription.tier != 'FREE' and not subscription.is_active %}
-                (You have access to Premium Plan until {{ expiration_date }})
-            {% endif %}
-        </p>
-        {% if subscription.tier != 'FREE' %}
-            {% if subscription.is_active %}
-                <p><strong>Next Billing Date:</strong>
-                    {% if subscription.stripe_subscription_id %}
-                    {{ next_billing_date }}
-                    {% else %}
-                    Monthly on the day you subscribed
-                    {% endif %}
+          {% if user.is_authenticated %}
+            <!-- Plan Overview -->
+            <div class="card mb-4">
+              <div class="card-header">
+                <h3>Plan Overview</h3>
+              </div>
+              <div class="card-body">
+                <p><strong>Current Plan:</strong>
+                  {{ subscription.tier }}
+                  {% if subscription.tier != 'FREE' and not subscription.is_active %}
+                    (You have access to Premium Plan until {{ expiration_date }})
+                  {% endif %}
                 </p>
-                <form method="post" action="{% url 'cancel_subscription' %}">
+                {% if subscription.tier != 'FREE' %}
+                  {% if subscription.is_active %}
+                    <p><strong>Next Billing Date:</strong>
+                      {% if subscription.stripe_subscription_id %}
+                      {{ next_billing_date }}
+                      {% else %}
+                      Monthly on the day you subscribed
+                      {% endif %}
+                    </p>
+                    <form method="post" action="{% url 'cancel_subscription' %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel your subscription?')">Cancel Subscription</button>
+                    </form>
+                  {% else %}
+                    <p><strong>Plan ends:</strong> {{ expiration_date }}</p>
+                    <form method="post" action="{% url 'reactivate_subscription' %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-success">Keep Subscription</button>
+                    </form>
+                  {% endif %}
+                {% else %}
+                  <form method="get" action="{% url 'join' %}">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel your subscription?')">Cancel Subscription</button>
-                </form>
-            {% else %}
-                <!-- Show this when the subscription is scheduled for cancellation -->
-                <p><strong>Plan ends:</strong> {{ expiration_date }}</p>
-                <form method="post" action="{% url 'reactivate_subscription' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-success">Keep Subscription</button>
-                </form>
-            {% endif %}
-        {% else %}
-          <!-- Replace the existing upgrade button with this -->
-<form method="get" action="{% url 'join' %}">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-primary">Upgrade</button>
-</form>
-        {% endif %}
-    </div>
-</div>
-            <!-- Payment Information -->
-           <!-- Payment Information -->
-<div class="card mb-4">
-    <div class="card-header">
-        <h3>Payment Information</h3>
-    </div>
-    <div class="card-body">
-        <p><strong>Payment Method:</strong>
-            {% if user_payment_info.card_last_four %}
-            **** **** **** {{ user_payment_info.card_last_four }} ({{ user_payment_info.card_type }})
-            {% else %}
-            Not set
-            {% endif %}
-        </p>
-        <div class="d-flex gap-2">
-            <a href="{% url 'update_payment' %}" class="btn btn-secondary">Update Payment Method</a>
+                    <button type="submit" class="btn btn-primary">Upgrade</button>
+                  </form>
+                {% endif %}
+              </div>
+            </div>
 
-        </div>
-    </div>
-</div>
+            <!-- Payment Information -->
+            <div class="card mb-4">
+              <div class="card-header">
+                <h3>Payment Information</h3>
+              </div>
+              <div class="card-body">
+                <p><strong>Payment Method:</strong>
+                  {% if user_payment_info.card_last_four %}
+                  **** **** **** {{ user_payment_info.card_last_four }} ({{ user_payment_info.card_type }})
+                  {% else %}
+                  Not set
+                  {% endif %}
+                </p>
+                <div class="d-flex gap-2">
+                  <a href="{% url 'update_payment' %}" class="btn btn-secondary">Update Payment Method</a>
+                </div>
+              </div>
+            </div>
 
             <!-- Account Details -->
             <div class="card mb-4">
-                <div class="card-header">
-                    <h3>Account Details</h3>
-                </div>
-                <div class="card-body">
-                    <p><strong>Email Address:</strong> {{ user.email }}</p>
-                </div>
+              <div class="card-header">
+                <h3>Account Details</h3>
+              </div>
+              <div class="card-body">
+                <p><strong>Email Address:</strong> {{ user.email }}</p>
+              </div>
             </div>
+          {% else %}
+            <p>Please log in to view and manage your account settings.</p>
+          {% endif %}
         </div>
-    </div>
+      </div>
+    </main>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-        crossorigin="anonymous"></script>
+  <!-- JS Files -->
+  <script src="{% static 'accounts/js/core/popper.min.js' %}"></script>
+  <script src="{% static 'accounts/js/core/bootstrap.min.js' %}"></script>
+  <script src="{% static 'accounts/js/plugins/perfect-scrollbar.min.js' %}"></script>
+  <script src="{% static 'accounts/js/plugins/smooth-scrollbar.min.js' %}"></script>
+  <script src="{% static 'accounts/js/soft-ui-dashboard.min.js' %}?v=1.0.7"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+
+      var dragSrcEl = null;
+
+      function handleDragStart(e) {
+        this.style.opacity = '0.1';
+        this.style.border = '3px dashed #c4cad3';
+
+        dragSrcEl = this;
+
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', this.innerHTML);
+      }
+
+      function handleDragOver(e) {
+        if (e.preventDefault) {
+          e.preventDefault();
+        }
+
+        e.dataTransfer.dropEffect = 'move';
+
+        return false;
+      }
+
+      function handleDragEnter(e) {
+        this.classList.add('task-hover');
+      }
+
+      function handleDragLeave(e) {
+        this.classList.remove('task-hover');
+      }
+
+      function handleDrop(e) {
+        if (e.stopPropagation) {
+          e.stopPropagation(); // stops the browser from redirecting.
+        }
+
+        if (dragSrcEl != this) {
+          dragSrcEl.innerHTML = this.innerHTML;
+          this.innerHTML = e.dataTransfer.getData('text/html');
+        }
+
+        return false;
+      }
+
+      function handleDragEnd(e) {
+        this.style.opacity = '1';
+        this.style.border = 0;
+
+        items.forEach(function (item) {
+          item.classList.remove('task-hover');
+        });
+      }
+
+      let items = document.querySelectorAll('.task');
+      items.forEach(function(item) {
+        item.addEventListener('dragstart', handleDragStart, false);
+        item.addEventListener('dragenter', handleDragEnter, false);
+        item.addEventListener('dragover', handleDragOver, false);
+        item.addEventListener('dragleave', handleDragLeave, false);
+        item.addEventListener('drop', handleDrop, false);
+        item.addEventListener('dragend', handleDragEnd, false);
+      });
+    });
+      let player;
+        let observer;
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '100%',
+                width: '100%',
+                videoId: 'c2jmFFsGCYs', // Replace with your YouTube video ID
+                playerVars: {
+                    'rel': 0,
+                    'modestbranding': 1,
+                    'controls': 1,
+                    'showinfo': 0,
+                    'fs': 1
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            event.target.playVideo();
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.PAUSED) {
+                observeOverlay();
+            } else if (event.data === YT.PlayerState.PLAYING) {
+                disconnectObserver();
+            }
+        }
+
+        function observeOverlay() {
+            const playerElement = document.getElementById('player');
+
+            // Check for existing overlay before creating observer
+            const existingOverlay = document.querySelector('.ytp-pause-overlay');
+            if (existingOverlay) {
+                closeOverlay(existingOverlay);
+                return;
+            }
+
+            if (!observer) {
+                observer = new MutationObserver((mutationsList) => {
+                    for (let mutation of mutationsList) {
+                        if (mutation.type === 'childList') {
+                            const overlay = document.querySelector('.ytp-pause-overlay');
+                            if (overlay) {
+                                closeOverlay(overlay);
+                                disconnectObserver();
+                            }
+                        }
+                    }
+                });
+
+                observer.observe(playerElement, { childList: true, subtree: true });
+            }
+        }
+
+        function closeOverlay(overlay) {
+            const closeButton = overlay.querySelector('.ytp-pause-overlay-close-button');
+            if (closeButton) {
+                closeButton.click();
+            }
+        }
+
+        function disconnectObserver() {
+            if (observer) {
+                observer.disconnect();
+                observer = null;
+            }
+        }
+
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  </script>
+
 </body>
-
 </html>

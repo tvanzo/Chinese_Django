@@ -13,58 +13,126 @@
   <link id="pagestyle" href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet" />
   <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet" />
   <style>
-    .btn-purple {
-      background-color: #d00c9c;
-      color: #ffffff;
-      border-color: #6f42c1;
-    }
-    .compact-btn {
-      padding: 0.25rem 0.5rem;
-    }
-    #unique-xp-display {
-      background-color: #d00c9c;
-      color: white;
-      padding: 3px 8px;
-      border-radius: 8px;
-    }
-    #unique-xp-display .unique-xp-circle {
-      background-color: #ffc40c;
-      color: white;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 5px;
-    }
-    #unique-xp-points {
-      font-weight: bold;
-      font-size: 14px;
-    }
-    @media (max-width: 1200px) {
-      #top-nav {
+/* Global Styles */
+:root {
+    --primary-color: #3a9fff; /* Blue */
+    --secondary-color: #7a1ea0; /* Deep Purple */
+    --accent-color: #d00c9c; /* Pink */
+    --gradient-start: var(--primary-color);
+    --gradient-middle: var(--secondary-color);
+    --gradient-end: var(--accent-color);
+    --text-color: white;
+}
+
+/* XP Button */
+#unique-xp-display {
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-middle) 50%, var(--gradient-end) 100%);
+    color: var(--text-color) !important;
+    padding: 5px 12px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 10px rgba(58, 159, 255, 0.3);
+    transition: all 0.3s ease-in-out;
+    border: none;
+}
+
+/* Hover Effect */
+#unique-xp-display:hover {
+    background: linear-gradient(135deg, #3a72ff 0%, #682b88 50%, #bc0c85 100%);
+    box-shadow: 0 6px 15px rgba(58, 159, 255, 0.4);
+}
+
+/* XP Circle */
+#unique-xp-display .unique-xp-circle {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+/* Compact Button for Mobile */
+.compact-btn {
+    padding: 0.25rem 0.5rem;
+}
+
+/* Navbar Link Styles */
+.nav-link {
+    color: #64748b;
+    transition: all 0.2s ease;
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    color: var(--primary-color);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+    #top-nav {
         display: block;
-      }
     }
-    @media (min-width: 1201px) {
-      #top-nav {
+}
+
+@media (min-width: 1201px) {
+    #top-nav {
         display: none;
-      }
     }
+}
+      /* XP Button Styling */
+#unique-xp-display {
+    background: linear-gradient(135deg, #1a1f36 0%, #3a9fff 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(58, 159, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+#unique-xp-display:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(58, 159, 255, 0.3);
+}
+
+#unique-xp-display .unique-xp-circle {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+#unique-xp-points {
+    font-weight: 600;
+    color: white;
+}
+
+
   </style>
 </head>
 <body>
 <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" navbar-scroll="true">
   <div class="container-fluid py-1 px-3">
 
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-        <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a></li>
-        <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Dashboard</li>
-      </ol>
-      <h6 class="font-weight-bolder mb-0">Dashboard</h6>
-    </nav>
+
       <nav id="top-nav">
    <ul class="navbar-nav">
 
