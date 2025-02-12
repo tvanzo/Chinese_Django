@@ -920,17 +920,195 @@
   border-color: #3a9fff;
   color: #3a9fff;
 }
+        .add-media-button {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background-color: var(--primary-color);
+      color: white;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: transform 0.2s ease;
+      border: none;
+      font-size: 24px;
+    }
+
+    .add-media-button:hover {
+      transform: scale(1.1);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-light);
+    }
+
+    .url-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .url-input {
+      padding: 0.75rem 1rem;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 1rem;
+      width: 100%;
+    }
+
+    .submit-button {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .submit-button:hover {
+      background-color: #2b8ae6;
+    }
+         .custom-url-input {
+      margin: 20px auto;
+      max-width: 600px;
+      padding: 0 20px;
+    }
+
+    .url-input-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      padding: 20px;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: #f3f4f6;
+      border-radius: 8px;
+      padding: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .search-box:focus-within {
+      box-shadow: 0 0 0 2px #6366f1;
+    }
+
+    .url-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 12px 16px;
+      font-size: 16px;
+      color: #374151;
+      outline: none;
+    }
+
+    .url-input::placeholder {
+      color: #9ca3af;
+    }
+
+    .submit-button {
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .submit-button:hover {
+      background: #4f46e5;
+    }
+
+    .disclaimer {
+      margin-top: 12px;
+      padding: 8px 12px;
+      background: #fff7ed;
+      border-left: 4px solid #f97316;
+      color: #9a3412;
+      font-size: 14px;
+      border-radius: 4px;
+    }
+       /* Tooltip container */
+.add-custom-url {
+  position: relative;
+  display: inline-block;
+}
+
+/* Tooltip text */
+.add-custom-url::after {
+  content: "Add YouTube Video";
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Show tooltip on hover */
+.add-custom-url:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+  </style>
   </style>
 </head>
 <body class="g-sidenav-show bg-gray-100">
-  <div id="notification-bar" class="notification-bar">
-  </div>
-      {% include 'accounts/navbar.html' %}
-
+  {% include 'accounts/navbar.html' %}
   {% include 'accounts/sidebar.html' %}
 
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
-
     <div class="container-fluid py-4">
       <h2>Explore Videos</h2>
 
@@ -942,6 +1120,24 @@
         <div class="category-item" data-category="daily-life">Daily Life</div>
         <div class="category-item" data-category="science">Science</div>
         <div class="category-item" data-category="culture">Culture</div>
+<div class="category-item add-custom-url" title="Add YouTube Video">+</div>
+      </div>
+
+      <!-- Custom URL Input (Initially Hidden) -->
+      <div class="custom-url-input" style="display: none;">
+        <div class="url-input-container">
+          <div class="search-box">
+            <input type="url" class="url-input" placeholder="Add YouTube URL" required>
+            <button type="submit" class="submit-button">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14m-7-7v14"/>
+              </svg>
+            </button>
+          </div>
+          <div class="disclaimer">
+            Note: Video must have Chinese subtitles available to be added successfully
+          </div>
+        </div>
       </div>
 
       <!-- Video Grid -->
@@ -954,7 +1150,6 @@
                 <div class="overlay-info">
                   <div class="badge badge-highlight">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <!-- Star icon -->
                       <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                     </svg>
                     {{ video.user_highlights_count }}
@@ -965,7 +1160,6 @@
               <div class="card-body">
                 <h5 class="card-title">{{ video.title }}</h5>
                 <p class="card-text">{{ video.description|truncatechars:100 }}</p>
-
                 <div class="channel-info">
                   <div class="channel-meta">
                     <span class="channel-name">{{ video.channel.name }}</span>
@@ -989,61 +1183,96 @@
     </div>
   </main>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Category filtering
-      const categoryItems = document.querySelectorAll('.category-item');
-      const videoCards = document.querySelectorAll('.video-card');
+ <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Category filtering
+    const categoryItems = document.querySelectorAll('.category-item');
+    const videoCards = document.querySelectorAll('.video-card');
+    const addButton = document.querySelector('.add-custom-url');
+    const urlInputContainer = document.querySelector('.custom-url-input');
 
-      categoryItems.forEach(item => {
+    let isUrlInputVisible = false;
+
+    // Function to toggle search bar visibility
+    function toggleUrlInput() {
+        isUrlInputVisible = !isUrlInputVisible;
+        urlInputContainer.style.display = isUrlInputVisible ? 'block' : 'none';
+    }
+
+    // Toggle the URL input when clicking the + button
+    addButton.addEventListener('click', function(event) {
+        event.stopPropagation(); // Prevent event from bubbling up
+        toggleUrlInput();
+    });
+
+    // Hide URL input when clicking another category filter
+    categoryItems.forEach(item => {
         item.addEventListener('click', function() {
-          const category = this.dataset.category;
-
-          categoryItems.forEach(i => i.classList.remove('active'));
-          this.classList.add('active');
-
-          videoCards.forEach(card => {
-            const cardCategory = card.dataset.category;
-            if (category === 'all' || cardCategory === category) {
-              card.style.display = 'block';
-            } else {
-              card.style.display = 'none';
+            if (!this.classList.contains('add-custom-url')) {
+                isUrlInputVisible = false;
+                urlInputContainer.style.display = 'none';
             }
-          });
         });
-      });
+    });
 
-      // Hover effects
-      document.querySelectorAll('.video-card').forEach(card => {
+    // Prevent search bar from closing when clicking inside it
+    urlInputContainer.addEventListener('click', function(event) {
+        event.stopPropagation();
+    });
+
+    // Close search bar if clicking anywhere outside
+    document.addEventListener('click', function(event) {
+        if (!urlInputContainer.contains(event.target) && event.target !== addButton) {
+            isUrlInputVisible = false;
+            urlInputContainer.style.display = 'none';
+        }
+    });
+
+    // Category filtering logic
+    categoryItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const category = this.dataset.category;
+
+            categoryItems.forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+
+            videoCards.forEach(card => {
+                const cardCategory = card.dataset.category;
+                card.style.display = (category === 'all' || cardCategory === category) ? 'block' : 'none';
+            });
+        });
+    });
+
+    // Hover effects
+    document.querySelectorAll('.video-card').forEach(card => {
         card.addEventListener('mouseenter', function() {
-          this.style.transform = 'translateY(-5px)';
+            this.style.transform = 'translateY(-5px)';
         });
 
         card.addEventListener('mouseleave', function() {
-          this.style.transform = 'translateY(0)';
+            this.style.transform = 'translateY(0)';
         });
-      });
+    });
 
-      // Ensure initial state of toggle buttons matches server data
-      document.querySelectorAll('.toggle-log').forEach(button => {
+    // Ensure initial state of toggle buttons matches server data
+    document.querySelectorAll('.toggle-log').forEach(button => {
         const action = button.dataset.action;
         let svg = button.querySelector('svg');
         svg.innerHTML = action === 'remove' ?
-          '<path d="M5 12h14"></path>' :
-          '<path d="M12 5v14M5 12h14"></path>';
+            '<path d="M5 12h14"></path>' :
+            '<path d="M12 5v14M5 12h14"></path>';
         if (action === 'remove') svg.classList.add('active');
         else svg.classList.remove('active');
-      });
+    });
 
-      // Toggle log functionality
-  document.querySelectorAll('.toggle-log').forEach(button => {
+    document.querySelectorAll('.toggle-log').forEach(button => {
     button.addEventListener('click', function(e) {
         e.preventDefault();
         const videoId = this.dataset.id;
         const action = this.dataset.action;
         const url = action === 'add' ? `/add_to_log/${videoId}/` : `/remove_from_log/${videoId}/`;
 
-        console.log(`Sending ${action} request for video ID:`, videoId); // Debugging
+        console.log(`Sending ${action} request for video ID:`, videoId);
 
         fetch(url, {
             method: 'POST',
@@ -1052,13 +1281,8 @@
                 'X-CSRFToken': getCookie('csrftoken')
             }
         })
-        .then(response => {
-            console.log('Response received:', response);
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            console.log('Response data:', data);
-
             if (data.success) {
                 console.log(`Updating UI for video ID: ${videoId}, action: ${action}`);
 
@@ -1075,16 +1299,17 @@
                 // Ensure UI update is enforced
                 this.closest('.video-card').classList.toggle('logged', action === 'add');
 
-                // Update highlight count
+                // 🔴 Prevent Unwanted Highlight Update
+                if (!this.classList.contains('highlight-button')) {
+                    console.log("Skipping highlight update because this is a log action.");
+                    return;
+                }
+
+                // Update highlight count only for highlight actions
                 let badge = this.closest('.video-card').querySelector('.badge-highlight');
                 if (badge) {
                     let currentCount = parseInt(badge.textContent.match(/\d+/)[0]) || 0;
                     badge.textContent = `${action === 'add' ? currentCount + 1 : Math.max(0, currentCount - 1)} Highlights`;
-                }
-
-                // Show +1 animation for add action
-                if (action === 'add') {
-                    showPlusOneAnimation(this);
                 }
 
                 showNotification(data.message, 'success');
@@ -1101,22 +1326,22 @@
 });
 
 
-      function getCookie(name) {
+    function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
-          const cookies = document.cookie.split(';');
-          for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-              break;
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
             }
-          }
         }
         return cookieValue;
-      }
+    }
 
-      function showPlusOneAnimation(element) {
+    function showPlusOneAnimation(element) {
         const plusOne = document.getElementById('plus-one-animation');
         const rect = element.getBoundingClientRect();
         plusOne.style.left = `${rect.left + rect.width}px`;
@@ -1125,12 +1350,12 @@
         plusOne.style.animation = 'flyOffScreen 1s forwards';
 
         plusOne.addEventListener('animationend', () => {
-          plusOne.style.display = 'none';
-          plusOne.style.animation = '';
+            plusOne.style.display = 'none';
+            plusOne.style.animation = '';
         });
-      }
+    }
 
-      function showNotification(message, type) {
+    function showNotification(message, type) {
         const notificationBar = document.getElementById('notification-bar');
         const notificationMessage = document.getElementById('notification-message');
 
@@ -1139,11 +1364,12 @@
         notificationBar.style.display = 'block';
 
         setTimeout(() => {
-          notificationBar.style.display = 'none';
+            notificationBar.style.display = 'none';
         }, 5000);
-      }
-    });
-  </script>
+    }
+});
+</script>
+
   <div id="plus-one-animation" class="plus-one">+1</div>
 </body>
 </html>

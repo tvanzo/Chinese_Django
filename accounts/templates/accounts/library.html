@@ -714,16 +714,17 @@ function filterVideos(status, element) {
     }
   </script>
 <script>
-   document.addEventListener('DOMContentLoaded', function() {
+ document.addEventListener('DOMContentLoaded', function() {
     console.log("DOM fully loaded and parsed");
 
     document.querySelectorAll('.toggle-log').forEach(button => {
         console.log("Adding event listener to button:", button);
 
         button.addEventListener('click', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
             console.log("Button clicked:", button);
 
-            event.preventDefault();
             const videoId = this.getAttribute('data-id');
             const action = this.getAttribute('data-action');
             console.log("Video ID:", videoId, "Action:", action);
@@ -738,10 +739,7 @@ function filterVideos(status, element) {
                     'X-CSRFToken': getCookie('csrftoken')
                 }
             })
-            .then(response => {
-                console.log("Fetch response:", response);
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
                 console.log("Fetch data:", data);
 
@@ -750,32 +748,17 @@ function filterVideos(status, element) {
                         this.setAttribute('data-action', 'remove');
                         this.innerHTML = `
                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px;">
-                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                                <g id="SVGRepo_iconCarrier">
-                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M23 4C23 2.34315 21.6569 1 20 1H4C2.34315 1 1 2.34315 1 4V20C1 21.6569 2.34315 23 4 23H20C21.6569 23 23 21.6569 23 20V4ZM21 4C21 3.44772 20.5523 3 20 3H4C3.44772 3 3 3.44772 3 4V20C3 20.5523 3.44772 21 4 21H20C20.5523 21 21 20.5523 21 20V4Z" fill="#0F0F0F"></path>
-                                    <path d="M16 11C16.5523 11 17 11.4477 17 12C17 12.5523 16.5523 13 16 13H8C7.44772 13 7 12.5523 7 12C7 11.4477 7.44772 11 8 11H16Z" fill="#0F0F0F"></path>
-                                </g>
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M23 4C23 2.34315 21.6569 1 20 1H4C2.34315 1 1 2.34315 1 4V20C1 21.6569 2.34315 23 4 23H20C21.6569 23 23 21.6569 23 20V4ZM21 4C21 3.44772 20.5523 3 20 3H4C3.44772 3 3 3.44772 3 4V20C3 20.5523 3.44772 21 4 21H20C20.5523 21 21 20.5523 21 20V4Z" fill="#0F0F0F"></path>
+                                <path d="M16 11C16.5523 11 17 11.4477 17 12C17 12.5523 16.5523 13 16 13H8C7.44772 13 7 12.5523 7 12C7 11.4477 7.44772 11 8 11H16Z" fill="#0F0F0F"></path>
                             </svg>
                         `;
                     } else {
-                        this.setAttribute('data-action', 'add');
-                        this.innerHTML = `
-                            <svg viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns" fill="#000000" style="width: 20px; height: 20px;">
-                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                                <g id="SVGRepo_iconCarrier">
-                                    <title>plus-square</title>
-                                    <desc>Created with Sketch Beta.</desc>
-                                    <defs></defs>
-                                    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
-                                        <g id="Icon-Set" sketch:type="MSLayerGroup" transform="translate(-100.000000, -1035.000000)" fill="#000000">
-                                            <path d="M130,1063 C130,1064.1 129.104,1065 128,1065 L104,1065 C102.896,1065 102,1064.1 102,1063 L102,1039 C102,1037.9 102.896,1037 104,1037 L128,1037 C129.104,1037 130,1037.9 130,1039 L130,1063 L130,1063 Z M128,1035 L104,1035 C101.791,1035 100,1036.79 100,1039 L100,1063 C100,1065.21 101.791,1067 104,1067 L128,1067 C130.209,1067 132,1065.21 132,1063 L132,1039 C132,1036.79 130.209,1035 128,1035 L128,1035 Z M122,1050 L117,1050 L117,1045 C117,1044.45 116.552,1044 116,1044 C115.448,1044 115,1044.45 115,1045 L115,1050 L110,1050 C109.448,1050 109,1050.45 109,1051 C109,1051.55 109.448,1052 110,1052 L115,1052 L115,1057 C115,1057.55 115.448,1058 116,1058 C116.552,1058 117,1057.55 117,1057 L117,1052 L122,1052 C122.552,1052 123,1051.55 123,1051 C123,1050.45 122.552,1050 122,1050 L122,1050 Z" id="plus-square" sketch:type="MSShapeGroup"></path>
-                                        </g>
-                                    </g>
-                                </g>
-                            </svg>
-                        `;
+                        // Remove the video card from the UI immediately
+                        const videoCard = this.closest('.video-card');
+                        if (videoCard) {
+                            videoCard.style.opacity = '0';
+                            setTimeout(() => videoCard.remove(), 300); // Smoothly remove after fade out
+                        }
                     }
                 }
             })
@@ -787,7 +770,7 @@ function filterVideos(status, element) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
             const cookies = document.cookie.split(';');
-            for (let i = 0; cookies.length > i; i++) {
+            for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
                 if (cookie.substring(0, name.length + 1) === (name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
