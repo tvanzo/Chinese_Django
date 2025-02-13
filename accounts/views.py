@@ -14,6 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.serializers import serialize
 from datetime import datetime, timedelta, date
 import json
+import time
 import logging
 from django.contrib.auth import authenticate, login
 from subplayer.forms import CustomUserCreationForm
@@ -268,10 +269,31 @@ def modify_highlight(request, highlight_id):
     else:
         return HttpResponse('Method not allowed', status=405)
 
+from django.core.serializers import serialize
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+import time
+
 @login_required
 def get_highlights(request, media_id):
+    start_time = time.time()  # Start timing
+
+    # Fetch data from database
     highlights = Highlight.objects.filter(user=request.user, media__media_id=media_id)
-    highlights_data = serializers.serialize('json', highlights)
+
+    db_time = time.time()
+    print(f"⏳ Database Query Time: {db_time - start_time:.4f} seconds")
+
+    # Serialize data
+    serialize_start = time.time()
+    highlights_data = serialize('json', highlights)
+    serialize_end = time.time()
+
+    print(f"📦 Serialization Time: {serialize_end - serialize_start:.4f} seconds")
+
+    end_time = time.time()
+    print(f"🚀 Total API Processing Time: {end_time - start_time:.4f} seconds")
+
     return JsonResponse(highlights_data, safe=False)
 
 @login_required
