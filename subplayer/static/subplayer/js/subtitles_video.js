@@ -326,18 +326,24 @@ function addHighlightToMap(frameIndex, sentenceIndex, charIndex, highlight) {
 }
 
 function updateHighlightMap() {
-  highlightMap = {}; // clear previous data
-  transformedArray.forEach(highlight => {
-    let frameIndex = highlight.frame_index; // Use the frame index
+    transformedArray.forEach(highlight => {
+        let frameIndex = highlight.frame_index;
 
-    for (let sentenceIndex = highlight.start_sentence_index; sentenceIndex <= highlight.end_sentence_index; sentenceIndex++) {
-      let startCharIndex = sentenceIndex == highlight.start_sentence_index ? highlight.start_index : 0;
-      let endCharIndex = sentenceIndex == highlight.end_sentence_index ? highlight.end_index : framesArray[frameIndex][sentenceIndex].sentence.length - 1;
-      for (let charIndex = startCharIndex; charIndex <= endCharIndex; charIndex++) {
-        addHighlightToMap(frameIndex, sentenceIndex, charIndex, highlight);
-      }
-    }
-  });
+        for (let sentenceIndex = highlight.start_sentence_index; sentenceIndex <= highlight.end_sentence_index; sentenceIndex++) {
+            let startCharIndex = sentenceIndex == highlight.start_sentence_index ? highlight.start_index : 0;
+            let endCharIndex = sentenceIndex == highlight.end_sentence_index ? highlight.end_index : framesArray[frameIndex][sentenceIndex].sentence.length - 1;
+            for (let charIndex = startCharIndex; charIndex <= endCharIndex; charIndex++) {
+                const key = `${frameIndex}_${sentenceIndex}_${charIndex}`;
+                if (!highlightMap[key]) {
+                    highlightMap[key] = [];
+                }
+                highlightMap[key].push({
+                    startTime: parseFloat(highlight.start_time),
+                    endTime: parseFloat(highlight.end_time)
+                });
+            }
+        }
+    });
 }
  function checkHighlightExistence() {
         const ul = document.getElementById('highlight-list');
@@ -356,8 +362,10 @@ function updateHighlightMap() {
         }
     }
 
-function updateSidebarWithHighlight(highlight) {
+function updateSidebarWithHighlight(highlightData) {
     const ul = document.getElementById('highlight-list');
+    const fragment = document.createDocumentFragment();
+
     const li = document.createElement('li');
     li.className = 'highlight-item';
 
@@ -366,52 +374,30 @@ function updateSidebarWithHighlight(highlight) {
 
     const a = document.createElement('a');
     a.href = "#";
-    a.textContent = highlight.highlighted_text;
-    a.dataset.startTime = highlight.start_time.toString();
-    a.dataset.endTime = highlight.end_time.toString();
-    a.dataset.frameIndex = highlight.frame_index;
-    a.dataset.startSentenceIndex = highlight.start_sentence_index;
-    a.dataset.startIndex = highlight.start_index;
+    a.textContent = highlightData.highlighted_text;
+    a.dataset.startTime = highlightData.start_time.toString();
+    a.dataset.endTime = highlightData.end_time.toString();
+    a.dataset.frameIndex = highlightData.frame_index;
+    a.dataset.startSentenceIndex = highlightData.start_sentence_index;
+    a.dataset.startIndex = highlightData.start_index;
 
     const img = document.createElement('img');
     img.src = '/static/subplayer/trash.png';
     img.alt = "Delete";
     img.className = "delete-highlight";
-    img.setAttribute('data-highlight-id', highlight.id);
+    img.setAttribute('data-highlight-id', highlightData.id);
     img.addEventListener('click', function() {
         deleteHighlight(this.dataset.highlightId);
     });
 
-
-
     div.appendChild(a);
     div.appendChild(img);
     li.appendChild(div);
+    fragment.appendChild(li);
 
-    // Find correct position based on frame index, sentence index, and start index
-    let inserted = false;
-    const existingHighlights = Array.from(ul.getElementsByClassName('highlight-item'));
-    for (let i = 0; i < existingHighlights.length; i++) {
-        const existingHighlight = existingHighlights[i];
-        const existingFrameIndex = parseInt(existingHighlight.querySelector('a').dataset.frameIndex);
-        const existingSentenceIndex = parseInt(existingHighlight.querySelector('a').dataset.startSentenceIndex);
-        const existingStartIndex = parseInt(existingHighlight.querySelector('a').dataset.startIndex);
-
-        if ((highlight.frame_index < existingFrameIndex) ||
-            (highlight.frame_index === existingFrameIndex && highlight.start_sentence_index < existingSentenceIndex) ||
-            (highlight.frame_index === existingFrameIndex && highlight.start_sentence_index === existingSentenceIndex && highlight.start_index < existingStartIndex)) {
-            ul.insertBefore(li, existingHighlight);
-            inserted = true;
-            break;
-        }
-    }
-
-    if (!inserted) {
-        ul.appendChild(li);
-    }
-
+    ul.appendChild(fragment);
     checkHighlightExistence();
-    setupHighlightLinks();  // Re-setup links to ensure new highlight is interactive
+    setupHighlightLinks();
 }
 
 
@@ -480,46 +466,42 @@ function findSubtitleIndex(time) {
 
 var subtitleTimes = [];
 function createSubtitles() {
+    if (currentSubtitleIndex < framesArray.length) {
+        var currentFrame = framesArray[currentSubtitleIndex];
 
-  if (currentSubtitleIndex < framesArray.length) {
-    var currentFrame = framesArray[currentSubtitleIndex];
+        subtitles.innerHTML = ""; // clear existing subtitles
+        subtitleTimes = []; // reset times for new frame
+        for (let i = 0; i < currentFrame.length; i++) {
+            var element = document.createElement('span');
+            element.setAttribute("id", "s_" + currentSubtitleIndex + "_" + i);
+            element.classList.add('sentence-span'); // Add this line
 
-    subtitles.innerHTML = ""; // clear existing subtitles
-    subtitleTimes = []; // reset times for new frame
-    for (let i = 0; i < currentFrame.length; i++) {
-      var element = document.createElement('span');
-      element.setAttribute("id", "s_" + currentSubtitleIndex + "_" + i);
-        element.classList.add('sentence-span'); // Add this line
+            // Begin new highlight processing
+            let highlightedSentence = "";
+            let sentence = currentFrame[i].sentence;
+            for (let k = 0; k < sentence.length; k++) {
+                const character = sentence.charAt(k);
+                const characterHighlights = highlightMap[`${currentSubtitleIndex}_${i}_${k}`];
 
+                if (characterHighlights) {
+                    highlightedSentence += `<span class="perm-highlight">${character}</span>`;
+                } else {
+                    highlightedSentence += character;
+                }
+            }
+            element.innerHTML = highlightedSentence;
+            // End new highlight processing
 
-      // Begin new highlight processing
-      let highlightedSentence = "";
-      let sentence = currentFrame[i].sentence;
-      for (let k = 0; k < sentence.length; k++) {
-        const character = sentence.charAt(k);
-        const characterHighlights = highlightMap[`${currentSubtitleIndex}_${i}_${k}`];
+            subtitles.appendChild(element);
 
-        if (characterHighlights) {
-          highlightedSentence += `<span class="perm-highlight">${character}</span>`;
-        } else {
-          highlightedSentence += character;
+            // Save time information
+            subtitleTimes.push({
+                startTime: parseFloat(currentFrame[i].startTime),
+                endTime: parseFloat(currentFrame[i].endTime),
+            });
         }
-      }
-      element.innerHTML = highlightedSentence;
-      // End new highlight processing
-
-      subtitles.appendChild(element);
-
-      // Save time information
-      subtitleTimes.push({
-        startTime: parseFloat(currentFrame[i].startTime),
-        endTime: parseFloat(currentFrame[i].endTime),
-      });
     }
-  }
-
 }
-
 
 
 
@@ -930,20 +912,26 @@ function createHighlight(selectedText, mediaId, highlightStartIndex, highlightEn
         frame_index: frameIndex,
     };
 
-    // Immediately update the UI with the new highlight
-    updateSidebarWithHighlight(highlightData);
+    // Update subtitles immediately to improve perceived speed
+highlightMap = {}; // Clear previous data
+transformedArray.push(highlightData); // Add new highlight to array
+updateHighlightMap();
+createSubtitles(); // Recreate subtitles first
 
-    // Send the request to the server
-    addHighlight(highlightData).then(() => {
-        // If the server request is successful, refresh the highlights
-        fetchHighlights(mediaId).then(() => {
-            createSubtitles(); // Recreate subtitles after fetching new highlights
-        });
-    }).catch(error => {
-        console.error('Error adding highlight:', error);
-        // Revert UI changes if the server request fails
-        removeHighlightFromUI(highlightData);
-    });
+// Defer Sidebar Update
+setTimeout(() => {
+    updateSidebarWithHighlight(highlightData);
+}, 100); // Sidebar update happens with a slight delay
+
+// Send the request to the server
+addHighlight(highlightData).then(() => {
+    // Fetch and update highlights to ensure sync with the server
+    fetchHighlights(mediaId);
+}).catch(error => {
+    console.error('Error adding highlight:', error);
+    removeHighlightFromUI(highlightData);
+});
+
 }
 
 function removeHighlightFromUI(highlightData) {
