@@ -326,12 +326,14 @@ function addHighlightToMap(frameIndex, sentenceIndex, charIndex, highlight) {
 }
 
 function updateHighlightMap() {
+    highlightMap = {}; // Clear the map before updating
     transformedArray.forEach(highlight => {
         let frameIndex = highlight.frame_index;
 
         for (let sentenceIndex = highlight.start_sentence_index; sentenceIndex <= highlight.end_sentence_index; sentenceIndex++) {
-            let startCharIndex = sentenceIndex == highlight.start_sentence_index ? highlight.start_index : 0;
-            let endCharIndex = sentenceIndex == highlight.end_sentence_index ? highlight.end_index : framesArray[frameIndex][sentenceIndex].sentence.length - 1;
+            let startCharIndex = sentenceIndex == highlight.start_sentence_index ? parseInt(highlight.start_index, 10) : 0;
+            let endCharIndex = sentenceIndex == highlight.end_sentence_index ? parseInt(highlight.end_index, 10) : framesArray[frameIndex][sentenceIndex].sentence.length - 1;
+
             for (let charIndex = startCharIndex; charIndex <= endCharIndex; charIndex++) {
                 const key = `${frameIndex}_${sentenceIndex}_${charIndex}`;
                 if (!highlightMap[key]) {
@@ -469,29 +471,29 @@ function createSubtitles() {
     if (currentSubtitleIndex < framesArray.length) {
         var currentFrame = framesArray[currentSubtitleIndex];
 
-        subtitles.innerHTML = ""; // clear existing subtitles
-        subtitleTimes = []; // reset times for new frame
+        subtitles.innerHTML = ""; // Clear existing subtitles
+        subtitleTimes = []; // Reset times for new frame
+
         for (let i = 0; i < currentFrame.length; i++) {
             var element = document.createElement('span');
             element.setAttribute("id", "s_" + currentSubtitleIndex + "_" + i);
-            element.classList.add('sentence-span'); // Add this line
+            element.classList.add('sentence-span');
 
-            // Begin new highlight processing
             let highlightedSentence = "";
             let sentence = currentFrame[i].sentence;
+
             for (let k = 0; k < sentence.length; k++) {
-                const character = sentence.charAt(k);
-                const characterHighlights = highlightMap[`${currentSubtitleIndex}_${i}_${k}`];
+                const key = `${currentSubtitleIndex}_${i}_${k}`;
+                const characterHighlights = highlightMap[key];
 
                 if (characterHighlights) {
-                    highlightedSentence += `<span class="perm-highlight">${character}</span>`;
+                    highlightedSentence += `<span class="perm-highlight">${sentence.charAt(k)}</span>`;
                 } else {
-                    highlightedSentence += character;
+                    highlightedSentence += sentence.charAt(k);
                 }
             }
-            element.innerHTML = highlightedSentence;
-            // End new highlight processing
 
+            element.innerHTML = highlightedSentence;
             subtitles.appendChild(element);
 
             // Save time information
@@ -912,26 +914,25 @@ function createHighlight(selectedText, mediaId, highlightStartIndex, highlightEn
         frame_index: frameIndex,
     };
 
-    // Update subtitles immediately to improve perceived speed
-highlightMap = {}; // Clear previous data
-transformedArray.push(highlightData); // Add new highlight to array
-updateHighlightMap();
-createSubtitles(); // Recreate subtitles first
+    // Update UI immediately
+    highlightMap = {}; // Clear previous data
+    transformedArray.push(highlightData); // Add new highlight to array
+    updateHighlightMap();
+    createSubtitles(); // Recreate subtitles first
 
-// Defer Sidebar Update
-setTimeout(() => {
-    updateSidebarWithHighlight(highlightData);
-}, 100); // Sidebar update happens with a slight delay
+    // Update sidebar with a slight delay to ensure UI responsiveness
+    setTimeout(() => {
+        updateSidebarWithHighlight(highlightData);
+    }, 100); // Sidebar update happens with a slight delay
 
-// Send the request to the server
-addHighlight(highlightData).then(() => {
-    // Fetch and update highlights to ensure sync with the server
-    fetchHighlights(mediaId);
-}).catch(error => {
-    console.error('Error adding highlight:', error);
-    removeHighlightFromUI(highlightData);
-});
-
+    // Send the request to the server
+    addHighlight(highlightData).then(() => {
+        // Fetch and update highlights to ensure sync with the server
+        fetchHighlights(mediaId);
+    }).catch(error => {
+        console.error('Error adding highlight:', error);
+        removeHighlightFromUI(highlightData); // Revert UI change if the request fails
+    });
 }
 
 function removeHighlightFromUI(highlightData) {
