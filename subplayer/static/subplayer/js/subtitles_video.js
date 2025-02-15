@@ -19,6 +19,12 @@ var framesArray = [];           // 2D array: frames => [ {startTime, endTime, se
 var subtitles = document.getElementById("subtitles");
 var subtitleTimes = [];
 
+/**
+ * We'll store the requestAnimationFrame ID here,
+ * so we can cancel it when paused or ended.
+ */
+let rafId = null;
+
 /*************************************************
  * YOUTUBE IFRAME API
 *************************************************/
@@ -42,21 +48,29 @@ function onPlayerReady(event) {
     playerReady = true;
     console.log("Player is ready.");
 
-    // We’ll do a first subtitles creation after frames & highlights are fetched (in DOMContentLoaded).
-    // If you want an immediate display, you can call createSubtitles() here, but typically wait
-    // until framesArray and highlights are ready.
-
     if (media) {
         setupProgressSaving();
+        // Keep your 1-second delay for fetching media progress if desired:
         setTimeout(() => {
             fetchMediaProgressAndSeek();
         }, 1000);
-        setInterval(updateProgress, 100);
+
+        // Remove the old setInterval(updateProgress, 100).
+        // We'll rely on requestAnimationFrame to update.
     }
 }
 
 function onPlayerStateChange(event) {
     console.log("Player state changed:", event.data, " isPlayingHighlights:", isPlayingHighlights);
+
+    // START the animation loop if the player is PLAYING
+    if (event.data === YT.PlayerState.PLAYING) {
+        startRAFLoop();
+    }
+    // STOP the animation loop if paused or ended
+    else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+        stopRAFLoop();
+    }
 
     // If first time playing or paused, fetch progress if not done yet
     if ((event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.PAUSED) && !mediaHasBeenPlayed) {
@@ -79,6 +93,25 @@ function onPlayerStateChange(event) {
 }
 
 /*************************************************
+ * RAF LOOP (to replace setInterval)
+*************************************************/
+function startRAFLoop() {
+    if (!rafId) {
+        rafId = requestAnimationFrame(animLoop);
+    }
+}
+function animLoop() {
+    updateProgress();
+    rafId = requestAnimationFrame(animLoop);
+}
+function stopRAFLoop() {
+    if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+    }
+}
+
+/*************************************************
  * PROGRESS & SEEK
 *************************************************/
 function fetchMediaProgressAndSeek() {
@@ -95,7 +128,7 @@ function fetchMediaProgressAndSeek() {
         if (data && data.time_stopped != null) {
             player.seekTo(data.time_stopped, true);
             lastUpdateTime = data.lastUpdateTime;
-            if (currentStatus === 'none'){
+            if (currentStatus === 'none') {
                 lastUpdateTime = 0;
             }
         } else {
@@ -370,26 +403,31 @@ function reRenderSentence(frameIndex, sentenceIndex) {
 }
 
 /*************************************************
- * UPDATE PROGRESS (CALLED EVERY 300ms)
+ * UPDATE PROGRESS (replaces the old setInterval)
 *************************************************/
 function updateProgress() {
     if (!player || typeof player.getCurrentTime !== 'function') return;
+
     let currentTime = player.getCurrentTime();
 
+    // Figure out if we've moved to a new frame
     const correctIndex = findSubtitleIndex(currentTime);
     if (correctIndex !== -1 && correctIndex !== currentSubtitleIndex) {
         currentSubtitleIndex = correctIndex;
         createSubtitles();
     }
 
+    // Highlight the active sentence(s) in the current frame
     if (currentSubtitleIndex < framesArray.length) {
         let frame = framesArray[currentSubtitleIndex];
         for (let j = 0; j < frame.length; j++) {
             const sentenceElement = document.getElementById("s_" + currentSubtitleIndex + "_" + j);
             if (!sentenceElement) continue;
 
-            if (currentTime >= parseFloat(frame[j].startTime) &&
-                currentTime <= parseFloat(frame[j].endTime)) {
+            if (
+                currentTime >= parseFloat(frame[j].startTime) &&
+                currentTime <= parseFloat(frame[j].endTime)
+            ) {
                 sentenceElement.classList.add('active-highlight');
             } else {
                 sentenceElement.classList.remove('active-highlight');
@@ -436,7 +474,6 @@ async function addHighlight(highlightData) {
     }
 }
 
-// Partial-only createHighlight (no full re-fetch or createSubtitles)
 function createHighlight(
     selectedText, mediaId,
     highlightStartIndex, highlightEndIndex,
@@ -473,8 +510,6 @@ function createHighlight(
     addHighlight(highlightData)
     .then(() => {
         console.log("Highlight saved on server.");
-        // If you need to re-fetch from server, do it occasionally,
-        // but not after every single highlight.
     })
     .catch(error => {
         console.error('Error adding highlight:', error);
@@ -597,15 +632,20 @@ function removeHighlightFromUI(hData) {
 document.addEventListener('DOMContentLoaded', function() {
     csrftoken2 = getCookie('csrftoken');
 
+    // If the player is already ready, set up saving
     if (playerReady) {
         setupProgressSaving();
     }
 
-    // First load highlights from server
+    // 1) Load highlights from server
     fetchHighlights(mediaId)
     .then(() => {
-        // Then create subtitles once framesArray is loaded
+        // 2) Once framesArray is loaded, create the subtitles
         createSubtitles();
+
+        // 3) Immediately call updateProgress() once so the first frame
+        //    can show any highlight at time=0 (if applicable).
+        updateProgress();
     })
     .catch(e => console.error("Error fetching highlights:", e));
 });
@@ -638,8 +678,8 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
         // chunk words into frames
         createFramesArray(syncData);
-        // we do NOT call createSubtitles() immediately here, because we wait
-        // for fetchHighlights => we do it in DOMContentLoaded callback
+        // we do NOT call createSubtitles() immediately here,
+        // because we wait for fetchHighlights => in DOMContentLoaded.
 
     } catch (error) {
         console.error('Error fetching transcript data:', error);
@@ -674,6 +714,7 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
             framesArray.push(currentFrame);
         }
 
+        // If the first subtitle doesn't start at 0, force it:
         if (framesArray.length && framesArray[0][0].startTime > 0) {
             framesArray[0][0].startTime = 0;
         }
@@ -734,16 +775,22 @@ function handleHighlightCreation() {
         // If there's an existing highlight overlapping
         if (overlappingHighlight.start_sentence_index !== overlappingHighlight.end_sentence_index) {
             deleteHighlight(overlappingHighlight.id);
-        } else if (overlappingHighlight.start_index === start_char_index &&
-                   overlappingHighlight.end_index   === end_char_index) {
+        } else if (
+            overlappingHighlight.start_index === start_char_index &&
+            overlappingHighlight.end_index   === end_char_index
+        ) {
             deleteHighlight(overlappingHighlight.id);
         } else {
             splitHighlight(overlappingHighlight.id, start_char_index, end_char_index);
         }
     } else {
         // No overlap => create new highlight
-        if (start_char_index !== null && end_char_index !== null &&
-            highlightStartTime !== null && highlightEndTime !== null) {
+        if (
+            start_char_index !== null &&
+            end_char_index   !== null &&
+            highlightStartTime !== null &&
+            highlightEndTime   !== null
+        ) {
             console.log("Creating new highlight");
             createHighlight(
                 selectedText, mediaId,
@@ -770,6 +817,7 @@ function calculateOffset(container, offset, span) {
     }
     return totalOffset;
 }
+
 function findParentWithClass(node, className) {
     if (node.nodeType !== Node.ELEMENT_NODE) {
         node = node.parentNode;
@@ -888,5 +936,4 @@ subtitles.addEventListener("mouseup", function() {
             }, 100);
         }
     }
-}
-);
+});
