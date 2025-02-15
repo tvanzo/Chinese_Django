@@ -2090,6 +2090,28 @@ iframe {
     margin-left: auto; /* Ensures it moves all the way to the right */
 }
 
+/* =========================================
+   ADD THIS AT THE END OF YOUR CSS
+   ========================================= */
+@media (max-width: 992px) {
+  /* Hide left sidebar, remove left margin */
+  .left-sidebar {
+    display: none !important;
+  }
+  .media-content {
+    margin-left: 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Hide right sidebar, remove right margin */
+  .right-sidebar {
+    display: none !important;
+  }
+  .media-content {
+    margin-right: 0 !important;
+  }
+}
 
 
 

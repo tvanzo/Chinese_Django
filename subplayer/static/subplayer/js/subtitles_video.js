@@ -51,7 +51,7 @@ function onPlayerReady(event) {
         setTimeout(() => {
             fetchMediaProgressAndSeek();
         }, 1000);
-        setInterval(updateProgress, 300);
+        setInterval(updateProgress, 100);
     }
 }
 
