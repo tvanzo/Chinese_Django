@@ -25,7 +25,7 @@
       border-radius: 24px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
       padding: 40px;
-      max-width: 800px;
+      max-width: 400px;
       width: 100%;
       text-align: center;
     }
@@ -39,64 +39,6 @@
       font-weight: 700;
       margin: 0;
       color: #1a1f36;
-    }
-
-    .membership-selection {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-bottom: 40px;
-    }
-
-    .membership-option {
-      padding: 24px;
-      border: 2px solid #e0e0e0;
-      border-radius: 16px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      background-color: #fff;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .membership-option:hover {
-      transform: translateY(-4px);
-      border-color: #3a9fff;
-    }
-
-    .membership-option.selected {
-      border-color: #3a9fff;
-      background-color: #f0f8ff;
-    }
-
-    .membership-option h6 {
-      font-size: 18px;
-      font-weight: 600;
-      margin: 0 0 8px 0;
-      color: #1a1f36;
-    }
-
-    .membership-option p {
-      font-size: 14px;
-      color: #64748b;
-      margin: 0;
-      line-height: 1.5;
-    }
-
-    .membership-option::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, #3a9fff, #3a72ff);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .membership-option.selected::before {
-      opacity: 1;
     }
 
     .form-group {
@@ -156,16 +98,6 @@
     .sign-in-link:hover {
       color: #3a72ff;
     }
-
-    @media (max-width: 768px) {
-      .membership-selection {
-        grid-template-columns: 1fr;
-      }
-
-      .card {
-        padding: 24px;
-      }
-    }
   </style>
 </head>
 
@@ -176,23 +108,8 @@
     </div>
     <form method="post" action="{% url 'register' %}">
       {% csrf_token %}
-      <div class="membership-selection">
-        <div class="membership-option" onclick="selectPlan('free')">
-          <h6>Free Plan</h6>
-          <p>Latest 3 videos from one channel</p>
-        </div>
-        <div class="membership-option" onclick="selectPlan('basic')">
-          <h6>Basic Plan</h6>
-          <p>Full access to Dashu Mandarin</p>
-          <p style="margin-top: 8px; font-weight: 600; color: #3a9fff;">$10/month</p>
-        </div>
-        <div class="membership-option" onclick="selectPlan('premium')">
-          <h6>Premium Plan</h6>
-          <p>Unlimited access to all videos</p>
-          <p style="margin-top: 8px; font-weight: 600; color: #3a9fff;">$20/month</p>
-        </div>
-      </div>
-      <input type="hidden" id="selected_plan" name="selected_plan" value="">
+
+      <input type="hidden" name="selected_plan" value="free"> <!-- Default to free plan -->
 
       <div class="form-group">
         <input type="text" class="form-control" placeholder="Username" name="username" required>
@@ -206,10 +123,6 @@
       <div class="form-group">
         <input type="password" class="form-control" placeholder="Confirm Password" name="password2" required>
       </div>
-      <div class="form-group">
-        <input type="text" class="form-control" placeholder="Invite Code" name="invite_code" required>
-        {{ form.invite_code.errors }}
-      </div>
 
       <div class="text-muted">Password must contain at least 8 characters</div>
 
@@ -220,20 +133,5 @@
       </p>
     </form>
   </div>
-
-  <script>
-    function selectPlan(plan) {
-      document.getElementById('selected_plan').value = plan;
-      var options = document.querySelectorAll('.membership-option');
-      options.forEach(function(option) {
-        option.classList.remove('selected');
-      });
-      document.querySelector(`.membership-option[onclick="selectPlan('${plan}')"]`).classList.add('selected');
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      selectPlan('free');
-    });
-  </script>
 </body>
 </html>

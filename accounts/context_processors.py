@@ -6,7 +6,7 @@ def total_minutes_watched(request):
     if request.user.is_authenticated:
         try:
             profile = Profile.objects.get(user=request.user)
-            total_minutes = round(profile.total_minutes / 60)  # Convert seconds to minutes and round
+            total_minutes = round(profile.total_minutes)  # Convert seconds to minutes and round
         except Profile.DoesNotExist:
             total_minutes = 0
     else:
@@ -18,7 +18,9 @@ def total_points(request):
     if request.user.is_authenticated:
         try:
             profile = Profile.objects.get(user=request.user)
-            total_minutes = round(profile.total_minutes / 60)  # Convert seconds to minutes and round
+            total_minutes = round(profile.total_minutes)
+            print(total_minutes)
+            # Convert seconds to minutes and round
             total_highlights = Highlight.objects.filter(user=request.user).count()
             total_points = total_minutes + total_highlights
             print(f"Total points calculated: {total_points}")  # Debug print

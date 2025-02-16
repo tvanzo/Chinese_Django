@@ -63,43 +63,25 @@ def register(request):
         if form.is_valid():
             user = form.save(request)
             raw_password = form.cleaned_data.get('password1')
-            selected_plan = request.POST.get('selected_plan')
 
-            if selected_plan == 'premium':
-                # Create Stripe customer for premium users
-                customer = stripe.Customer.create(email=user.email, description=f"{user.email}")
-                profile = Profile.objects.get(user=user)
-                profile.stripe_customer_id = customer.id
-                profile.save()
+            # Automatically assign user to Free Plan
+            Subscription.objects.update_or_create(user=user, defaults={'tier': 'FREE'})
 
-                session = stripe.checkout.Session.create(
-                    customer=customer.id,
-                    payment_method_types=['card'],
-                    line_items=[{
-                        'price': 'price_1Qie43DbaGsKLbbK3mkJlaON',
-                        'quantity': 1,
-                    }],
-                    mode='subscription',
-                    success_url=f"{request.build_absolute_uri('/payment_success/')}?session_id={{CHECKOUT_SESSION_ID}}",
-                    cancel_url=request.build_absolute_uri('/register/'),
-                )
-                request.session['new_user_id'] = user.id
-                return redirect(session.url, code=303)
+            # Authenticate & Log in the user
+            authenticated_user = authenticate(email=user.email, password=raw_password)
+            if authenticated_user is not None:
+                login(request, authenticated_user)
+                messages.success(request, f'Welcome, {user.email}! You have been enrolled in the Free Plan.')
+                return redirect('/')  # Redirect to homepage or dashboard
             else:
-                authenticated_user = authenticate(email=user.email, password=raw_password)
-                if authenticated_user is not None:
-                    login(request, authenticated_user)
-                    Subscription.objects.update_or_create(user=user, defaults={'tier': 'FREE'})
-                    messages.success(request, f'Welcome to the Free Plan, {user.email}!')
-                    return redirect('/')
-                else:
-                    messages.error(request, 'Authentication failed. Please try again.')
-                    user.delete()
+                messages.error(request, 'Authentication failed. Please try again.')
+                user.delete()  # Delete user if login fails
         else:
             messages.error(request, 'Invalid form submission. Please correct the errors and try again.')
             print(form.errors)
     else:
         form = CustomUserCreationForm()
+
     return render(request, 'accounts/register.html', {'form': form})
 @login_required
 def media_list(request):
@@ -193,9 +175,27 @@ def update_media_progress(request):
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
 
+
 @login_required
 def create_highlight(request):
     try:
+        # Check if the user is on a free subscription
+        subscription = Subscription.objects.get(user=request.user)
+        if subscription.tier == 'FREE':
+            # Get the number of highlights created today
+            today = timezone.now().date()
+            highlights_today = Highlight.objects.filter(
+                user=request.user,
+                created_at__date=today
+            ).count()
+
+            # If the user has reached the limit, return an error with a specific flag
+            if highlights_today >= 3:
+                return JsonResponse({
+                    'error': 'YYou have reached the daily limit of 3 highlights. Upgrade to create more.',
+                    'limit_reached': True  # Add this flag
+                }, status=403)
+
         data = json.loads(request.body)
         media_obj = Media.objects.get(media_id=data['media'])
 
@@ -228,7 +228,6 @@ def create_highlight(request):
         return JsonResponse({'error': f'Missing key in request data: {e}'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-
 def delete_highlight(request, highlight_id):
     try:
         data = json.loads(request.body.decode('utf-8'))  # Parse JSON from the request body
@@ -436,6 +435,7 @@ def update_media_status(request, media_id, status=None):
 
         profile.total_word_count += adjusted_words_to_add
         profile.total_minutes += adjusted_minutes_to_add
+        print(total_minutes)
 
         profile.save()
 
@@ -585,6 +585,7 @@ import os
 @login_required
 @login_required
 @login_required
+
 def stats_view(request):
     user = request.user
     profile = user.profile
@@ -592,13 +593,10 @@ def stats_view(request):
     registration_date = user.date_joined.date()
     total_days_registered = (end_date - registration_date).days
 
-    # Determine the interval for "all time"
-    if total_days_registered <= 10:
-        interval_days = 1
-    else:
-        interval_days = total_days_registered // 10
+    # Determine interval for "all time"
+    interval_days = 1 if total_days_registered <= 10 else total_days_registered // 10
 
-    data = {
+    data_ranges = {
         'week': timezone.timedelta(days=7),
         'month': timezone.timedelta(days=30),
         'all_time': timezone.timedelta(days=total_days_registered)
@@ -608,33 +606,40 @@ def stats_view(request):
     totals = {}
     media_info = []
 
+    # Get all dates with highlights or media progress
     highlight_dates = Highlight.objects.filter(user=user).dates('created_at', 'day')
     media_dates = MediaProgress.objects.filter(profile=profile).dates('date', 'day')
     active_dates = sorted(set(highlight_dates) | set(media_dates))
 
+    # Streak Calculation
     streak = 0
     today = end_date
-    for i in range(len(active_dates) - 1, -1, -1):
-        if active_dates[i] == today:
+    while True:
+        minutes = MediaProgress.objects.filter(profile=profile, date=today).aggregate(
+            total=Sum('minutes_watched')
+        )['total'] or 0
+        highlights = Highlight.objects.filter(user=user, created_at__date=today).count()
+
+        print(f"📅 {today} -> Minutes Watched: {minutes}, Highlights: {highlights}")
+
+        if minutes >= 1 or highlights > 0:
             streak += 1
-            today -= timezone.timedelta(days=1)
+            today -= timedelta(days=1)
         else:
-            break
+            break  # Streak ends
 
-    for key, delta in data.items():
-        if key == 'all_time':
-            start_date = registration_date
-        else:
-            start_date = end_date - delta
-
+    # Time Range Stats Calculation
+    for key, delta in data_ranges.items():
+        start_date = registration_date if key == 'all_time' else end_date - delta
         num_days = (end_date - start_date).days
         interval_count = num_days // interval_days if key == 'all_time' else num_days
-        all_dates = [start_date + timezone.timedelta(days=i * interval_days) for i in range(interval_count + 1)]
-        dates_str = [d.strftime('%Y-%m-%d') for d in all_dates]
+        date_list = [start_date + timezone.timedelta(days=i * interval_days) for i in range(interval_count + 1)]
+        date_str_list = [d.strftime('%Y-%m-%d') for d in date_list]
 
-        highlights_data = {date: 0 for date in dates_str}
-        minutes_data = {date: 0 for date in dates_str}
+        highlights_data = {date: 0 for date in date_str_list}
+        minutes_data = {date: 0 for date in date_str_list}
 
+        # Get daily highlights count
         daily_highlights = Highlight.objects.filter(
             user=user,
             created_at__date__range=[start_date, end_date]
@@ -644,28 +649,49 @@ def stats_view(request):
             day_str = highlight['day'].strftime('%Y-%m-%d')
             highlights_data[day_str] = highlight['total']
 
+        # Get daily watch minutes
         daily_minutes = MediaProgress.objects.filter(
             profile=profile,
             date__range=[start_date, end_date]
         ).annotate(day=TruncDay('date')).values('day').annotate(total_minutes=Sum('minutes_watched'))
 
         for minute in daily_minutes:
+            print(f"🕒 {minute['day']} - Total Minutes: {minute['total_minutes']}")
             day_str = minute['day'].strftime('%Y-%m-%d')
-            minutes_data[day_str] = round(minute['total_minutes'] / 60, 2)
+            minutes_data[day_str] = round(minute['total_minutes'], 2)
+
+        # Yesterday Debugging
+        yesterday = end_date - timezone.timedelta(days=1)
+        daily_minutes_yesterday = MediaProgress.objects.filter(profile=profile, date=yesterday).values('media_id').annotate(
+            total_minutes=Max('minutes_watched')
+        )
+
+        total_yesterday = sum(entry['total_minutes'] for entry in daily_minutes_yesterday)
+
+        print(f"📊 Debugging Yesterday's Watch Time ({yesterday}):")
+        for entry in daily_minutes_yesterday:
+            print(f"🎥 Media ID: {entry['media_id']}, Minutes Watched: {entry['total_minutes']}")
+        print(f"📊 Total Calculated Minutes for Yesterday: {total_yesterday}")
 
         results[key] = {
-            'dates': dates_str,
+            'dates': date_str_list,
             'highlights': list(highlights_data.values()),
             'minutes': list(minutes_data.values()),
         }
 
         totals[key] = {
             'total_highlights': sum(highlights_data.values()),
-            'total_minutes': round(sum(minutes_data.values())),  # Round to nearest whole number
-            'total_videos': MediaProgress.objects.filter(profile=profile, date__range=[start_date, end_date]).values('media_id').distinct().count(),
+            'total_minutes': round(sum(minutes_data.values())),
+            'total_videos': MediaProgress.objects.filter(profile=profile, date__range=[start_date, end_date]).values(
+                'media_id'
+            ).distinct().count(),
+            'streak': streak if key == 'week' else 0  # Streak applies only to "week"
         }
 
-    media_statuses = UserMediaStatus.objects.filter(user=user, status__in=['in_progress', 'completed']).select_related('media__channel').annotate(
+    # Media Status Tracking
+    media_statuses = UserMediaStatus.objects.filter(
+        user=user, status__in=['in_progress', 'completed']
+    ).select_related('media__channel').annotate(
         total_highlights=Count('media__highlights', filter=Q(media__highlights__user=user)),
         latest_time_stopped=Subquery(
             MediaProgress.objects.filter(profile=profile, media=OuterRef('media')).order_by('-date').values('time_stopped')[:1]
@@ -675,10 +701,9 @@ def stats_view(request):
     for status in media_statuses:
         video_length = status.media.video_length
         latest_time_stopped = status.latest_time_stopped or 0
-        if status.status == 'completed':
-            progress_percent = 100
-        else:
-            progress_percent = round((latest_time_stopped / video_length * 100), 0) if video_length > 0 else 0
+        progress_percent = 100 if status.status == 'completed' else (
+            round((latest_time_stopped / video_length * 100), 0) if video_length > 0 else 0
+        )
 
         media_info.append({
             'media_id': status.media.media_id,
@@ -690,20 +715,23 @@ def stats_view(request):
             'profile_image_url': status.media.channel.profile_pic_url
         })
 
+    # Context for Template
     context = {
         'highlight_data_json': json.dumps(results),
         'totals_json': json.dumps(totals),
         'media_info': media_info,
         'streak': streak,
         'default_image_url': static('accounts/img/small-logos/logo-xd.svg'),
-        'total_minutes': profile.total_minutes / 60,  # Keep this if used elsewhere
+        'total_minutes': profile.total_minutes / 60,  # Keep if needed elsewhere
     }
-    # Clear messages after displaying them
+
+    # Clear Messages After Displaying
     storage = messages.get_messages(request)
     for message in storage:
-        pass  # Just iterate over the messages to clear them
+        pass  # Clears messages
 
     return render(request, 'accounts/stats.html', context)
+
 @login_required
 def update_progress(request):
     if request.method != 'POST':

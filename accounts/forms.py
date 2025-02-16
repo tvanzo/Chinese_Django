@@ -4,21 +4,19 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.contrib.auth.models import User
 
+from django import forms
+from allauth.account.forms import SignupForm
+from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import User
+
 class CustomUserCreationForm(SignupForm):
     email = forms.EmailField(required=True, label=_("Email"))
-    invite_code = forms.CharField(required=True, label=_("Invite Code"), max_length=100)
     password1 = forms.CharField(label=_("Password"), strip=False, widget=forms.PasswordInput)
     password2 = forms.CharField(label=_("Password confirmation"), strip=False, widget=forms.PasswordInput)
 
     class Meta:
         model = User
-        fields = ("username", "email", "password1", "password2", "invite_code")
-
-    def clean_invite_code(self):
-        invite_code = self.cleaned_data.get('invite_code')
-        if invite_code != settings.INVITE_CODE:
-            raise forms.ValidationError(_("Invalid invite code."))
-        return invite_code
+        fields = ("username", "email", "password1", "password2")
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")

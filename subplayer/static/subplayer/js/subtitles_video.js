@@ -1,6 +1,4 @@
-/*************************************************
- * GLOBAL VARIABLES & SETUP
-*************************************************/
+
 var mediaHasBeenPlayed = false;
 var csrftoken2;
 var media;
@@ -161,7 +159,7 @@ function setupProgressSaving() {
         if (Math.abs(timeChange) >= 10 && currentStatus === 'in_progress') {
             const wordsPerSecond = media.word_count / media.video_length;
             const additionalWords = wordsPerSecond * timeChange;
-            const additionalMinutes = timeChange;
+            const additionalMinutes = timeChange/60;
 
             console.log(`Updating progress: +${additionalWords} words, +${additionalMinutes} minutes`);
 
@@ -451,28 +449,117 @@ function findSubtitleIndex(time) {
     }
     return -1;
 }
+function showLimitPopup() {
+    console.log("🚨 showLimitPopup() called!");
+
+    if (document.querySelector('.limit-popup')) {
+        console.log("Popup already exists, not creating another one.");
+        return;
+    }
+
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay active';  // Add active immediately
+
+    const popup = document.createElement('div');
+    popup.className = 'limit-popup';
+    popup.innerHTML = `
+        <div class="popup-content">
+            <div class="popup-header">
+                <div class="warning-icon">⚠️</div>
+                <h3 class="popup-title">Highlight Limit Reached</h3>
+            </div>
+            <p class="popup-message">You've reached your daily limit of 3 highlights. Upgrade your account to unlock unlimited highlights and more features.</p>
+            <div class="button-container">
+                <button class="upgrade-button" onclick="redirectToAccount()">Upgrade Now</button>
+                <button class="close-button" onclick="closePopup()">Maybe Later</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(popup);
+
+    // Ensure smooth appearance transition
+    setTimeout(() => {
+        overlay.classList.add('active');
+        popup.classList.add('active');
+    }, 10);
+
+    console.log("✅ Popup added to the DOM");
+}
+
+function closePopup() {
+    console.log("Closing popup");
+    const popup = document.querySelector('.limit-popup');
+    const overlay = document.querySelector('.overlay');
+    if (popup) {
+        popup.remove();
+    }
+    if (overlay) {
+        overlay.classList.remove('active');
+        setTimeout(() => {
+            overlay.remove();
+        }, 300); // Wait for fade-out transition before removing
+    }
+}
+
+function redirectToAccount() {
+    window.location.href = '/join/';
+}
+
 
 /*************************************************
  * ADD / DELETE / SPLIT HIGHLIGHTS (PARTIAL)
 *************************************************/
 async function addHighlight(highlightData) {
-    const response = await fetch(`/api/user/create_highlight`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken2
-        },
-        body: JSON.stringify(highlightData),
-    });
+    try {
+        const response = await fetch(`/api/user/create_highlight`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken2
+            },
+            body: JSON.stringify(highlightData),
+        });
 
-    if (response.ok) {
-        const addedHighlight = await response.json();
+        console.log("📢 Response status:", response.status);
+        console.log("✅ Response OK:", response.ok);
+
+        const responseText = await response.text(); // Read response as text first
+        let jsonResponse = {};
+
+        try {
+            jsonResponse = JSON.parse(responseText); // Parse response to JSON
+        } catch (e) {
+            console.error("❌ JSON Parse Error:", e, responseText);
+        }
+
+        console.log("🔎 Full API response:", jsonResponse);
+
+        // Check if the limit was reached
+        if (jsonResponse.limit_reached) {
+            console.log("🛑 Limit reached - Calling showLimitPopup()");
+            showLimitPopup();
+            return null; // Stop processing further
+        }
+
+        if (!response.ok) {
+            console.error("❌ Unexpected error:", jsonResponse);
+            throw new Error('Failed to add highlight: ' + (jsonResponse.error || "Unknown error"));
+        }
+
+        // Process valid highlight response
+        const addedHighlight = jsonResponse;
         highlightData.id = addedHighlight.id;
         return addedHighlight;
-    } else {
-        throw new Error('Failed to add highlight: ' + await response.text());
+
+    } catch (error) {
+        console.error('❌ Error adding highlight:', error);
     }
 }
+
+
+
 
 function createHighlight(
     selectedText, mediaId,
