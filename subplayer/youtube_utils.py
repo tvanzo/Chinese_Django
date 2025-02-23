@@ -9,6 +9,8 @@ import logging
 from isodate import parse_duration
 from google.auth.exceptions import DefaultCredentialsError
 from datetime import datetime
+from datetime import datetime, timezone  # Add timezone import
+
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +69,9 @@ def fetch_video_details(url):
 
         # Capture the upload time
         published_at = video_item['snippet']['publishedAt']
-        upload_time = datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        from django.utils.timezone import make_aware
+
+        upload_time = make_aware(datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%SZ"))
 
         subtitles = fetch_subtitles(video_id)
         subtitles_path = None

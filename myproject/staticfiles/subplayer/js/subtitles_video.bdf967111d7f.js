@@ -775,7 +775,7 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
     function createFramesArray(sync) {
         let currentFrame = [];
         let currentFrameCharCount = 0;
-        const charLimit = 50;
+        const charLimit = 10;
 
         sync.forEach(wordItem => {
             let wordLen = wordItem.word.length;
