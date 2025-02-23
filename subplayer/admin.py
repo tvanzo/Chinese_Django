@@ -1,13 +1,11 @@
 from django.contrib import admin
 from django import forms
 from django.contrib import messages
-from django.core.files.base import ContentFile
 from django.conf import settings
-import os
 import logging
 
 from .models import Media, Channel
-from .youtube_utils import fetch_video_details, fetch_channel_details, fetch_videos_from_channel_with_chinese_subtitles
+from .youtube_utils import fetch_video_details, fetch_channel_details, fetch_videos_from_channel  # ✅ Fixed import
 
 logger = logging.getLogger(__name__)
 
@@ -17,11 +15,12 @@ class MediaAdminForm(forms.ModelForm):
         model = Media
         fields = ['url']
 
+
 class MediaAdmin(admin.ModelAdmin):
     form = MediaAdminForm
-    list_display = ('title', 'url', 'media_type', 'channel', 'media_id', 'category')  # Added 'category'
+    list_display = ('title', 'url', 'media_type', 'channel', 'media_id', 'category')
     search_fields = ['title', 'url', 'channel__name']
-    list_filter = ['category']  # Optional, for filtering by category
+    list_filter = ['category']
 
     def save_model(self, request, obj, form, change):
         video_details = fetch_video_details(obj.url)
@@ -29,7 +28,7 @@ class MediaAdmin(admin.ModelAdmin):
             # Fetch or create the associated channel
             channel_url = f"https://www.youtube.com/channel/{video_details['channel_id']}"
             channel_details = fetch_channel_details(channel_url)
-            obj.youtube_upload_time = video_details['upload_time']  # Use YouTube's upload time
+            obj.youtube_upload_time = video_details['upload_time']
 
             if channel_details:
                 channel, created = Channel.objects.update_or_create(
@@ -52,14 +51,14 @@ class MediaAdmin(admin.ModelAdmin):
             obj.media_id = video_details['video_id']
             obj.youtube_video_id = video_details['video_id']
             obj.video_length = video_details['video_length']
-            obj.category = video_details.get('category_id', 'Unknown')  # Ensure the category is assigned
+            obj.category = video_details.get('category_id', 'Unknown')
             super().save_model(request, obj, form, change)
         else:
             messages.error(request, video_details.get('message', 'Failed to fetch video details.'))
 
 
-
 admin.site.register(Media, MediaAdmin)
+
 
 class ChannelAdminForm(forms.ModelForm):
     class Meta:
@@ -71,11 +70,13 @@ class ChannelAdminForm(forms.ModelForm):
         url = cleaned_data.get('url')
         if not url:
             raise forms.ValidationError({'url': "URL cannot be blank."})
+
         logger.info(f"Fetching channel details for URL: {url}")
         channel_details = fetch_channel_details(url)
         if not channel_details or 'channel_id' not in channel_details or not channel_details['channel_id']:
             logger.error(f"Failed to fetch channel details for URL: {url}")
-            raise forms.ValidationError("Failed to fetch channel details or channel ID not found. Please check the URL and try again.")
+            raise forms.ValidationError(
+                "Failed to fetch channel details or channel ID not found. Please check the URL and try again.")
 
         cleaned_data['channel_id'] = channel_details['channel_id']
         cleaned_data['name'] = channel_details.get('channel_name', 'Unnamed Channel')
@@ -93,16 +94,19 @@ class ChannelAdminForm(forms.ModelForm):
             logger.info(f"Channel '{instance.name}' saved successfully with ID: {instance.channel_id}")
         return instance
 
+
 class ChannelAdmin(admin.ModelAdmin):
     form = ChannelAdminForm
     list_display = ('name', 'channel_id', 'url')
     actions = ['fetch_videos']
 
     def fetch_videos(self, request, queryset):
+        """Fetch latest videos from YouTube channels"""
         logger.info("Starting fetch_videos action in admin.")
         for channel in queryset:
             logger.info(f"Attempting to fetch videos for channel: {channel.name} (ID: {channel.channel_id})")
-            videos = fetch_videos_from_channel_with_chinese_subtitles(channel.channel_id)
+            videos = fetch_videos_from_channel(channel.channel_id)  # ✅ Fixed function name
+
             if videos:
                 logger.info(f"Found {len(videos)} videos for channel: {channel.name}")
                 for video in videos:
@@ -118,7 +122,7 @@ class ChannelAdmin(admin.ModelAdmin):
                             'channel': channel,
                             'category': video['category_id'],
                             'thumbnail_url': video.get('thumbnail_url'),
-                            'media_id': video['video_id']  # Ensure media_id is also set correctly
+                            'media_id': video['video_id']
                         }
                     )
                     if created:
@@ -129,7 +133,7 @@ class ChannelAdmin(admin.ModelAdmin):
                 logger.warning(f"No videos found or failed to fetch videos for channel: {channel.name}")
                 messages.warning(request, f"No videos found or failed to fetch videos for channel: {channel.name}")
 
-    fetch_videos.short_description = "Fetch latest videos with Chinese subtitles"
+    fetch_videos.short_description = "Fetch latest videos with subtitles"
 
 
 admin.site.register(Channel, ChannelAdmin)
