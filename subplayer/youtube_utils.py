@@ -1,7 +1,6 @@
 import os
 import re
 import json
-import time
 import logging
 import requests
 from datetime import datetime
@@ -14,34 +13,23 @@ from django.utils.timezone import make_aware
 
 logger = logging.getLogger(__name__)
 
-# Multiple API keys to rotate if quota is exceeded
-API_KEYS = [
-    os.getenv('GOOGLE_API_KEY'),
-    os.getenv('GOOGLE_API_KEY_2')  # Add a second key if available
-]
-
-if not API_KEYS[0]:
-    raise RuntimeError("At least one GOOGLE_API_KEY must be set in environment variables")
-
-# Function to get API key with rotation
-def get_api_key():
-    return API_KEYS[int(time.time()) % len(API_KEYS)]  # Rotate keys based on time
+# Use a single API key (your original setup)
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+if not GOOGLE_API_KEY:
+    raise RuntimeError("GOOGLE_API_KEY environment variable is not set")
 
 # Initialize YouTube API client
-def get_youtube_client():
-    try:
-        return build('youtube', 'v3', developerKey=get_api_key())
-    except DefaultCredentialsError as e:
-        logger.error("Failed to authenticate with Google API: %s", e)
-        raise RuntimeError("Failed to authenticate with Google API") from e
-
-youtube = get_youtube_client()
+try:
+    youtube = build('youtube', 'v3', developerKey=GOOGLE_API_KEY)
+except DefaultCredentialsError as e:
+    logger.error("Failed to authenticate with Google API: %s", e)
+    raise RuntimeError("Failed to authenticate with Google API") from e
 
 ### Fetch Subtitles from YouTube API ###
 def fetch_subtitles(video_id, language="zh"):
-    """Fetch subtitles using YouTube Data API instead of YouTubeTranscriptApi"""
+    """Fetch subtitles using YouTube Data API"""
     try:
-        url = f"https://www.googleapis.com/youtube/v3/captions?part=snippet&videoId={video_id}&key={get_api_key()}"
+        url = f"https://www.googleapis.com/youtube/v3/captions?part=snippet&videoId={video_id}&key={GOOGLE_API_KEY}"
         response = requests.get(url).json()
 
         if "items" not in response:
@@ -64,7 +52,7 @@ def fetch_subtitles(video_id, language="zh"):
 def download_caption(caption_id):
     """Download the subtitle file"""
     try:
-        url = f"https://www.googleapis.com/youtube/v3/captions/{caption_id}?tfmt=srv3&key={get_api_key()}"
+        url = f"https://www.googleapis.com/youtube/v3/captions/{caption_id}?tfmt=srv3&key={GOOGLE_API_KEY}"
         response = requests.get(url)
         if response.status_code == 200:
             return response.text  # YouTube provides subtitles in XML format
@@ -89,7 +77,6 @@ def fetch_video_details(url):
         return {'status': 'invalid', 'message': "Invalid YouTube URL."}
 
     try:
-        youtube = get_youtube_client()
         video_response = youtube.videos().list(
             id=video_id, part='snippet,contentDetails,status'
         ).execute()
@@ -162,6 +149,7 @@ def process_and_save_subtitles(subtitles, video_id):
     except Exception as e:
         logger.error(f"Failed to save subtitles: {e}")
         return None, 0
+
 
 ### Fetch Latest Videos from a Channel ###
 def fetch_videos_from_channel(channel_id):
