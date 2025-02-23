@@ -13,7 +13,7 @@ from django.utils.timezone import make_aware
 
 logger = logging.getLogger(__name__)
 
-# Use a single API key (your original setup)
+# Use a single API key (like your original setup)
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 if not GOOGLE_API_KEY:
     raise RuntimeError("GOOGLE_API_KEY environment variable is not set")
@@ -150,13 +150,11 @@ def process_and_save_subtitles(subtitles, video_id):
         logger.error(f"Failed to save subtitles: {e}")
         return None, 0
 
-
 ### Fetch Latest Videos from a Channel ###
 def fetch_videos_from_channel(channel_id):
     """Fetch latest videos from a YouTube channel"""
     videos = []
     try:
-        youtube = get_youtube_client()
         response = youtube.search().list(
             channelId=channel_id, part='id,snippet', maxResults=5, order='date', type='video'
         ).execute()
@@ -184,7 +182,6 @@ def fetch_videos_from_channel(channel_id):
 def fetch_channel_details(url):
     """Fetch YouTube channel details"""
     try:
-        youtube = get_youtube_client()
         match = re.search(r'youtube\.com/channel/([^/?]+)', url)
         channel_id = match.group(1) if match else None
 
