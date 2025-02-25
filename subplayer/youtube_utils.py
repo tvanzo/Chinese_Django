@@ -81,7 +81,6 @@ def fetch_video_details(url):
 
         video_item = video_response['items'][0]
 
-        # Check if the video is embeddable
         if video_item['status'].get('embeddable') is False:
             logger.warning(f"Video ID {video_id} is not embeddable.")
             return {'status': 'invalid', 'message': "Video not supported: Sorry, this is the rare case a YouTuber has disabled embedding on this video."}
@@ -93,11 +92,10 @@ def fetch_video_details(url):
         duration = parse_duration(video_item['contentDetails']['duration'])
         video_length_seconds = int(duration.total_seconds())
 
-        # Capture the upload time
+        # Use the correct field name
         published_at = video_item['snippet']['publishedAt']
         from django.utils.timezone import make_aware
-
-        upload_time = make_aware(datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%SZ"))
+        youtube_upload_time = make_aware(datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%SZ"))
 
         subtitles = fetch_subtitles(video_id)
         subtitles_path = None
@@ -117,7 +115,7 @@ def fetch_video_details(url):
             'word_count': word_count,
             'channel_id': channel_id,
             'category_id': category_id,
-            'upload_time': upload_time  # Added this line for upload time
+            'youtube_upload_time': youtube_upload_time  # Updated to match model
         }
     except HttpError as e:
         logger.error(f"HTTP Error while fetching video details: {e}")

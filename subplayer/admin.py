@@ -26,10 +26,9 @@ class MediaAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         video_details = fetch_video_details(obj.url)
         if video_details['status'] == 'valid':
-            # Fetch or create the associated channel
             channel_url = f"https://www.youtube.com/channel/{video_details['channel_id']}"
             channel_details = fetch_channel_details(channel_url)
-            obj.youtube_upload_time = video_details['upload_time']  # Use YouTube's upload time
+            obj.youtube_upload_time = video_details['youtube_upload_time']  # Updated to match model
 
             if channel_details:
                 channel, created = Channel.objects.update_or_create(
@@ -52,11 +51,10 @@ class MediaAdmin(admin.ModelAdmin):
             obj.media_id = video_details['video_id']
             obj.youtube_video_id = video_details['video_id']
             obj.video_length = video_details['video_length']
-            obj.category = video_details.get('category_id', 'Unknown')  # Ensure the category is assigned
+            obj.category = video_details.get('category_id', 'Unknown')
             super().save_model(request, obj, form, change)
         else:
             messages.error(request, video_details.get('message', 'Failed to fetch video details.'))
-
 
 
 admin.site.register(Media, MediaAdmin)
@@ -106,29 +104,31 @@ class ChannelAdmin(admin.ModelAdmin):
             if videos:
                 logger.info(f"Found {len(videos)} videos for channel: {channel.name}")
                 for video in videos:
-                    result, created = Media.objects.update_or_create(
-                        youtube_video_id=video['video_id'],
-                        defaults={
-                            'title': video['title'],
-                            'url': f"https://www.youtube.com/watch?v={video['video_id']}",
-                            'media_type': 'video',
-                            'subtitle_file': video.get('subtitles_file_path'),
-                            'word_count': video.get('word_count', 0),
-                            'video_length': video['video_length'],
-                            'channel': channel,
-                            'category': video['category_id'],
-                            'thumbnail_url': video.get('thumbnail_url'),
-                            'media_id': video['video_id']  # Ensure media_id is also set correctly
-                        }
-                    )
-                    if created:
-                        logger.info(f"Created new media object for video: {video['title']}")
-                    else:
-                        logger.info(f"Updated existing media object for video: {video['title']}")
+                    if video['status'] == 'valid':
+                        result, created = Media.objects.update_or_create(
+                            youtube_video_id=video['video_id'],
+                            defaults={
+                                'title': video['title'],
+                                'url': f"https://www.youtube.com/watch?v={video['video_id']}",
+                                'media_type': 'video',
+                                'subtitle_file': video.get('subtitles_file_path'),
+                                'word_count': video.get('word_count', 0),
+                                'video_length': video.get('video_length'),
+                                'channel': channel,
+                                'category': video['category_id'],
+                                'thumbnail_url': video.get('thumbnail_url'),
+                                'media_id': video['video_id'],
+                                'youtube_upload_time': video['youtube_upload_time']  # Add this
+                            }
+                        )
+                        if created:
+                            logger.info(f"Created new media object for video: {video['title']}")
+                        else:
+                            logger.info(f"Updated existing media object for video: {video['title']}")
+                messages.success(request, f"Successfully fetched {len(videos)} videos for channel: {channel.name}")
             else:
                 logger.warning(f"No videos found or failed to fetch videos for channel: {channel.name}")
                 messages.warning(request, f"No videos found or failed to fetch videos for channel: {channel.name}")
-
     fetch_videos.short_description = "Fetch latest videos with Chinese subtitles"
 
 
