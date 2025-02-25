@@ -27,10 +27,36 @@ except DefaultCredentialsError as e:
 
 def fetch_subtitles(video_id, language='zh'):
     try:
-        return YouTubeTranscriptApi.get_transcript(video_id, languages=['zh-CN', 'zh-Hans', 'zh', 'zh-Hant', 'zh-TW'])
+        proxy_username = os.getenv('SMARTPROXY_USERNAME', 'spkvdhj6aq')
+        proxy_password = os.getenv('SMARTPROXY_PASSWORD', 'BmbkI+85nRf1Idopi2')
+        proxy_host = 'gate.visitxiangtan.com'
+        proxy_port = '10003'  # Updated to working port
+
+        proxies = {
+            "http": f"http://{proxy_username}:{proxy_password}@{proxy_host}:{proxy_port}",
+            "https": f"http://{proxy_username}:{proxy_password}@{proxy_host}:{proxy_port}"
+        }
+
+        # Use timeout if library supports it; otherwise omit
+        try:
+            # For version >= 0.6.0
+            return YouTubeTranscriptApi.get_transcript(
+                video_id,
+                languages=['zh-CN', 'zh-Hans', 'zh-Hant', 'zh', 'zh-TW'],
+                proxies=proxies,
+                timeout=15  # Increased for stability
+            )
+        except TypeError:
+            # Fallback for older versions
+            return YouTubeTranscriptApi.get_transcript(
+                video_id,
+                languages=['zh-CN', 'zh-Hans', 'zh-Hant', 'zh', 'zh-TW'],
+                proxies=proxies
+            )
     except Exception as e:
         logger.error(f"Failed to fetch subtitles for video ID {video_id}: {e}")
         return None
+
 #d
 def fetch_video_details(url):
     logger.debug(f"Fetching video details for URL: {url}")
