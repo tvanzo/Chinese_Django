@@ -4,20 +4,23 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 import os
 
+class Category(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.name
+
 
 class Channel(models.Model):
     channel_id = models.CharField(max_length=255, unique=True, blank=True, null=True)
     name = models.CharField(max_length=255, blank=True, null=True)
     url = models.URLField()
     profile_pic_url = models.URLField(blank=True, null=True)  # Adding this field to store the channel's profile picture URL
+    categories = models.ManyToManyField(Category, related_name='channels', blank=True)
 
     def __str__(self):
-        return str(self.name) if self.name else "Unnamed Channel"
+        return self.name if self.name else "Unnamed Channel"
 
-
-
-    def __str__(self):
-        return self.name
 
 class Media(models.Model):
     MEDIA_TYPES = (
@@ -37,11 +40,11 @@ class Media(models.Model):
     video_length = models.PositiveIntegerField(blank=True, null=True, help_text="Length of the video in seconds.")
     word_count = models.IntegerField(default=0, blank=True, null=True, help_text="Estimated word count from video subtitles.")
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, related_name='media')
-    category = models.CharField(max_length=255, default='Unknown')
+    categories = models.ManyToManyField(Category, related_name='media', blank=True)
     profile_image_url = models.URLField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)  # Add this field
     youtube_upload_time = models.DateTimeField()
-#test
+
     def delete(self, *args, **kwargs):
         if self.subtitle_file:
             file_path = os.path.join(settings.MEDIA_ROOT, self.subtitle_file.name)
@@ -51,6 +54,7 @@ class Media(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.media_type})"
+
 
 class UserMediaStatus(models.Model):
     STATUS_CHOICES = (
@@ -64,6 +68,7 @@ class UserMediaStatus(models.Model):
 
     class Meta:
         unique_together = ('user', 'media')
+
 
 class Highlight(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='highlights')

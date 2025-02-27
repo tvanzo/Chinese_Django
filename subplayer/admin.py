@@ -1,34 +1,50 @@
 from django.contrib import admin
 from django import forms
 from django.contrib import messages
-from django.core.files.base import ContentFile
-from django.conf import settings
-import os
-import logging
-
-from .models import Media, Channel
+from .models import Media, Channel, Category
 from .youtube_utils import fetch_video_details, fetch_channel_details, fetch_videos_from_channel_with_chinese_subtitles
+import logging
 
 logger = logging.getLogger(__name__)
 
-
+# MediaAdminForm to handle the URL field
 class MediaAdminForm(forms.ModelForm):
     class Meta:
         model = Media
         fields = ['url']
 
+# Custom filter to allow filtering by category in the admin interface
+class CategoryFilter(admin.SimpleListFilter):
+    title = 'Category'
+    parameter_name = 'category'
+
+    def lookups(self, request, model_admin):
+        categories = Category.objects.all()
+        return [(category.id, category.name) for category in categories]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(categories__id=self.value())
+        return queryset
+
+# Admin for Media model
 class MediaAdmin(admin.ModelAdmin):
     form = MediaAdminForm
-    list_display = ('title', 'url', 'media_type', 'channel', 'media_id', 'category')  # Added 'category'
+    list_display = ('title', 'url', 'media_type', 'channel', 'media_id', 'category_display')  # Added 'category_display'
     search_fields = ['title', 'url', 'channel__name']
-    list_filter = ['category']  # Optional, for filtering by category
+    list_filter = [CategoryFilter]  # Now using the custom filter for categories
+
+    # Custom method to display categories
+    def category_display(self, obj):
+        return ", ".join([category.name for category in obj.categories.all()])
+    category_display.short_description = 'Categories'  # Display name for the column
 
     def save_model(self, request, obj, form, change):
         video_details = fetch_video_details(obj.url)
         if video_details['status'] == 'valid':
             channel_url = f"https://www.youtube.com/channel/{video_details['channel_id']}"
             channel_details = fetch_channel_details(channel_url)
-            obj.youtube_upload_time = video_details['youtube_upload_time']  # Updated to match model
+            obj.youtube_upload_time = video_details['youtube_upload_time']  # Set the upload time for YouTube
 
             if channel_details:
                 channel, created = Channel.objects.update_or_create(
@@ -51,18 +67,20 @@ class MediaAdmin(admin.ModelAdmin):
             obj.media_id = video_details['video_id']
             obj.youtube_video_id = video_details['video_id']
             obj.video_length = video_details['video_length']
-            obj.category = video_details.get('category_id', 'Unknown')
+            obj.category = video_details.get('category_id', 'Unknown')  # Category handling
             super().save_model(request, obj, form, change)
         else:
             messages.error(request, video_details.get('message', 'Failed to fetch video details.'))
 
-
 admin.site.register(Media, MediaAdmin)
 
+# ChannelAdminForm for Channel model with added categories
 class ChannelAdminForm(forms.ModelForm):
+    categories = forms.ModelChoiceField(queryset=Category.objects.all(), required=False)  # Single category field
+
     class Meta:
         model = Channel
-        fields = ['url']
+        fields = ['url', 'categories']
 
     def clean(self):
         cleaned_data = super().clean()
@@ -89,8 +107,12 @@ class ChannelAdminForm(forms.ModelForm):
         if commit:
             instance.save()
             logger.info(f"Channel '{instance.name}' saved successfully with ID: {instance.channel_id}")
+            # Assign selected category to the channel
+            if self.cleaned_data['categories']:
+                instance.categories = self.cleaned_data['categories']
         return instance
 
+# Admin for Channel model
 class ChannelAdmin(admin.ModelAdmin):
     form = ChannelAdminForm
     list_display = ('name', 'channel_id', 'url')
@@ -131,5 +153,12 @@ class ChannelAdmin(admin.ModelAdmin):
                 messages.warning(request, f"No videos found or failed to fetch videos for channel: {channel.name}")
     fetch_videos.short_description = "Fetch latest videos with Chinese subtitles"
 
-
+# Registering ChannelAdmin
 admin.site.register(Channel, ChannelAdmin)
+
+# Registering Category model to be editable in the Django admin
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'id')
+    search_fields = ['name']
+
+admin.site.register(Category, CategoryAdmin)
