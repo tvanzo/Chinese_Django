@@ -30,21 +30,21 @@ class CategoryFilter(admin.SimpleListFilter):
 # Admin for Media model
 class MediaAdmin(admin.ModelAdmin):
     form = MediaAdminForm
-    list_display = ('title', 'url', 'media_type', 'channel', 'media_id', 'category_display')  # Added 'category_display'
+    list_display = ('title', 'url', 'media_type', 'channel', 'media_id', 'category_display')
     search_fields = ['title', 'url', 'channel__name']
-    list_filter = [CategoryFilter]  # Now using the custom filter for categories
+    list_filter = [CategoryFilter]
 
     # Custom method to display categories
     def category_display(self, obj):
         return ", ".join([category.name for category in obj.categories.all()])
-    category_display.short_description = 'Categories'  # Display name for the column
+    category_display.short_description = 'Categories'
 
     def save_model(self, request, obj, form, change):
         video_details = fetch_video_details(obj.url)
         if video_details['status'] == 'valid':
             channel_url = f"https://www.youtube.com/channel/{video_details['channel_id']}"
             channel_details = fetch_channel_details(channel_url)
-            obj.youtube_upload_time = video_details['youtube_upload_time']  # Set the upload time for YouTube
+            obj.youtube_upload_time = video_details['youtube_upload_time']
 
             if channel_details:
                 channel, created = Channel.objects.update_or_create(
@@ -67,7 +67,7 @@ class MediaAdmin(admin.ModelAdmin):
             obj.media_id = video_details['video_id']
             obj.youtube_video_id = video_details['video_id']
             obj.video_length = video_details['video_length']
-            obj.category = video_details.get('category_id', 'Unknown')  # Category handling
+            obj.category = video_details.get('category_id', 'Unknown')
             super().save_model(request, obj, form, change)
         else:
             messages.error(request, video_details.get('message', 'Failed to fetch video details.'))
@@ -76,7 +76,7 @@ admin.site.register(Media, MediaAdmin)
 
 # ChannelAdminForm for Channel model with added categories
 class ChannelAdminForm(forms.ModelForm):
-    categories = forms.ModelMultipleChoiceField(queryset=Category.objects.all(), required=False)  # Changed to ModelMultipleChoiceField
+    categories = forms.ModelMultipleChoiceField(queryset=Category.objects.all(), required=False)
 
     class Meta:
         model = Channel
@@ -109,7 +109,7 @@ class ChannelAdminForm(forms.ModelForm):
             logger.info(f"Channel '{instance.name}' saved successfully with ID: {instance.channel_id}")
             # Assign selected categories to the channel
             if self.cleaned_data['categories']:
-                instance.categories.set(self.cleaned_data['categories'])  # Use set() for ManyToManyField
+                instance.categories.set(self.cleaned_data['categories'])
         return instance
 
 # Admin for Channel model
@@ -140,7 +140,7 @@ class ChannelAdmin(admin.ModelAdmin):
                                 'category': video['category_id'],
                                 'thumbnail_url': video.get('thumbnail_url'),
                                 'media_id': video['video_id'],
-                                'youtube_upload_time': video['youtube_upload_time']  # Add this
+                                'youtube_upload_time': video['youtube_upload_time']
                             }
                         )
                         if created:

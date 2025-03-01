@@ -9,6 +9,9 @@ import logging
 from isodate import parse_duration
 from google.auth.exceptions import DefaultCredentialsError
 from datetime import datetime, timezone
+import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 logger = logging.getLogger(__name__)
 
@@ -28,29 +31,25 @@ def fetch_subtitles(video_id, language='zh'):
         proxy_username = os.getenv('SMARTPROXY_USERNAME', 'spkvdhj6aq')
         proxy_password = os.getenv('SMARTPROXY_PASSWORD', 'BmbkI+85nRf1Idopi2')
         proxy_host = 'gate.visitxiangtan.com'
-        proxy_port = '10003'  # Updated to working port
+        proxy_port = '10003'
 
         proxies = {
             "http": f"http://{proxy_username}:{proxy_password}@{proxy_host}:{proxy_port}",
             "https": f"http://{proxy_username}:{proxy_password}@{proxy_host}:{proxy_port}"
         }
 
-        # Use timeout if library supports it; otherwise omit
-        try:
-            # For version >= 0.6.0
-            return YouTubeTranscriptApi.get_transcript(
-                video_id,
-                languages=['zh-CN', 'zh-Hans', 'zh-Hant', 'zh', 'zh-TW'],
-                proxies=proxies,
-                timeout=15  # Increased for stability
-            )
-        except TypeError:
-            # Fallback for older versions
-            return YouTubeTranscriptApi.get_transcript(
-                video_id,
-                languages=['zh-CN', 'zh-Hans', 'zh-Hant', 'zh', 'zh-TW'],
-                proxies=proxies
-            )
+        # Configure retries
+        session = requests.Session()
+        retries = Retry(total=3, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
+        session.mount("http://", HTTPAdapter(max_retries=retries))
+        session.mount("https://", HTTPAdapter(max_retries=retries))
+
+        # Fetch subtitles
+        return YouTubeTranscriptApi.get_transcript(
+            video_id,
+            languages=['zh-CN', 'zh-Hans', 'zh-Hant', 'zh', 'zh-TW'],
+            proxies=proxies
+        )
     except Exception as e:
         logger.error(f"Failed to fetch subtitles for video ID {video_id}: {e}")
         return None
@@ -112,7 +111,7 @@ def fetch_video_details(url):
             'word_count': word_count,
             'channel_id': channel_id,
             'category_id': category_id,
-            'youtube_upload_time': youtube_upload_time  # Updated to match model
+            'youtube_upload_time': youtube_upload_time
         }
     except HttpError as e:
         logger.error(f"HTTP Error while fetching video details: {e}")
@@ -148,8 +147,7 @@ def process_and_save_subtitles(subtitles, video_id):
 
         if os.path.exists(file_path):
             relative_path = os.path.relpath(file_path, start=settings.MEDIA_ROOT)
-            logger.info(
-                f"Successfully saved subtitles for video ID {video_id} at {relative_path} with word count of {word_count}")
+            logger.info(f"Successfully saved subtitles for video ID {video_id} at {relative_path} with word count of {word_count}")
             return relative_path, word_count
         else:
             logger.error(f"Subtitle file was not created at the expected path: {file_path}")
@@ -212,7 +210,7 @@ def fetch_videos_from_channel_with_chinese_subtitles(channel_id):
     nextPageToken = None
     try:
         logger.info(f"Starting video fetch for channel ID: {channel_id}")
-        while len(videos) < 100:
+        while len(videos) < 10:  # Limit to 10 videos per batch
             response = youtube.search().list(
                 channelId=channel_id, part='id,snippet', maxResults=5, order='date', type='video',
                 pageToken=nextPageToken
@@ -230,7 +228,7 @@ def fetch_videos_from_channel_with_chinese_subtitles(channel_id):
                         logger.info(f"Video {video_id} added with subtitles.")
                     else:
                         logger.info(f"Video {video_id} skipped, no subtitles.")
-                    if len(videos) == 5:
+                    if len(videos) == 10:  # Stop after 10 videos
                         break
             nextPageToken = response.get('nextPageToken')
             if not nextPageToken:
