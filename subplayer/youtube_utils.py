@@ -8,9 +8,7 @@ from django.conf import settings
 import logging
 from isodate import parse_duration
 from google.auth.exceptions import DefaultCredentialsError
-from datetime import datetime
-from datetime import datetime, timezone  # Add timezone import
-
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +55,6 @@ def fetch_subtitles(video_id, language='zh'):
         logger.error(f"Failed to fetch subtitles for video ID {video_id}: {e}")
         return None
 
-#d
 def fetch_video_details(url):
     logger.debug(f"Fetching video details for URL: {url}")
     if "youtube.com" not in url and "youtu.be" not in url:
@@ -210,7 +207,6 @@ def fetch_channel_details(url):
         logger.error(f"An error occurred while fetching channel details: {e}")
         return None
 
-#teste
 def fetch_videos_from_channel_with_chinese_subtitles(channel_id):
     videos = []
     nextPageToken = None
@@ -247,7 +243,6 @@ def fetch_videos_from_channel_with_chinese_subtitles(channel_id):
     else:
         logger.info(f"Total videos fetched and added: {len(videos)}")
     return videos
-
 
 def get_channel_profile_pic(youtube_url):
     try:

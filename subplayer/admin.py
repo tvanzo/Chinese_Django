@@ -76,7 +76,7 @@ admin.site.register(Media, MediaAdmin)
 
 # ChannelAdminForm for Channel model with added categories
 class ChannelAdminForm(forms.ModelForm):
-    categories = forms.ModelChoiceField(queryset=Category.objects.all(), required=False)  # Single category field
+    categories = forms.ModelMultipleChoiceField(queryset=Category.objects.all(), required=False)  # Changed to ModelMultipleChoiceField
 
     class Meta:
         model = Channel
@@ -107,9 +107,9 @@ class ChannelAdminForm(forms.ModelForm):
         if commit:
             instance.save()
             logger.info(f"Channel '{instance.name}' saved successfully with ID: {instance.channel_id}")
-            # Assign selected category to the channel
+            # Assign selected categories to the channel
             if self.cleaned_data['categories']:
-                instance.categories = self.cleaned_data['categories']
+                instance.categories.set(self.cleaned_data['categories'])  # Use set() for ManyToManyField
         return instance
 
 # Admin for Channel model
