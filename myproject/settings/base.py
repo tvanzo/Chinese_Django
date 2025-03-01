@@ -186,6 +186,7 @@ MESSAGE_TAGS = {
 # Custom settings
 INVITE_CODE = 'beta-cnforum'
 # settings.py
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-CELERY_TIMEZONE = 'UTC'
+from datetime import timedelta
+
+# Increase default timeout
+TIMEOUT = timedelta(minutes=10)

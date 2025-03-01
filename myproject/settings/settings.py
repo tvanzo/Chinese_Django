@@ -197,6 +197,10 @@ import os
 print("GOOGLE_API_KEY:", os.getenv("GOOGLE_API_KEY"))
 # Custom settings
 INVITE_CODE = 'beta-cnforum'
+from datetime import timedelta
+
+# Increase default timeout
+TIMEOUT = timedelta(minutes=10)
 
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', 'default_secret_key_if_not_set')
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', 'default_publishable_key_if_not_set')
