@@ -7,6 +7,7 @@ from django.db.models import Sum
 from django.core.serializers import serialize
 from django.conf import settings
 from django.db.models import Count, Exists, OuterRef, Q
+from subplayer.models import Category
 
 from django.http import HttpResponse
 
@@ -227,6 +228,7 @@ def media_list(request):
     user = request.user
     today = timezone.now().date()
 
+    # Time span filtering
     time_span = request.GET.get('span', 'all')
     if time_span == 'day':
         start_date = today
@@ -235,26 +237,34 @@ def media_list(request):
     else:
         start_date = None
 
-    # Fetch all media and annotate with user_highlights_count and is_in_log
-    all_media = Media.objects.annotate(
+    # Category filtering
+    category_filter = request.GET.get('category', '').lower()
+
+    # Fetch all media with annotations and optimizations
+    all_media = Media.objects.select_related('channel').prefetch_related('categories', 'channel__categories').annotate(
         user_highlights_count=Count('highlights', filter=Q(highlights__user=user)),
         is_in_log=Exists(UserMediaStatus.objects.filter(media=OuterRef('pk'), user=user)) |
-                   Exists(user.added_media.filter(id=OuterRef('pk')))
+                  Exists(user.added_media.filter(id=OuterRef('pk')))
     )
 
-    # Fetch the media with any status for the user
-    user_media_statuses = UserMediaStatus.objects.filter(user=user).select_related('media')
+    # Apply category filter if specified
+    if category_filter and category_filter != 'all':
+        all_media = all_media.filter(
+            Q(categories__name__iexact=category_filter) |
+            Q(channel__categories__name__iexact=category_filter)
+        ).distinct()
 
-    # Map status to each media
+    # Fetch user media statuses
+    user_media_statuses = UserMediaStatus.objects.filter(user=user).select_related('media')
     media_statuses = {entry.media_id: entry.status for entry in user_media_statuses}
 
-    # Attach the status and formatted video length directly to each media object
+    # Attach additional attributes to each media object
     for media in all_media:
         media.status = media_statuses.get(media.id, "Not Available")
         media.formatted_video_length = format_duration(media.video_length)
         media.time_ago = time_ago(media.youtube_upload_time)
 
-
+    # Progress stats
     progress_filters = {'profile': user.profile}
     if start_date:
         progress_filters['date__gte'] = start_date
@@ -264,7 +274,12 @@ def media_list(request):
     total_words = progress_entries.aggregate(sum_words=Sum('words_learned'))['sum_words'] or 0
     total_highlights = Highlight.objects.filter(user=user).count()
 
-    # Get the list of channels with the media count
+    # Get all categories relevant to the media
+    categories = Category.objects.filter(
+        Q(media__in=all_media) | Q(channels__media__in=all_media)
+    ).distinct()
+
+    # Get channels with media count
     channels = Channel.objects.annotate(media_count=Count('media'))
 
     context = {
@@ -272,11 +287,12 @@ def media_list(request):
         'total_minutes': round(total_minutes, 2),
         'total_words': total_words,
         'total_highlights': total_highlights,
-        'channels': channels  # Include channels in the context
+        'channels': channels,
+        'categories': categories,
+        'selected_category': category_filter or 'all',
     }
 
     return render(request, 'watch.html', context)
-
 
 
 def dictionary_lookup(request):

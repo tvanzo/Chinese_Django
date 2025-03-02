@@ -21,7 +21,8 @@ from subplayer.forms import CustomUserCreationForm
 from accounts.models import Profile, MediaProgress, Subscription
 from subplayer.models import Media, Highlight, UserMediaStatus
 from subplayer.views import format_duration  # Import the function from subplayer.views
-
+from django.db.models import Q
+from subplayer.models import Media, Category, UserMediaStatus
 logger = logging.getLogger(__name__)
 import stripe
 from django.conf import settings
