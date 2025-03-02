@@ -1188,12 +1188,9 @@
   </main>
  <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Category filtering
     const categoryItems = document.querySelectorAll('.category-item');
-    const videoCards = document.querySelectorAll('.video-card');
     const addButton = document.querySelector('.add-custom-url');
     const urlInputContainer = document.querySelector('.custom-url-input');
-
     let isUrlInputVisible = false;
 
     // Function to toggle search bar visibility
@@ -1204,18 +1201,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Toggle the URL input when clicking the + button
     addButton.addEventListener('click', function(event) {
-        event.stopPropagation(); // Prevent event from bubbling up
+        event.stopPropagation();
         toggleUrlInput();
     });
 
     // Hide URL input when clicking another category filter
     categoryItems.forEach(item => {
-        item.addEventListener('click', function() {
-            if (!this.classList.contains('add-custom-url')) {
+        if (!item.classList.contains('add-custom-url')) {
+            item.addEventListener('click', function() {
                 isUrlInputVisible = false;
                 urlInputContainer.style.display = 'none';
-            }
-        });
+            });
+        }
     });
 
     // Prevent search bar from closing when clicking inside it
@@ -1231,104 +1228,70 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Category filtering logic
-    categoryItems.forEach(item => {
-        item.addEventListener('click', function() {
-            const category = this.dataset.category;
+    // Category filtering with server-side fetch
+    function filterByCategory(category, element) {
+        window.history.pushState({}, '', `?category=${category}`);
+        categoryItems.forEach(i => i.classList.remove('active'));
+        element.classList.add('active');
 
-            categoryItems.forEach(i => i.classList.remove('active'));
-            this.classList.add('active');
+        fetch(`/watch/?category=${category}`, { credentials: 'include' })
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newVideoGrid = doc.querySelector('.video-grid');
+                document.querySelector('.video-grid').innerHTML = newVideoGrid.innerHTML;
+                reattachToggleListeners();  // Reattach listeners after DOM update
+            })
+            .catch(error => console.error('Error fetching filtered content:', error));
+    }
 
-            videoCards.forEach(card => {
-                const cardCategory = card.dataset.category;
-                card.style.display = (category === 'all' || cardCategory === category) ? 'block' : 'none';
+    // Reattach toggle listeners
+    function reattachToggleListeners() {
+        document.querySelectorAll('.toggle-log').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const videoId = this.dataset.id;
+                const action = this.dataset.action;
+                const url = action === 'add' ? `/add_to_log/${videoId}/` : `/remove_from_log/${videoId}/`;
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.dataset.action = action === 'add' ? 'remove' : 'add';
+                        let svg = this.querySelector('svg');
+                        svg.innerHTML = action === 'add' ? '<path d="M5 12h14"></path>' : '<path d="M12 5v14M5 12h14"></path>';
+                        svg.classList.toggle('active');
+                    } else {
+                        console.error('Error:', data.error);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
             });
         });
-    });
+    }
+
+    // Initial toggle listeners
+    reattachToggleListeners();
 
     // Hover effects
     document.querySelectorAll('.video-card').forEach(card => {
         card.addEventListener('mouseenter', function() {
             this.style.transform = 'translateY(-5px)';
         });
-
         card.addEventListener('mouseleave', function() {
             this.style.transform = 'translateY(0)';
         });
     });
 
-    // Ensure initial state of toggle buttons matches server data
-    document.querySelectorAll('.toggle-log').forEach(button => {
-        const action = button.dataset.action;
-        let svg = button.querySelector('svg');
-        svg.innerHTML = action === 'remove' ?
-            '<path d="M5 12h14"></path>' :
-            '<path d="M12 5v14M5 12h14"></path>';
-        if (action === 'remove') svg.classList.add('active');
-        else svg.classList.remove('active');
-    });
-
-    document.querySelectorAll('.toggle-log').forEach(button => {
-    button.addEventListener('click', function(e) {
-        e.preventDefault();
-        const videoId = this.dataset.id;
-        const action = this.dataset.action;
-        const url = action === 'add' ? `/add_to_log/${videoId}/` : `/remove_from_log/${videoId}/`;
-
-        console.log(`Sending ${action} request for video ID:`, videoId);
-
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                console.log(`Updating UI for video ID: ${videoId}, action: ${action}`);
-
-                // Toggle the action attribute
-                this.dataset.action = action === 'add' ? 'remove' : 'add';
-
-                // Toggle SVG icon
-                let svg = this.querySelector('svg');
-                svg.innerHTML = action === 'add' ?
-                    '<path d="M5 12h14"></path>' :  // Minus sign when added
-                    '<path d="M12 5v14M5 12h14"></path>'; // Plus sign when removed
-                svg.classList.toggle('active');
-
-                // Ensure UI update is enforced
-                this.closest('.video-card').classList.toggle('logged', action === 'add');
-
-                // 🔴 Prevent Unwanted Highlight Update
-                if (!this.classList.contains('highlight-button')) {
-                    console.log("Skipping highlight update because this is a log action.");
-                    return;
-                }
-
-                // Update highlight count only for highlight actions
-                let badge = this.closest('.video-card').querySelector('.badge-highlight');
-                if (badge) {
-                    let currentCount = parseInt(badge.textContent.match(/\d+/)[0]) || 0;
-                    badge.textContent = `${action === 'add' ? currentCount + 1 : Math.max(0, currentCount - 1)} Highlights`;
-                }
-
-                showNotification(data.message, 'success');
-            } else {
-                console.error('Error from server:', data.error);
-                showNotification(data.error || 'An error occurred', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Fetch error:', error);
-            showNotification('An error occurred', 'error');
-        });
-    });
-});
-
-
+    // Get CSRF token
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -1344,32 +1307,14 @@ document.addEventListener('DOMContentLoaded', function() {
         return cookieValue;
     }
 
-    function showPlusOneAnimation(element) {
-        const plusOne = document.getElementById('plus-one-animation');
-        const rect = element.getBoundingClientRect();
-        plusOne.style.left = `${rect.left + rect.width}px`;
-        plusOne.style.top = `${rect.top}px`;
-        plusOne.style.display = 'block';
-        plusOne.style.animation = 'flyOffScreen 1s forwards';
-
-        plusOne.addEventListener('animationend', () => {
-            plusOne.style.display = 'none';
-            plusOne.style.animation = '';
-        });
-    }
-
-    function showNotification(message, type) {
-        const notificationBar = document.getElementById('notification-bar');
-        const notificationMessage = document.getElementById('notification-message');
-
-        notificationMessage.textContent = message;
-        notificationBar.className = `notification-bar ${type}`;
-        notificationBar.style.display = 'block';
-
-        setTimeout(() => {
-            notificationBar.style.display = 'none';
-        }, 5000);
-    }
+    // Ensure initial state of toggle buttons matches server data
+    document.querySelectorAll('.toggle-log').forEach(button => {
+        const action = button.dataset.action;
+        let svg = button.querySelector('svg');
+        svg.innerHTML = action === 'remove' ? '<path d="M5 12h14"></path>' : '<path d="M12 5v14M5 12h14"></path>';
+        if (action === 'remove') svg.classList.add('active');
+        else svg.classList.remove('active');
+    });
 });
 </script>
 
