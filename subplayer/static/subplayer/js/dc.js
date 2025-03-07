@@ -1,5 +1,5 @@
 'use strict';
-
+console.log("dc.js code executed");
 let dictionary = null; // This will hold the loaded dictionary
 
 let savedTarget;
@@ -640,7 +640,7 @@ async function loadDictionary() {
 }
 // Execute the loadDictionary function when the document is fully loaded
 document.addEventListener('DOMContentLoaded', async () => {
-console.log("Dictionary loading outter...");
+console.log("Dictionary loading...");
 loadDictionary().then(() => {
   console.log("Dictionary loaded:", dictionary);
     // Assuming each entry is on a new line and format is "word - definition"
@@ -654,11 +654,11 @@ loadDictionary().then(() => {
 });    // You can add other initializations here...
 });
 
-    
 
 
 
-    
+
+
 
 
 
@@ -903,7 +903,7 @@ function triggerSearch() {
 
 function processSearchResult(result) {
      console.log("processSearchResult called with result:", result);
-    
+
     // No need to check config existence here since we've directly initialized it
     const tonecolors = config.tonecolors; // Directly use it
 

@@ -1,5 +1,5 @@
 'use strict';
-
+console.log("dc.js code executed");
 let dictionary = null; // This will hold the loaded dictionary
 
 let savedTarget;
@@ -654,11 +654,11 @@ loadDictionary().then(() => {
 });    // You can add other initializations here...
 });
 
-    
 
 
 
-    
+
+
 
 
 
@@ -899,7 +899,7 @@ function triggerSearch() {
 
 function processSearchResult(result) {
      console.log("processSearchResult called with result:", result);
-    
+
     // No need to check config existence here since we've directly initialized it
     const tonecolors = config.tonecolors; // Directly use it
 

@@ -210,7 +210,7 @@ def fetch_videos_from_channel_with_chinese_subtitles(channel_id):
     nextPageToken = None
     try:
         logger.info(f"Starting video fetch for channel ID: {channel_id}")
-        while len(videos) < 100:  # Limit to 10 videos per batch
+        while len(videos) < 1:  # Limit to 10 videos per batch
             response = youtube.search().list(
                 channelId=channel_id, part='id,snippet', maxResults=5, order='date', type='video',
                 pageToken=nextPageToken

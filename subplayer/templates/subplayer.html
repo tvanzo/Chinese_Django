@@ -3043,6 +3043,9 @@ iframe {
     /* right: 10px; left: auto; */
 }
 
+
+
+=
 </style>
 </head>
 
@@ -3146,12 +3149,12 @@ data-start-index="{{ highlight.start_index }}">
     <div class="subtitles-container" id="subtitles"></div>
     <div class="buttons-container">
     <!-- Status Button -->
-    <div class="button-group">
-        <button class="icon-button" id="status-icon">
-            <img src="{% static 'subplayer/status.png' %}" alt="Set Status">
-        </button>
-        <span class="tooltip-text" id="status-tooltip">Set Status</span>
-    </div>
+   <div class="button-group">
+    <button class="icon-button" id="status-icon">
+        <img src="{% static 'subplayer/status.png' %}" alt="Set Status">
+    </button>
+    <span class="tooltip-text" id="status-tooltip">Set Status</span>
+</div>
 
     <!-- Loop Button -->
     <div class="button-group">
@@ -3232,17 +3235,6 @@ data-start-index="{{ highlight.start_index }}">
     }
 
     // Setup Highlight Links
-    const highlights = document.querySelectorAll('#highlight-list a');
-    highlights.forEach(highlight => {
-        highlight.addEventListener('click', function(e) {
-            e.preventDefault();
-            const startTime = parseFloat(this.getAttribute('data-start-time'));
-            if (player && !isNaN(startTime)) {
-                player.seekTo(startTime, true);
-            }
-        });
-    });
-
     function setupHighlightLinks() {
         const highlights = document.querySelectorAll('#highlight-list a');
         highlights.forEach(highlight => {
@@ -3256,74 +3248,59 @@ data-start-index="{{ highlight.start_index }}">
         });
     }
 
-    setupHighlightLinks();
+    // Toggle Sidebar (Both)
+    function toggleSidebar() {
+        const leftSidebar = document.querySelector('.left-sidebar');
+        const rightSidebar = document.querySelector('.right-sidebar');
+        const mediaContent = document.querySelector('.media-content');
 
-function toggleSidebar() {
-    const leftSidebar = document.querySelector('.left-sidebar');
-    const rightSidebar = document.querySelector('.right-sidebar');
-    const mediaContent = document.querySelector('.media-content');
+        leftSidebar.classList.toggle('collapsed');
+        rightSidebar.classList.toggle('collapsed');
 
-    // Toggle both sidebars
-    leftSidebar.classList.toggle('collapsed');
-    rightSidebar.classList.toggle('collapsed');
+        mediaContent.style.marginLeft = leftSidebar.classList.contains('collapsed') ? '40px' : '240px';
+        mediaContent.style.marginRight = rightSidebar.classList.contains('collapsed') ? '0' : '250px';
 
-    // Update the media content margins
-    if (leftSidebar.classList.contains('collapsed')) {
-        mediaContent.style.marginLeft = '40px';
-    } else {
-        mediaContent.style.marginLeft = '240px';
-    }
-    if (rightSidebar.classList.contains('collapsed')) {
-        mediaContent.style.marginRight = '0';
-    } else {
-        mediaContent.style.marginRight = '250px';
+        const leftCollapseButton = document.querySelector('.left-sidebar .sidebar-toggle');
+        const leftExpandButton = document.querySelector('.left-sidebar .sidebar-expand');
+        leftCollapseButton.style.display = leftSidebar.classList.contains('collapsed') ? 'none' : 'flex';
+        leftExpandButton.style.display = leftSidebar.classList.contains('collapsed') ? 'flex' : 'none';
+
+        localStorage.setItem('bothSidebars', leftSidebar.classList.contains('collapsed') ? 'collapsed' : 'expanded');
     }
 
-    // Update toggle buttons visibility
-    const leftCollapseButton = document.querySelector('.left-sidebar .sidebar-toggle');
-    const leftExpandButton = document.querySelector('.left-sidebar .sidebar-expand');
-    if (leftSidebar.classList.contains('collapsed')) {
-        leftCollapseButton.style.display = 'none';
-        leftExpandButton.style.display = 'flex';
-    } else {
-        leftCollapseButton.style.display = 'flex';
-        leftExpandButton.style.display = 'none';
+    // Toggle Left Sidebar (Individual Control)
+    function toggleLeftSidebar(action) {
+        const leftSidebar = document.querySelector('.left-sidebar');
+        const collapseButton = document.querySelector('.left-sidebar .sidebar-toggle');
+        const expandButton = document.querySelector('.left-sidebar .sidebar-expand');
+        const mediaContent = document.querySelector('.media-content');
+        const rightSidebar = document.querySelector('.right-sidebar');
+
+        if (action === 'collapse') {
+            leftSidebar.classList.add('collapsed');
+            collapseButton.style.display = 'none';
+            expandButton.style.display = 'block';
+            mediaContent.style.marginLeft = '60px';
+            mediaContent.style.width = rightSidebar.classList.contains('collapsed') ? 'calc(100% - 80px)' : 'calc(100% - 320px)';
+        } else if (action === 'expand') {
+            leftSidebar.classList.remove('collapsed');
+            collapseButton.style.display = 'block';
+            expandButton.style.display = 'none';
+            mediaContent.style.marginLeft = '260px';
+            mediaContent.style.width = rightSidebar.classList.contains('collapsed') ? 'calc(100% - 280px)' : 'calc(100% - 520px)';
+        }
+
+        mediaContent.style.marginRight = rightSidebar.classList.contains('collapsed') ? '20px' : '260px';
+        localStorage.setItem('leftSidebar', leftSidebar.classList.contains('collapsed') ? 'collapsed' : 'expanded');
+
+        const playerIframe = document.querySelector('#player iframe');
+        if (playerIframe) {
+            playerIframe.style.width = '100%';
+            playerIframe.style.height = '100%';
+        }
     }
 
-    // Save sidebars state
-    localStorage.setItem('bothSidebars', leftSidebar.classList.contains('collapsed') ? 'collapsed' : 'expanded');
-}
-
-// Option to restore state on page load for both sidebars
-document.addEventListener('DOMContentLoaded', function() {
-    const bothSidebarsState = localStorage.getItem('bothSidebars');
-    if (bothSidebarsState === 'collapsed') {
-        toggleSidebar(); // This will toggle both sidebars to collapsed state
-    }
-});
-
-// Keep the separate toggle for the left sidebar if you want individual control
-function toggleLeftSidebar(action) {
-    const leftSidebar = document.querySelector('.left-sidebar');
-    const collapseButton = document.querySelector('.left-sidebar .sidebar-toggle');
-    const expandButton = document.querySelector('.left-sidebar .sidebar-expand');
-    const mediaContent = document.querySelector('.media-content');
-
-    if (action === 'collapse') {
-        leftSidebar.classList.add('collapsed');
-        collapseButton.style.display = 'none';
-        expandButton.style.display = 'block';
-        mediaContent.style.marginLeft = '40px';
-    } else if (action === 'expand') {
-        leftSidebar.classList.remove('collapsed');
-        collapseButton.style.display = 'block';
-        expandButton.style.display = 'none';
-        mediaContent.style.marginLeft = '240px';
-    }
-
-    // Save the state if needed
-    localStorage.setItem('leftSidebar', leftSidebar.classList.contains('collapsed') ? 'collapsed' : 'expanded');
-}
+    // Play All Highlights
     document.getElementById('play-all-btn').addEventListener('click', playAllHighlights);
 
     async function playAllHighlights() {
@@ -3356,32 +3333,25 @@ function toggleLeftSidebar(action) {
 
     async function seekAndPlay(startTime) {
         player.seekTo(startTime, true);
-        await new Promise(resolve => setTimeout(resolve, 500)); // Wait for 500ms to ensure seeking is complete
+        await new Promise(resolve => setTimeout(resolve, 500));
         player.playVideo();
     }
 
     function updateActiveHighlight(activeElement) {
         document.querySelectorAll('#highlight-list a').forEach(highlight => {
-            highlight.classList.remove('played-highlight');
-            highlight.classList.remove('active-highlight');
+            highlight.classList.remove('played-highlight', 'active-highlight');
         });
-        activeElement.classList.add('played-highlight');
-        activeElement.classList.add('active-highlight');
+        activeElement.classList.add('played-highlight', 'active-highlight');
     }
 
-    function removeHighlightActiveStates() {
-        document.querySelectorAll('#highlight-list a').forEach(highlight => {
-            highlight.classList.remove('played-highlight');
-        });
-    }
-
+    // Delete Highlight
     async function deleteHighlight(highlightId) {
         try {
             const response = await fetch(`/api/user/delete_highlight/${highlightId}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': csrftoken2
+                    'X-CSRFToken': getCookie('csrftoken') // Assuming csrftoken2 was a typo
                 },
                 body: JSON.stringify({ highlight_id: highlightId }),
             });
@@ -3398,26 +3368,13 @@ function toggleLeftSidebar(action) {
         }
     }
 
-    function setupHighlightDeletion() {
-        const deleteButtons = document.querySelectorAll('.delete-highlight');
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function(event) {
-                event.preventDefault();
-                const highlightId = this.getAttribute('data-highlight-id');
-                deleteHighlight(highlightId).then(() => {
-                    this.closest('li').remove();
-                });
-            });
-        });
-    }
-
+    // Highlight Mode Toggle
     function toggleHighlightMode() {
         document.addEventListener('keydown', function(event) {
             if (event.key === "Shift") {
                 document.getElementById('highlight-icon').src = '{% static "subplayer/yellow-high.png" %}';
             }
         });
-
         document.addEventListener('keyup', function(event) {
             if (event.key === "Shift") {
                 document.getElementById('highlight-icon').src = '{% static "subplayer/black-high.png" %}';
@@ -3425,10 +3382,11 @@ function toggleLeftSidebar(action) {
         });
     }
 
+    // Status Functions
     function initializeStatusUI() {
         console.log('Initializing status UI');
         const mediaStatusElement = document.getElementById('media-status');
-        const initialStatus = mediaStatusElement.getAttribute('data-status');
+        const initialStatus = mediaStatusElement.getAttribute('data-status') || 'set-status';
         console.log('Initial status:', initialStatus);
         updateSingleStatusIcon(initialStatus);
     }
@@ -3456,14 +3414,11 @@ function toggleLeftSidebar(action) {
     async function toggleStatus(newStatus) {
         console.log("Toggle status called:", newStatus);
         const mediaId = '{{ media.media_id }}';
-        const currentTime = player.getCurrentTime();
-        currentStatus = newStatus;
-        if (currentStatus === 'set-status') {
-            lastUpdateTime = 0;
-        }
+        const currentTime = player ? player.getCurrentTime() : 0;
+
         try {
-            let url = `/media/update_status/${mediaId}/${newStatus}/`;
-            let data = { status: newStatus, current_time: currentTime };
+            const url = `/media/update_status/${mediaId}/${newStatus}/`;
+            const data = { status: newStatus, current_time: currentTime };
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -3478,7 +3433,7 @@ function toggleLeftSidebar(action) {
             }
 
             const result = await response.json();
-            console.log("Response received from updateMediaStatus:" + newStatus, result);
+            console.log("Status update response:", result);
 
             if (result && result.status === 'success') {
                 updateSingleStatusIcon(newStatus);
@@ -3491,27 +3446,85 @@ function toggleLeftSidebar(action) {
     }
 
     function updateSingleStatusIcon(status) {
-        console.log("updatedstatusicon")
+        console.log("Updating status icon to:", status);
         const statusIcon = document.getElementById('status-icon');
+        const statusImg = statusIcon.querySelector('img');
         const statusTooltip = document.getElementById('status-tooltip');
+
+        statusIcon.classList.remove('in-progress', 'completed', 'default');
 
         switch (status) {
             case 'in_progress':
-                statusIcon.src = '{% static "subplayer/in-prog.png" %}';
+                statusImg.src = '{% static "subplayer/in-prog.png" %}';
+                statusIcon.classList.add('in-progress');
                 statusTooltip.textContent = 'In Progress';
                 break;
             case 'completed':
-                statusIcon.src = '{% static "subplayer/complete-check.png" %}';
+                statusImg.src = '{% static "subplayer/complete-check.png" %}';
+                statusIcon.classList.add('completed');
                 statusTooltip.textContent = 'Completed';
                 break;
+            case 'set-status':
             default:
-                statusIcon.src = '{% static "subplayer/status.png" %}';
+                statusImg.src = '{% static "subplayer/status.png" %}';
+                statusIcon.classList.add('default');
                 statusTooltip.textContent = 'Set Status';
                 break;
         }
         statusIcon.dataset.status = status;
     }
 
+    // Dictionary Functions
+    function toggleDictionary() {
+        const dictionaryButton = document.getElementById('toggleDictionary');
+        dictionaryButton.classList.toggle('active');
+        dictionaryEnabled = dictionaryButton.classList.contains('active');
+
+        if (!dictionaryEnabled) {
+            hidePopup();
+        }
+    }
+
+    function showPopup(word, definition, x, y) {
+        let popup = document.getElementById('dictionary-popup');
+        if (!popup) {
+            popup = document.createElement('div');
+            popup.id = 'dictionary-popup';
+            document.body.appendChild(popup);
+        }
+
+        popup.innerHTML = `<strong>${word}</strong>: ${definition}`;
+        popup.style.position = 'absolute';
+        popup.style.left = `${x}px`;
+        popup.style.top = `${y + 20}px`;
+        popup.style.background = '#fff';
+        popup.style.border = '1px solid #ccc';
+        popup.style.padding = '10px';
+        popup.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+        popup.style.zIndex = '1000';
+        popup.style.maxWidth = '300px';
+        popup.style.borderRadius = '5px';
+        popup.style.display = 'block';
+    }
+
+    function hidePopup() {
+        const popup = document.getElementById('dictionary-popup');
+        if (popup) {
+            popup.style.display = 'none';
+        }
+    }
+
+    async function fetchDefinition(word) {
+        // Mock API call - replace with your actual dictionary API
+        return new Promise(resolve => {
+            setTimeout(() => {
+                resolve(`Definition of ${word} (mocked)`);
+            }, 500);
+        });
+        // Example: await fetch(`/api/dictionary/${word}/`).then(res => res.json());
+    }
+
+    // Utility Function
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -3527,9 +3540,49 @@ function toggleLeftSidebar(action) {
         return cookieValue;
     }
 
+    // DOMContentLoaded Event Listener
     document.addEventListener('DOMContentLoaded', function() {
+        const leftSidebar = document.querySelector('.left-sidebar');
+        const rightSidebar = document.querySelector('.right-sidebar');
+        const mediaContent = document.querySelector('.media-content');
         const highlightList = document.getElementById('highlight-list');
 
+        // Restore Sidebar States
+        const bothSidebarsState = localStorage.getItem('bothSidebars');
+        const leftSidebarState = localStorage.getItem('leftSidebar');
+        const rightSidebarState = localStorage.getItem('rightSidebar');
+
+        if (bothSidebarsState === 'collapsed') {
+            toggleSidebar();
+        }
+
+        if (leftSidebarState === 'collapsed') {
+            leftSidebar.classList.add('collapsed');
+            mediaContent.style.marginLeft = '60px';
+            document.querySelector('.left-sidebar .sidebar-toggle').style.display = 'none';
+            document.querySelector('.left-sidebar .sidebar-expand').style.display = 'block';
+        } else {
+            mediaContent.style.marginLeft = '260px';
+        }
+
+        if (rightSidebarState === 'collapsed') {
+            rightSidebar.classList.add('collapsed');
+            mediaContent.style.marginRight = '20px';
+        } else {
+            mediaContent.style.marginRight = '260px';
+        }
+
+        mediaContent.style.width = (leftSidebarState === 'collapsed' && rightSidebarState === 'collapsed') ? 'calc(100% - 80px)' :
+                                   (leftSidebarState === 'collapsed') ? 'calc(100% - 320px)' :
+                                   (rightSidebarState === 'collapsed') ? 'calc(100% - 280px)' : 'calc(100% - 520px)';
+
+        const playerIframe = document.querySelector('#player iframe');
+        if (playerIframe) {
+            playerIframe.style.width = '100%';
+            playerIframe.style.height = '100%';
+        }
+
+        // Highlight Deletion
         highlightList.addEventListener('click', function(event) {
             let deleteBtn = event.target.closest('.delete-highlight');
             if (deleteBtn) {
@@ -3537,177 +3590,39 @@ function toggleLeftSidebar(action) {
                 const highlightId = deleteBtn.getAttribute('data-highlight-id');
                 deleteHighlight(highlightId).then(() => {
                     deleteBtn.closest('li').remove();
-                    checkHighlightExistence();
+                    // Assuming checkHighlightExistence() exists elsewhere
                 });
             }
         });
 
+        // Dictionary Hover
+        const contentArea = document.querySelector('.media-content'); // Adjust to your text container
+        contentArea.addEventListener('click', async function(e) {
+            if (!dictionaryEnabled) return;
+
+            const selection = window.getSelection().toString().trim();
+            if (selection) {
+                const range = window.getSelection().getRangeAt(0);
+                const rect = range.getBoundingClientRect();
+                const definition = await fetchDefinition(selection);
+                showPopup(selection, definition, rect.left + window.scrollX, rect.top + window.scrollY);
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            const popup = document.getElementById('dictionary-popup');
+            if (popup && !popup.contains(e.target) && e.target.id !== 'toggleDictionary') {
+                hidePopup();
+            }
+        });
+
+        // Initialize Features
         setupHighlightLinks();
         toggleHighlightMode();
         initializeStatusUI();
         attachSingleStatusIconEventListener();
     });
-
-    async function deleteHighlight(highlightId) {
-        try {
-            const response = await fetch(`/api/user/delete_highlight/${highlightId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrftoken2
-                },
-                body: JSON.stringify({ highlight_id: highlightId }),
-            });
-
-            if (response.ok) {
-                console.log("Highlight deleted successfully!");
-                await fetchHighlights(mediaId);
-                createSubtitles();
-            } else {
-                console.error('Failed to delete highlight:', await response.text());
-            }
-        } catch (error) {
-            console.error('Error during delete highlight:', error);
-        }
-    }
-
-    function toggleDictionary() {
-        const dictionaryButton = document.getElementById('toggleDictionary');
-        dictionaryButton.classList.toggle('active');
-        dictionaryEnabled = dictionaryButton.classList.contains('active'); // Update dictionaryEnabled
-
-        if (!dictionaryEnabled) {
-            hidePopup(); // Hide the popup if the dictionary is disabled
-        }
-    }
-function toggleLeftSidebar(action) {
-    const leftSidebar = document.querySelector('.left-sidebar');
-    const collapseButton = document.querySelector('.left-sidebar .sidebar-toggle');
-    const expandButton = document.querySelector('.left-sidebar .sidebar-expand');
-    const mediaContent = document.querySelector('.media-content');
-    const rightSidebar = document.querySelector('.right-sidebar');
-
-    if (action === 'collapse') {
-        leftSidebar.classList.add('collapsed');
-        collapseButton.style.display = 'none';
-        expandButton.style.display = 'block';
-        mediaContent.style.marginLeft = '60px'; // 40px sidebar + 20px gap
-        // Adjust width based on right sidebar state
-        mediaContent.style.width = rightSidebar.classList.contains('collapsed')
-            ? 'calc(100% - 80px)' // Both collapsed: 40px left + 20px + 0px right + 20px
-            : 'calc(100% - 320px)'; // Left collapsed: 40px + 20px + 240px + 20px
-    } else if (action === 'expand') {
-        leftSidebar.classList.remove('collapsed');
-        collapseButton.style.display = 'block';
-        expandButton.style.display = 'none';
-        mediaContent.style.marginLeft = '260px'; // 240px sidebar + 20px gap
-        // Restore width based on right sidebar state
-        mediaContent.style.width = rightSidebar.classList.contains('collapsed')
-            ? 'calc(100% - 280px)' // Right collapsed: 240px + 20px + 0px + 20px
-            : 'calc(100% - 520px)'; // Both expanded: 240px + 20px + 240px + 20px
-    }
-
-    // Ensure centering
-    mediaContent.style.marginLeft = mediaContent.style.marginLeft;
-    mediaContent.style.marginRight = rightSidebar.classList.contains('collapsed') ? '20px' : '260px';
-
-    // Save the state
-    localStorage.setItem('leftSidebar', leftSidebar.classList.contains('collapsed') ? 'collapsed' : 'expanded');
-
-    // Force video player to resize
-    const playerIframe = document.querySelector('#player iframe');
-    if (playerIframe) {
-        playerIframe.style.width = '100%';
-        playerIframe.style.height = '100%';
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    const leftSidebar = document.querySelector('.left-sidebar');
-    const rightSidebar = document.querySelector('.right-sidebar');
-    const mediaContent = document.querySelector('.media-content');
-
-    const leftSidebarState = localStorage.getItem('leftSidebar');
-    const rightSidebarState = localStorage.getItem('rightSidebar');
-
-    // Left sidebar state
-    if (leftSidebarState === 'collapsed') {
-        leftSidebar.classList.add('collapsed');
-        mediaContent.style.marginLeft = '60px'; // 40px + 20px gap
-        document.querySelector('.left-sidebar .sidebar-toggle').style.display = 'none';
-        document.querySelector('.left-sidebar .sidebar-expand').style.display = 'block';
-    } else {
-        mediaContent.style.marginLeft = '260px'; // 240px + 20px gap
-    }
-
-    // Right sidebar state
-    if (rightSidebarState === 'collapsed') {
-        rightSidebar.classList.add('collapsed');
-        mediaContent.style.marginRight = '20px'; // Just the 20px gap
-    } else {
-        mediaContent.style.marginRight = '260px'; // 240px + 20px gap
-    }
-
-    // Set initial width based on sidebar states
-    if (leftSidebarState === 'collapsed' && rightSidebarState === 'collapsed') {
-        mediaContent.style.width = 'calc(100% - 80px)';
-    } else if (leftSidebarState === 'collapsed') {
-        mediaContent.style.width = 'calc(100% - 320px)';
-    } else if (rightSidebarState === 'collapsed') {
-        mediaContent.style.width = 'calc(100% - 280px)';
-    } else {
-        mediaContent.style.width = 'calc(100% - 520px)';
-    }
-
-    // Force video player resize on load
-    const playerIframe = document.querySelector('#player iframe');
-    if (playerIframe) {
-        playerIframe.style.width = '100%';
-        playerIframe.style.height = '100%';
-    }
-});
-function toggleSidebar() {
-    const leftSidebar = document.querySelector('.left-sidebar');
-    const rightSidebar = document.querySelector('.right-sidebar');
-    const mediaContent = document.querySelector('.media-content');
-
-    // Toggle both sidebars
-    leftSidebar.classList.toggle('collapsed');
-    rightSidebar.classList.toggle('collapsed');
-
-    // Update the media content margins
-    if (leftSidebar.classList.contains('collapsed')) {
-        mediaContent.style.marginLeft = '40px';
-    } else {
-        mediaContent.style.marginLeft = '240px';
-    }
-    if (rightSidebar.classList.contains('collapsed')) {
-        mediaContent.style.marginRight = '0';
-    } else {
-        mediaContent.style.marginRight = '250px';
-    }
-
-    // Update toggle buttons visibility
-    const leftCollapseButton = document.querySelector('.left-sidebar .sidebar-toggle');
-    const leftExpandButton = document.querySelector('.left-sidebar .sidebar-expand');
-    if (leftSidebar.classList.contains('collapsed')) {
-        leftCollapseButton.style.display = 'none';
-        leftExpandButton.style.display = 'flex';
-    } else {
-        leftCollapseButton.style.display = 'flex';
-        leftExpandButton.style.display = 'none';
-    }
-
-    // Save sidebars state
-    localStorage.setItem('bothSidebars', leftSidebar.classList.contains('collapsed') ? 'collapsed' : 'expanded');
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    const bothSidebarsState = localStorage.getItem('bothSidebars');
-    if (bothSidebarsState === 'collapsed') {
-        toggleSidebar(); // This will toggle both sidebars to collapsed state
-    }
-});
+    
 </script>
 
 {% if media.media_type == 'audio' %}
