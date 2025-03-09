@@ -822,32 +822,91 @@ document.getElementById('highlight-icon').addEventListener('click', function () 
     console.log("Highlight icon clicked");
     handleHighlightCreation();
 });
+function showSelectionRequiredPopup(action) {
+    // Remove existing popup if any
+    const existingPopup = document.querySelector('.selection-required-popup');
+    const existingOverlay = document.querySelector('.overlay');
+    if (existingPopup) existingPopup.remove();
+    if (existingOverlay) existingOverlay.remove();
 
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+
+    // Create popup
+    const popup = document.createElement('div');
+    popup.className = 'selection-required-popup';
+    popup.innerHTML = `
+        <div class="popup-content">
+            <div class="popup-header">
+                <div class="info-icon">ℹ️</div>
+                <h3 class="popup-title">Text Selection Required</h3>
+            </div>
+            <p class="popup-message">
+                Please select some text to ${action === 'highlight' ? 'highlight' : 'loop'}.
+                ${action === 'highlight' ? 'Then click the Highlight button or press Shift.' : 'Then click the Loop button or press CMD/Control.'}
+            </p>
+            <button class="close-button" onclick="closeSelectionPopup()">OK</button>
+        </div>
+    `;
+
+    // Append to body
+    document.body.appendChild(overlay);
+    document.body.appendChild(popup);
+
+    // Trigger transition
+    setTimeout(() => {
+        overlay.classList.add('active');
+        popup.classList.add('active');
+    }, 10);
+}
+
+function closeSelectionPopup() {
+    const popup = document.querySelector('.selection-required-popup');
+    const overlay = document.querySelector('.overlay');
+    if (popup && overlay) {
+        popup.classList.remove('active');
+        overlay.classList.remove('active');
+        setTimeout(() => {
+            popup.remove();
+            overlay.remove();
+        }, 300); // Match transition duration
+    }
+}
 function handleHighlightCreation() {
     let selection = window.getSelection();
-    if (selection.rangeCount === 0) return;
+    if (selection.rangeCount === 0 || !selection.toString().trim()) {
+        showSelectionRequiredPopup('highlight');
+        return;
+    }
 
     let range = selection.getRangeAt(0);
     let selectedText = selection.toString().trim();
-    if (!selectedText) return;
+    if (!selectedText) {
+        showSelectionRequiredPopup('highlight');
+        return;
+    }
 
-    // The logic for finding start_span, end_span, offsets:
+    // Rest of your existing logic...
     let startSpan = findParentWithClass(range.startContainer, 'sentence-span');
-    let endSpan   = findParentWithClass(range.endContainer, 'sentence-span');
+    let endSpan = findParentWithClass(range.endContainer, 'sentence-span');
 
     if (!startSpan || !endSpan) return;
 
     let start_char_index = calculateOffset(range.startContainer, range.startOffset, startSpan);
-    let end_char_index   = calculateOffset(range.endContainer, range.endOffset, endSpan) - 1;
+    let end_char_index = calculateOffset(range.endContainer, range.endOffset, endSpan) - 1;
 
     // Pad single digits
     if (start_char_index < 10) start_char_index = '0' + start_char_index;
-    if (end_char_index < 10)   end_char_index   = '0' + end_char_index;
+    if (end_char_index < 10) end_char_index = '0' + end_char_index;
 
     let highlightStartSentenceIndex = parseInt(startSpan.id.split('_')[2]);
-    let highlightEndSentenceIndex   = parseInt(endSpan.id.split('_')[2]);
-    let highlightStartTime          = subtitleTimes[highlightStartSentenceIndex].startTime;
-    let highlightEndTime            = subtitleTimes[highlightEndSentenceIndex].endTime;
+    let highlightEndSentenceIndex = parseInt(endSpan.id.split('_')[2]);
+    let highlightStartTime = subtitleTimes[highlightStartSentenceIndex].startTime;
+    let highlightEndTime = subtitleTimes[highlightEndSentenceIndex].endTime;
+
+    // Check overlap logic and proceed as before...
+
 
     // Check overlap logic
     const overlappingHighlight = transformedArray.find(item =>
@@ -923,6 +982,12 @@ var isCmdPressed = false;
 var loopingInterval = null;
 
 function toggleLoopMode() {
+    let selection = window.getSelection();
+    if (!isLoopMode && (!selection.rangeCount || !selection.toString().trim())) {
+        showSelectionRequiredPopup('loop');
+        return;
+    }
+
     isLoopMode = !isLoopMode;
     updateLoopIcon();
 
@@ -943,13 +1008,7 @@ function toggleLoopMode() {
 
 function updateLoopIcon() {
     const loopIcon = document.getElementById('loop-icon');
-    if (isLoopMode) {
-        loopIcon.src = '/static/subplayer/loopon.png';
-        loopIcon.alt = 'Loop On';
-    } else {
-        loopIcon.src = '/static/subplayer/loopoff.png';
-        loopIcon.alt = 'Loop Off';
-    }
+    loopIcon.classList.toggle('active', isLoopMode); // Toggle .active class based on isLoopMode
 }
 
 document.addEventListener('keydown', function(event) {
@@ -977,7 +1036,10 @@ subtitles.addEventListener("mouseup", function() {
     if (isLoopMode) {
         const selection = window.getSelection();
         const selectedText = selection.toString().trim();
-        if (!selectedText) return;
+        if (!selectedText) {
+            showSelectionRequiredPopup('loop');
+            return;
+        }
 
         const currentTime = player.getCurrentTime();
         const currentFrameIndex = findSubtitleIndex(currentTime);
@@ -993,7 +1055,7 @@ subtitles.addEventListener("mouseup", function() {
             startLoopTime = parseFloat(frameSubtitles[0].startTime);
             endLoopTime   = parseFloat(frameSubtitles[frameSubtitles.length - 1].endTime);
 
-            // refine start/end times by scanning
+            // Refine start/end times by scanning
             for (let i = 0; i < frameSubtitles.length; i++) {
                 if (frameSubtitles[i].sentence.includes(
                     selectedText.slice(0, Math.floor(selectedText.length / 2))

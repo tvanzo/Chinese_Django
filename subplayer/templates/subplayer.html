@@ -3045,7 +3045,544 @@ iframe {
 
 
 
-=
+/* Default state */
+#loop-icon svg {
+    fill: #000000; /* Black when off */
+}
+
+/* Active state */
+.icon-button.active {
+    background-color: #007BFF; /* Blue background */
+    border-color: #007BFF;
+    box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3);
+}
+#loop-icon.active svg {
+    fill: #FFFFFF; /* White when on */
+}
+
+/* Hover effect */
+.icon-button:hover svg {
+    fill: #0056b3; /* Darker blue on hover */
+}
+    /* Button styling remains unchanged */
+
+
+/* Shrink the SVG inside the button */
+#loop-icon svg {
+    width: 60%; /* Adjust size relative to button */
+    height: 60%;
+    max-width: 24px; /* Ensures it doesn't get too big */
+    max-height: 24px;
+}
+
+/* Optional: Hover effect for the button */
+#loop-icon:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+/* Popup for Selection Required */
+.selection-required-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background-color: white;
+    width: 90%;
+    max-width: 350px;
+    border-radius: 12px;
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none; /* Prevents interaction when hidden */
+}
+
+.selection-required-popup.active {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    pointer-events: auto;
+}
+
+.selection-required-popup .popup-content {
+    padding: 20px;
+}
+
+.selection-required-popup .popup-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.selection-required-popup .info-icon {
+    background-color: #dbeafe;
+    color: #3b82f6;
+    padding: 6px;
+    border-radius: 50%;
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+.selection-required-popup .popup-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.selection-required-popup .popup-message {
+    color: #6b7280;
+    margin-bottom: 20px;
+    line-height: 1.4;
+    font-size: 14px;
+}
+
+.selection-required-popup .close-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #f3f4f6;
+    color: #4b5563;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.selection-required-popup .close-button:hover {
+    background-color: #e5e7eb;
+}
+
+
+
+.overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+    /* Generic Styles */
+#zhongwen-window, #zhongwen-window * {
+  width: auto;
+  height: auto;
+  background: transparent;
+  border: none !important;
+  margin: 0px;
+  padding: 0px;
+  letter-spacing: normal;
+  text-align: left;
+  text-decoration: none;
+  text-indent: 0px;
+  text-transform: none;
+  white-space: normal;
+  word-spacing: normal;
+  font-weight: normal;
+  font-size: 12px;
+  font-family: Tahoma, Geneva, sans-serif;
+  visibility: visible;
+  line-height: initial;
+}
+
+#zhongwen-window {
+  position: absolute;
+  z-index: 999999999;
+  border: 1px solid #d0d0d0 !important;
+  padding: 4px;
+  background: #e6f4ff;
+  top: 5px;
+  left: 5px;
+  min-width: 100px;
+  border-radius: 5px;
+  box-shadow: 10px 10px 5px -5px #999999;
+}
+
+#zhongwen-window .w-hanzi {
+  font-size: 32px;
+  margin-right: 0.7em;
+}
+
+#zhongwen-window .w-pinyin {
+  font-size: 18px;
+}
+
+#zhongwen-window .w-def {
+  font-size: 16px;
+}
+
+#zhongwen-window .w-zhuyin {
+  font-family: PMingLiU, 'Apple LiGothic', sans-serif;
+  font-size: 16px;
+}
+
+#zhongwen-window .w-hanzi-small {
+  font-size: 18px;
+  margin-right: 0.7em;
+}
+
+#zhongwen-window .w-pinyin-small {
+  font-size: 16px;
+}
+
+#zhongwen-window .w-def-small {
+  font-size: 12px;
+}
+
+#zhongwen-window .w-zhuyin-small {
+  font-family: PMingLiU, 'Apple LiGothic', sans-serif;
+  font-size: 12px;
+}
+
+#zhongwen-window .grammar {
+  font-weight: bold;
+}
+
+#zhongwen-window .vocab {
+  font-weight: bold;
+}
+
+/* Yellow Background */
+#zhongwen-window.background-yellow,
+#zhongwen-window.background-yellow * {
+  color: #000000;
+  background: #ffffbf;
+}
+
+#zhongwen-window.background-yellow .w-hanzi,
+#zhongwen-window.background-yellow .w-hanzi-small {
+  color: #7070e0;
+}
+
+#zhongwen-window.background-yellow .grammar {
+  color: #00008b;
+}
+
+#zhongwen-window.background-yellow .vocab {
+  color: #00008b;
+}
+
+
+/* Lightblue Background */
+#zhongwen-window.background-lightblue,
+#zhongwen-window.background-lightblue * {
+  color: #000000;
+  background: #e6f4ff;
+}
+
+#zhongwen-window.background-lightblue .w-hanzi,
+#zhongwen-window.background-lightblue .w-hanzi-small {
+  color: #3082bf;
+}
+
+#zhongwen-window.background-lightblue .w-pinyin,
+#zhongwen-window.background-lightblue .w-pinyin-small {
+  color: #00b366;
+}
+
+#zhongwen-window.background-lightblue .grammar {
+  color: #00008b;
+}
+
+#zhongwen-window.background-lightblue .vocab {
+  color: #00008b;
+}
+
+/* Blue Background */
+#zhongwen-window.background-blue,
+#zhongwen-window.background-blue * {
+  color: #ffffff;
+  background: #5c73b8;
+}
+
+#zhongwen-window.background-blue .w-hanzi,
+#zhongwen-window.background-blue .w-hanzi-small {
+  color: #b7e7ff;
+}
+
+#zhongwen-window.background-blue .w-pinyin,
+#zhongwen-window.background-blue .w-pinyin-small {
+  color: #c0ffc0;
+}
+
+#zhongwen-window.background-blue .grammar {
+  color: #add8e6;
+}
+
+#zhongwen-window.background-blue .vocab {
+  color: #add8e6;
+}
+
+/* Black Background */
+#zhongwen-window.background-black,
+#zhongwen-window.background-black * {
+  color: #ffffff;
+  background: #000000;
+}
+
+#zhongwen-window.background-black .w-hanzi,
+#zhongwen-window.background-black .w-hanzi-small {
+  color: #7070e0;
+}
+
+#zhongwen-window.background-black .w-pinyin,
+#zhongwen-window.background-black .w-pinyin-small {
+  color: #20a020;
+}
+
+#zhongwen-window.background-black .grammar {
+  color: #add8e6;
+}
+
+#zhongwen-window.background-black .vocab {
+  color: #add8e6;
+}
+
+/* Standard Tone Colors */
+#zhongwen-window.tonecolor-standard .tone1 {
+  color: #ee363e;
+}
+
+#zhongwen-window.tonecolor-standard .tone2 {
+  color: #f47c36;
+}
+
+#zhongwen-window.tonecolor-standard .tone3 {
+  color: #73bb4f;
+}
+
+#zhongwen-window.tonecolor-standard .tone4 {
+  color: #649cd3;
+}
+
+#zhongwen-window.tonecolor-standard .tone5 {
+  color: #a0a0a0;
+}
+
+
+/* Pleco Tone Colors */
+#zhongwen-window.tonecolor-pleco .tone1 {
+  color: #e30000;
+}
+
+#zhongwen-window.tonecolor-pleco .tone2 {
+  color: #02b31c;
+}
+
+#zhongwen-window.tonecolor-pleco .tone3 {
+  color: #1510f0;
+}
+
+#zhongwen-window.tonecolor-pleco .tone4 {
+  color: #8900bf;
+}
+
+#zhongwen-window.tonecolor-pleco .tone5 {
+  color: #777777;
+}
+
+
+/* Hanping Tone Colors */
+#zhongwen-window.tonecolor-hanping .tone1 {
+  color: #64b4ff;
+}
+
+#zhongwen-window.tonecolor-hanping .tone2 {
+  color: #30b030;
+}
+
+#zhongwen-window.tonecolor-hanping .tone3 {
+  color: #f08000;
+}
+
+#zhongwen-window.tonecolor-hanping .tone4 {
+  color: #d00020;
+}
+
+#zhongwen-window.tonecolor-hanping .tone5 {
+  color: #a0a0a0;
+}/* Right Sidebar Base */
+.right-sidebar {
+    right: 0;
+    width: 240px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    padding: 24px 16px;
+    overflow-y: auto;
+    background-color: #f8fafc;
+    box-sizing: border-box;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    border-left: 1px solid #e2e8f0;
+    margin: 20px 20px 20px 0;
+    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.05);
+}
+
+/* XP Display Enhancement */
+#unique-xp-display {
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    transition: all 0.2s ease;
+    font-weight: 600;
+}
+
+#unique-xp-display .unique-xp-circle {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(4px);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Highlight Items */
+.highlight-container {
+    background-color: white;
+    padding: 14px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    border: 1px solid #e2e8f0;
+    margin: 8px 0;
+}
+
+.highlight-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background-color: #f1f5f9;
+}
+
+.highlight-container a {
+    color: #1e293b;
+    font-size: 0.925rem;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+.delete-highlight {
+    opacity: 0;
+    transition: all 0.2s ease;
+    filter: grayscale(1);
+    width: 16px;
+    height: 16px;
+}
+
+.highlight-container:hover .delete-highlight {
+    opacity: 0.6;
+}
+
+.delete-highlight:hover {
+    opacity: 1 !important;
+    filter: grayscale(0);
+    transform: scale(1.1);
+}
+
+/* Play All Button Enhancement */
+#play-all-btn {
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 16px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    transition: all 0.2s ease;
+    width: 100%;
+    max-width: 200px;
+    height: 44px;
+    letter-spacing: 0.3px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#play-all-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
+    background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+}
+
+/* Played Highlight State */
+.played-highlight {
+    background-color: #f0f9ff;
+    border-left: 3px solid #3b82f6;
+}
+
+/* Toggle Button Refinement */
+.sidebar-toggle, .sidebar-expand {
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.sidebar-toggle:hover, .sidebar-expand:hover {
+    background-color: #f8fafc;
+    transform: scale(1.05);
+}
+
+.sidebar-toggle svg, .sidebar-expand svg {
+    width: 16px;
+    height: 16px;
+    stroke: #64748b;
+}
+
+/* Scrollbar Styling */
+.right-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.right-sidebar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.right-sidebar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.right-sidebar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+    #highlight-icon svg {
+    width: 20px; /* Match your existing icon size */
+    height: 20px;
+    transition: all 0.3s ease;
+}
+
+.icon-button:hover #highlight-icon svg {
+    filter: brightness(0) saturate(100%) invert(40%) sepia(100%) saturate(2000%) hue-rotate(200deg) brightness(90%) contrast(90%);
+}
+/* Play All Button Enhancement */
+#play-all-btn {
+    background: linear-gradient(135deg, #007BFF 0%, #3a9fff 100%); /* Adjusted to primary blue gradient */
+    color: white;
+    padding: 12px 24px;
+    border-radius: 16px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2); /* Adjusted shadow to match #007BFF */
+    transition: all 0.2s ease;
+    width: 100%;
+    max-width: 200px;
+    height: 44px;
+    letter-spacing: 0.3px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#play-all-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3); /* Enhanced shadow with #007BFF */
+    background: linear-gradient(135deg, #0056b3 0%, #007BFF 100%); /* Darker to primary blue */
+}
+
 </style>
 </head>
 
@@ -3158,37 +3695,41 @@ data-start-index="{{ highlight.start_index }}">
 
     <!-- Loop Button -->
     <div class="button-group">
-        <button class="icon-button" id="loop-icon">
-            <img src="{% static 'subplayer/loopoff.png' %}" alt="Loop Off">
-        </button>
-        <span class="tooltip-text">Loop Mode: Select Text, Turn on Loop Mode (CMD Key)</span>
+    <div id="loop-icon" class="icon-button" title="Loop">
+        <svg viewBox="0 0 17 17" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#000000">
+            <g id="SVGRepo_iconCarrier">
+                <path d="M1 9c0 2.206 1.711 4 3.813 4v1c-2.654 0-4.813-2.243-4.813-5s2.159-5 4.813-5h4.229l-1.646-1.646 0.707-0.707 2.854 2.853-2.853 2.854-0.708-0.708 1.647-1.646h-4.23c-2.102 0-3.813 1.794-3.813 4zM12.187 4v1c2.102 0 3.813 1.794 3.813 4s-1.711 4-3.813 4h-4.23l1.646-1.646-0.707-0.707-2.853 2.853 2.854 2.854 0.707-0.707-1.647-1.647h4.229c2.655 0 4.814-2.243 4.814-5s-2.159-5-4.813-5z" fill="#000000"></path>
+            </g>
+        </svg>
     </div>
+    <span class="tooltip-text">Loop Mode: Select Text, Turn on Loop Mode (CMD Key)</span>
+</div>
 
     <!-- Highlight Button -->
     <div class="button-group">
         <button class="icon-button" id="highlight-icon">
-            <img src="{% static 'subplayer/black-high.png' %}" alt="Highlighter">
-        </button>
+   <svg viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>highlight-filled</title> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="drop" fill="#000000" transform="translate(64.000000, 44.956885)"> <path d="M405.333333,381.709781 L362.666667,424.376448 L85.3333333,424.376448 L128,381.709781 L405.333333,381.709781 Z M41.168,299.372 L103.67,361.874 L42.6666667,392.376448 L1.42108547e-14,403.043115 L10.6666667,360.376448 L41.168,299.372 Z M61.1,191.304 L212.137,342.341 L206.971557,347.655494 L201.097332,347.365048 L194.94444,347.269241 C184.457401,347.271762 172.809254,348.085275 160,349.709781 L151.970104,350.837434 L144.123951,352.129117 L136.61735,353.518237 L127.387,355.421 L48.9491375,276.983016 C50.507182,270.709588 52.0860762,262.939495 53.3333333,253.709781 C55.8645145,234.979019 56.7941068,216.011107 56.1221103,196.806047 L59.4284876,193.08414 L61.1,191.304 Z M282.327442,7.10542736e-15 L403.006999,120.679557 L384.970948,143.928809 L352.415716,185.42913 L333.317316,209.393653 L316.302987,230.396289 L304.909911,244.204529 L291.542704,260.023864 L282.884971,269.944627 L275.399527,278.199329 L269.086373,284.787971 L254.094195,299.615469 L227.035,327.069 L75.976,176.01 L78.5389897,173.389008 L116.39305,135.764502 L128.060065,124.568671 L141.033549,112.687653 L152.352994,102.689504 L164.50858,92.2528346 L177.500305,81.3776459 L191.328171,70.0639374 L205.992177,58.3117091 L229.55595,39.8611422 L246.310307,27.0126145 L263.900804,13.7255671 L282.327442,7.10542736e-15 Z" id="Combined-Shape"> </path> </g> </g> </g></svg>
+
+
+</button>
         <span class="tooltip-text">Highlight Mode: Select Text Then Click Shift</span>
     </div>
 
     <!-- Dictionary Button -->
     <div class="button-group">
-        <button id="toggleDictionary" class="dictionary-button" onclick="toggleDictionary()">
-            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" fill="#000000">
-                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                <g id="SVGRepo_iconCarrier">
-                    <defs>
-                        <style>.a{fill:none;stroke:#000000;stroke-linecap:round;stroke-linejoin:round;}</style>
-                    </defs>
-                    <path class="a" d="M12.73,4.5H10.4a2,2,0,0,0-2,2v35a2,2,0,0,0,2,2h2.33"></path>
-                    <path class="a" d="M12.73,4.5v39H37.6a2,2,0,0,0,2-2V6.5a2,2,0,0,0-2-2Z"></path>
-                    <circle class="a" cx="28.1947" cy="22.6705" r="6.3286"></circle>
-                    <line class="a" x1="23.7228" y1="27.1424" x2="17.6714" y2="33.1939"></line>
-                </g>
-            </svg>
-        </button>
+       <button id="toggleDictionary" class="dictionary-button" onclick="toggleDictionary()">
+    <svg width="36" height="36" viewBox="6 6 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+        <g id="SVGRepo_iconCarrier">
+            <rect x="6" y="6" width="36" height="36" rx="3" fill="#2F88FF" stroke="#000000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></rect>
+            <path d="M21 19.9389C20.6008 18.7746 19.403 16.737 17.0076 17.0281C14.6122 17.3193 12.8152 20.5211 13.0152 24.5962C13.2152 28.6714 15.4106 31 17.4068 31C19.8023 31 21 28.2056 21 28.2056" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M26 31L26 19" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M26 31L26 24.5C26 22.0147 28.0147 20 30.5 20V20C32.9853 20 35 22.0147 35 24.5L35 31" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+        </g>
+    </svg>
+    <span class="tooltip-text">Dictionary</span>
+</button>
         <span class="tooltip-text">Dictionary</span>
     </div>
 
@@ -3369,19 +3910,21 @@ data-start-index="{{ highlight.start_index }}">
     }
 
     // Highlight Mode Toggle
-    function toggleHighlightMode() {
-        document.addEventListener('keydown', function(event) {
-            if (event.key === "Shift") {
-                document.getElementById('highlight-icon').src = '{% static "subplayer/yellow-high.png" %}';
-            }
-        });
-        document.addEventListener('keyup', function(event) {
-            if (event.key === "Shift") {
-                document.getElementById('highlight-icon').src = '{% static "subplayer/black-high.png" %}';
-            }
-        });
-    }
+   function toggleHighlightMode() {
+    const highlightSvgGroup = document.querySelector('#highlight-icon g#drop'); // Target the group with fill
 
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Shift") {
+            highlightSvgGroup.setAttribute('fill', '#FFD700'); // Yellow color
+        }
+    });
+
+    document.addEventListener('keyup', function(event) {
+        if (event.key === "Shift") {
+            highlightSvgGroup.setAttribute('fill', '#000000'); // Black color
+        }
+    });
+}
     // Status Functions
     function initializeStatusUI() {
         console.log('Initializing status UI');
@@ -3622,7 +4165,7 @@ data-start-index="{{ highlight.start_index }}">
         initializeStatusUI();
         attachSingleStatusIconEventListener();
     });
-    
+
 </script>
 
 {% if media.media_type == 'audio' %}
