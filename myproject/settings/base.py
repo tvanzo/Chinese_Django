@@ -190,3 +190,8 @@ from datetime import timedelta
 
 # Increase default timeout
 TIMEOUT = timedelta(minutes=10)
+import openai
+
+DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
+openai.api_key = DEEPSEEK_API_KEY
+openai.api_base = 'https://api.deepseek.com'

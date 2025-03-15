@@ -10,6 +10,7 @@ from django.db.models import Count, Exists, OuterRef, Q
 from subplayer.models import Category
 
 from django.http import HttpResponse
+from reportlab.pdfgen import canvas
 
 import logging
 import json
@@ -212,6 +213,8 @@ def video_detail(request, media_id):
     }
 
     return render(request, 'subplayer.html', context)
+import os
+
 
 
 from django.db.models import Exists, OuterRef
@@ -426,3 +429,381 @@ def time_ago(datetime_str):
     else:
         years = diff.days // 365
         return f"{years} year{'s' if years > 1 else ''} ago"
+import os
+import json
+import logging
+from io import BytesIO
+import requests
+from django.conf import settings  # For static file paths
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_protect  # Use this instead of csrf_exempt
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
+# Retrieve API key from environment
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+if not DEEPSEEK_API_KEY:
+    logger.error("DEEPSEEK_API_KEY is not set in environment variables.")
+
+# Define font paths using STATIC_ROOT
+font_path_regular = os.path.join(settings.STATIC_ROOT, "fonts", "NotoSerifSC-Regular.ttf")
+font_path_bold = os.path.join(settings.STATIC_ROOT, "fonts", "NotoSerifSC-Bold.ttf")
+
+# Register the fonts in ReportLab
+try:
+    pdfmetrics.registerFont(TTFont('NotoSerif', font_path_regular))
+    pdfmetrics.registerFont(TTFont('NotoSerifBold', font_path_bold))
+except Exception as e:
+    logger.warning(f"Font registration failed: {e}. Ensure font files are in {font_path_regular} and {font_path_bold}.")
+
+@csrf_protect  # Replace csrf_exempt with proper CSRF protection
+def generate_pdf(request):
+    """Generate a PDF study guide from a YouTube script for Chinese learners."""
+    if request.method != "POST":
+        return HttpResponse("Invalid request method", status=405)
+
+    try:
+        # Extract data from request
+        data = json.loads(request.body)
+        script_text = data.get("script_text")
+        highlights = data.get("highlights", [])
+
+        if not script_text:
+            logger.error("No script text provided in request.")
+            return HttpResponse("No script text provided", status=400)
+
+        # Log received data
+        logger.info("Received script_text: %s...", script_text[:100] if len(script_text) > 100 else script_text)
+        logger.info("Received highlights: %s", highlights)
+
+        # Chunk the script to ensure full coverage (max 2500 characters per chunk)
+        CHUNK_SIZE = 2500
+        script_chunks = [script_text[i:i + CHUNK_SIZE] for i in range(0, len(script_text), CHUNK_SIZE)]
+        highlight_text = "\n".join(highlights) if highlights else "无亮点提供。"
+
+        # Process the first chunk to generate title and summary
+        first_chunk_prompt = f"""Using the provided Chinese script chunk and highlights, generate a title and summary for the entire video, and contribute to a comprehensive Chinese language study guide in JSON format for a 30-minute video, designed for intermediate-to-advanced learners (HSK 5-6 level). The title should be a descriptive, general title for the entire video content, without referencing specific parts or chunks.
+
+Structure the JSON as follows:
+{{
+  "title": "A descriptive title in simplified Chinese based on the overall content (15-20 characters)",
+  "summary": "A concise summary of the script in simplified Chinese (100-150 characters)",
+  "vocabulary": [
+    {{
+      "chinese": "难词 (difficult word/phrase from this chunk)",
+      "pinyin": "Accurate pinyin with tones",
+      "english": "Precise English definition",
+      "context": "The phrase/sentence from this chunk where this word appears",
+      "difficulty": "HSK level (5-6) or '高级' if beyond HSK",
+      "examples": [
+        {{
+          "chinese": "Example sentence using the word",
+          "pinyin": "Full pinyin with tones",
+          "english": "Natural English translation"
+        }},
+        ...2-3 unique examples per word, including at least one from this chunk if possible
+      ]
+    }},
+    ...5-7 vocabulary items from this chunk
+  ],
+  "phrases": [
+    {{
+      "chinese": "Complete useful phrase from this chunk",
+      "pinyin": "Full pinyin with tones",
+      "english": "Natural English translation",
+      "notes": "Brief usage notes or cultural context (optional)"
+    }},
+    ...2-4 phrases from this chunk
+  ],
+  "grammar_points": [
+    {{
+      "pattern": "Grammar pattern in Chinese from this chunk",
+      "explanation": "Explanation in Chinese with English",
+      "example": "Example from this chunk"
+    }},
+    ...1-2 grammar points from this chunk
+  ],
+  "cultural_notes": [
+    "Brief cultural explanation related to specific content in this chunk (50-100 characters each)",
+    ...1-2 notes from this chunk
+  ]
+}}
+
+Selection criteria:
+1. Analyze the ENTIRE chunk and select difficult words/phrases evenly from beginning, middle, and end.
+2. Prioritize words/phrases from highlighted sections if they appear in this chunk.
+3. Choose 5-7 difficult vocabulary words (HSK 5-6 or beyond, not basic level) unique to this chunk.
+4. Provide 2-3 unique example sentences per word, including at least one from this chunk if possible.
+5. Include Taiwan-specific or travel-related terms if relevant to this chunk.
+6. Ensure a mix of nouns, verbs, adjectives, and idiomatic expressions.
+7. Select practical phrases for real-world use.
+
+All Chinese text must be in simplified characters. Pinyin must include tone marks and proper spacing. Ensure pinyin accuracy and contextually appropriate English definitions.
+
+Highlights (prioritize these if present in this chunk):
+{highlight_text}
+
+Script Chunk 1 of {len(script_chunks)}:
+{script_chunks[0]}
+"""
+
+        # Call DeepSeek API for the first chunk
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {DEEPSEEK_API_KEY}"  # Use variable directly
+        }
+        payload = {
+            "model": "deepseek-chat",
+            "messages": [
+                {"role": "system", "content": "You are a Chinese language expert creating comprehensive study guides for intermediate-to-advanced learners from 30-minute video transcripts."},
+                {"role": "user", "content": first_chunk_prompt}
+            ],
+            "stream": False,
+            "response_format": {"type": "json_object"}
+        }
+        response = requests.post("https://api.deepseek.com/chat/completions", headers=headers, json=payload)
+        if response.status_code != 200:
+            logger.error("DeepSeek API Error for first chunk: %s", response.text)
+            return HttpResponse(f"DeepSeek API Error for first chunk: {response.text}", status=500)
+
+        # Parse first chunk response
+        try:
+            first_data = json.loads(response.json()["choices"][0]["message"]["content"])
+            title = first_data["title"]
+            summary = first_data["summary"]
+            all_vocabulary = first_data.get("vocabulary", [])
+            all_phrases = first_data.get("phrases", [])
+            all_grammar_points = first_data.get("grammar_points", [])
+            all_cultural_notes = first_data.get("cultural_notes", [])
+        except (KeyError, json.JSONDecodeError) as e:
+            logger.error("Invalid JSON response for first chunk: %s", str(e))
+            return HttpResponse(f"Invalid JSON response for first chunk: {str(e)}", status=500)
+
+        # Process remaining chunks
+        for i in range(1, len(script_chunks)):
+            chunk_prompt = f"""Using the provided Chinese script chunk and highlights, contribute to a comprehensive Chinese language study guide in JSON format for a 30-minute video, designed for intermediate-to-advanced learners (HSK 5-6 level).
+
+Structure the JSON as follows:
+{{
+  "vocabulary": [
+    {{
+      "chinese": "难词 (difficult word/phrase from this chunk)",
+      "pinyin": "Accurate pinyin with tones",
+      "english": "Precise English definition",
+      "context": "The phrase/sentence from this chunk where this word appears",
+      "difficulty": "HSK level (5-6) or '高级' if beyond HSK",
+      "examples": [
+        {{
+          "chinese": "Example sentence using the word",
+          "pinyin": "Full pinyin with tones",
+          "english": "Natural English translation"
+        }},
+        ...2-3 unique examples per word, including at least one from this chunk if possible
+      ]
+    }},
+    ...5-7 vocabulary items from this chunk
+  ],
+  "phrases": [
+    {{
+      "chinese": "Complete useful phrase from this chunk",
+      "pinyin": "Full pinyin with tones",
+      "english": "Natural English translation",
+      "notes": "Brief usage notes or cultural context (optional)"
+    }},
+    ...2-4 phrases from this chunk
+  ],
+  "grammar_points": [
+    {{
+      "pattern": "Grammar pattern in Chinese from this chunk",
+      "explanation": "Explanation in Chinese with English",
+      "example": "Example from this chunk"
+    }},
+    ...1-2 grammar points from this chunk
+  ],
+  "cultural_notes": [
+    "Brief cultural explanation related to specific content in this chunk (50-100 characters each)",
+    ...1-2 notes from this chunk
+  ]
+}}
+
+Selection criteria:
+1. Analyze the ENTIRE chunk and select difficult words/phrases evenly from beginning, middle, and end.
+2. Prioritize words/phrases from highlighted sections if they appear in this chunk.
+3. Choose 5-7 difficult vocabulary words (HSK 5-6 or beyond, not basic level) unique to this chunk.
+4. Provide 2-3 unique example sentences per word, including at least one from this chunk if possible.
+5. Include Taiwan-specific or travel-related terms if relevant to this chunk.
+6. Ensure a mix of nouns, verbs, adjectives, and idiomatic expressions.
+7. Select practical phrases for real-world use.
+
+All Chinese text must be in simplified characters. Pinyin must include tone marks and proper spacing. Ensure pinyin accuracy and contextually appropriate English definitions.
+
+Highlights (prioritize these if present in this chunk):
+{highlight_text}
+
+Script Chunk {i + 1} of {len(script_chunks)}:
+{script_chunks[i]}
+"""
+
+            # Call DeepSeek API for this chunk
+            response = requests.post("https://api.deepseek.com/chat/completions", headers=headers, json={
+                "model": "deepseek-chat",
+                "messages": [
+                    {"role": "system", "content": "You are a Chinese language expert creating comprehensive study guides for intermediate-to-advanced learners from 30-minute video transcripts."},
+                    {"role": "user", "content": chunk_prompt}
+                ],
+                "stream": False,
+                "response_format": {"type": "json_object"}
+            })
+            if response.status_code != 200:
+                logger.error("DeepSeek API Error for chunk %d: %s", i + 1, response.text)
+                return HttpResponse(f"DeepSeek API Error for chunk {i + 1}: {response.text}", status=500)
+
+            # Parse chunk response
+            try:
+                chunk_data = json.loads(response.json()["choices"][0]["message"]["content"])
+                all_vocabulary.extend(chunk_data.get("vocabulary", []))
+                all_phrases.extend(chunk_data.get("phrases", []))
+                all_grammar_points.extend(chunk_data.get("grammar_points", []))
+                all_cultural_notes.extend(chunk_data.get("cultural_notes", []))
+            except (KeyError, json.JSONDecodeError) as e:
+                logger.error("Invalid JSON response for chunk %d: %s", i + 1, str(e))
+                return HttpResponse(f"Invalid JSON response for chunk {i + 1}: {str(e)}", status=500)
+
+        # Deduplicate and limit items
+        def deduplicate(items, key, max_items):
+            seen = set()
+            result = []
+            for item in items:
+                identifier = item.get(key)
+                if identifier not in seen:
+                    seen.add(identifier)
+                    result.append(item)
+                    if len(result) >= max_items:
+                        break
+            return result
+
+        study_guide = {
+            "title": title,
+            "summary": summary,
+            "vocabulary": deduplicate(all_vocabulary, "chinese", 20),
+            "phrases": deduplicate(all_phrases, "chinese", 10),
+            "grammar_points": deduplicate(all_grammar_points, "pattern", 5),
+            "cultural_notes": all_cultural_notes[:5]  # No deduplication for notes
+        }
+
+        # Set up PDF in memory
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter, leftMargin=60, rightMargin=60, topMargin=72, bottomMargin=72)
+
+        # Define styles
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle('CustomTitle', parent=styles['Title'], fontName='NotoSerifBold', fontSize=20, leading=24, alignment=1, textColor=colors.HexColor('#2C3E50'), spaceAfter=16)
+        heading_style = ParagraphStyle('CustomHeading', parent=styles['Heading1'], fontName='NotoSerifBold', fontSize=16, leading=20, textColor=colors.HexColor('#3498DB'), spaceBefore=24, spaceAfter=12)
+        normal_style = ParagraphStyle('CustomNormal', parent=styles['Normal'], fontName='NotoSerif', fontSize=11, leading=16, spaceBefore=4, spaceAfter=4)
+        vocab_style = ParagraphStyle('VocabStyle', parent=normal_style, leftIndent=20, firstLineIndent=-20)
+        example_style = ParagraphStyle('ExampleStyle', parent=normal_style, leftIndent=30, spaceBefore=6, spaceAfter=6, borderWidth=1, borderColor=colors.HexColor('#E0E0E0'), borderPadding=8, borderRadius=5)
+        note_style = ParagraphStyle('NoteStyle', parent=normal_style, fontName='NotoSerif', fontSize=10, leading=14, textColor=colors.HexColor('#7F8C8D'), leftIndent=20)
+
+        # Add page numbers and header
+        def add_page_number(canvas, doc):
+            canvas.saveState()
+            canvas.setFont('NotoSerifBold', 10)
+            canvas.setFillColor(colors.HexColor('#3498DB'))
+            canvas.drawString(72, 720, study_guide["title"])
+            canvas.setFont('NotoSerif', 10)
+            canvas.setFillColor(colors.gray)
+            page_num = canvas.getPageNumber()
+            text = f"第 {page_num} 页"
+            canvas.drawRightString(540, 36, text)
+            canvas.setStrokeColor(colors.HexColor('#E0E0E0'))
+            canvas.line(72, 710, 540, 710)
+            canvas.line(72, 50, 540, 50)
+            canvas.restoreState()
+
+        # Build flowables
+        flowables = [Paragraph(study_guide["title"], title_style)]
+        flowables.append(Paragraph("内容摘要", heading_style))
+        flowables.append(Paragraph(study_guide["summary"], normal_style))
+        flowables.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#E0E0E0'), spaceBefore=12, spaceAfter=12))
+
+        # Vocabulary
+        if study_guide["vocabulary"]:
+            flowables.append(Paragraph("重点词汇", heading_style))
+            for i, word in enumerate(study_guide["vocabulary"]):
+                word_text = f'<b>{i + 1}. <font color="#E74C3C">{word.get("chinese", "未知")}</font></b> <font color="#7F8C8D">[{word.get("pinyin", "无拼音")}]</font><br/><b>释义：</b>{word.get("english", "无定义")}'
+                flowables.append(Paragraph(word_text, vocab_style))
+                if word.get("context"):
+                    flowables.append(Paragraph(f'<b>语境：</b><i>"{word["context"]}"</i>', example_style))
+                for ex in word.get("examples", []):
+                    ex_text = f'<font color="black">{ex.get("chinese", "无例句")}</font><br/><font color="gray">{ex.get("pinyin", "无拼音")}</font><br/><font color="gray">{ex.get("english", "无翻译")}</font>'
+                    flowables.append(Paragraph(ex_text, example_style))
+                if word.get("difficulty"):
+                    flowables.append(Paragraph(f'<b>难度：</b>{word["difficulty"]}', note_style))
+                flowables.append(Spacer(1, 10))
+        else:
+            flowables.append(Paragraph("未提供重点词汇。", normal_style))
+        flowables.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#E0E0E0'), spaceBefore=12, spaceAfter=12))
+
+        # Phrases
+        if study_guide["phrases"]:
+            flowables.append(Paragraph("实用短语", heading_style))
+            for i, phrase in enumerate(study_guide["phrases"]):
+                phrase_text = f'<b>{i + 1}. <font color="#E74C3C">{phrase.get("chinese", "未知")}</font></b> <font color="#7F8C8D">[{phrase.get("pinyin", "无拼音")}]</font><br/><b>翻译：</b>{phrase.get("english", "无翻译")}'
+                flowables.append(Paragraph(phrase_text, vocab_style))
+                if phrase.get("notes"):
+                    flowables.append(Paragraph(f'<b>笔记：</b>{phrase["notes"]}', note_style))
+                flowables.append(Spacer(1, 8))
+        else:
+            flowables.append(Paragraph("未提供实用短语。", normal_style))
+        flowables.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#E0E0E0'), spaceBefore=12, spaceAfter=12))
+
+        # Grammar Points
+        if study_guide["grammar_points"]:
+            flowables.append(Paragraph("语法要点", heading_style))
+            for i, gp in enumerate(study_guide["grammar_points"]):
+                gp_text = f'<b>{i + 1}. <font color="#2980B9">{gp.get("pattern", "未知")}</font></b><br/><b>解释：</b>{gp.get("explanation", "无解释")}'
+                flowables.append(Paragraph(gp_text, normal_style))
+                if gp.get("example"):
+                    flowables.append(Paragraph(f'<b>例句：</b><i>"{gp["example"]}"</i>', example_style))
+                flowables.append(Spacer(1, 8))
+        else:
+            flowables.append(Paragraph("未提供语法要点。", normal_style))
+        flowables.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#E0E0E0'), spaceBefore=12, spaceAfter=12))
+
+        # Cultural Notes
+        if study_guide["cultural_notes"]:
+            flowables.append(Paragraph("文化笔记", heading_style))
+            for i, note in enumerate(study_guide["cultural_notes"]):
+                flowables.append(Paragraph(f'<b>{i + 1}.</b> {note}', normal_style))
+                flowables.append(Spacer(1, 6))
+        else:
+            flowables.append(Paragraph("未提供文化笔记。", normal_style))
+
+        # Build PDF
+        doc.build(flowables, onFirstPage=add_page_number, onLaterPages=add_page_number)
+
+        # Prepare response
+        pdf = buffer.getvalue()
+        buffer.close()
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{title}_study_guide.pdf"'
+        response.write(pdf)
+        logger.info("PDF generated and sent successfully.")
+        return response
+
+    except json.JSONDecodeError:
+        logger.error("Invalid JSON in request body.")
+        return HttpResponse("Invalid JSON in request body", status=400)
+    except requests.RequestException as e:
+        logger.error("API request failed: %s", str(e))
+        return HttpResponse(f"API request failed: {str(e)}", status=500)
+    except Exception as e:
+        logger.exception("Unexpected error generating PDF: %s", str(e))
+        return HttpResponse(f"Internal error: {str(e)}", status=500)

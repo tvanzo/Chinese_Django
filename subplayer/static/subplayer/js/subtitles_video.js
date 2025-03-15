@@ -204,6 +204,8 @@ async function fetchHighlights(mediaId) {
             return response.json();
         })
         .then(data => {
+            console.log("📌 DEBUG: Raw Highlights Data from API:", data);
+
             if (!Array.isArray(data)) {
                 data = JSON.parse(data);
             }
@@ -220,14 +222,18 @@ async function fetchHighlights(mediaId) {
                 frame_index: item.fields.frame_index
             }));
 
+            console.log("📌 DEBUG: Processed TransformedArray:", transformedArray);
+
             updateHighlightMap();
             resolve();
         })
         .catch(error => {
+            console.error("🚨 ERROR Fetching Highlights:", error);
             reject(error);
         });
     });
 }
+
 
 function updateHighlightMap() {
     highlightMap = {};
@@ -762,12 +768,10 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
         const response = await fetch(test2);  // "test2" presumably is your transcript JSON URL
         const data = await response.json();
         const syncData = data.words;
-
         // chunk words into frames
         createFramesArray(syncData);
         // we do NOT call createSubtitles() immediately here,
         // because we wait for fetchHighlights => in DOMContentLoaded.
-
     } catch (error) {
         console.error('Error fetching transcript data:', error);
     }
@@ -1086,3 +1090,138 @@ subtitles.addEventListener("mouseup", function() {
         }
     }
 });
+
+async function fetchVideoScript() {
+    console.log("Fetching video transcript...");
+
+    try {
+        const response = await fetch(test2); // Fetch the transcript from the API
+        const data = await response.json();
+
+        if (!data.words || !Array.isArray(data.words)) {
+            console.error("Transcript data is not in expected format", data);
+            return "";
+        }
+
+        return data.words.map(wordItem => wordItem.word).join(' ');
+    } catch (error) {
+        console.error("Error fetching transcript:", error);
+        return "";
+    }
+}
+const studyGuideButton = document.getElementById('create-study-sheet');
+const notification = document.getElementById('download-notification');
+const body = document.body;
+
+function showNotification() {
+    notification.style.display = 'block'; // Make it visible
+    setTimeout(() => {
+        notification.classList.add('show'); // Fade in
+        adjustBodyPadding(); // Adjust padding after showing
+    }, 10); // Small delay to ensure display: block takes effect before transition
+}
+
+function hideNotification() {
+    notification.classList.remove('show'); // Fade out
+    setTimeout(() => {
+        notification.style.display = 'none'; // Hide after fade
+        adjustBodyPadding(); // Reset padding
+    }, 300); // Match transition duration (0.3s)
+}
+
+function adjustBodyPadding() {
+    if (notification.style.display !== 'none') {
+        body.style.paddingTop = notification.offsetHeight + 'px';
+    } else {
+        body.style.paddingTop = '0';
+    }
+}
+
+document.getElementById("create-study-sheet").addEventListener("click", async function() {
+    console.log("Fetching video script and highlights...");
+
+    const scriptText = await fetchVideoScript();
+    if (!scriptText) {
+        console.error("No script text found.");
+        return;
+    }
+
+    try {
+        await fetchHighlights(mediaId);
+        let highlights = transformedArray.map(h => h.highlighted_text);
+
+        console.log("Sending script and highlights to backend...");
+        showNotification(); // Show notification
+        studyGuideButton.disabled = true;
+
+        const response = await fetch("/api/generate-pdf/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken()
+            },
+            body: JSON.stringify({
+                script_text: scriptText,
+                highlights: highlights
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server Error: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "study_guide.pdf";
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        console.log("PDF downloaded successfully");
+        hideNotification(); // Hide notification
+        studyGuideButton.disabled = false;
+
+    } catch (error) {
+        console.error("Error generating PDF:", error);
+        hideNotification(); // Hide on error
+        studyGuideButton.disabled = false;
+    }
+});
+
+function getCSRFToken() {
+    return document.querySelector("meta[name='csrf-token']").getAttribute("content");
+}
+
+// Integrate with existing DOMContentLoaded padding logic
+document.addEventListener('DOMContentLoaded', function() {
+    // Existing welcome banner logic
+    var banner = document.getElementById('welcome-banner');
+    if (banner) {
+        function adjustPadding() {
+            if (banner && !banner.classList.contains('d-none')) {
+                body.style.paddingTop = banner.offsetHeight + 'px';
+            } else if (notification.style.display !== 'none') {
+                body.style.paddingTop = notification.offsetHeight + 'px';
+            } else {
+                body.style.paddingTop = '0';
+            }
+        }
+        adjustPadding();
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === 'class') adjustPadding();
+            });
+        });
+        observer.observe(banner, { attributes: true, attributeFilter: ['class'] });
+        banner.addEventListener('closed.bs.alert', adjustPadding);
+    }
+
+    // Ensure notification padding is checked on load too
+    adjustBodyPadding();
+});
+
+
+

@@ -77,5 +77,7 @@ path('dashboard/', account_views.stats_view, name='stats_view'),
     path('cancel-subscription/', account_views.cancel_subscription, name='cancel_subscription'),
     path('reactivate-subscription/', account_views.reactivate_subscription, name='reactivate_subscription'),
     path('upgrade/', account_views.upgrade_plan, name='upgrade_plan'),
+    path('api/generate-pdf/', subplayer_views.generate_pdf, name='generate_pdf'),
+
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -3582,13 +3582,330 @@ iframe {
     box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3); /* Enhanced shadow with #007BFF */
     background: linear-gradient(135deg, #0056b3 0%, #007BFF 100%); /* Darker to primary blue */
 }
+    #unique-xp-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 
+#create-study-sheet {
+    background-color: #4CAF50; /* Green */
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+#create-study-sheet:hover {
+    background-color: #45a049;
+}
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+}
+
+.btn-icon svg {
+    width: 26px;
+    height: 26px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.btn-icon:hover svg {
+    transform: scale(1.1);
+}
+
+
+
+
+
+
+
+    .right-sidebar {
+    right: 0;
+    width: 240px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    padding: 24px 16px;
+    overflow-y: auto;
+    background-color: #f8fafc;
+    box-sizing: border-box;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    border-left: 1px solid #e2e8f0;
+    margin: 20px 20px 20px 0;
+    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.05);
+}
+
+/* XP Display Enhancement */
+#unique-xp-display {
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    transition: all 0.2s ease;
+    font-weight: 600;
+}
+
+#unique-xp-display .unique-xp-circle {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(4px);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Study Guide Button Enhancement */
+#create-study-sheet {
+    background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+    transition: all 0.2s ease;
+    margin-left: 10px;
+}
+
+#create-study-sheet:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(14, 165, 233, 0.3);
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+}
+
+#create-study-sheet svg {
+    width: 22px;
+    height: 22px;
+    fill: white;
+}
+
+#create-study-sheet svg path {
+    fill: white;
+}
+
+/* Highlight Items */
+.highlight-container {
+    background-color: white;
+    padding: 14px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    border: 1px solid #e2e8f0;
+    margin: 8px 0;
+}
+
+.highlight-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background-color: #f1f5f9;
+}
+
+.highlight-container a {
+    color: #1e293b;
+    font-size: 0.925rem;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+.delete-highlight {
+    opacity: 0;
+    transition: all 0.2s ease;
+    filter: grayscale(1);
+    width: 16px;
+    height: 16px;
+}
+
+.highlight-container:hover .delete-highlight {
+    opacity: 0.6;
+}
+
+.delete-highlight:hover {
+    opacity: 1 !important;
+    filter: grayscale(0);
+    transform: scale(1.1);
+}
+
+/* Play All Button Enhancement */
+#play-all-btn {
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 16px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    transition: all 0.2s ease;
+    width: 100%;
+    max-width: 200px;
+    height: 44px;
+    letter-spacing: 0.3px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#play-all-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
+    background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+}
+
+/* Played Highlight State */
+.played-highlight {
+    background-color: #f0f9ff;
+    border-left: 3px solid #3b82f6;
+}
+
+/* Toggle Button Refinement */
+.sidebar-toggle, .sidebar-expand {
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.sidebar-toggle:hover, .sidebar-expand:hover {
+    background-color: #f8fafc;
+    transform: scale(1.05);
+}
+
+.sidebar-toggle svg, .sidebar-expand svg {
+    width: 16px;
+    height: 16px;
+    stroke: #64748b;
+}
+
+/* Scrollbar Styling */
+.right-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.right-sidebar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.right-sidebar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.right-sidebar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Sidebar Header Spacing */
+.sidebar-header {
+    margin-bottom: 20px;
+}
+
+.xp-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+    /* Study Guide Popup Styles */
+#study-guide-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background-color: white;
+    width: 90%;
+    max-width: 400px;
+    border-radius: 12px;
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+#study-guide-popup.active {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    pointer-events: auto;
+}
+
+
+
+#study-guide-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+    .study-guide-tooltip {
+    width: 80px; /* Adjust the width to make it less wide */
+    white-space: normal; /* Allow text to wrap to the next line */
+    word-wrap: break-word; /* Break long words if necessary */
+    text-align: center; /* Center the text */
+    padding: 5px; /* Add some padding for better readability */
+    font-size: 12px; /* Adjust font size if needed */
+    line-height: 1.4; /* Adjust line height for better spacing */
+}
+#download-notification {
+    background-color: #f8f9fa; /* Light grey, matching welcome banner */
+    color: #344767; /* Darker text for contrast */
+    border: none;
+    border-bottom: 2px solid #e9ecef; /* Pronounced bottom line */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+    padding: 10px 15px; /* Thinner padding */
+    font-size: 14px; /* Clean, modern text size */
+    width: 100%;
+    text-align: center; /* Center the text */
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1060; /* Match welcome banner’s layering */
+    opacity: 0; /* Start invisible for fade effect */
+    transition: opacity 0.3s ease-in-out; /* Smooth fade in/out */
+}
+
+#download-notification.show {
+    opacity: 1; /* Fully visible when shown */
+}
+
+/* Ensure body padding adjusts like welcome banner */
+body {
+    transition: padding-top 0.3s ease-in-out; /* Smooth padding adjustment */
+}
 </style>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+
 </head>
 
 
 <body class="subplayer-page">
-
+<div id="download-notification" class="alert alert-light fade fixed-top" role="alert" style="z-index: 1060; display: none;">
+  <div class="container-fluid py-2">
+    <div class="d-flex align-items-center justify-content-center">
+      <span>Your study guide is downloading. This may take a couple of minutes...</span>
+    </div>
+  </div>
+</div>
 <div class="dashboard">
  <aside class="sidebar left-sidebar">
     {% include 'accounts/sidebar.html' %}
@@ -3610,71 +3927,61 @@ iframe {
 
 <aside class="sidebar right-sidebar">
     <div class="sidebar-header">
-        <div class="xp-container">
+        <div class="xp-container d-flex align-items-center">
+            <!-- XP Button -->
             <div class="btn btn-purple btn-sm mb-0 d-flex align-items-center compact-btn" id="unique-xp-display">
                 <div class="unique-xp-circle d-flex align-items-center justify-content-center me-2">XP</div>
                 <span id="unique-xp-points">{{ total_points }}</span>
             </div>
+
+            <!-- Study Guide Button -->
+            <div class="button-group">
+                <button id="create-study-sheet" title="Create Study Guide">
+                    <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M437.456,512H21.212c-8.166,0-14.786-6.621-14.786-14.786V256.915c0-8.165,6.62-14.786,14.786-14.786 s14.786,6.621,14.786,14.786v225.512h386.671v-32.939c0-8.165,6.62-14.786,14.786-14.786s14.786,6.621,14.786,14.786v47.725 C452.242,505.379,445.622,512,437.456,512z"></path>
+                        <polygon points="21.212,177.092 21.212,172.3 176.068,14.786 176.068,177.092"></polygon>
+                        <rect x="196.524" y="219.426" width="294.274" height="163.712"></rect>
+                        <path d="M490.791,204.634h-38.549V14.786c0-8.165-6.62-14.786-14.786-14.786H176.068 c-0.067,0-0.132,0.009-0.198,0.01c-0.359,0.004-0.717,0.022-1.075,0.053c-0.12,0.01-0.241,0.021-0.361,0.034 c-0.41,0.046-0.816,0.105-1.22,0.185c-0.031,0.006-0.061,0.009-0.092,0.015c-0.432,0.089-0.858,0.2-1.28,0.325 c-0.111,0.033-0.22,0.071-0.33,0.106c-0.322,0.105-0.642,0.22-0.958,0.347c-0.108,0.044-0.217,0.086-0.324,0.132 c-0.807,0.346-1.585,0.766-2.326,1.257c-0.102,0.067-0.2,0.139-0.3,0.207c-0.274,0.191-0.541,0.392-0.803,0.603 c-0.099,0.08-0.198,0.157-0.294,0.24c-0.339,0.287-0.67,0.586-0.985,0.906L10.668,161.935c-0.346,0.352-0.671,0.719-0.977,1.1 c-0.182,0.226-0.342,0.463-0.509,0.696c-0.112,0.157-0.234,0.309-0.34,0.47c-0.194,0.294-0.364,0.599-0.534,0.903 c-0.062,0.112-0.133,0.219-0.192,0.333c-0.166,0.315-0.308,0.639-0.449,0.963c-0.05,0.114-0.108,0.225-0.155,0.34 c-0.126,0.312-0.231,0.628-0.336,0.946c-0.046,0.139-0.099,0.274-0.14,0.413c-0.087,0.294-0.152,0.591-0.22,0.889 c-0.04,0.172-0.087,0.34-0.121,0.515c-0.053,0.274-0.084,0.55-0.121,0.825c-0.027,0.201-0.062,0.399-0.081,0.6 c-0.025,0.268-0.03,0.535-0.04,0.801c-0.007,0.191-0.028,0.38-0.028,0.571v4.792c0,8.165,6.62,14.786,14.786,14.786h154.855 c8.166,0,14.786-6.621,14.786-14.786V29.572h231.816v175.062H196.518c-8.166,0-14.786,6.621-14.786,14.786v163.705 c0,8.165,6.62,14.786,14.786,14.786h294.272c8.166,0,14.786-6.621,14.786-14.786V219.421 C505.577,211.256,498.957,204.634,490.791,204.634z M51.772,162.308l47.938-48.76l61.571-62.63v111.39L51.772,162.308 L51.772,162.308z M476.005,368.339h-264.7V234.207h264.7V368.339z"></path>
+                        <path d="M246.08,260.736c0-3.2,2.925-6.015,7.375-6.015h26.322c16.785,0,30.008,7.934,30.008,29.433v0.64 c0,21.499-13.733,29.689-31.28,29.689h-12.589v27.641c0,4.096-4.959,6.142-9.919,6.142s-9.919-2.048-9.919-6.142L246.08,260.736 L246.08,260.736z M265.916,272.124v27.002h12.589c7.121,0,11.444-4.096,11.444-12.797v-1.406c0-8.703-4.323-12.797-11.444-12.797 h-12.589V272.124z"></path>
+                        <path d="M349.586,254.721c17.548,0,31.282,8.19,31.282,30.202v33.145c0,22.011-13.733,30.201-31.282,30.201 h-22.507c-5.214,0-8.647-2.815-8.647-6.014v-81.518c0-3.2,3.433-6.015,8.647-6.015h22.507V254.721z M338.269,272.124v58.739h11.317 c7.121,0,11.444-4.096,11.444-12.796v-33.145c0-8.703-4.323-12.797-11.444-12.797h-11.317V272.124z"></path>
+                        <path d="M393.458,260.863c0-4.096,4.323-6.142,8.647-6.142h44.125c4.196,0,5.977,4.479,5.977,8.574 c0,4.735-2.162,8.83-5.977,8.83h-32.935v21.628h19.201c3.815,0,5.977,3.711,5.977,7.806c0,3.456-1.78,7.55-5.977,7.55h-19.201 v33.016c0,4.096-4.959,6.142-9.919,6.142c-4.959,0-9.919-2.048-9.919-6.142V260.863z"></path>
+                    </svg>
+                </button>
+                <span class="tooltip-text study-guide-tooltip">Create Study Guide</span>
+            </div>
         </div>
     </div>
 
-<!-- rest of the sidebar content -->
-<div class="highlight-list-container">
+    <!-- Highlight List -->
+    <div class="highlight-list-container">
+        <ul id="highlight-list">
+            {% for highlight in highlights %}
+            <li class="highlight-item">
+                <div class="highlight-container">
+                    <a href="#"
+                        data-start-time="{{ highlight.start_time }}"
+                        data-end-time="{{ highlight.end_time }}"
+                        data-frame-index="{{ highlight.frame_index }}"
+                        data-start-sentence-index="{{ highlight.start_sentence_index }}"
+                        data-start-index="{{ highlight.start_index }}">
+                        {{ highlight.highlighted_text }}
+                    </a>
+                    <img src="{% static 'subplayer/trash.png' %}" alt="Delete" class="delete-highlight" data-highlight-id="{{ highlight.id }}">
+                </div>
+            </li>
+            {% empty %}
+            <li id="no-highlights">No highlights found.</li>
+            {% endfor %}
+        </ul>
+    </div>
 
-<ul id="highlight-list">
-
-{% for highlight in highlights %}
-
-<li class="highlight-item">
-
-<div class="highlight-container">
-
-<a href="#"
-
-data-start-time="{{ highlight.start_time }}"
-
-data-end-time="{{ highlight.end_time }}"
-
-data-frame-index="{{ highlight.frame_index }}"
-
-data-start-sentence-index="{{ highlight.start_sentence_index }}"
-
-data-start-index="{{ highlight.start_index }}">
-
-{{ highlight.highlighted_text }}
-
-</a>
-
-<img src="{% static 'subplayer/trash.png' %}" alt="Delete" class="delete-highlight" data-highlight-id="{{ highlight.id }}">
-
-</div>
-
-</li>
-
-{% empty %}
-
-<li id="no-highlights">No highlights found.</li>
-
-{% endfor %}
-
-</ul>
-
-</div>
-
-<div class="bottom-buttons">
-
-<div class="button-xp-container">
-
-<button id="play-all-btn" class="play-all-button">Play All Highlights</button>
-
-</div>
-
-
-
-</div>
-
+    <!-- Play All Button -->
+    <div class="bottom-buttons">
+        <div class="button-xp-container">
+            <button id="play-all-btn" class="play-all-button">Play All Highlights</button>
+        </div>
+    </div>
 </aside>
-
 
 
 
@@ -3755,7 +4062,27 @@ data-start-index="{{ highlight.start_index }}">
 </div>
 <div id="media-status" data-status="{{ media_status }}"></div>
 
-
+<!-- Study Guide Popup -->
+<div id="study-guide-popup" class="limit-popup">
+    <div class="popup-content">
+        <div class="popup-header">
+            <div class="warning-icon">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12" y2="17"></line>
+                </svg>
+            </div>
+            <h3 class="popup-title">Want to download your study guide?</h3>
+        </div>
+        <p class="popup-message">Click the button below to download your study guide.</p>
+        <div class="button-container">
+            <button class="upgrade-button" onclick="downloadStudyGuide()">Download Now</button>
+            <button class="close-button" onclick="hideStudyGuidePopup()">Close</button>
+        </div>
+    </div>
+</div>
+<div id="study-guide-overlay" class="overlay"></div>
 <script>
     let dictionaryEnabled = false; // Track if the dictionary is enabled
 
@@ -4165,7 +4492,34 @@ data-start-index="{{ highlight.start_index }}">
         initializeStatusUI();
         attachSingleStatusIconEventListener();
     });
+// Function to show the study guide popup
+function showStudyGuidePopup() {
+    const popup = document.getElementById('study-guide-popup');
+    const overlay = document.getElementById('study-guide-overlay');
+    popup.classList.add('active');
+    overlay.classList.add('active');
+}
 
+// Function to hide the study guide popup
+function hideStudyGuidePopup() {
+    const popup = document.getElementById('study-guide-popup');
+    const overlay = document.getElementById('study-guide-overlay');
+    popup.classList.remove('active');
+    overlay.classList.remove('active');
+}
+
+// Function to handle the download action
+function downloadStudyGuide() {
+    // Implement your download logic here
+    console.log('Downloading study guide...');
+    hideStudyGuidePopup();
+}
+
+// Attach event listener to the study guide button
+document.getElementById('create-study-sheet').addEventListener('click', function(event) {
+    event.preventDefault();
+    showStudyGuidePopup();
+});
 </script>
 
 {% if media.media_type == 'audio' %}
