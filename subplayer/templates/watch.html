@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="apple-touch-icon" sizes="76x76" href="{% static 'accounts/img/apple-icon.png' %}">
-        <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
+  <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
   <title>Chinese Log</title>
 
   <!-- Fonts and icons -->
@@ -148,8 +148,14 @@
       color: white;
     }
 
+    .badge-subscription {
+      background: rgba(0, 179, 122, 0.9);
+      color: white;
+    }
+
     .card-body {
-      padding: 1rem 1.25rem 2rem; /* Increased bottom padding to ensure space for + button */
+      padding: 1rem 1.25rem 1.5rem;
+      position: relative;
     }
 
     .card-title {
@@ -178,8 +184,8 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      padding: 0.25rem 0.5rem 0; /* Adjusted padding for channel info */
-      margin-top: 0; /* No top margin to push it up slightly */
+      padding: 0.5rem 0.5rem 0.75rem;
+      margin-top: 0.5rem;
       border-top: 1px solid #f0f2f5;
     }
 
@@ -219,10 +225,18 @@
       justify-content: center;
       transition: all 0.2s ease;
       flex-shrink: 0;
-      position: absolute;
-      top: calc(100% - 16px); /* Position at the top of card-body with some offset */
-      right: 1rem; /* More space from right edge */
-      z-index: 1;
+      position: static;
+      margin-left: auto;
+    }
+
+    .toggle-log:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .toggle-log.active {
+      background: var(--primary-color);
+      color: white;
     }
 
     /* Responsive Design */
@@ -238,11 +252,19 @@
       }
 
       .toggle-log {
-        right: 0.5rem; /* Adjust for smaller screens */
+        right: 0.5rem;
       }
 
       .channel-name {
-        margin-right: 2rem; /* Adjust for smaller screens */
+        margin-right: 2rem;
+      }
+
+      .content-tabs {
+        flex-direction: column;
+      }
+
+      .tab-button {
+        margin-bottom: 8px;
       }
     }
 
@@ -258,98 +280,221 @@
       0% { background-position: -200% 0; }
       100% { background-position: 200% 0; }
     }
-  </style>
-      <style>
-    :root {
-      --primary-color: #3a9fff;
-      --accent-color: #d00c9c;
-      --text-dark: #2c3e50;
-      --text-light: #7f8c8d;
-      --bg-light: #f8f9fa;
-    }
 
-    body {
-      background-color: var(--bg-light);
-      color: var(--text-dark);
-      font-family: 'Open Sans', sans-serif;
-    }
+    .text-warning { color: #dcb234; }
+    .text-success { color: #3c763d; }
 
-    .main-content {
-      padding: 20px;
-    }
-
-    h2 {
-      color: var(--text-dark);
-      font-weight: 700;
-      margin-bottom: 2rem;
-      position: relative;
-      text-align: center;
-      padding-bottom: 0.5rem;
-    }
-
-    h2::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 3px;
-      background-color: var(--primary-color);
-    }
-
-    /* Category Filter */
-    .category-filter {
+    .title-container {
       display: flex;
-      gap: 8px;
-      margin: 2rem 0;
-      flex-wrap: wrap;
+      flex-direction: column;
+      justify-content: center;
+      height: 50px;
+    }
+
+    .title-container p {
+      margin: 0;
+      line-height: 1.1;
+      text-align: center;
+      white-space: pre-line;
+      font-size: 0.75rem;
+    }
+
+    .nav-link.active .icon svg {
+      fill: #FFD700 !important;
+      color: #FFD700 !important;
+    }
+
+    .xp-points-bar {
+      background-color: #f8f9fa;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .xp-points-bar h2 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: normal;
+    }
+
+    .xp-points-bar #xp-points {
+      font-size: 20px;
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    .xp-circle {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background-color: #ffc40c;
+      color: #ffffff;
+      font-weight: bold;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
       justify-content: center;
     }
 
-    .category-item {
-      background: white;
-      border: 1px solid #e9ecef;
-      padding: 8px 20px;
-      border-radius: 24px;
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      user-select: none;
+    #xp-points {
+      font-size: 14px;
+      font-weight: bold;
+      color: #ffffff;
     }
 
-    .category-item.active {
-      background: var(--primary-color);
+    .btn-purple {
+      background-color: #d00c9c;
+      color: #ffffff;
+      border-color: #6f42c1;
+    }
+
+    .compact-btn {
+      padding: 0.25rem 0.5rem;
+    }
+
+    #unique-xp-display {
+      background-color: #d00c9c;
       color: white;
-      border-color: var(--primary-color);
+      padding: 3px 8px;
+      border-radius: 8px;
     }
 
-    /* Video Grid */
+    #unique-xp-display .unique-xp-circle {
+      background-color: #ffc40c;
+      color: white;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 5px;
+    }
+
+    #unique-xp-points {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    #sidenav-main {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+    }
+
+    @media (max-width: 1200px) {
+      #sidenav-main {
+        display: none;
+      }
+      #top-nav {
+        display: block;
+      }
+    }
+
+    @media (min-width: 1201px) {
+      #top-nav {
+        display: none;
+      }
+    }
+
+    #welcome-banner {
+      background-color: #e9ecef;
+      border-radius: 0 0 10px 10px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: left;
+      width: 100%;
+    }
+
+    #welcome-banner .alert-heading {
+      font-weight: 700;
+      color: #28a745;
+    }
+
+    #welcome-banner button.btn-close {
+      background: transparent;
+      border: none;
+      color: #6c757d;
+    }
+
+    #welcome-banner button.btn-close:hover {
+      color: #343a40;
+    }
+
+    .sidenav-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100px;
+    }
+
+    .custom-logo-size {
+      height: 50px !important;
+    }
+
+    #welcome-banner {
+      background-color: #f8f9fa;
+      color: #344767;
+      border: none;
+      border-bottom: 2px solid #e9ecef;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      padding: 10px 15px;
+      font-size: 14px;
+      width: 100%;
+      text-align: left;
+    }
+
+    #welcome-banner .close {
+      background: transparent;
+      border: none;
+      color: #6c757d;
+      padding: 0;
+      font-size: 20px;
+      line-height: 1;
+      opacity: 0.5;
+      transition: opacity 0.15s ease-in-out;
+    }
+
+    #welcome-banner .close:hover {
+      opacity: 1;
+    }
+
+    #welcome-banner .close:focus {
+      outline: none;
+      box-shadow: none;
+    }
+
+    /* Video Grid and Card Styles */
     .video-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1.5rem;
-      padding: 1rem;
+      padding: 1.5rem;
     }
 
-    /* Video Card */
     .video-card {
-      background: white;
-      border-radius: 16px;
+      background: #FFFFFF;
+      border-radius: 1rem;
       overflow: hidden;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
       position: relative;
     }
 
     .video-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
 
     .image-container {
       position: relative;
-      padding-top: 56.25%; /* 16:9 aspect ratio */
-      background: #f0f2f5;
+      padding-top: 56.25%;
+      background: #f8f9fa;
     }
 
     .card-img-top {
@@ -359,40 +504,42 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 16px 16px 0 0;
     }
 
     .overlay-info {
       position: absolute;
-      bottom: 10px;
-      left: 10px;
-      right: 10px;
+      bottom: 0.75rem;
+      left: 0.75rem;
+      right: 0.75rem;
       display: flex;
       justify-content: space-between;
+      z-index: 1;
     }
 
     .badge {
-      padding: 6px 12px;
-      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
       font-size: 0.75rem;
+      font-weight: 600;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      backdrop-filter: blur(4px);
+      gap: 0.375rem;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .badge-highlight {
-      background: rgba(208, 12, 156, 0.9);
+      background: rgba(58, 159, 255, 0.9);
       color: white;
     }
 
     .badge-length {
-      background: rgba(44, 62, 80, 0.9);
+      background: rgba(26, 31, 54, 0.9);
       color: white;
     }
 
     .card-body {
-      padding: 1rem 1.25rem 2.5rem; /* Increased bottom padding to ensure space for the 'x' button */
+      padding: 1.25rem;
       position: relative;
     }
 
@@ -400,527 +547,100 @@
       font-size: 1rem;
       font-weight: 600;
       line-height: 1.4;
-      margin-top: 0.75rem;
-      margin-bottom: 0.5rem;
-      padding: 0 0.5rem;
+      margin-bottom: 0.75rem;
+      color: #344767;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      color: var(--text-dark);
     }
 
     .card-text {
       font-size: 0.875rem;
-      color: var(--text-light);
+      color: #7f8c8d;
       line-height: 1.5;
-      margin-bottom: 0.5rem;
+      margin-bottom: 1rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .channel-info {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      padding: 0.25rem 0.5rem 0; /* Adjusted padding for channel info */
-      margin-top: 0; /* No top margin to push it up slightly */
+      padding-top: 0.75rem;
       border-top: 1px solid #f0f2f5;
     }
 
     .channel-meta {
       display: flex;
       align-items: center;
-      gap: 4px;
-      flex-grow: 1;
-      min-width: 0;
-      padding-right: 8px;
+      gap: 0.5rem;
     }
 
     .channel-name {
       font-size: 0.875rem;
       font-weight: 600;
-      color: var(--primary-color);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      padding: 0 0.5rem;
+      color: #3a9fff;
     }
 
     .time-ago {
       font-size: 0.75rem;
-      color: var(--text-light);
-      white-space: nowrap;
-      margin-left: 8px;
+      color: #7f8c8d;
     }
 
     .toggle-log {
-      background: #f0f2f5;
-      width: 32px;
-      height: 32px;
+      width: 2rem;
+      height: 2rem;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
+      background: #f8f9fa;
       transition: all 0.2s ease;
-      flex-shrink: 0;
-      position: absolute;
-      top: calc(100% - 20px); /* Adjust 'x' button position to be higher */
-      right: 1rem; /* More space from right edge */
-      z-index: 1;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .video-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      }
-
-      .category-filter {
-        justify-content: flex-start;
-        overflow-x: auto;
-        padding-bottom: 8px;
-      }
-
-      .toggle-log {
-        right: 0.5rem; /* Adjust for smaller screens */
-      }
-
-      .channel-name {
-        margin-right: 2rem; /* Adjust for smaller screens */
-      }
-    }
-
-    /* Loading State */
-    .skeleton-loader {
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: 8px;
-    }
-
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-  </style>
-     <style>
-    /* Previous :root and body styles remain unchanged */
-
-    .card-body {
-      padding: 1rem 1.25rem 3rem; /* Increased bottom padding for button space */
-      position: relative;
-    }
-
-    .toggle-log {
-      background: #f0f2f5;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      flex-shrink: 0;
-      position: absolute;
-      top: auto; /* Remove vertical positioning */
-      bottom: 1rem; /* Position from bottom */
-      right: 1rem;
-      z-index: 1;
+      cursor: pointer;
     }
 
     .toggle-log:hover {
-      background: var(--primary-color);
+      background: #3a9fff;
       color: white;
     }
 
-    /* Adjust responsive positioning */
-    @media (max-width: 768px) {
-      .toggle-log {
-        bottom: 0.75rem;
-        right: 0.75rem;
-      }
+    /* Category Filter */
+    .category-filter {
+      display: flex;
+      gap: 0.75rem;
+      margin: 2rem 1.5rem;
+      flex-wrap: wrap;
     }
-          .card-body {
-    padding: 1rem 1.25rem 1.5rem; /* Reduced bottom padding since button is now inline */
-    position: relative;
-  }
 
-  .channel-info {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 0.5rem 0.5rem 0.75rem; /* Added bottom padding to channel info */
-    margin-top: 0.5rem; /* Added spacing above channel info */
-    border-top: 1px solid #f0f2f5;
-  }
-
-
-  .toggle-log {
-    background: #f0f2f5;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-    position: static; /* Remove absolute positioning */
-    margin-left: auto; /* Push to right side */
-  }
-       .text-warning { color: #dcb234; } /* Custom dark yellow */
-.text-success { color: #3c763d; } /* Custom dark green */
-.title-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 50px; /* Adjusted height to provide more control */
-}
-.title-container p {
-    margin: 0;
-    line-height: 1.1; /* Tighter line spacing */
-    text-align: center;
-    white-space: pre-line; /* Ensures proper line breaking */
-    font-size: 0.75rem; /* Adjust size as needed */
-}
-.nav-link.active .icon svg {
-    fill: #FFD700 !important;
-    color: #FFD700 !important;
-}
-.xp-points-bar {
-    background-color: #f8f9fa;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
-.xp-points-bar h2 {
-    margin: 0;
-    font-size: 24px;
-    font-weight: normal;
-}
-.xp-points-bar #xp-points {
-    font-size: 20px;
-    font-weight: bold;
-    color: #007bff;
-}
-.xp-circle {
-    width: 20px; /* Adjust size as needed */
-    height: 20px; /* Adjust size as needed */
-    border-radius: 50%;
-    background-color: #ffc40c; /* Yellow color */
-    color: #ffffff; /* White text */
-    font-weight: bold;
-    font-size: 12px; /* Adjust size as needed */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-#xp-points {
-    font-size: 14px; /* Adjust size as needed */
-    font-weight: bold;
-    color: #ffffff; /* Adjust color as needed */
-}
-.btn-purple {
-    background-color: #d00c9c; /* Purple color */
-    color: #ffffff; /* White text */
-    border-color: #6f42c1;
-}
-.compact-btn {
-    padding: 0.25rem 0.5rem; /* Less padding for a more compact button */
-}
-#unique-xp-display {
-    background-color: #d00c9c; /* Change the color to your preference */
-    color: white; /* Ensure the text color contrasts well */
-    padding: 3px 8px; /* Adjust padding to make it smaller */
-    border-radius: 8px; /* Increased border radius to make corners more rounded */
-}
-#unique-xp-display .unique-xp-circle {
-    background-color: #ffc40c; /* Change the color to your preference */
-    color: white; /* Ensure the text color contrasts well */
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 5px; /* Adjust margin as needed */
-}
-#unique-xp-points {
-    font-weight: bold;
-    font-size: 14px; /* Adjust font size as needed */
-}
-#sidenav-main {
-    background-color: #ffffff; /* White background */
-    border-radius: 12px; /* Adjust the border radius to your preference */
-    padding: 10px; /* Add padding if necessary */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for better visibility */
-    margin-bottom: 20px; /* Add margin to ensure the bottom border is visible */
-    max-height: calc(100vh - 40px); /* Ensure the sidebar fits within the viewport */
-    overflow-y: auto; /* Add vertical scrolling if necessary */
-}
-@media (max-width: 1200px) {
-    #sidenav-main {
-        display: none;
+    .category-item {
+      background: white;
+      border: 1px solid #e9ecef;
+      padding: 0.5rem 1rem;
+      border-radius: 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #344767;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
-    #top-nav {
-        display: block;
+
+    .category-item.active {
+      background: #3a9fff;
+      color: white;
+      border-color: #3a9fff;
     }
-}
-@media (min-width: 1201px) {
-    #top-nav {
-        display: none;
+
+    .category-item:hover:not(.active) {
+      background: #f8f9fa;
+      border-color: #3a9fff;
+      color: #3a9fff;
     }
-}
-#welcome-banner {
-  background-color: #e9ecef; /* Light grey background */
-  border-radius: 0 0 10px 10px; /* Rounded bottom corners */
-  padding: 15px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow */
-  text-align: left;
-  width: 100%; /* Full width */
-}
 
-#welcome-banner .alert-heading {
-  font-weight: 700;
-  color: #28a745; /* Green color for success */
-}
-
-#welcome-banner button.btn-close {
-  background: transparent;
-  border: none;
-  color: #6c757d;
-}
-
-#welcome-banner button.btn-close:hover {
-  color: #343a40;
-}
-
-
-.sidenav-header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100px;  /* Adjust this height as needed */
-}
-.custom-logo-size {
-    height: 50px !important; /* Increase by 20% from 80px */
-    /* If you also need to adjust width while maintaining aspect ratio, you can uncomment the following line */
-    /* width: auto; */
-}
-#welcome-banner {
-  background-color: #f8f9fa; /* Light grey for a subtle modern look */
-  color: #344767; /* Darker text for contrast */
-  border: none;
-  border-bottom: 2px solid #e9ecef; /* A bit more pronounced bottom line */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Subtle shadow for depth */
-  padding: 10px 15px; /* Adjust for a thinner, modern look */
-  font-size: 14px; /* Smaller text size for a cleaner appearance */
-  width: 100%;
-  text-align: left;
-}
-
-#welcome-banner .close {
-  background: transparent;
-  border: none;
-  color: #6c757d;
-  padding: 0;
-  font-size: 20px; /* Size of the 'X' */
-  line-height: 1;
-  opacity: 0.5;
-  transition: opacity 0.15s ease-in-out;
-}
-
-#welcome-banner .close:hover {
-  opacity: 1;
-}
-
-#welcome-banner .close:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-
-    #welcome-banner .close:hover {
-  opacity: 1;
-}
-
-#welcome-banner .close:focus {
-  outline: none;
-  box-shadow: none;
-}
-       /* Video Grid and Card Styles */
-.video-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-  padding: 1.5rem;
-}
-
-.video-card {
-  background: #FFFFFF;
-  border-radius: 1rem;
-  overflow: hidden;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  position: relative;
-}
-
-.video-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.image-container {
-  position: relative;
-  padding-top: 56.25%;
-  background: #f8f9fa;
-}
-
-.card-img-top {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.overlay-info {
-  position: absolute;
-  bottom: 0.75rem;
-  left: 0.75rem;
-  right: 0.75rem;
-  display: flex;
-  justify-content: space-between;
-  z-index: 1;
-}
-
-.badge {
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.badge-highlight {
-  background: rgba(58, 159, 255, 0.9);
-  color: white;
-}
-
-.badge-length {
-  background: rgba(26, 31, 54, 0.9);
-  color: white;
-}
-
-.card-body {
-  padding: 1.25rem;
-  position: relative;
-}
-
-.card-title {
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.4;
-  margin-bottom: 0.75rem;
-  color: #344767;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.card-text {
-  font-size: 0.875rem;
-  color: #7f8c8d;
-  line-height: 1.5;
-  margin-bottom: 1rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.channel-info {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 0.75rem;
-  border-top: 1px solid #f0f2f5;
-}
-
-.channel-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.channel-name {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #3a9fff;
-}
-
-.time-ago {
-  font-size: 0.75rem;
-  color: #7f8c8d;
-}
-
-.toggle-log {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f8f9fa;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.toggle-log:hover {
-  background: #3a9fff;
-  color: white;
-}
-
-/* Category Filter */
-.category-filter {
-  display: flex;
-  gap: 0.75rem;
-  margin: 2rem 1.5rem;
-  flex-wrap: wrap;
-}
-
-.category-item {
-  background: white;
-  border: 1px solid #e9ecef;
-  padding: 0.5rem 1rem;
-  border-radius: 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #344767;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.category-item.active {
-  background: #3a9fff;
-  color: white;
-  border-color: #3a9fff;
-}
-
-.category-item:hover:not(.active) {
-  background: #f8f9fa;
-  border-color: #3a9fff;
-  color: #3a9fff;
-}
-        .add-media-button {
+    .add-media-button {
       position: fixed;
       bottom: 2rem;
       right: 2rem;
@@ -1008,7 +728,8 @@
     .submit-button:hover {
       background-color: #2b8ae6;
     }
-         .custom-url-input {
+
+    .custom-url-input {
       margin: 20px auto;
       max-width: 600px;
       padding: 0 20px;
@@ -1071,252 +792,429 @@
       font-size: 14px;
       border-radius: 4px;
     }
-       /* Tooltip container */
-.add-custom-url {
-  position: relative;
-  display: inline-block;
+
+    /* Tooltip container */
+    .add-custom-url {
+      position: relative;
+      display: inline-block;
+    }
+
+    /* Tooltip text */
+    .add-custom-url::after {
+      content: "Add YouTube Video";
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.75);
+      color: white;
+      padding: 6px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease-in-out;
+    }
+
+    /* Show tooltip on hover */
+    .add-custom-url:hover::after {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .channel-profile-pic {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    /* New Styles for Content Tabs */
+    .content-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 1rem 0 2rem;
+    }
+
+    .tab-button {
+      background: white;
+      border: 2px solid #e9ecef;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--text-dark);
+    }
+
+    .tab-button.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .tab-button:hover:not(.active) {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .content-section {
+      display: none;
+    }
+
+    .content-section.active {
+      display: block;
+    }
+
+    .subscriptions-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0 1.5rem 1rem;
+    }
+
+    .manage-subscriptions {
+      font-size: 0.875rem;
+      color: var(--primary-color);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .manage-subscriptions:hover {
+      text-decoration: underline;
+    }
+
+    .subscription-indicator {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: var(--accent-color);
+      color: white;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.5rem;
+      z-index: 2;
+    }
+    /* Adjust container-fluid to allow full width for navbar */
+.container-fluid {
+  max-width: 1200px; /* Keep for content below navbar */
+  padding: 2rem 1rem; /* Keep for content below navbar */
 }
 
-/* Tooltip text */
-.add-custom-url::after {
-  content: "Add YouTube Video";
-  position: absolute;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: rgba(0, 0, 0, 0.75);
-  color: white;
-  padding: 6px 10px;
-  border-radius: 5px;
-  font-size: 12px;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s ease-in-out;
+/* Target only the navbar’s container-fluid */
+.navbar-main .container-fluid {
+  max-width: none; /* Remove width constraint for navbar */
+  padding-right: 0; /* Remove right padding for navbar */
 }
 
-/* Show tooltip on hover */
-.add-custom-url:hover::after {
-  opacity: 1;
-  visibility: visible;
-}
 
-  </style>
+
   </style>
 </head>
 <body class="g-sidenav-show bg-gray-100">
   {% include 'accounts/navbar.html' %}
   {% include 'accounts/sidebar.html' %}
- <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
     <div class="container-fluid py-4">
       <h2>Explore Videos</h2>
 
-      <!-- Category Filter -->
-      <div class="category-filter">
-        <div class="category-item {% if selected_category == 'all' %}active{% endif %}"
-             data-category="all"
-             onclick="filterByCategory('all', this)">All</div>
-        {% for category in categories %}
-          <div class="category-item {% if selected_category == category.name|lower %}active{% endif %}"
-               data-category="{{ category.name|lower }}"
-               onclick="filterByCategory('{{ category.name|lower }}', this)">
-            {{ category.name }}
-          </div>
-        {% endfor %}
-        <div class="category-item add-custom-url" title="Add YouTube Video">+</div>
+      <!-- Content Tabs -->
+      <div class="content-tabs">
+        <button class="tab-button active" data-target="explore-section">Explore</button>
+        <button class="tab-button" data-target="subscriptions-section">Subscriptions</button>
       </div>
 
-      <!-- Custom URL Input (Initially Hidden) -->
-      <div class="custom-url-input" style="display: none;">
-        <div class="url-input-container">
-          <div class="search-box">
-            <input type="url" class="url-input" placeholder="Add YouTube URL" required>
-            <button type="submit" class="submit-button">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M5 12h14m-7-7v14"/>
-              </svg>
-            </button>
+      <!-- Explore Section -->
+      <div id="explore-section" class="content-section active">
+        <!-- Category Filter -->
+        <div class="category-filter">
+          <div class="category-item {% if selected_category == 'all' %}active{% endif %}"
+               data-category="all"
+               onclick="filterByCategory('all', this)">All</div>
+          {% for category in categories %}
+            <div class="category-item {% if selected_category == category.name|lower %}active{% endif %}"
+                 data-category="{{ category.name|lower }}"
+                 onclick="filterByCategory('{{ category.name|lower }}', this)">
+              {{ category.name }}
+            </div>
+          {% endfor %}
+          <div class="category-item add-custom-url" title="Add YouTube Video">+</div>
+        </div>
+
+        <!-- Custom URL Input (Initially Hidden) -->
+        <div class="custom-url-input" style="display: none;">
+          <div class="url-input-container">
+            <div class="search-box">
+              <input type="url" class="url-input" placeholder="Add YouTube URL" required>
+              <button type="submit" class="submit-button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14m-7-7v14"/>
+                </svg>
+              </button>
+            </div>
+            <div class="disclaimer">
+              Note: Video must have Chinese subtitles available to be added successfully
+            </div>
           </div>
-          <div class="disclaimer">
-            Note: Video must have Chinese subtitles available to be added successfully
-          </div>
+        </div>
+
+        <!-- Video Grid for Explore -->
+        <div class="video-grid">
+          {% for video in media %}
+            <div class="video-card"
+                 data-category="{{ video.categories.all|join:','|lower }},{{ video.channel.categories.all|join:','|lower }}">
+              <a href="{% url 'video_detail' video.media_id %}" class="card-link">
+                <div class="image-container">
+                  <img src="{{ video.thumbnail_url }}" class="card-img-top" alt="{{ video.title }}">
+                  <div class="overlay-info">
+                    <div class="badge badge-highlight">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                      </svg>
+                      {{ video.user_highlights_count }}
+                    </div>
+                    <div class="badge badge-length">{{ video.formatted_video_length }}</div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <h5 class="card-title">{{ video.title }}</h5>
+                  <p class="card-text">{{ video.description|truncatechars:100 }}</p>
+                  <div class="channel-info">
+                    <div class="channel-meta">
+                      <a href="{% url 'channel_view' video.channel.id %}" class="channel-link">
+                        <img src="{{ video.channel.profile_pic_url|default:'{% static "accounts/img/default_profile_pic.png" %}' }}"
+                             class="channel-profile-pic" alt="{{ video.channel.name }} profile picture">
+                        <span class="channel-name">{{ video.channel.name }}</span>
+                      </a>
+                      <span class="time-ago">{{ video.time_ago }}</span>
+                    </div>
+                    <a href="#" class="toggle-log" data-id="{{ video.id }}"
+                       data-action="{% if video.is_in_log %}remove{% else %}add{% endif %}">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                           class="{% if video.is_in_log %}active{% endif %}">
+                        <path d="{% if video.is_in_log %}M5 12h14{% else %}M12 5v14M5 12h14{% endif %}"/>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              </a>
+            </div>
+          {% empty %}
+            <div class="no-results text-center py-5">
+              <p>No videos found matching your criteria</p>
+            </div>
+          {% endfor %}
         </div>
       </div>
 
-      <!-- Video Grid -->
-      <div class="video-grid">
-        {% for video in media %}
-          <div class="video-card"
-               data-category="{{ video.categories.all|join:','|lower }},{{ video.channel.categories.all|join:','|lower }}">
-            <a href="{% url 'video_detail' video.media_id %}" class="card-link">
-              <div class="image-container">
-                <img src="{{ video.thumbnail_url }}" class="card-img-top" alt="{{ video.title }}">
-                <div class="overlay-info">
-                  <div class="badge badge-highlight">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                    </svg>
-                    {{ video.user_highlights_count }}
+      <!-- Subscriptions Section -->
+      <div id="subscriptions-section" class="content-section">
+        <div class="subscriptions-header">
+          <h3>Content from channels you subscribe to</h3>
+          <a href="{% url 'channels_list' %}" class="manage-subscriptions">
+            Manage
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 5l7 7-7 7"/>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Video Grid for Subscriptions -->
+        <div class="video-grid">
+          {% for video in subscribed_media %}
+            <div class="video-card">
+              <a href="{% url 'video_detail' video.media_id %}" class="card-link">
+                <div class="image-container">
+                  <img src="{{ video.thumbnail_url }}" class="card-img-top" alt="{{ video.title }}">
+                  <div class="overlay-info">
+                    <div class="badge badge-subscription">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 8l-7 6-7-6"/>
+                      </svg>
+                      Subscribed
+                    </div>
+                    <div class="badge badge-length">{{ video.formatted_video_length }}</div>
                   </div>
-                  <div class="badge badge-length">{{ video.formatted_video_length }}</div>
                 </div>
-              </div>
-              <div class="card-body">
-                <h5 class="card-title">{{ video.title }}</h5>
-                <p class="card-text">{{ video.description|truncatechars:100 }}</p>
-                <div class="channel-info">
-                  <div class="channel-meta">
-                    <span class="channel-name">{{ video.channel.name }}</span>
-                    <span class="time-ago">{{ video.time_ago }}</span>
+                <div class="card-body">
+                  <h5 class="card-title">{{ video.title }}</h5>
+                  <p class="card-text">{{ video.description|truncatechars:100 }}</p>
+                  <div class="channel-info">
+                    <div class="channel-meta">
+                      <a href="{% url 'channel_view' video.channel.id %}" class="channel-link">
+                        <img src="{{ video.channel.profile_pic_url|default:'{% static "accounts/img/default_profile_pic.png" %}' }}"
+                             class="channel-profile-pic" alt="{{ video.channel.name }} profile picture">
+                        <span class="channel-name">{{ video.channel.name }}</span>
+                      </a>
+                      <span class="time-ago">{{ video.time_ago }}</span>
+                    </div>
+                    <a href="#" class="toggle-log" data-id="{{ video.id }}"
+                       data-action="{% if video.is_in_log %}remove{% else %}add{% endif %}">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                           class="{% if video.is_in_log %}active{% endif %}">
+                        <path d="{% if video.is_in_log %}M5 12h14{% else %}M12 5v14M5 12h14{% endif %}"/>
+                      </svg>
+                    </a>
                   </div>
-                  <a href="#" class="toggle-log" data-id="{{ video.id }}" data-action="{% if video.is_in_log %}remove{% else %}add{% endif %}">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="{% if video.is_in_log %}active{% endif %}">
-                      <path d="{% if video.is_in_log %}M5 12h14{% else %}M12 5v14M5 12h14{% endif %}"/>
-                    </svg>
-                  </a>
                 </div>
-              </div>
-            </a>
-          </div>
-        {% empty %}
-          <div class="no-results text-center py-5">
-            <p>No videos found matching your criteria</p>
-          </div>
-        {% endfor %}
+              </a>
+            </div>
+          {% empty %}
+            <div class="no-results text-center py-5">
+              <p>You haven't subscribed to any channels yet.
+                <a href="{% url 'channels_list' %}">Browse Channels</a>
+              </p>
+            </div>
+          {% endfor %}
+        </div>
       </div>
     </div>
   </main>
- <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const categoryItems = document.querySelectorAll('.category-item');
-    const addButton = document.querySelector('.add-custom-url');
-    const urlInputContainer = document.querySelector('.custom-url-input');
-    let isUrlInputVisible = false;
 
-    // Function to toggle search bar visibility
-    function toggleUrlInput() {
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Tab switching functionality
+      const tabButtons = document.querySelectorAll('.tab-button');
+      const contentSections = document.querySelectorAll('.content-section');
+
+      tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          contentSections.forEach(section => section.classList.remove('active'));
+
+          this.classList.add('active');
+          const targetSection = document.getElementById(this.dataset.target);
+          targetSection.classList.add('active');
+        });
+      });
+
+      // URL input functionality
+      const categoryItems = document.querySelectorAll('.category-item');
+      const addButton = document.querySelector('.add-custom-url');
+      const urlInputContainer = document.querySelector('.custom-url-input');
+      let isUrlInputVisible = false;
+
+      function toggleUrlInput() {
         isUrlInputVisible = !isUrlInputVisible;
         urlInputContainer.style.display = isUrlInputVisible ? 'block' : 'none';
-    }
+      }
 
-    // Toggle the URL input when clicking the + button
-    addButton.addEventListener('click', function(event) {
-        event.stopPropagation();
-        toggleUrlInput();
-    });
+      if (addButton) {
+        addButton.addEventListener('click', function(event) {
+          event.stopPropagation();
+          toggleUrlInput();
+        });
+      }
 
-    // Hide URL input when clicking another category filter
-    categoryItems.forEach(item => {
+      categoryItems.forEach(item => {
         if (!item.classList.contains('add-custom-url')) {
-            item.addEventListener('click', function() {
-                isUrlInputVisible = false;
-                urlInputContainer.style.display = 'none';
-            });
-        }
-    });
-
-    // Prevent search bar from closing when clicking inside it
-    urlInputContainer.addEventListener('click', function(event) {
-        event.stopPropagation();
-    });
-
-    // Close search bar if clicking anywhere outside
-    document.addEventListener('click', function(event) {
-        if (!urlInputContainer.contains(event.target) && event.target !== addButton) {
+          item.addEventListener('click', function() {
             isUrlInputVisible = false;
             urlInputContainer.style.display = 'none';
+          });
         }
-    });
+      });
 
-    // Category filtering with server-side fetch
-    function filterByCategory(category, element) {
+      if (urlInputContainer) {
+        urlInputContainer.addEventListener('click', function(event) {
+          event.stopPropagation();
+        });
+      }
+
+      document.addEventListener('click', function(event) {
+        if (urlInputContainer && !urlInputContainer.contains(event.target) && event.target !== addButton) {
+          isUrlInputVisible = false;
+          urlInputContainer.style.display = 'none';
+        }
+      });
+
+      // Category filtering with server-side fetch
+      window.filterByCategory = function(category, element) {
         window.history.pushState({}, '', `?category=${category}`);
         categoryItems.forEach(i => i.classList.remove('active'));
         element.classList.add('active');
 
         fetch(`/watch/?category=${category}`, { credentials: 'include' })
-            .then(response => response.text())
-            .then(html => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const newVideoGrid = doc.querySelector('.video-grid');
-                document.querySelector('.video-grid').innerHTML = newVideoGrid.innerHTML;
-                reattachToggleListeners();  // Reattach listeners after DOM update
-            })
-            .catch(error => console.error('Error fetching filtered content:', error));
-    }
+          .then(response => response.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newVideoGrid = doc.querySelector('#explore-section .video-grid');
+            document.querySelector('#explore-section .video-grid').innerHTML = newVideoGrid.innerHTML;
+            reattachToggleListeners();
+          })
+          .catch(error => console.error('Error fetching filtered content:', error));
+      };
 
-    // Reattach toggle listeners
-    function reattachToggleListeners() {
+      // Reattach toggle listeners
+      function reattachToggleListeners() {
         document.querySelectorAll('.toggle-log').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const videoId = this.dataset.id;
-                const action = this.dataset.action;
-                const url = action === 'add' ? `/add_to_log/${videoId}/` : `/remove_from_log/${videoId}/`;
+          button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const videoId = this.dataset.id;
+            const action = this.dataset.action;
+            const url = action === 'add' ? `/add_to_log/${videoId}/` : `/remove_from_log/${videoId}/`;
 
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        this.dataset.action = action === 'add' ? 'remove' : 'add';
-                        let svg = this.querySelector('svg');
-                        svg.innerHTML = action === 'add' ? '<path d="M5 12h14"></path>' : '<path d="M12 5v14M5 12h14"></path>';
-                        svg.classList.toggle('active');
-                    } else {
-                        console.error('Error:', data.error);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-            });
+            fetch(url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                this.dataset.action = action === 'add' ? 'remove' : 'add';
+                const svg = this.querySelector('svg');
+                svg.innerHTML = action === 'add' ? '<path d="M5 12h14"></path>' : '<path d="M12 5v14M5 12h14"></path>';
+                svg.classList.toggle('active');
+              } else {
+                console.error('Error:', data.error);
+              }
+            })
+            .catch(error => console.error('Error:', error));
+          });
         });
-    }
+      }
 
-    // Initial toggle listeners
-    reattachToggleListeners();
+      // Initial toggle listeners
+      reattachToggleListeners();
 
-    // Hover effects
-    document.querySelectorAll('.video-card').forEach(card => {
+      // Hover effects (moved to CSS, but kept here for compatibility)
+      document.querySelectorAll('.video-card').forEach(card => {
         card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-5px)';
+          this.style.transform = 'translateY(-5px)';
         });
         card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
+          this.style.transform = 'translateY(0)';
         });
-    });
+      });
 
-    // Get CSRF token
-    function getCookie(name) {
+      // Get CSRF token
+      function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
             }
+          }
         }
         return cookieValue;
-    }
-
-    // Ensure initial state of toggle buttons matches server data
-    document.querySelectorAll('.toggle-log').forEach(button => {
-        const action = button.dataset.action;
-        let svg = button.querySelector('svg');
-        svg.innerHTML = action === 'remove' ? '<path d="M5 12h14"></path>' : '<path d="M12 5v14M5 12h14"></path>';
-        if (action === 'remove') svg.classList.add('active');
-        else svg.classList.remove('active');
+      }
     });
-});
-</script>
+  </script>
 
   <div id="plus-one-animation" class="plus-one">+1</div>
 </body>

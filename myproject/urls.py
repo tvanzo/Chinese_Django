@@ -24,7 +24,7 @@ urlpatterns = [
     path('watch/', subplayer_views.media_list, name='media_list'),
     path('add_media/', subplayer_views.add_media, name='add_media'),
     path('search/', subplayer_views.search, name='search'),
-    path('channel/<str:channel_name>/', subplayer_views.channel_view, name='channel_view'),
+    path('channel/<int:channel_id>/', subplayer_views.channel_view, name='channel_view'),
     path('channels/', subplayer_views.channels_list, name='channels_list'),
     path('intro/', subplayer_views.intro_view, name='intro'),
 path('dashboard/', account_views.stats_view, name='stats_view'),
@@ -78,6 +78,8 @@ path('dashboard/', account_views.stats_view, name='stats_view'),
     path('reactivate-subscription/', account_views.reactivate_subscription, name='reactivate_subscription'),
     path('upgrade/', account_views.upgrade_plan, name='upgrade_plan'),
     path('api/generate-pdf/', subplayer_views.generate_pdf, name='generate_pdf'),
-
+    path('api/generate-highlight-study-guide/', subplayer_views.generate_highlight_study_guide, name='generate_highlight_study_guide'),
+    path('subscribe/<int:channel_id>/', subplayer_views.subscribe_to_channel, name='subscribe_to_channel'),
+    path('unsubscribe/<int:channel_id>/', subplayer_views.unsubscribe_from_channel, name='unsubscribe_from_channel'),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

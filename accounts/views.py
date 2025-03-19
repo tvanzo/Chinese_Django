@@ -823,11 +823,12 @@ def highlights_detail(request, media_id):
 
 def user_videos(request):
     user = request.user
+    profile = user.profile  # Assuming profile exists as in stats_view
 
     # Fetch media associated with the logged-in user's added_media
-    user_media = user.added_media.all()
+    user_media = user.added_media.all().select_related('channel')
 
-    # Attach formatted video length, user highlights count, and status
+    # Attach additional data to each media object
     for media in user_media:
         media.formatted_video_length = format_duration(media.video_length)
         media.user_highlights_count = media.highlights.filter(user=user).count()
@@ -836,13 +837,25 @@ def user_videos(request):
         media_status = UserMediaStatus.objects.filter(user=user, media=media).first()
         media.status = media_status.status if media_status else 'all'
 
+        # Fetch latest time stopped from MediaProgress
+        latest_time_stopped = MediaProgress.objects.filter(
+            profile=profile, media=media
+        ).order_by('-date').values('time_stopped')[:1]
+
+        # Calculate progress percentage
+        video_length = media.video_length
+        time_stopped = latest_time_stopped[0]['time_stopped'] if latest_time_stopped else 0
+        media.progress_percent = 100 if media.status == 'completed' else (
+            round((time_stopped / video_length * 100), 0) if video_length > 0 else 0
+        )
+
     # Count media based on status from UserMediaStatus
     all_media_count = UserMediaStatus.objects.filter(user=user).count()
     in_progress_count = UserMediaStatus.objects.filter(user=user, status='in_progress').count()
     completed_count = UserMediaStatus.objects.filter(user=user, status='completed').count()
 
     context = {
-        'media': user_media,  # Keep original working logic
+        'media': user_media,
         'all_media_count': all_media_count,
         'in_progress_count': in_progress_count,
         'completed_count': completed_count,

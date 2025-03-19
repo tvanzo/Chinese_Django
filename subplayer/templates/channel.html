@@ -1,379 +1,762 @@
 {% load static %}
-
-<!--
-=========================================================
-* Soft UI Dashboard - v1.0.7
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/soft-ui-dashboard
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://www.creative-tim.com/license)
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
--->
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="apple-touch-icon" sizes="76x76" href="{% static 'accounts/img/apple-icon.png' %}">
-        <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
-  <title>
-    Soft UI Dashboard by Creative Tim
-  </title>
-  <!--     Fonts and icons     -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
-  <!-- Nucleo Icons -->
-    <link id="pagestyle" href="{% static 'accounts/css/nucleo-icons.css' %}"rel="stylesheet" />
-
-  <!-- Font Awesome Icons -->
-  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-  <link id="pagestyle" href="{% static 'accounts/css/nucleo-svg.css' %}"rel="stylesheet" />
-
-  <!-- CSS Files -->
-  <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}"rel="stylesheet" />
-  <!-- Nepcha Analytics (nepcha.com) -->
-  <!-- Nepcha is a easy-to-use web analytics. No cookies and fully compliant with GDPR, CCPA and PECR. -->
-  <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
-
-</head>
-
 <body class="g-sidenav-show bg-gray-100">
-<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 my-3 fixed-start ms-3" id="sidenav-main">
-  <div class="sidenav-header">
-  <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
-<a class=" m-0 d-flex justify-content-center align-items-center" href="/" style="padding-left: 0px;">
-<img src="{% static 'subplayer/logo.png' %}" alt="Logo" class="custom-logo-size" style="height: 50px; width: auto; display: block; margin: auto;" /></a>
-</div>
-   <hr class="horizontal dark mt-0">
-    <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link " href="/">
-                    <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center" style="background-color: #FFFFFF; width: 48px; height: 48px; color: #000000;">
-                        <svg width="12px" height="12px" viewBox="0 0 45 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="fill: #000000; color: #000000;">
-                            <title>shop</title>
-                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g transform="translate(-1716.000000, -439.000000)" fill="#000000" fill-rule="nonzero">
-                                    <g transform="translate(1716.000000, 291.000000)">
-                                        <g transform="translate(0.000000, 148.000000)">
-                                            <path class="color-background opacity-6" d="M46.7199583,10.7414583 L40.8449583,0.949791667 C40.4909749,0.360605034 39.8540131,0 39.1666667,0 L7.83333333,0 C7.1459869,0 6.50902508,0.360605034 6.15504167,0.949791667 L0.280041667,10.7414583 C0.0969176761,11.0460037 -1.23209662e-05,11.3946378 -1.23209662e-05,11.75 C-0.00758042603,16.0663731 3.48367543,19.5725301 7.80004167,19.5833333 L7.81570833,19.5833333 C9.75003686,19.5882688 11.6168794,18.8726691 13.0522917,17.5760417 C16.0171492,20.2556967 20.5292675,20.2556967 23.494125,17.5760417 C26.4604562,20.2616016 30.9794188,20.2616016 33.94575,17.5760417 C36.2421905,19.6477597 39.5441143,20.1708521 42.3684437,18.9103691 C45.1927731,17.649886 47.0084685,14.8428276 47.0000295,11.75 C47.0000295,11.3946378 46.9030823,11.0460037 46.7199583,10.7414583 Z" style="fill: #000000;"></path>
-                                            <path class="color-background" d="M39.198,22.4912623 C37.3776246,22.4928106 35.5817531,22.0149171 33.951625,21.0951667 L33.92225,21.1107282 C31.1430221,22.6838032 27.9255001,22.9318916 24.9844167,21.7998837 C24.4750389,21.605469 23.9777983,21.3722567 23.4960833,21.1018359 L23.4745417,21.1129513 C20.6961809,22.6871153 17.4786145,22.9344611 14.5386667,21.7998837 C14.029926,21.6054643 13.533337,21.3722507 13.0522917,21.1018359 C11.4250962,22.0190609 9.63246555,22.4947009 7.81570833,22.4912623 C7.16510551,22.4842162 6.51607673,22.4173045 5.875,22.2911849 L5.875,44.7220845 C5.875,45.9498589 6.7517757,46.9451667 7.83333333,46.9451667 L19.5833333,46.9451667 L19.5833333,33.6066734 L27.4166667,33.6066734 L27.4166667,46.9451667 L39.1666667,46.9451667 C40.2482243,46.9451667 41.125,45.9498589 41.125,44.7220845 L41.125,22.2822926 C40.4887822,22.4116582 39.8442868,22.4815492 39.198,22.4912623 Z" style="fill: #000000;"></path>
-                                        </g>
-                                    </g>
-                                </g>
-                            </g>
-                        </svg>
-                    </div>
-                    <span class="nav-link-text ms-1">Dashboard</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link active" href="/media_list">
-                    <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center" style="background-color: #FFFFFF; width: 48px; height: 48px; color: #000000;">
-                        <svg width="12px" height="12px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="fill: #000000; color: #000000;">
-                            <title>Search</title>
-                            <g fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="11" cy="11" r="8" stroke="#000000" stroke-width="2"></circle>
-                                <path d="M21 21l-4.35-4.35" stroke="#000000" stroke-width="2"></path>
-                            </g>
-                        </svg>
-                    </div>
-                    <span class="nav-link-text ms-1">Search</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/user_videos">
-                    <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center" style="background-color: #FFFFFF; width: 48px; height: 48px; color: #000000;">
-                        <svg width="12px" height="12px" viewBox="0 0 42 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="fill: #000000; color: #000000;">
-                            <title>box-3d-50</title>
-                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g transform="translate(-2319.000000, -291.000000)" fill="#000000" fill-rule="nonzero">
-                                    <g transform="translate(1716.000000, 291.000000)">
-                                        <g transform="translate(603.000000, 0.000000)">
-                                            <path class="color-background" d="M22.7597136,19.3090182 L38.8987031,11.2395234 C39.3926816,10.9925342 39.592906,10.3918611 39.3459167,9.89788265 C39.249157,9.70436312 39.0922432,9.5474453 38.8987261,9.45068056 L20.2741875,0.1378125 L20.2741875,0.1378125 C19.905375,-0.04725 19.469625,-0.04725 19.0995,0.1378125 L3.1011696,8.13815822 C2.60720568,8.38517662 2.40701679,8.98586148 2.6540352,9.4798254 C2.75080129,9.67332903 2.90771305,9.83023153 3.10122239,9.9269862 L21.8652864,19.3090182 C22.1468139,19.4497819 22.4781861,19.4497819 22.7597136,19.3090182 Z" style="fill: #000000;"></path>
-                                            <path class="color-background opacity-6" d="M23.625,22.429159 L23.625,39.8805372 C23.625,40.4328219 24.0727153,40.8805372 24.625,40.8805372 C24.7802551,40.8805372 24.9333778,40.8443874 25.0722402,40.7749511 L41.2741875,32.673375 L41.2741875,32.673375 C41.719125,32.4515625 42,31.9974375 42,31.5 L42,14.241659 C42,13.6893742 41.5522847,13.241659 41,13.241659 C40.8447549,13.241659 40.6916418,13.2778041 40.5527864,13.3472318 L24.1777864,21.5347318 C23.8390024,21.7041238 23.625,22.0503869 23.625,22.429159 Z" style="fill: #000000;"></path>
-                                            <path class="color-background opacity-6" d="M20.4472136,21.5347318 L1.4472136,12.0347318 C0.953235098,11.7877425 0.352562058,11.9879669 0.105572809,12.4819454 C0.0361450918,12.6208008 6.47121774e-16,12.7739139 0,12.929159 L0,30.1875 L0,30.1875 C0,30.6849375 0.280875,31.1390625 0.7258125,31.3621875 L19.5528096,40.7750766 C20.0467945,41.0220531 20.6474623,40.8218132 20.8944388,40.3278283 C20.963859,40.1889789 21,40.0358742 21,39.8806379 L21,22.429159 C21,22.0503869 20.7859976,21.7041238 20.4472136,21.5347318 Z" style="fill: #000000;"></path>
-                                        </g>
-                                    </g>
-                                </g>
-                            </g>
-                        </svg>
-                    </div>
-                    <span class="nav-link-text ms-1">My Library</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/highlights">
-                    <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center" style="background-color: #FFFFFF; width: 48px; height: 48px;">
-                        <svg width="12px" height="12px" viewBox="0 0 43 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                            <title>credit-card</title>
-                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g transform="translate(-2169.000000, -745.000000)" fill="currentColor" fill-rule="nonzero">
-                                    <g transform="translate(1716.000000, 291.000000)">
-                                        <g transform="translate(453.000000, 454.000000)">
-                                            <path class="color-background opacity-6" d="M43,10.7482083 L43,3.58333333 C43,1.60354167 41.3964583,0 39.4166667,0 L3.58333333,0 C1.60354167,0 0,1.60354167 0,3.58333333 L0,10.7482083 L43,10.7482083 Z" style="fill: currentColor;"></path>
-                                            <path class="color-background" d="M0,16.125 L0,32.25 C0,34.2297917 1.60354167,35.8333333 3.58333333,35.8333333 L39.4166667,35.8333333 C41.3964583,35.8333333 43,34.2297917 43,32.25 L43,16.125 L0,16.125 Z M19.7083333,26.875 L7.16666667,26.875 L7.16666667,23.2916667 L19.7083333,23.2916667 L19.7083333,26.875 Z M35.8333333,26.875 L28.6666667,26.875 L28.6666667,23.2916667 L35.8333333,23.2916667 L35.8333333,26.875 Z" style="fill: currentColor;"></path>
-                                        </g>
-                                    </g>
-                                </g>
-                            </g>
-                        </svg>
-                    </div>
-                    <span class="nav-link-text ms-1">Highlights</span>
-                </a>
-            </li>
-        </ul>
-    </div>
-        <!--
-   <div class="sidenav-footer mb-3 mx-3">
-    <a class="btn bg-gradient-primary w-90" href="/join" style="margin-bottom: 0;">Upgrade to Pro</a>
-    <a class="nav-link mt-1 text-center" href="/accounts/login/">Sign In</a>
+  {% include 'accounts/navbar.html' %}
+  {% include 'accounts/sidebar.html' %}
 
-</div>
--->
-
-
-</aside>
-
-
-
-    <div class="main-content position-relative bg-gray-100 max-height-vh-100 h-100">
-      {% include 'accounts/navbar.html' %}
-
-        <div class="container-fluid">
-            <div class="page-header min-height-300 border-radius-xl mt-4" style="background-image: url('{% static 'accounts/img/curved-images/curved0.jpg' %}'); background-position-y: 50%;">
-                <span class="mask bg-gradient-primary opacity-6"></span>
-            </div>
-            <div class="card card-body blur shadow-blur mx-4 mt-n6 overflow-hidden">
-                <div class="row gx-4">
-                    <div class="col-auto">
-                        <div class="avatar avatar-xl position-relative">
-                            <img src="{{ channel.profile_pic_url }}" alt="profile_image" class="w-100 border-radius-lg shadow-sm">
-                        </div>
-                    </div>
-                    <div class="col-auto my-auto">
-                        <div class="h-100">
-                            <h5 class="mb-1">{{ channel.name }}</h5>
-                            <p class="mb-0 font-weight-bold text-sm">Channel Info</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+    <div class="container-fluid">
+      <!-- Channel Header Section -->
+      <div class="channel-header-wrapper">
+        <div class="channel-banner border-radius-xl mt-4"
+             style="background-image: url('{% static 'accounts/img/curved-images/curved0.jpg' %}');">
+          <span class="mask bg-gradient-primary opacity-6"></span>
         </div>
-
-       <div class="container-fluid py-4">
-    <div class="row">
-      {% for video in media_list %}
-      <div class="col-md-4 mb-4">
-        <div class="card video-card" style="color: inherit; text-decoration: none; position: relative;">
-          <a href="{% url 'video_detail' video.media_id %}" style="color: inherit; text-decoration: none;">
-            <div class="image-container">
-              <img src="{{ video.thumbnail_url }}" class="card-img-top" alt="{{ video.title }}">
-              <div class="overlay-info">
-                <div class="badge badge-highlight highlights-count">
-                  <svg fill="#ffd700" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" stroke="#ffd700" stroke-width="10.24" style="width: 1em; height: 1em; vertical-align: middle;">
-                    <path d="M224,120H164.2l22.9-22.9a12,12,0,0,0,0-17L175,68.9a12,12,0,0,0-17,0L128,98.9,98.9,69.8a12,12,0,0,0-17,0L69.8,80.2a12,12,0,0,0,0,17L92.7,120H32a12,12,0,0,0-12,12v12a12,12,0,0,0,12,12H92.7L69.8,179a12,12,0,0,0,0,17L80.2,209.1a12,12,0,0,0,17,0L128,187.1l29.1,29.1a12,12,0,0,0,17,0L186.2,196a12,12,0,0,0,0-17L163.3,156H224a12,12,0,0,0,12-12V132A12,12,0,0,0,224,120Z"></path>
-                  </svg>
-                  {{ video.user_highlights_count }} Highlights
+        <div class="channel-info-card">
+          <div class="channel-profile-section">
+            <div class="channel-avatar">
+              <img src="{{ channel.profile_pic_url }}" alt="{{ channel.name }} profile picture">
+            </div>
+            <div class="channel-details">
+              <h3 class="channel-title">{{ channel.name }}</h3>
+              <div class="channel-stats">
+                <div class="stat-item">
+                  <i class="fas fa-video"></i>
+                  <span>{{ media_list|length }} Videos</span>
                 </div>
-                <div class="badge badge-length video-length">{{ video.formatted_video_length }}</div>
               </div>
+              <p class="channel-description">{{ channel.description|default:"Channel content" }}</p>
             </div>
-            <div class="card-body">
-              <h5 class="card-title">{{ video.title }}</h5>
-              <p class="card-text">{{ video.description|truncatechars:100 }}</p>
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="channel-name">{{ video.channel.name }}</span>
-                <a href="{% url 'add_to_log' video.id %}?next={{ request.path }}" class="add-to-log" style="margin-left: auto;">
-                  <svg viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns" fill="#000000" style="width: 20px; height: 20px;">
-                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                    <g id="SVGRepo_iconCarrier">
-                      <title>plus-square</title>
-                      <desc>Created with Sketch Beta.</desc>
-                      <defs></defs>
-                      <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
-                        <g id="Icon-Set" sketch:type="MSLayerGroup" transform="translate(-100.000000, -1035.000000)" fill="#000000">
-                          <path d="M130,1063 C130,1064.1 129.104,1065 128,1065 L104,1065 C102.896,1065 102,1064.1 102,1063 L102,1039 C102,1037.9 102.896,1037 104,1037 L128,1037 C129.104,1037 130,1037.9 130,1039 L130,1063 L130,1063 Z M128,1035 L104,1035 C101.791,1035 100,1036.79 100,1039 L100,1063 C100,1065.21 101.791,1067 104,1067 L128,1067 C130.209,1067 132,1065.21 132,1063 L132,1039 C132,1036.79 130.209,1035 128,1035 L128,1035 Z M122,1050 L117,1050 L117,1045 C117,1044.45 116.552,1044 116,1044 C115.448,1044 115,1044.45 115,1045 L115,1050 L110,1050 C109.448,1050 109,1050.45 109,1051 C109,1051.55 109.448,1052 110,1052 L115,1052 L115,1057 C115,1057.55 115.448,1058 116,1058 C116.552,1058 117,1057.55 117,1057 L117,1052 L122,1052 C122.552,1052 123,1051.55 123,1051 C123,1050.45 122.552,1050 122,1050 L122,1050 Z" id="plus-square" sketch:type="MSShapeGroup"></path>
-                        </g>
-                      </g>
-                    </g>
-                  </svg>
-                </a>
-              </div>
-            </div>
-          </a>
+          </div>
+          <div class="channel-actions">
+            {% if user.is_authenticated %}
+              <button class="btn btn-subscribe" id="subscribe-btn" data-channel-id="{{ channel.id }}"
+                      data-subscribed="{% if channel in user.profile.subscribed_channels.all %}true{% else %}false{% endif %}">
+                <i class="fas fa-bell"></i>
+                <span id="subscribe-text">
+                  {% if channel in user.profile.subscribed_channels.all %}Unsubscribe{% else %}Subscribe{% endif %}
+                </span>
+              </button>
+            {% else %}
+              <a href="{% url 'login' %}" class="btn btn-subscribe">
+                <i class="fas fa-bell"></i> Subscribe
+              </a>
+            {% endif %}
+          </div>
         </div>
       </div>
-      {% empty %}
-      <p>No videos found.</p>
-      {% endfor %}
+
+      <!-- Video Grid Section (unchanged) -->
+      <div class="container-fluid py-4">
+        <div class="section-header">
+          <h4 class="section-title">Videos</h4>
+        </div>
+
+        <div class="video-grid">
+          {% for video in media_list %}
+          <div class="video-card">
+            <a href="{% url 'video_detail' video.media_id %}" class="card-link">
+              <div class="image-container">
+                <img src="{{ video.thumbnail_url }}" class="card-img-top" alt="{{ video.title }}">
+                <div class="overlay-info">
+                  <div class="badge badge-highlight">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                    </svg>
+                    {{ video.user_highlights_count }}
+                  </div>
+                  <div class="badge badge-length">{{ video.formatted_video_length }}</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <h5 class="card-title">{{ video.title }}</h5>
+                <p class="card-text">{{ video.description|truncatechars:100 }}</p>
+                <div class="card-footer">
+                  <div class="channel-meta">
+                    <a href="{% url 'channel_view' video.channel.id %}" class="channel-link">
+                      <img src="{{ video.channel.profile_pic_url|default:'{% static "accounts/img/default_profile_pic.png" %}' }}"
+                           class="channel-profile-pic"
+                           alt="{{ video.channel.name }} profile picture">
+                      <span class="channel-name">{{ video.channel.name }}</span>
+                    </a>
+                    <span class="time-ago">{{ video.time_ago }}</span>
+                  </div>
+                  <a href="#" class="toggle-log"
+                     data-id="{{ video.id }}"
+                     data-action="{% if video.is_in_log %}remove{% else %}add{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" class="{% if video.is_in_log %}active{% endif %}">
+                      <path d="{% if video.is_in_log %}M5 12h14{% else %}M12 5v14M5 12h14{% endif %}"/>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </a>
+          </div>
+          {% empty %}
+          <div class="no-videos">
+            <div class="empty-state">
+              <i class="fas fa-video-slash empty-icon"></i>
+              <h5>No Videos Found</h5>
+              <p>This channel hasn't uploaded any videos yet.</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Pagination (unchanged) -->
+        {% if is_paginated %}
+        <div class="pagination-container">
+          <ul class="pagination">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                <i class="fas fa-chevron-left"></i>
+              </a>
+            </li>
+            {% endif %}
+            {% for i in paginator.page_range %}
+            <li class="page-item {% if page_obj.number == i %}active{% endif %}">
+              <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+            </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                <i class="fas fa-chevron-right"></i>
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
     </div>
-    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Subscribe/Unsubscribe Button Functionality
+      const subscribeBtn = document.getElementById('subscribe-btn');
+      if (subscribeBtn) {
+        subscribeBtn.addEventListener('click', function() {
+          const channelId = this.dataset.channelId;
+          const isSubscribed = this.dataset.subscribed === 'true';
+          const url = isSubscribed ? `/unsubscribe/${channelId}/` : `/subscribe/${channelId}/`;
+
+          fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.status === 'success') {
+              const subscribeText = document.getElementById('subscribe-text');
+              if (isSubscribed) {
+                this.dataset.subscribed = 'false';
+                subscribeText.textContent = 'Subscribe';
+                showToast('Unsubscribed from channel!');
+              } else {
+                this.dataset.subscribed = 'true';
+                subscribeText.textContent = 'Unsubscribe';
+                showToast('Subscribed to channel!');
+              }
+            } else {
+              showToast(data.message, true);
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            showToast('An error occurred', true);
+          });
+        });
+      }
+
+      // Existing Toggle Log Button Functionality (unchanged)
+      document.querySelectorAll('.toggle-log').forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const videoId = this.dataset.id;
+          const action = this.dataset.action;
+          const url = action === 'add' ? `/add_to_log/${videoId}/` : `/remove_from_log/${videoId}/`;
+
+          fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              this.dataset.action = action === 'add' ? 'remove' : 'add';
+              const svg = this.querySelector('svg');
+              svg.innerHTML = action === 'add'
+                ? '<path d="M5 12h14"></path>'
+                : '<path d="M12 5v14M5 12h14"></path>';
+              svg.classList.toggle('active');
+              showToast(action === 'add' ? 'Added to your log!' : 'Removed from your log');
+            } else {
+              console.error('Error:', data.error);
+              showToast('Error: ' + data.error, true);
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            showToast('An error occurred', true);
+          });
+        });
+      });
+
+      // Existing Sort Filter Functionality (unchanged)
+      const sortFilter = document.getElementById('sortFilter');
+      if (sortFilter) {
+        sortFilter.addEventListener('change', function() {
+          const currentUrl = new URL(window.location.href);
+          currentUrl.searchParams.set('sort', this.value);
+          window.location.href = currentUrl.toString();
+        });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const sortParam = urlParams.get('sort');
+        if (sortParam) {
+          sortFilter.value = sortParam;
+        }
+      }
+
+      // Get CSRF Token (unchanged)
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+      // Toast Notification Function (unchanged)
+      function showToast(message, isError = false) {
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+          toastContainer = document.createElement('div');
+          toastContainer.id = 'toast-container';
+          toastContainer.style.position = 'fixed';
+          toastContainer.style.bottom = '20px';
+          toastContainer.style.right = '20px';
+          toastContainer.style.zIndex = '1050';
+          document.body.appendChild(toastContainer);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = 'toast ' + (isError ? 'toast-error' : 'toast-success');
+        toast.innerHTML = message;
+        toast.style.backgroundColor = isError ? '#f87171' : '#10b981';
+        toast.style.color = 'white';
+        toast.style.padding = '0.75rem 1.25rem';
+        toast.style.borderRadius = '0.5rem';
+        toast.style.marginTop = '0.625rem';
+        toast.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+        toast.style.maxWidth = '300px';
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+          toast.style.opacity = '1';
+        }, 10);
+
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          setTimeout(() => {
+            toastContainer.removeChild(toast);
+          }, 300);
+        }, 3000);
+      }
+    });
+  </script>
+
+
 <style>
-.text-warning { color: #dcb234; }
-.text-success { color: #3c763d; }
+  /* Base Styles */
+  :root {
+    --primary-color: #3a9fff;
+    --primary-dark: #2b8ae6;
+    --secondary-color: #cb0ba0;
+    --highlight-color: #ffd700;
+    --text-primary: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --bg-light: #f8f9fa;
+    --card-bg: #ffffff;
+    --border-color: #e2e8f0;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --transition-normal: all 0.3s ease;
+  }
 
-.video-card {
+  body {
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-primary);
+    background-color: var(--bg-light);
+    line-height: 1.5;
+  }
+
+  /* Channel Header Styles */
+  .channel-header-wrapper {
+    margin-bottom: 2rem;
+  }
+
+  .channel-banner {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
     position: relative;
+    border-radius: 1rem;
     overflow: hidden;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-}
+  }
 
-.video-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-}
-
-.image-container {
+  .channel-info-card {
+    background: var(--card-bg);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-top: -3rem;
     position: relative;
-    width: 100%;
-    height: 180px;
-}
+    z-index: 10;
+    box-shadow: var(--shadow-md);
+    margin-left: 1rem;
+    margin-right: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-.card-img-top {
+  .channel-profile-section {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1;
+  }
+
+  .channel-avatar {
+    width: 100px;
+    height: 100px;
+    border: 4px solid white;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    margin-top: -3.5rem;
+  }
+
+  .channel-avatar img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: opacity 0.3s ease-in-out;
-}
+  }
 
-.video-card:hover .card-img-top {
-    opacity: 0.9;
-}
+  .channel-details {
+    flex: 1;
+  }
 
-.overlay-info {
+  .channel-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+  }
+
+  .channel-stats {
+    display: flex;
+    gap: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+
+  .channel-description {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin-bottom: 0;
+  }
+
+  .channel-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .btn-subscribe {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 2rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition-normal);
+  }
+
+  .btn-subscribe:hover {
+    background-color: #ad0a89;
+    transform: translateY(-2px);
+  }
+
+  /* Video Grid Styles */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 0 0.5rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .filter-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .form-select {
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 0.4rem 2rem 0.4rem 1rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='16' height='16'%3E%3Cpath fill='none' d='M0 0h24v24H0z'/%3E%3Cpath d='M12 15l-4.243-4.243 1.415-1.414L12 12.172l2.828-2.829 1.415 1.414z' fill='%2364748b'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+  }
+
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+  }
+
+  /* Video Card Styles */
+  .video-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+  }
+
+  .video-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .image-container {
+    position: relative;
+    padding-top: 56.25%; /* 16:9 aspect ratio */
+    background: #f0f2f5;
+  }
+
+  .card-img-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .overlay-info {
     position: absolute;
     bottom: 10px;
     left: 10px;
     right: 10px;
     display: flex;
     justify-content: space-between;
-    padding: 5px;
-}
+  }
 
-.badge-highlight, .badge-length {
-    background-color: #cb0ba0;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
+  .badge {
+    padding: 6px 12px;
+    border-radius: 8px;
     font-size: 0.75rem;
-    margin: 2px;
-}
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    backdrop-filter: blur(4px);
+  }
 
-.card-body {
-    padding: 10px;
-}
+  .badge-highlight {
+    background: rgba(208, 12, 156, 0.9);
+    color: white;
+  }
 
-.card-title {
-    white-space: normal;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .badge-length {
+    background: rgba(44, 62, 80, 0.9);
+    color: white;
+  }
+
+  .card-body {
+    padding: 1rem 1.25rem 0.75rem;
+    position: relative;
+  }
+
+  .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding: 0 0.25rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    font-size: 1rem; /* Adjust based on preference */
-    line-height: 1.2; /* Ensure this is enough to fit two lines nicely */
-    height: 2.4rem; /* Based on font-size and line-height, adjust if needed */
-    margin-bottom: 5px; /* Reduced space between title and description */
-}
+    overflow: hidden;
+    color: var(--text-primary);
+  }
 
-.card-text {
-    font-size: 0.875rem; /* Slightly smaller font size for description */
-    margin-bottom: 5px; /* Reduced space between description and channel name */
-}
+  .card-text {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+    padding: 0 0.25rem;
+  }
 
-.channel-info {
+  /* Card Footer Styles */
+  .card-footer {
     display: flex;
     align-items: center;
-    gap: 10px; /* Add some space between the channel name and the "+" icon */
-}
+    justify-content: space-between;
+    padding: 0.5rem 0.25rem 0.75rem; /* Adjusted padding */
+    margin-top: 0.5rem; /* Added spacing above the footer */
+    border-top: 1px solid #f0f2f5;
+    height: auto; /* Ensure the height is flexible */
+  }
 
-.channel-plus-container {
-    display: flex;
-    justify-content: space-between; /* Ensures maximum separation between elements */
-    align-items: center;
-    width: 100%;
-}
-
-.channel-name {
-    flex-grow: 1; /* Ensures the channel name occupies all available space to the left */
-}
-
-.add-to-log svg {
-    margin-left: auto; /* Forces the SVG icon to align to the right */
-    width: 20px; /* Set consistent icon size */
-    height: 20px;
-}
-
-.add-to-log {
+  .channel-meta {
     display: flex;
     align-items: center;
-}
+    gap: 6px; /* Adjusted gap */
+    flex-grow: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
 
-.container-fluid {
-    padding-right: 15px;
-    padding-left: 15px;
-}
+  .channel-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 6px; /* Adjusted gap */
+    overflow: hidden;
+    flex-shrink: 1;
+  }
 
-.badge-highlight {
-    background-color: #cb0ba0; /* Purple similar to the button */
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 0.75rem;
-    text-align: center;
+  .channel-profile-pic {
+    width: 24px; /* Adjusted size */
+    height: 24px; /* Adjusted size */
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .channel-name {
+    font-size: 0.875rem; /* Adjusted font size */
+    font-weight: 600;
+    color: var(--primary-color);
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 110px;
+  }
+
+  .time-ago {
+    font-size: 0.75rem; /* Adjusted font size */
+    color: var(--text-secondary);
+    white-space: nowrap;
+    margin-left: 8px; /* Adjusted margin */
+  }
+
+  .toggle-log {
+    background: #f0f2f5;
+    width: 32px; /* Adjusted size */
+    height: 32px; /* Adjusted size */
+    border-radius: 50%;
     display: flex;
     align-items: center;
-    gap: 5px; /* Space between icon and text */
-}
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    margin-left: auto; /* Push to the right side */
+  }
 
-.badge-highlight svg {
-    fill: #ffd700; /* Golden color for the SVG */
-    width: 1em; /* Size of the SVG */
-    height: 1em; /* Size of the SVG */
-}
-.nav-link.active .icon svg {
-  fill: #FFD700 !important;
-  color: #FFD700 !important;
-}
-       .btn-purple {
-  background-color: #d00c9c; /* Purple color */
-  color: #ffffff; /* White text */
-  border-color: #6f42c1;
-}
-       #unique-xp-display {
-  background-color: #d00c9c; /* Change the color to your preference */
-  color: white; /* Ensure the text color contrasts well */
-  padding: 3px 8px; /* Adjust padding to make it smaller */
-  border-radius: 8px; /* Increased border radius to make corners more rounded */
-}
+  .toggle-log:hover {
+    background: var(--primary-color);
+    color: white;
+  }
 
-#unique-xp-display .unique-xp-circle {
-  background-color: #ffc40c; /* Change the color to your preference */
-  color: white; /* Ensure the text color contrasts well */
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 5px; /* Adjust margin as needed */
-}
+  /* Empty State */
+  .no-videos {
+    grid-column: 1 / -1;
+  }
 
-#unique-xp-points {
-  font-weight: bold;
-  font-size: 14px; /* Adjust font size as needed */
-}
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-sm);
+  }
 
+  .empty-icon {
+    font-size: 3rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+  }
+
+  /* Pagination Styles */
+  .pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 0.25rem;
+  }
+
+  .page-item {
+    display: inline-block;
+  }
+
+  .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    border-radius: 0.5rem;
+    background-color: white;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: var(--transition-normal);
+    font-size: 0.875rem;
+    border: 1px solid var(--border-color);
+  }
+
+  .page-item.active .page-link {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+  }
+
+  .page-link:hover:not(.page-item.active .page-link) {
+    background-color: var(--bg-light);
+    color: var(--primary-color);
+  }
+
+  /* Responsive Styles */
+  @media (max-width: 991px) {
+    .channel-avatar {
+      width: 80px;
+      height: 80px;
+      margin-top: -2.5rem;
+    }
+    .channel-banner {
+      height: 160px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .channel-info-card {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .channel-profile-section {
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    .channel-actions {
+      width: 100%;
+      justify-content: flex-end;
+    }
+    .video-grid {
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+  }
+
+  @media (max-width: 576px) {
+    .channel-profile-section {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .channel-avatar {
+      margin-top: -2rem;
+    }
+    .section-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .filter-controls {
+      width: 100%;
+    }
+    .form-select {
+      width: 100%;
+    }
+    .video-grid {
+      grid-template-columns: 1fr;
+    }
+
+    /* Adjust card footer for small screens */
+    .card-footer {
+      height: auto;
+      flex-wrap: wrap;
+      padding-bottom: 0.25rem;
+    }
+
+    .channel-name {
+      max-width: 90px;
+    }
+  }
 </style>
-    <!-- Add your footer here if needed -->
 </body>
 </html>

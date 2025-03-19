@@ -1,17 +1,3 @@
-<!--
-=========================================================
-* Soft UI Dashboard - v1.0.7
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/soft-ui-dashboard
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://www.creative-tim.com/license)
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
--->
 {% load static %}
 
 <!DOCTYPE html>
@@ -20,183 +6,442 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
-  <title>
-Chinese Log  </title>
-  <!--     Fonts and icons     -->
+  <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
+  <title>Chinese Log</title>
+  <!-- Fonts and Icons -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
   <!-- Nucleo Icons -->
-    <link id="pagestyle" href="{% static 'accounts/css/nucleo-icons.css' %}"rel="stylesheet" />
-
+  <link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet" />
   <!-- Font Awesome Icons -->
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-  <link id="pagestyle" href="{% static 'accounts/css/nucleo-svg.css' %}"rel="stylesheet" />
-
+  <link href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet" />
   <!-- CSS Files -->
-  <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}"rel="stylesheet" />
-  <!-- Nepcha Analytics (nepcha.com) -->
-  <!-- Nepcha is a easy-to-use web analytics. No cookies and fully compliant with GDPR, CCPA and PECR. -->
-  <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
-<style>
-  .btn-primary {
-    background-color: #3a9fff !important;
-    color: #fff !important;
-  }
-  .filter-button.active {
-    background-color: #007bff !important;
-    color: white !important;
-  }
-  .text-warning { color: #dcb234; }
-  .text-success { color: #3c763d; }
-  .video-card {
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-  }
-  .video-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-  }
-  .image-container {
-    position: relative;
-    width: 100%;
-    height: 180px;
-  }
-  .card-img-top {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: opacity 0.3s ease-in-out;
-  }
-  .video-card:hover .card-img-top {
-    opacity: 0.9;
-  }
-  .overlay-info {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    right: 10px;
-    display: flex;
-    justify-content: space-between;
-    padding: 5px;
-  }
-  .badge-highlight, .badge-length {
-    background-color: #cb0ba0;
+  <link href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet" />
+
+  <style>
+    :root {
+      --primary-color: #3a9fff;
+      --accent-color: #cb0ba0;
+      --dark-color: #1e293b;
+      --light-color: #f8fafc;
+      --border-radius: 16px;
+      --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      --hover-transform: translateY(-8px);
+    }
+
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background-color: var(--light-color);
+      color: var(--dark-color);
+    }
+
+    .container-fluid {
+      max-width: 1200px;
+      padding: 2rem 1rem;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--dark-color);
+      margin: 0;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 0.75rem;
+      background: white;
+      padding: 0.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-filter {
+      padding: 0.75rem 1.25rem;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-filter.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-count {
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.1);
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-filter.active .btn-count {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+  .btn-download {
+    padding: 0.5rem 1rem; /* Reduced padding from 0.75rem 1.5rem */
+    border-radius: 10px;
+    border: none;
+    background: var(--primary-color);
     color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 0.75rem;
-    margin: 2px;
-  }
-  .card-body {
-    padding: 10px;
-  }
-  .card-title {
-    white-space: normal;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    font-size: 1rem; /* Adjust based on preference */
-    line-height: 1.2; /* Ensure this is enough to fit two lines nicely */
-    height: 2.4rem; /* Based on font-size and line-height, adjust if needed */
-    margin-bottom: 5px; /* Reduced space between title and description */
-  }
-  .card-text {
-    font-size: 0.875rem; /* Slightly smaller font size for description */
-    margin-bottom: 5px; /* Reduced space between description and channel name */
-  }
-  .channel-info {
+    font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 10px; /* Add some space between the channel name and the "+" icon */
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(58, 159, 255, 0.3);
+    font-size: 0.875rem; /* Added explicit font size */
   }
-  .channel-plus-container {
-    display: flex;
-    justify-content: space-between; /* Ensures maximum separation between elements */
-    align-items: center;
-    width: 100%;
+
+  .btn-download:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(58, 159, 255, 0.4);
   }
-  .channel-name {
-    flex-grow: 1; /* Ensures the channel name occupies all available space to the left */
+
+  .btn-download svg {
+    width: 16px; /* Added specific width */
+    height: 16px; /* Added specific height */
   }
-  .add-to-log svg {
-    margin-left: auto; /* Forces the SVG icon to align to the right */
-    width: 20px; /* Set consistent icon size */
-    height: 20px;
-  }
-  .add-to-log {
-    display: flex;
-    align-items: center;
-  }
-  .container-fluid {
-    padding-right: 15px;
-    padding-left: 15px;
-  }
-  .badge-highlight {
-    background-color: #cb0ba0; /* Purple similar to the button */
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 0.75rem;
-    text-align: center;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 5px; /* Space between icon and text */
-  }
-  .badge-highlight svg {
-    fill: #ffd700; /* Golden color for the SVG */
-    width: 1em; /* Size of the SVG */
-    height: 1em; /* Size of the SVG */
-  }
-  .nav-link.active .icon svg {
-    fill: #FFD700 !important;
-    color: #FFD700 !important;
-  }
-  .btn {
-    background-color: #3a9fff;
-    border-radius: 20px;
-    padding: 10px 25px;
-    color: #fff;
-    box-shadow: 0px 18px 13px -6px rgba(0, 0, 0, 0.2);
-    transition: all 0.4s;
-  }
-  .btn:hover {
-    box-shadow: 0px 25px 18px -6px rgba(0, 0, 0, 0.2);
-    background-color: #63b2fc;
-    color: #fff;
-  }
-  .btn--revert {
-    background-color: transparent;
-    color: #8198ae;
-    box-shadow: none;
-    border: 1px solid #c9d9e9;
-  }
-  .btn--revert:hover {
-    background-color: transparent;
-    color: #1f4568;
-    box-shadow: none;
-    border: 1px solid #8198ae;
-  }
-  .sidenav {
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .achievement-badge {
+      position: relative;
+      background: linear-gradient(145deg, #ffffff, #f5f7fa);
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      height: 100%;
+    }
+
+    .achievement-badge:hover {
+      transform: var(--hover-transform);
+      box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.2);
+    }
+
+    .badge-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      height: 100%;
+    }
+
+    .badge-banner {
+      position: relative;
+      height: 140px;
+      overflow: hidden;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+
+    .badge-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+      filter: brightness(0.85);
+    }
+
+    .achievement-badge:hover .badge-img {
+      transform: scale(1.1);
+    }
+
+    .badge-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 50%);
+      z-index: 1;
+    }
+
+    .badge-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--primary-color);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+      z-index: 2;
+      border: 4px solid white;
+      transition: all 0.3s ease;
+    }
+
+    .achievement-badge:hover .badge-icon {
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    .badge-stats {
+      position: absolute;
+      bottom: 0.75rem;
+      left: 0.75rem;
+      right: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      z-index: 2;
+      color: white;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      padding: 0.5rem 0.75rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .stat.highlights {
+      background: rgba(203, 11, 160, 0.8);
+    }
+
+    .stat.duration {
+      background: rgba(58, 159, 255, 0.8);
+    }
+
+    .achievement-badge:hover .stat {
+      transform: scale(1.05);
+    }
+
+    .stat svg {
+      width: 16px;
+      height: 16px;
+      fill: white;
+    }
+
+    .badge-content {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      height: calc(100% - 140px);
+    }
+
+    .badge-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+      color: var(--dark-color);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.4;
+    }
+
+    .badge-description {
+      color: #64748b;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.6;
+    }
+
+    .badge-progress {
+      width: 100%;
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 0.75rem 0;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .completed-badge {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: var(--accent-color);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.35rem 0.75rem;
+      border-radius: 10px;
+      z-index: 10;
+      box-shadow: 0 4px 10px rgba(203, 11, 160, 0.3);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .badge-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .badge-channel {
+      font-size: 0.875rem;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 0.35rem 0.6rem;
+    }
+
+    .status-badge.in-progress {
+      background: rgba(58, 159, 255, 0.1);
+      color: var(--primary-color);
+    }
+
+    .status-badge.completed {
+      background: rgba(203, 11, 160, 0.1);
+      color: var(--accent-color);
+    }
+
+    @media (max-width: 768px) {
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      .filter-group {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+      .video-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+      }
+      .badge-banner {
+        height: 120px;
+      }
+      .badge-icon {
+        width: 50px;
+        height: 50px;
+      }
+      .badge-content {
+        padding: 1.25rem;
+      }
+    }
+  </style>
+    <style>
+    body{
+      transition: padding-top 0.3s ease-in-out; /* Smooth transition for padding change */
+
+    }
+.text-warning { color: #dcb234; } /* Custom dark yellow */
+.text-success { color: #3c763d; } /* Custom dark green */
+.title-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-  }
-  .sidenav-footer {
-    margin-top: 135px;
-    padding-bottom: 1rem;
-  }
-  #unique-xp-display {
+    justify-content: center;
+    height: 50px; /* Adjusted height to provide more control */
+}
+.title-container p {
+    margin: 0;
+    line-height: 1.1; /* Tighter line spacing */
+    text-align: center;
+    white-space: pre-line; /* Ensures proper line breaking */
+    font-size: 0.75rem; /* Adjust size as needed */
+}
+.nav-link.active .icon svg {
+    fill: #FFD700 !important;
+    color: #FFD700 !important;
+}
+.xp-points-bar {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+.xp-points-bar h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: normal;
+}
+.xp-points-bar #xp-points {
+    font-size: 20px;
+    font-weight: bold;
+    color: #007bff;
+}
+.xp-circle {
+    width: 20px; /* Adjust size as needed */
+    height: 20px; /* Adjust size as needed */
+    border-radius: 50%;
+    background-color: #ffc40c; /* Yellow color */
+    color: #ffffff; /* White text */
+    font-weight: bold;
+    font-size: 12px; /* Adjust size as needed */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#xp-points {
+    font-size: 14px; /* Adjust size as needed */
+    font-weight: bold;
+    color: #ffffff; /* Adjust color as needed */
+}
+.btn-purple {
+    background-color: #d00c9c; /* Purple color */
+    color: #ffffff; /* White text */
+    border-color: #6f42c1;
+}
+.compact-btn {
+    padding: 0.25rem 0.5rem; /* Less padding for a more compact button */
+}
+#unique-xp-display {
     background-color: #d00c9c; /* Change the color to your preference */
     color: white; /* Ensure the text color contrasts well */
     padding: 3px 8px; /* Adjust padding to make it smaller */
     border-radius: 8px; /* Increased border radius to make corners more rounded */
-  }
-  #unique-xp-display .unique-xp-circle {
+}
+#unique-xp-display .unique-xp-circle {
     background-color: #ffc40c; /* Change the color to your preference */
     color: white; /* Ensure the text color contrasts well */
     width: 20px;
@@ -206,12 +451,12 @@ Chinese Log  </title>
     align-items: center;
     justify-content: center;
     margin-right: 5px; /* Adjust margin as needed */
-  }
-  #unique-xp-points {
+}
+#unique-xp-points {
     font-weight: bold;
     font-size: 14px; /* Adjust font size as needed */
-  }
-  #sidenav-main {
+}
+#sidenav-main {
     background-color: #ffffff; /* White background */
     border-radius: 12px; /* Adjust the border radius to your preference */
     padding: 10px; /* Add padding if necessary */
@@ -219,1047 +464,449 @@ Chinese Log  </title>
     margin-bottom: 20px; /* Add margin to ensure the bottom border is visible */
     max-height: calc(100vh - 40px); /* Ensure the sidebar fits within the viewport */
     overflow-y: auto; /* Add vertical scrolling if necessary */
-  }
-  @media (max-width: 1200px) {
+}
+@media (max-width: 1200px) {
     #sidenav-main {
-      display: none;
+        display: none;
     }
     #top-nav {
-      display: block;
+        display: block;
     }
-  }
-  @media (min-width: 1201px) {
+}
+@media (min-width: 1201px) {
     #top-nav {
-      display: none;
+        display: none;
     }
-  }
-  .custom-logo-size {
+}
+#welcome-banner {
+  background-color: #e9ecef; /* Light grey background */
+  border-radius: 0 0 10px 10px; /* Rounded bottom corners */
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow */
+  text-align: left;
+  width: 100%; /* Full width */
+}
+
+#welcome-banner .alert-heading {
+  font-weight: 700;
+  color: #28a745; /* Green color for success */
+}
+
+#welcome-banner button.btn-close {
+  background: transparent;
+  border: none;
+  color: #6c757d;
+}
+
+#welcome-banner button.btn-close:hover {
+  color: #343a40;
+}
+
+
+.sidenav-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;  /* Adjust this height as needed */
+}
+.custom-logo-size {
     height: 50px !important; /* Increase by 20% from 80px */
     /* If you also need to adjust width while maintaining aspect ratio, you can uncomment the following line */
     /* width: auto; */
+}
+#welcome-banner {
+  background-color: #f8f9fa; /* Light grey for a subtle modern look */
+  color: #344767; /* Darker text for contrast */
+  border: none;
+  border-bottom: 2px solid #e9ecef; /* A bit more pronounced bottom line */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Subtle shadow for depth */
+  padding: 10px 15px; /* Adjust for a thinner, modern look */
+  font-size: 14px; /* Smaller text size for a cleaner appearance */
+  width: 100%;
+  text-align: left;
+}
+
+#welcome-banner .close {
+  background: transparent;
+  border: none;
+  color: #6c757d;
+  padding: 0;
+  font-size: 20px; /* Size of the 'X' */
+  line-height: 1;
+  opacity: 0.5;
+  transition: opacity 0.15s ease-in-out;
+}
+
+#welcome-banner .close:hover {
+  opacity: 1;
+}
+
+#welcome-banner .close:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+
+    #welcome-banner .close:hover {
+  opacity: 1;
+}
+
+#welcome-banner .close:focus {
+  outline: none;
+  box-shadow: none;
+}
+        :root {
+      --primary-color: #3a9fff;
+      --accent-color: #cb0ba0;
+      --dark-color: #1e293b;
+      --light-color: #f8fafc;
+      --border-radius: 16px;
+      --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      --hover-transform: translateY(-8px);
+    }
+
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background-color: var(--light-color);
+      color: var(--dark-color);
+    }
+
+    .container-fluid {
+      max-width: 1200px;
+      padding: 2rem 1rem;
+    }
+
+    .navbar-main {
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    .navbar-main .container-fluid {
+      padding: 0 !important;
+      width: 100%;
+      max-width: none;
+    }
+
+    .navbar-main .navbar-collapse {
+      justify-content: flex-end;
+      padding-right: 0 !important;
+      margin-right: 0 !important;
+    }
+
+    .navbar-main .navbar-nav.ms-auto {
+      margin-right: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-right: 0;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 0.75rem;
+      background: white;
+      padding: 0.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-filter {
+      padding: 0.75rem 1.25rem;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-filter.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-count {
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.1);
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-filter.active .btn-count {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-download {
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      border: none;
+      background: var(--primary-color);
+      color: white;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(58, 159, 255, 0.3);
+      font-size: 0.875rem;
+      margin-left: 1rem;
+    }
+         :root {
+    --primary-color: #3a9fff;
+    --accent-color: #cb0ba0;
+    --dark-color: #1e293b;
+    --light-color: #f8fafc;
+    --border-radius: 16px;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    --hover-transform: translateY(-8px);
   }
-  .sidenav-header {
+
+  :root {
+    --primary-color: #3a9fff;
+    --accent-color: #cb0ba0;
+    --dark-color: #1e293b;
+    --light-color: #f8fafc;
+    --border-radius: 16px;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    --hover-transform: translateY(-8px);
+  }
+
+:root {
+    --primary-color: #3a9fff;
+    --accent-color: #cb0ba0;
+    --dark-color: #1e293b;
+    --light-color: #f8fafc;
+    --border-radius: 16px;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    --hover-transform: translateY(-8px);
+  }
+
+ :root {
+    --primary-color: #3a9fff;
+    --accent-color: #cb0ba0;
+    --dark-color: #1e293b;
+    --light-color: #f8fafc;
+    --border-radius: 16px;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    --hover-transform: translateY(-8px);
+  }
+
+  :root {
+    --primary-color: #3a9fff;
+    --accent-color: #cb0ba0;
+    --dark-color: #1e293b;
+    --light-color: #f8fafc;
+    --border-radius: 16px;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    --hover-transform: translateY(-8px);
+  }
+
+  body {
+    font-family: 'Open Sans', sans-serif;
+    background-color: var(--light-color);
+    color: var(--dark-color);
+  }
+
+  .container-fluid {
+    max-width: 1200px;
+    padding: 2rem 1rem;
+  }
+
+  /* Increase right padding to move all navbar items farther left */
+  .navbar-main {
+    padding: 0.75rem 5rem !important; /* 0.75rem top/bottom, 5rem left/right */
+    margin: 0 !important;
+  }
+
+  .navbar-main .container-fluid {
+    padding: 0 !important;
+    width: 100%;
+    max-width: none;
+  }
+
+  .navbar-main .navbar-collapse {
+    justify-content: flex-end;
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .navbar-main .navbar-nav.ms-auto {
+    margin-right: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .page-header {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
-    height: 100px; /* Adjust this height as needed */
+    margin-bottom: 2rem;
+    padding-right: 0;
   }
-  .custom-logo-size {
-    max-height: 80%;
-    width: auto;
-  }
-</style>
-    <style>
-/* Add these new styles */
-.video-card {
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-    transform: translateY(0);
-}
-
-.video-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-}
-
-.video-card:hover .image-container img {
-    transform: scale(1.05);
-}
-
-.filter-button {
-    background: transparent;
-    color: #666;
-    border: none;
-}
-
-.filter-button:hover, .filter-button.active {
-    background: linear-gradient(135deg, #6366F1, #8B5CF6);
-    color: white;
-    transform: translateY(-2px);
-}
-
-.btn-download:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-}
-
-.gradient-overlay {
-    backdrop-filter: blur(4px);
-}
-
-.channel-avatar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f0f0f0;
-    color: #666;
-}
-
-.toggle-log:hover {
-    background: #e9ecef;
-    transform: rotate(90deg);
-    transition: transform 0.3s ease;
-}
 </style>
 </head>
 
-<body class="g-sidenav-show  bg-gray-100">
- {% include 'accounts/navbar.html' %}
- {% include 'accounts/sidebar.html' %}
+<body class="g-sidenav-show bg-gray-100">
+  {% include 'accounts/navbar.html' %}
+  {% include 'accounts/sidebar.html' %}
 
-  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
-    <!-- Navbar -->
-
-    <!-- End Navbar -->
-
-
-
-<!-- Hidden element to store data -->
-<div id="highlight-data" style="display: none;">{{ highlight_data_json|safe }}</div>
-<div id="totals-data" style="display: none;">{{ totals_json|safe }}</div>
-
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<div class="container-fluid py-4">
-    <!-- Sorting Buttons -->
-<!-- Sorting Buttons -->
-<!-- Replace the existing buttons div with this -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-   <div class="filter-group">
-       <button class="btn-filter active" onclick="filterVideos('all', this)">
-           <span class="btn-text">All Videos</span>
-           <span class="btn-count">{{ all_media_count }}</span>
-       </button>
-       <button class="btn-filter" onclick="filterVideos('in_progress', this)">
-           <span class="btn-text">In Progress</span>
-           <span class="btn-count">{{ in_progress_count }}</span>
-       </button>
-       <button class="btn-filter" onclick="filterVideos('completed', this)">
-           <span class="btn-text">Completed</span>
-           <span class="btn-count">{{ completed_count }}</span>
-       </button>
-   </div>
-   <!-- Download Button Positioned on Right -->
-   <button class="btn-download" onclick="downloadSubtitles()">Download Subtitles</button>
-</div>
-
-
-<style>
-.filter-group {
-    display: flex;
-    gap: 1rem;
-    background: #f8f9fa;
-    padding: 0.5rem;
-    border-radius: 12px;
-}
-
-.btn-filter {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: #64748b;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.btn-filter:hover {
-    background: rgba(99, 102, 241, 0.1);
-    color: #4f46e5;
-}
-
-.btn-filter.active {
-    background: #4f46e5;
-    color: white;
-}
-
-.btn-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 6px;
-    border-radius: 10px;
-    background: rgba(0, 0, 0, 0.1);
-    font-size: 0.75rem;
-}
-
-.btn-filter.active .btn-count {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.btn-download {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 8px;
-    background: #4f46e5;
-    color: white;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.btn-download:hover {
-    background: #4338ca;
-    transform: translateY(-1px);
-}
-
-.btn-download svg {
-    transition: transform 0.2s ease;
-}
-
-.btn-download:hover svg {
-    transform: translateY(2px);
-}
-</style>
-<div class="row" id="video-list">
-    {% if media %}
-        {% for video in media %}
-        <div class="col-md-4 mb-4">
-            <div class="video-card" data-status="{{ video.status|default:'all' }}">
-                <a href="{% url 'video_detail' video.media_id %}" class="video-card-link">
-                    <div class="thumbnail-container">
-                        <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}" class="thumbnail">
-                        <div class="overlay">
-                            <div class="stats">
-                                <span class="stat-item">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-                                    </svg>
-                                    {{ video.user_highlights_count }}
-                                </span>
-                                <span class="stat-item">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <circle cx="12" cy="12" r="10"/>
-                                        <polyline points="12 6 12 12 16 14"/>
-                                    </svg>
-                                    {{ video.formatted_video_length }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="content">
-                        <h3 class="title">{{ video.title }}</h3>
-                        <p class="description">{{ video.description|truncatechars:100 }}</p>
-                        <div class="footer">
-                            <span class="channel">{{ video.channel.name }}</span>
-                            <button class="btn-action toggle-log" data-id="{{ video.id }}" data-action="remove">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="5" y1="12" x2="19" y2="12"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-        {% endfor %}
-    {% else %}
-        <div class="col-12 text-center py-5">
-            <p>No videos found.</p>
-        </div>
-    {% endif %}
-</div>
-
-<style>
-.video-card {
-    background: white;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.video-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-}
-
-.video-card-link {
-    text-decoration: none;
-    color: inherit;
-}
-
-.thumbnail-container {
-    position: relative;
-    padding-top: 56.25%;
-    overflow: hidden;
-}
-
-.thumbnail {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.video-card:hover .thumbnail {
-    transform: scale(1.05);
-}
-
-.overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 1rem;
-    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-    color: white;
-}
-
-.stats {
-    display: flex;
-    gap: 1rem;
-}
-
-.stat-item {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    font-size: 0.875rem;
-}
-
-.stat-item svg {
-    width: 16px;
-    height: 16px;
-}
-
-.content {
-    padding: 1.25rem;
-}
-
-.title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.description {
-    font-size: 0.875rem;
-    color: #64748b;
-    margin-bottom: 1rem;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.channel {
-    font-size: 0.875rem;
-    color: #64748b;
-}
-
-.btn-action {
-    padding: 0.5rem;
-    border: none;
-    background: transparent;
-    border-radius: 8px;
-    color: #64748b;
-    transition: all 0.2s ease;
-}
-
-.btn-action:hover {
-    background: rgba(0, 0, 0, 0.05);
-    color: #4f46e5;
-}
-</style>
-
-
-<!-- JavaScript for Filtering -->
-<script>
-function filterVideos(status, element) {
-    const videos = document.querySelectorAll('.video-card');
-    videos.forEach(video => {
-        if (status === 'all' || video.getAttribute('data-status') === status) {
-            video.style.display = 'block';
-        } else {
-            video.style.display = 'none';
-        }
-    });
-
-    // Remove active class from all buttons
-    const buttons = document.querySelectorAll('.btn-filter');
-    buttons.forEach(button => {
-        button.classList.remove('active');
-    });
-
-    // Add active class to the clicked button
-    element.classList.add('active');
-}
-</script>
-
-<!-- Additional Styles for Active Button -->
-<style>
-.filter-button.active {
-    background-color: #007bff;
-    color: white;
-}
-</style>
-
-
-
-
-
-
-<!-- Additional stats content below -->
-
-
-    </div>
-  </main>
-  <div class="fixed-plugin">
-    <a class="fixed-plugin-button text-dark position-fixed px-3 py-2">
-      <i class="fa fa-cog py-2"> </i>
-    </a>
-    <div class="card shadow-lg ">
-      <div class="card-header pb-0 pt-3 ">
-        <div class="float-start">
-          <h5 class="mt-3 mb-0">Soft UI Configurator</h5>
-          <p>See our dashboard options.</p>
-        </div>
-        <div class="float-end mt-4">
-          <button class="btn btn-link text-dark p-0 fixed-plugin-close-button">
-            <i class="fa fa-close"></i>
+  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+    <div class="container-fluid py-4">
+      <div class="page-header">
+        <div class="filter-group">
+          <button class="btn-filter active" onclick="filterVideos('all', this)">
+            <span>All Videos</span>
+            <span class="btn-count">{{ all_media_count }}</span>
+          </button>
+          <button class="btn-filter" onclick="filterVideos('in_progress', this)">
+            <span>In Progress</span>
+            <span class="btn-count">{{ in_progress_count }}</span>
+          </button>
+          <button class="btn-filter" onclick="filterVideos('completed', this)">
+            <span>Completed</span>
+            <span class="btn-count">{{ completed_count }}</span>
           </button>
         </div>
-        <!-- End Toggle Button -->
+        <button class="btn-download" onclick="downloadSubtitles()">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download Subtitles
+        </button>
       </div>
-      <hr class="horizontal dark my-1">
-      <div class="card-body pt-sm-3 pt-0">
-        <!-- Sidebar Backgrounds -->
-        <div>
-          <h6 class="mb-0">Sidebar Colors</h6>
-        </div>
-        <a href="javascript:void(0)" class="switch-trigger background-color">
-          <div class="badge-colors my-2 text-start">
-            <span class="badge filter bg-gradient-primary active" data-color="primary" onclick="sidebarColor(this)"></span>
-            <span class="badge filter bg-gradient-dark" data-color="dark" onclick="sidebarColor(this)"></span>
-            <span class="badge filter bg-gradient-info" data-color="info" onclick="sidebarColor(this)"></span>
-            <span class="badge filter bg-gradient-success" data-color="success" onclick="sidebarColor(this)"></span>
-            <span class="badge filter bg-gradient-warning" data-color="warning" onclick="sidebarColor(this)"></span>
-            <span class="badge filter bg-gradient-danger" data-color="danger" onclick="sidebarColor(this)"></span>
+
+      <!-- Within the video-grid section, update the in-progress SVGs -->
+<div class="video-grid" id="video-list">
+  {% if media %}
+    {% for video in media %}
+    <div class="achievement-badge" data-status="{{ video.status|default:'all' }}">
+      <a href="{% url 'video_detail' video.media_id %}" class="badge-link">
+        <div class="badge-banner">
+          <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}" class="badge-img">
+          <div class="badge-overlay"></div>
+          <div class="badge-icon">
+            {% if video.status == 'completed' %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+              </svg>
+            {% else %}
+              <!-- New in-progress SVG for badge icon with white fill -->
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd"
+                      d="M10.9965 4.00001C11.4368 3.99846 11.8263 4.28508 11.9558 4.70591L15.1231 14.9997L18.0715 7.62861C18.1964 7.31651 18.4697 7.08801 18.7989 7.02042C19.1282 6.95284 19.4694 7.0552 19.7071 7.29289L22.7071 10.2929C23.0976 10.6834 23.0976 11.3166 22.7071 11.7071C22.3166 12.0976 21.6834 12.0976 21.2929 11.7071L19.3652 9.77946L15.9285 18.3714C15.771 18.765 15.3826 19.0165 14.959 18.9992C14.5355 18.9818 14.1689 18.6992 14.0442 18.2941L11.0121 8.43973L8.95782 15.2873C8.84938 15.6488 8.54667 15.9185 8.17511 15.9845C7.80355 16.0506 7.42643 15.9019 7.2 15.6L5 12.6667L2.8 15.6C2.46863 16.0418 1.84183 16.1314 1.4 15.8C0.95817 15.4686 0.868627 14.8418 1.2 14.4L4.2 10.4C4.38885 10.1482 4.68524 10 5 10C5.31475 10 5.61114 10.1482 5.8 10.4L7.6114 12.8152L10.0422 4.71265C10.1687 4.29092 10.5562 4.00156 10.9965 4.00001Z"
+                      fill="white"/>
+              </svg>
+            {% endif %}
           </div>
-        </a>
-        <!-- Sidenav Type -->
-        <div class="mt-3">
-          <h6 class="mb-0">Sidenav Type</h6>
-          <p class="text-sm">Choose between 2 different sidenav types.</p>
+
+          <div class="badge-stats">
+            <span class="stat highlights">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+              </svg>
+              {{ video.user_highlights_count }}
+            </span>
+            <span class="stat duration">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              {{ video.formatted_video_length }}
+            </span>
+          </div>
         </div>
-        <div class="d-flex">
-          <button class="btn bg-gradient-primary w-100 px-3 mb-2 active" data-class="bg-transparent" onclick="sidebarType(this)">Transparent</button>
-          <button class="btn bg-gradient-primary w-100 px-3 mb-2 ms-2" data-class="bg-white" onclick="sidebarType(this)">White</button>
+        <div class="badge-content">
+          <h3 class="badge-title">{{ video.title }}</h3>
+          <p class="badge-description">{{ video.description|truncatechars:100 }}</p>
+          <div class="badge-progress">
+            <div class="progress-bar" style="width: {% if video.status == 'completed' %}100%{% elif video.status == 'in_progress' %}65%{% else %}0%{% endif %}"></div>
+          </div>
+          <div class="badge-footer">
+            <span class="badge-channel">{{ video.channel.name }}</span>
+            <span class="status-badge {{ video.status|default:'in-progress' }}">
+              {% if video.status == 'completed' %}
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 6L9 17L4 12"/>
+                </svg>
+                Completed
+              {% else %}
+                <!-- New in-progress SVG for status badge with var(--primary-color) stroke -->
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" clip-rule="evenodd"
+                        d="M10.9965 4.00001C11.4368 3.99846 11.8263 4.28508 11.9558 4.70591L15.1231 14.9997L18.0715 7.62861C18.1964 7.31651 18.4697 7.08801 18.7989 7.02042C19.1282 6.95284 19.4694 7.0552 19.7071 7.29289L22.7071 10.2929C23.0976 10.6834 23.0976 11.3166 22.7071 11.7071C22.3166 12.0976 21.6834 12.0976 21.2929 11.7071L19.3652 9.77946L15.9285 18.3714C15.771 18.765 15.3826 19.0165 14.959 18.9992C14.5355 18.9818 14.1689 18.6992 14.0442 18.2941L11.0121 8.43973L8.95782 15.2873C8.84938 15.6488 8.54667 15.9185 8.17511 15.9845C7.80355 16.0506 7.42643 15.9019 7.2 15.6L5 12.6667L2.8 15.6C2.46863 16.0418 1.84183 16.1314 1.4 15.8C0.95817 15.4686 0.868627 14.8418 1.2 14.4L4.2 10.4C4.38885 10.1482 4.68524 10 5 10C5.31475 10 5.61114 10.1482 5.8 10.4L7.6114 12.8152L10.0422 4.71265C10.1687 4.29092 10.5562 4.00156 10.9965 4.00001Z"
+                        fill="none" stroke="var(--primary-color)" stroke-width="2"/>
+                </svg>
+                In Progress
+              {% endif %}
+            </span>
+          </div>
         </div>
-        <p class="text-sm d-xl-none d-block mt-2">You can change the sidenav type just on desktop view.</p>
-        <!-- Navbar Fixed -->
-        <div class="mt-3">
-          <h6 class="mb-0">Navbar Fixed</h6>
-        </div>
-        <div class="form-check form-switch ps-0">
-          <input class="form-check-input mt-1 ms-auto" type="checkbox" id="navbarFixed" onclick="navbarFixed(this)">
-        </div>
-        <hr class="horizontal dark my-sm-4">
-        <a class="btn bg-gradient-dark w-100" href="https://www.creative-tim.com/product/soft-ui-dashboard">Free Download</a>
-        <a class="btn btn-outline-dark w-100" href="https://www.creative-tim.com/learning-lab/bootstrap/license/soft-ui-dashboard">View documentation</a>
-        <div class="w-100 text-center">
-          <a class="github-button" href="https://github.com/creativetimofficial/soft-ui-dashboard" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star creativetimofficial/soft-ui-dashboard on GitHub">Star</a>
-          <h6 class="mt-3">Thank you for sharing!</h6>
-          <a href="https://twitter.com/intent/tweet?text=Check%20Soft%20UI%20Dashboard%20made%20by%20%40CreativeTim%20%23webdesign%20%23dashboard%20%23bootstrap5&amp;url=https%3A%2F%2Fwww.creative-tim.com%2Fproduct%2Fsoft-ui-dashboard" class="btn btn-dark mb-0 me-2" target="_blank">
-            <i class="fab fa-twitter me-1" aria-hidden="true"></i> Tweet
-          </a>
-          <a href="https://www.facebook.com/sharer/sharer.php?u=https://www.creative-tim.com/product/soft-ui-dashboard" class="btn btn-dark mb-0 me-2" target="_blank">
-            <i class="fab fa-facebook-square me-1" aria-hidden="true"></i> Share
-          </a>
-        </div>
-      </div>
+      </a>
     </div>
-  </div>
-  <!--   Core JS Files   -->
+    {% endfor %}
+  {% else %}
+    <div class="col-12 text-center py-5">
+      <p>No videos found.</p>
+    </div>
+  {% endif %}
+</div>
+    </div>
+  </main>
+
+  <!-- Core JS Files -->
   <script src="{% static 'accounts/js/core/popper.min.js' %}"></script>
   <script src="{% static 'accounts/js/core/bootstrap.min.js' %}"></script>
   <script src="{% static 'accounts/js/plugins/perfect-scrollbar.min.js' %}"></script>
-
-    <script src="{% static 'accounts/js/plugins/smooth-scrollbar.min.js' %}"></script>
-
-
-      <script src="{% static 'accounts/js/plugins/chartjs.min.js' %}"></script>
-
-
-
+  <script src="{% static 'accounts/js/plugins/smooth-scrollbar.min.js' %}"></script>
+  <script src="{% static 'accounts/js/soft-ui-dashboard.min.js?v=1.0.7' %}"></script>
 
   <script>
     var win = navigator.platform.indexOf('Win') > -1;
     if (win && document.querySelector('#sidenav-scrollbar')) {
-      var options = {
-        damping: '0.5'
-      }
+      var options = { damping: '0.5' };
       Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
     }
+
+    function filterVideos(status, element) {
+      const videos = document.querySelectorAll('.achievement-badge');
+      videos.forEach(video => {
+        if (status === 'all' || video.getAttribute('data-status') === status) {
+          video.style.display = 'block';
+        } else {
+          video.style.display = 'none';
+        }
+      });
+      const buttons = document.querySelectorAll('.btn-filter');
+      buttons.forEach(button => button.classList.remove('active'));
+      element.classList.add('active');
+    }
+
+    function downloadSubtitles() {
+      const url = "{% url 'download_subtitles' %}";
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'combined_subtitles.txt';
+      link.click();
+    }
   </script>
-<script>
- document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM fully loaded and parsed");
-
-    document.querySelectorAll('.toggle-log').forEach(button => {
-        console.log("Adding event listener to button:", button);
-
-        button.addEventListener('click', function(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            console.log("Button clicked:", button);
-
-            const videoId = this.getAttribute('data-id');
-            const action = this.getAttribute('data-action');
-            console.log("Video ID:", videoId, "Action:", action);
-
-            const url = action === 'add' ? `/add_to_log/${videoId}/` : `/remove_from_log/${videoId}/`;
-            console.log("URL:", url);
-
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Fetch data:", data);
-
-                if (data.success) {
-                    if (action === 'add') {
-                        this.setAttribute('data-action', 'remove');
-                        this.innerHTML = `
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px;">
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M23 4C23 2.34315 21.6569 1 20 1H4C2.34315 1 1 2.34315 1 4V20C1 21.6569 2.34315 23 4 23H20C21.6569 23 23 21.6569 23 20V4ZM21 4C21 3.44772 20.5523 3 20 3H4C3.44772 3 3 3.44772 3 4V20C3 20.5523 3.44772 21 4 21H20C20.5523 21 21 20.5523 21 20V4Z" fill="#0F0F0F"></path>
-                                <path d="M16 11C16.5523 11 17 11.4477 17 12C17 12.5523 16.5523 13 16 13H8C7.44772 13 7 12.5523 7 12C7 11.4477 7.44772 11 8 11H16Z" fill="#0F0F0F"></path>
-                            </svg>
-                        `;
-                    } else {
-                        // Remove the video card from the UI immediately
-                        const videoCard = this.closest('.video-card');
-                        if (videoCard) {
-                            videoCard.style.opacity = '0';
-                            setTimeout(() => videoCard.remove(), 300); // Smoothly remove after fade out
-                        }
-                    }
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        });
-    });
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-});
-
-let cumulativeMinutesChart;
-let barChart;
-
-function createLineChart(data) {
-    const canvasLine = document.getElementById('cumulativeMinutesChart');
-    if (!canvasLine) {
-        console.error('Line chart canvas not found');
-        return;
-    }
-    const ctxLine = canvasLine.getContext('2d');
-
-    if (cumulativeMinutesChart) {
-        cumulativeMinutesChart.destroy();
-    }
-
-    const maxMinutes = Math.max(...data.minutes);
-    const suggestedMax = maxMinutes < 5 ? 5 : Math.ceil(maxMinutes * 1.5);
-
-    cumulativeMinutesChart = new Chart(ctxLine, {
-        type: 'line',
-        data: {
-            labels: data.dates.map(date => new Date(date).toLocaleDateString('en-us', { month: 'short', day: 'numeric' })),
-            datasets: [{
-                label: 'Cumulative Minutes Watched',
-                data: data.minutes,
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.5)',
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    suggestedMax: suggestedMax,
-                    ticks: {
-                        stepSize: 1,
-                        color: '#9a9a9a'
-                    },
-                    grid: {
-                        color: '#e7e7e7',
-                        borderDash: [5, 5]
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false
-                    },
-                    ticks: {
-                        color: '#9a9a9a'
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false,
-                    position: 'top'
-                },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false
-                }
-            },
-            interaction: {
-                mode: 'nearest',
-                axis: 'x',
-                intersect: false
-            }
-        }
-    });
-}
-
-function createBarChart(data) {
-    const ctxBar = document.getElementById('highlightBarChart').getContext('2d');
-    if (barChart) {
-        barChart.destroy();
-    }
-
-    barChart = new Chart(ctxBar, {
-        type: 'bar',
-        data: {
-            labels: data.dates.map(date => new Date(date).toLocaleDateString('en-us', { month: 'short', day: 'numeric' })),
-            datasets: [{
-                label: 'Highlights Count',
-                tension: 0.4,
-                borderWidth: 0,
-                borderRadius: 4,
-                borderSkipped: false,
-                backgroundColor: '#fff',
-                data: data.highlights,
-                maxBarThickness: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false,
-                },
-                title: {
-                    display: true,
-                    text: 'Highlights',
-                    font: {
-                        size: 18,
-                        family: 'Open Sans',
-                        weight: 'bold'
-                    },
-                    padding: {
-                        top: 10,
-                        bottom: 10
-                    },
-                    color: '#fff'  // Adjust color to match the design
-                }
-            },
-            interaction: {
-                intersect: false,
-                mode: 'index',
-            },
-            scales: {
-                y: {
-                    grid: {
-                        drawBorder: false,
-                        display: false,
-                        drawOnChartArea: false,
-                        drawTicks: false,
-                    },
-                    ticks: {
-                        suggestedMin: 0,
-                        suggestedMax: Math.max(...data.highlights) * 1.2, // 20% above max for better scale visibility
-                        beginAtZero: true,
-                        padding: 15,
-                        font: {
-                            size: 14,
-                            family: "Open Sans",
-                            style: 'normal',
-                            lineHeight: 2
-                        },
-                        color: "#fff"
-                    },
-                },
-                x: {
-                    grid: {
-                        drawBorder: true,
-                        display: true,
-                        drawOnChartArea: true,
-                        drawTicks: true
-                    },
-                    ticks: {
-                        display: true
-                    },
-                },
-            },
-        },
-    });
-}
-
-
-function updateChartData(timeSpan) {
-    const data = JSON.parse(document.getElementById('highlight-data').textContent);
-
-    if (data[timeSpan]) {
-        createLineChart({
-            dates: data[timeSpan].dates,
-            minutes: data[timeSpan].minutes // Ensure that minutes data is provided
-        });
-        createBarChart({
-            dates: data[timeSpan].dates,
-            highlights: data[timeSpan].highlights
-        });
-
-        // Update stats data as well
-        updateStatsData(timeSpan);
-    } else {
-        console.error("No data available for:", timeSpan);
-    }
-}
-
-function updateStatsData(timeSpan) {
-    const statsData = JSON.parse(document.getElementById('totals-data').textContent);
-
-    if (statsData[timeSpan]) {
-        document.getElementById('total-highlights').innerText = statsData[timeSpan].total_highlights || '0';
-        document.getElementById('total-minutes').innerText = statsData[timeSpan].total_minutes || '0';
-        document.getElementById('streak').innerText = '{{streak}}' || '0';
-        document.getElementById('total-videos').innerText = statsData[timeSpan].total_videos || '0';
-        document.getElementById('total-words').innerText = statsData[timeSpan].total_words || '0';
-    } else {
-        console.error("No totals data found for the time span:", timeSpan);
-    }
-}
-
-
-    console.log({{ highlight_data_json|safe }});
-// Initialize the charts and stats for 'week' as soon as the page loads
-document.addEventListener('DOMContentLoaded', function() {
-    updateChartData('week');
-});
-</script>
-
-
-
-    <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const sidenav = document.getElementById('sidenav-main');
-  const topNav = document.getElementById('top-nav');
-  const iconSidenav = document.getElementById('iconSidenav');
-
-  iconSidenav.addEventListener('click', function() {
-    if (window.innerWidth < 992) {
-      sidenav.classList.toggle('d-none');
-      topNav.classList.toggle('d-none');
-    }
-  });
-});
-</script>
-  <script>
-function downloadSubtitles() {
-    const url = "{% url 'download_subtitles' %}";
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'combined_subtitles.txt';
-    link.click();
-}
-</script>
-
-  <!-- Github buttons -->
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
-  <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
-<script src="{% static 'accounts/js/soft-ui-dashboard.min.js?v=1.0.7' %}"></script>
-
-<style>
-/* Updated color scheme and shared styles */
-:root {
-  --primary-color: #4f46e5;
-  --secondary-color: #64748b;
-  --accent-color: #cb0ba0;
-  --background-color: #f8f9fa;
-  --card-color: #ffffff;
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --border-radius: 12px;
-}
-
-/* Navigation styles update */
-.nav-link {
-  color: var(--text-secondary);
-  transition: all 0.2s ease;
-  border-radius: var(--border-radius);
-  padding: 0.75rem 1.25rem;
-}
-
-
-
-.btn-purple {
-  background-color: var(--accent-color);
-  color: white;
-  border: none;
-  border-radius: var(--border-radius);
-  padding: 0.5rem 1rem;
-  transition: all 0.2s ease;
-}
-
-.btn-purple:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(203, 11, 160, 0.2);
-}
-
-/* XP Display update */
-#unique-xp-display {
-  background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: var(--border-radius);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-#unique-xp-display .unique-xp-circle {
-  background-color: rgba(255, 255, 255, 0.2);
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Content area updates */
-.filter-group {
-  background: var(--card-color);
-  border-radius: var(--border-radius);
-  padding: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.btn-filter {
-  color: var(--text-secondary);
-  background: transparent;
-  border: none;
-  border-radius: calc(var(--border-radius) - 4px);
-  padding: 0.75rem 1.25rem;
-  transition: all 0.2s ease;
-}
-
-.btn-filter:hover,
-.btn-filter.active {
-  background: var(--primary-color);
-  color: white;
-}
-
-.video-card {
-  background: var(--card-color);
-  border-radius: var(--border-radius);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
-}
-
-.video-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Responsive adjustments */
-@media (max-width: 1200px) {
-  #sidenav-main {
-    display: none;
-  }
-  #top-nav {
-    display: block;
-  }
-}
-
-@media (min-width: 1201px) {
-  #top-nav {
-    display: none;
-  }
-}
-    .btn-filter {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: #64748b;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.btn-filter:hover {
-    background: rgba(99, 102, 241, 0.1);
-    color: #4f46e5;
-}
-
-.btn-filter.active {
-    background: #4f46e5;
-    color: white;
-}
-
-.btn-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 6px;
-    border-radius: 10px;
-    background: rgba(0, 0, 0, 0.1);
-    font-size: 0.75rem;
-}
-
-.btn-filter.active .btn-count {
-    background: rgba(255, 255, 255, 0.2);
-}
-    /* Primary Button */
-.btn-primary {
-    background-color: #3a9fff !important;
-    border-color: #3a9fff !important;
-    color: #ffffff !important;
-}
-
-.btn-primary:hover {
-    background-color: #3a72ff !important;
-    border-color: #3a72ff !important;
-    color: #ffffff !important;
-}
-
-/* General Buttons */
-.btn {
-    background-color: #3a9fff !important;
-    color: white !important;
-    border-radius: 12px;
-    padding: 10px 20px;
-    transition: all 0.3s ease;
-}
-
-.btn:hover {
-    background-color: #3a72ff !important;
-    box-shadow: 0 4px 12px rgba(58, 159, 255, 0.3);
-}
-
-/* Filter Buttons */
-.btn-filter {
-    background-color: #3a9fff !important;
-    color: white !important;
-    border-radius: 8px;
-    padding: 10px 15px;
-    transition: all 0.3s ease;
-}
-
-.btn-filter:hover,
-.btn-filter.active {
-    background-color: #3a72ff !important;
-    color: white !important;
-}
-
-/* Download Buttons */
-.btn-download {
-    background-color: #3a9fff !important;
-    color: white !important;
-    border-radius: 12px;
-    padding: 10px 20px;
-    transition: all 0.3s ease;
-}
-
-.btn-download:hover {
-    background-color: #3a72ff !important;
-    box-shadow: 0 4px 12px rgba(58, 159, 255, 0.3);
-}
-
-/* Action Buttons (e.g., Add/Remove from Log) */
-.btn-action {
-    background-color: #3a9fff !important;
-    color: white !important;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.btn-action:hover {
-    background-color: #3a72ff !important;
-    box-shadow: 0 4px 12px rgba(58, 159, 255, 0.3);
-}
-
-/* Sidebar Buttons */
-.sidenav-footer .btn {
-    background-color: #3a9fff !important;
-    color: white !important;
-}
-
-.sidenav-footer .btn:hover {
-    background-color: #3a72ff !important;
-}
-    /* Button and Active State Styling */
-.btn-primary,
-.btn-filter.active,
-.btn-download {
-    background: linear-gradient(135deg, #3a9fff 0%, #3a72ff 100%) !important;
-    border: none;
-    color: white !important;
-    box-shadow: 0 4px 12px rgba(58, 159, 255, 0.2);
-    transition: all 0.3s ease;
-}
-
-.btn-primary:hover,
-.btn-filter.active:hover,
-.btn-download:hover {
-    background: linear-gradient(135deg, #3a72ff 0%, #3a9fff 100%) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(58, 159, 255, 0.3);
-}
-
-</style>
 </body>
 
 </html>
+
+

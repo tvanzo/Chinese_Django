@@ -1090,7 +1090,6 @@ subtitles.addEventListener("mouseup", function() {
         }
     }
 });
-
 async function fetchVideoScript() {
     console.log("Fetching video transcript...");
 
@@ -1109,7 +1108,9 @@ async function fetchVideoScript() {
         return "";
     }
 }
+
 const studyGuideButton = document.getElementById('create-study-sheet');
+const highlightStudyGuideButton = document.getElementById('create-highlight-study-sheet'); // New button
 const notification = document.getElementById('download-notification');
 const body = document.body;
 
@@ -1137,8 +1138,9 @@ function adjustBodyPadding() {
     }
 }
 
-document.getElementById("create-study-sheet").addEventListener("click", async function() {
-    console.log("Fetching video script and highlights...");
+// Existing Study Guide Functionality
+studyGuideButton.addEventListener("click", async function() {
+    console.log("Fetching video script and highlights for full study guide...");
 
     const scriptText = await fetchVideoScript();
     if (!scriptText) {
@@ -1154,7 +1156,7 @@ document.getElementById("create-study-sheet").addEventListener("click", async fu
         showNotification(); // Show notification
         studyGuideButton.disabled = true;
 
-        const response = await fetch("/api/generate-pdf/", {
+        const response = await fetch("/api/generate-highlight-study-guide/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -1180,14 +1182,67 @@ document.getElementById("create-study-sheet").addEventListener("click", async fu
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
 
-        console.log("PDF downloaded successfully");
+        console.log("Full study guide PDF downloaded successfully");
         hideNotification(); // Hide notification
         studyGuideButton.disabled = false;
 
     } catch (error) {
-        console.error("Error generating PDF:", error);
+        console.error("Error generating full study guide PDF:", error);
         hideNotification(); // Hide on error
         studyGuideButton.disabled = false;
+    }
+});
+
+// New Highlight-Only Study Guide Functionality
+highlightStudyGuideButton.addEventListener("click", async function() {
+    console.log("Fetching highlights for highlight study guide...");
+
+    try {
+        await fetchHighlights(mediaId);
+        let highlights = transformedArray.map(h => h.highlighted_text);
+
+        if (!highlights || highlights.length === 0) {
+            console.error("No highlights found.");
+            return;
+        }
+
+        console.log("Sending highlights to backend for highlight study guide...");
+        showNotification(); // Show notification
+        highlightStudyGuideButton.disabled = true;
+
+        const response = await fetch("/api/generate-highlight-study-guide/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken()
+            },
+            body: JSON.stringify({
+                highlights: highlights
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server Error: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "highlight_study_guide.pdf";
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        console.log("Highlight study guide PDF downloaded successfully");
+        hideNotification(); // Hide notification
+        highlightStudyGuideButton.disabled = false;
+
+    } catch (error) {
+        console.error("Error generating highlight study guide PDF:", error);
+        hideNotification(); // Hide on error
+        highlightStudyGuideButton.disabled = false;
     }
 });
 
