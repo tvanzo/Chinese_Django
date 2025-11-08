@@ -2,20 +2,25 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Chinese Log</title>
   <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
 
   <!-- Fonts and icons -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700"
+        rel="stylesheet">
   <!-- Nucleo Icons -->
   <link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet">
   <link href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet">
   <!-- Font Awesome Latest Version -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- CSS Files -->
-  <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet">
+  <link id="pagestyle"
+        href="{% static 'accounts/css/soft-ui-dashboard.css' %}"
+        rel="stylesheet">
 
   <style>
     :root {
@@ -33,30 +38,44 @@
       --tag-4: #f2dcf5;
       --tag-4-text: #a734ba;
       --purple: #7784ee;
+
+      --primary-color: #3a9fff;
+      --text-color: #344767;
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --hover-color: #f3f4f6;
     }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       font-family: 'Open Sans', sans-serif;
     }
+
     body {
       color: var(--text);
+      background-color: var(--bg-color);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
+
     .app {
       background-color: var(--bg);
       width: 100%;
       min-height: 100vh;
     }
+
     h1 {
       font-size: 30px;
     }
+
     .project {
       padding: 2rem;
       max-width: 75%;
       width: 100%;
       display: inline-block;
     }
+
     .project-info {
       padding: 2rem 0;
       display: flex;
@@ -64,11 +83,14 @@
       justify-content: space-between;
       align-items: center;
     }
+
     .project-participants {
       display: flex;
       align-items: center;
     }
-    .project-participants span, .project-participants__add {
+
+    .project-participants span,
+    .project-participants__add {
       width: 30px;
       height: 30px;
       display: inline-block;
@@ -76,6 +98,7 @@
       border-radius: 100rem;
       margin: 0 0.2rem;
     }
+
     .project-participants__add {
       background: transparent;
       border: 1px dashed #969696;
@@ -83,11 +106,13 @@
       cursor: pointer;
       position: relative;
     }
+
     .project-participants__add:after {
       content: "+";
       font-size: 15px;
       color: #969696;
     }
+
     .project-tasks {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -95,15 +120,18 @@
       grid-column-gap: 1.5rem;
       padding-left: 20px;
     }
+
     .project-column-heading {
       margin-bottom: 1rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
+
     .project-column-heading__title {
       font-size: 20px;
     }
+
     .project-column-heading__options {
       background: transparent;
       color: var(--light-grey);
@@ -111,6 +139,7 @@
       border: 0;
       cursor: pointer;
     }
+
     .task {
       cursor: move;
       background-color: var(--white);
@@ -122,43 +151,52 @@
       border: 3px dashed transparent;
       margin-left: 0;
     }
+
     .task:hover {
       box-shadow: rgba(99, 99, 99, 0.3) 0px 2px 8px 0px;
       border-color: rgba(162, 179, 207, 0.2) !important;
     }
+
     .task p {
       font-size: 15px;
       margin: 1.2rem 0;
     }
+
     .task__tag {
       border-radius: 100px;
       padding: 2px 13px;
       font-size: 12px;
     }
+
     .task__tag--copyright {
       color: var(--tag-4-text);
       background-color: var(--tag-4);
     }
+
     .task__tag--design {
       color: var(--tag-3-text);
       background-color: var(--tag-3);
     }
+
     .task__tag--illustration {
       color: var(--tag-2-text);
       background-color: var(--tag-2);
     }
+
     .task__tags {
       width: 100%;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
+
     .task__options {
       background: transparent;
       border: 0;
       color: var(--light-grey);
       font-size: 17px;
     }
+
     .task__stats {
       display: flex;
       justify-content: space-between;
@@ -168,12 +206,15 @@
       color: var(--light-grey);
       font-size: 12px;
     }
+
     .task__stats span:not(:last-of-type) {
       margin-right: 1rem;
     }
+
     .task__stats svg {
       margin-right: 5px;
     }
+
     .task__owner {
       width: 25px;
       height: 25px;
@@ -184,9 +225,11 @@
       right: 0;
       bottom: 0;
     }
+
     .task-hover {
       border: 3px dashed var(--light-grey) !important;
     }
+
     .task-details {
       width: 24%;
       border-left: 1px solid #d9e0e9;
@@ -195,21 +238,26 @@
       vertical-align: top;
       padding: 3rem 2rem;
     }
+
     .tag-progress {
       margin: 1.5rem 0;
     }
+
     .tag-progress h2 {
       font-size: 16px;
       margin-bottom: 1rem;
     }
+
     .tag-progress p {
       display: flex;
       width: 100%;
       justify-content: space-between;
     }
+
     .tag-progress p span {
       color: #b4b4b4;
     }
+
     .tag-progress .progress {
       width: 100%;
       -webkit-appearance: none;
@@ -218,42 +266,53 @@
       border-radius: 10px;
       height: 10px;
     }
+
     .tag-progress .progress::-webkit-progress-bar,
     .tag-progress .progress::-webkit-progress-value {
       border-radius: 10px;
     }
+
     .tag-progress .progress--copyright::-webkit-progress-bar {
       background-color: #ecd8e6;
     }
+
     .tag-progress .progress--copyright::-webkit-progress-value {
       background: #d459e8;
     }
+
     .tag-progress .progress--illustration::-webkit-progress-bar {
       background-color: #dee7e3;
     }
+
     .tag-progress .progress--illustration::-webkit-progress-value {
       background-color: #46bd84;
     }
+
     .tag-progress .progress--design::-webkit-progress-bar {
       background-color: #d8e7f4;
     }
+
     .tag-progress .progress--design::-webkit-progress-value {
       background-color: #08a0f7;
     }
+
     .task-activity h2 {
       font-size: 16px;
       margin-bottom: 1rem;
     }
+
     .task-activity li {
       list-style: none;
       margin: 1rem 0;
       padding: 0rem 1rem 1rem 3rem;
       position: relative;
     }
+
     .task-activity time {
       display: block;
       color: var(--light-grey);
     }
+
     .task-icon {
       width: 30px;
       height: 30px;
@@ -265,27 +324,34 @@
       align-items: center;
       justify-content: center;
     }
+
     .task-icon svg {
       font-size: 12px;
       color: var(--white);
     }
+
     .task-icon--attachment {
       background-color: #fba63c;
     }
+
     .task-icon--comment {
       background-color: #5dc983;
     }
+
     .task-icon--edit {
       background-color: #7784ee;
     }
+
     @media only screen and (max-width: 1300px) {
       .project {
         max-width: 100%;
       }
+
       .task-details {
         width: 100%;
         display: flex;
       }
+
       .tag-progress,
       .task-activity {
         flex-basis: 50%;
@@ -295,30 +361,37 @@
         margin: 1rem;
       }
     }
+
     @media only screen and (max-width: 1000px) {
       .project-column:nth-child(2),
       .project-column:nth-child(3) {
         display: none;
       }
+
       .project-tasks {
         grid-template-columns: 1fr 1fr;
       }
     }
+
     @media only screen and (max-width: 600px) {
       .project-column:nth-child(4) {
         display: none;
       }
+
       .project-tasks {
         grid-template-columns: 1fr;
       }
+
       .task-details {
         flex-wrap: wrap;
         padding: 3rem 1rem;
       }
+
       .tag-progress,
       .task-activity {
         flex-basis: 100%;
       }
+
       h1 {
         font-size: 25px;
       }
@@ -334,10 +407,12 @@
       flex-direction: column;
       height: 100vh;
     }
+
     .sidenav-footer {
       margin-top: 135px;
       padding-bottom: 1rem;
     }
+
     .xp-circle {
       width: 20px;
       height: 20px;
@@ -350,22 +425,26 @@
       align-items: center;
       justify-content: center;
     }
+
     #xp-points {
       font-size: 14px;
       font-weight: bold;
       color: #ffffff;
     }
+
     .btn-purple {
       background-color: #d00c9c;
       color: #ffffff;
       border-color: #6f42c1;
     }
+
     #unique-xp-display {
       background-color: #d00c9c;
       color: white;
       padding: 3px 8px;
       border-radius: 8px;
     }
+
     #unique-xp-display .unique-xp-circle {
       background-color: #ffc40c;
       color: white;
@@ -377,10 +456,12 @@
       justify-content: center;
       margin-right: 5px;
     }
+
     #unique-xp-points {
       font-weight: bold;
       font-size: 14px;
     }
+
     #sidenav-main {
       background-color: #ffffff;
       border-radius: 12px;
@@ -395,15 +476,18 @@
       flex-grow: 1;
       align-self: center;
     }
+
     .task__actions {
       display: flex;
       gap: 5px;
     }
+
     .task__actions .btn {
       padding: 2px 6px;
       color: var(--light-grey);
       margin-bottom: 0 !important;
     }
+
     .task__actions .btn .fas {
       color: var(--light-grey);
       font-size: 115%;
@@ -413,36 +497,49 @@
       #sidenav-main {
         display: none;
       }
+
       #top-nav {
         display: block;
       }
     }
+
     @media (min-width: 1201px) {
       #top-nav {
         display: none;
       }
     }
+
     .custom-logo-size {
       height: 50px !important;
     }
+
     .sidenav-header {
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100px;
     }
+
     .custom-logo-size {
       max-height: 80%;
       width: auto;
     }
-    .text-warning { color: #dcb234; }
-    .text-success { color: #3c763d; }
+
+    .text-warning {
+      color: #dcb234;
+    }
+
+    .text-success {
+      color: #3c763d;
+    }
+
     .title-container {
       display: flex;
       flex-direction: column;
       justify-content: center;
       height: 50px;
     }
+
     .title-container p {
       margin: 0;
       line-height: 1.1;
@@ -450,6 +547,7 @@
       white-space: pre-line;
       font-size: 0.75rem;
     }
+
     .xp-points-bar {
       background-color: #f8f9fa;
       padding: 10px;
@@ -457,11 +555,13 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       text-align: center;
     }
+
     .xp-points-bar h2 {
       margin: 0;
       font-size: 24px;
       font-weight: normal;
     }
+
     .xp-points-bar #xp-points {
       font-size: 20px;
       font-weight: bold;
@@ -479,6 +579,7 @@
       width: 100%;
       text-align: left;
     }
+
     #welcome-banner .close {
       background: transparent;
       border: none;
@@ -489,54 +590,49 @@
       opacity: 0.5;
       transition: opacity 0.15s ease-in-out;
     }
+
     #welcome-banner .close:hover {
       opacity: 1;
     }
+
     #welcome-banner .close:focus {
       outline: none;
       box-shadow: none;
     }
 
-    /* Highlights page specific */
-    :root {
-      --primary-color: #3a9fff;
-      --text-color: #344767;
-      --bg-color: #f8f9fa;
-      --card-bg: #ffffff;
-      --hover-color: #f3f4f6;
-    }
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    }
+    /* Highlights page */
     .highlights-container {
       max-width: 1200px;
       margin: 2rem auto;
       padding: 0 1rem;
     }
+
     .highlights-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 1.5rem;
     }
+
     .highlight-card {
       background: var(--card-bg);
       border-radius: 1rem;
       padding: 1.5rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
       transition: transform 0.2s, box-shadow 0.2s;
     }
+
     .highlight-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
+
     .highlight-header-line {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 0.75rem;
     }
+
     .highlight-source {
       font-size: 0.75rem;
       font-weight: 600;
@@ -545,14 +641,17 @@
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
+
     .highlight-source-media {
       background-color: #e0f2ff;
       color: #1e88e5;
     }
+
     .highlight-source-chat {
       background-color: #ffe7f4;
       color: #d00c9c;
     }
+
     .highlight-text {
       color: var(--primary-color);
       font-weight: 500;
@@ -561,6 +660,7 @@
       line-height: 1.5;
       white-space: pre-wrap;
     }
+
     .highlight-content {
       color: var(--text-color);
       margin-bottom: 1rem;
@@ -568,6 +668,7 @@
       font-size: 0.8rem;
       opacity: 0.8;
     }
+
     .highlight-footer {
       display: flex;
       justify-content: space-between;
@@ -575,10 +676,12 @@
       color: #666;
       font-size: 0.85rem;
     }
+
     .highlight-actions {
       display: flex;
       gap: 0.75rem;
     }
+
     .action-btn {
       background: none;
       border: none;
@@ -588,9 +691,11 @@
       border-radius: 0.25rem;
       transition: background-color 0.2s;
     }
+
     .action-btn:hover {
       background-color: var(--hover-color);
     }
+
     .action-btn i {
       font-size: 1rem;
     }
@@ -599,33 +704,45 @@
       background: linear-gradient(to right, #ffffff, #f8f9fa);
       padding: 2rem;
       border-radius: 1rem;
-      box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
       margin-bottom: 2rem;
     }
+
     .header-content {
       max-width: 1200px;
       margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .header-top-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 1rem;
     }
+
     .header h1 {
       font-size: 1.8rem;
       color: #344767;
       margin: 0;
       font-weight: 600;
     }
+
     .header-controls {
       display: flex;
       gap: 1rem;
       align-items: center;
+      flex-wrap: wrap;
     }
+
     .select-wrapper {
       position: relative;
-      min-width: 200px;
+      min-width: 180px;
     }
+
     .select-wrapper .select-icon {
       position: absolute;
       right: 1rem;
@@ -634,6 +751,7 @@
       color: #6c757d;
       pointer-events: none;
     }
+
     .filter-dropdown {
       width: 100%;
       padding: 0.75rem 2.5rem 0.75rem 1rem;
@@ -646,11 +764,13 @@
       cursor: pointer;
       transition: all 0.2s ease;
     }
+
     .filter-dropdown:focus {
       outline: none;
       border-color: var(--primary-color);
       box-shadow: 0 0 0 3px rgba(58, 159, 255, 0.1);
     }
+
     .download-btn {
       display: flex;
       align-items: center;
@@ -664,32 +784,71 @@
       font-weight: 500;
       cursor: pointer;
       transition: all 0.2s ease;
+      white-space: nowrap;
     }
+
     .download-btn:hover {
       background: #2b8ae8;
       transform: translateY(-1px);
     }
+
     .download-btn:active {
       transform: translateY(0);
     }
+
     .download-btn i {
       font-size: 1rem;
+    }
+
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .stat-pill {
+      background: #ffffff;
+      border-radius: 999px;
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+      font-size: 0.85rem;
+    }
+
+    .stat-pill .stat-label {
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+      color: #6b7280;
+    }
+
+    .stat-pill .stat-value {
+      font-weight: 700;
+      color: #111827;
+      font-size: 0.95rem;
     }
 
     @media (max-width: 768px) {
       .highlights-grid {
         grid-template-columns: 1fr;
       }
+
       .header-content {
+        align-items: stretch;
+      }
+
+      .header-controls {
         flex-direction: column;
         align-items: stretch;
       }
-      .header-controls {
-        flex-direction: column;
-      }
+
       .select-wrapper {
         width: 100%;
       }
+
       .download-btn {
         width: 100%;
         justify-content: center;
@@ -709,21 +868,57 @@
       <div class="highlights-container">
         <div class="header">
           <div class="header-content">
-            <h1>My Highlights</h1>
-            <div class="header-controls">
-              <div class="select-wrapper">
-                <select id="videoFilter" class="filter-dropdown">
-                  <option value="all">All Videos</option>
-                  {% for title in video_titles %}
-                    <option value="{{ title }}">{{ title }}</option>
-                  {% endfor %}
-                </select>
-                <i class="fas fa-chevron-down select-icon"></i>
+            <div class="header-top-row">
+              <h1>My Highlights</h1>
+
+              <div class="header-controls">
+                <!-- Source filter: All / Video / Article / Chat -->
+                <div class="select-wrapper">
+                  <select id="sourceFilter" class="filter-dropdown">
+                    <option value="all">All Types</option>
+                    <option value="media">Video</option>
+                    <option value="article">Article</option>
+                    <option value="chat">Chat</option>
+                  </select>
+                  <i class="fas fa-filter select-icon"></i>
+                </div>
+
+                <!-- Video-only filter -->
+                <div class="select-wrapper">
+                  <select id="videoFilter" class="filter-dropdown">
+                    <option value="all">All Videos</option>
+                    {% for title in video_titles %}
+                      <option value="{{ title }}">{{ title }}</option>
+                    {% endfor %}
+                  </select>
+                  <i class="fas fa-chevron-down select-icon"></i>
+                </div>
+
+                <button class="download-btn" onclick="downloadHighlights()">
+                  <i class="fas fa-download"></i>
+                  <span>Download All</span>
+                </button>
               </div>
-              <button class="download-btn" onclick="downloadHighlights()">
-                <i class="fas fa-download"></i>
-                <span>Download All</span>
-              </button>
+            </div>
+
+            <!-- Motivational stats row -->
+            <div class="stats-row">
+              <div class="stat-pill">
+                <span class="stat-label">Total</span>
+                <span class="stat-value">{{ stats.total }}</span>
+              </div>
+              <div class="stat-pill">
+                <span class="stat-label">Video</span>
+                <span class="stat-value">{{ stats.video }}</span>
+              </div>
+              <div class="stat-pill">
+                <span class="stat-label">Article</span>
+                <span class="stat-value">{{ stats.article }}</span>
+              </div>
+              <div class="stat-pill">
+                <span class="stat-label">Chat</span>
+                <span class="stat-value">{{ stats.chat }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -731,6 +926,7 @@
         <div class="highlights-grid">
           {% for highlight in highlights %}
             <div class="highlight-card"
+                 data-source="{{ highlight.source }}"
                  data-video-title="{% if highlight.source == 'media' and highlight.media %}{{ highlight.media.title }}{% else %}{% endif %}">
               <div class="highlight-header-line">
                 <span class="highlight-source
@@ -831,28 +1027,42 @@
           link.click();
         }
 
-        // Filter by video title; article + chat highlights only appear in "All Videos"
         document.addEventListener("DOMContentLoaded", function() {
-          const filterDropdown = document.getElementById("videoFilter");
+          const sourceFilter = document.getElementById("sourceFilter");
+          const videoFilter = document.getElementById("videoFilter");
           const highlightCards = document.querySelectorAll(".highlight-card");
 
-          filterDropdown.addEventListener("change", function() {
-            const selectedTitle = this.value.toLowerCase();
+          function applyFilters() {
+            const selectedSource = sourceFilter.value; // all, media, article, chat
+            const selectedVideoTitle = videoFilter.value.toLowerCase();
 
             highlightCards.forEach(card => {
-              const videoTitle = (card.getAttribute("data-video-title") || "").toLowerCase();
+              const cardSource = (card.getAttribute("data-source") || "").toLowerCase();
+              const cardVideoTitle = (card.getAttribute("data-video-title") || "").toLowerCase();
 
-              if (selectedTitle === "all") {
-                // Show everything (media + article + chat)
-                card.style.display = "block";
-              } else if (videoTitle === selectedTitle) {
-                // Only media highlights from that video
+              let matchesSource = (selectedSource === "all") || (cardSource === selectedSource);
+              let matchesVideo = true;
+
+              // Video filter only applies to media highlights
+              if (selectedVideoTitle !== "all") {
+                if (cardSource === "media") {
+                  matchesVideo = (cardVideoTitle === selectedVideoTitle);
+                } else {
+                  // Non-video highlights are hidden when a specific video is selected
+                  matchesVideo = false;
+                }
+              }
+
+              if (matchesSource && matchesVideo) {
                 card.style.display = "block";
               } else {
                 card.style.display = "none";
               }
             });
-          });
+          }
+
+          sourceFilter.addEventListener("change", applyFilters);
+          videoFilter.addEventListener("change", applyFilters);
         });
 
         // Delete highlight via AJAX and remove from DOM

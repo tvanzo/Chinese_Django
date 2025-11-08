@@ -232,24 +232,43 @@ def create_highlight(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+@login_required
 def delete_highlight(request, highlight_id):
+    # Try to read JSON, but fall back to URL param if needed
     try:
-        data = json.loads(request.body.decode('utf-8'))  # Parse JSON from the request body
-        highlight_id = data['highlight_id']
-        highlight = Highlight.objects.get(pk=highlight_id)
+        data = json.loads(request.body.decode('utf-8') or '{}')
+    except json.JSONDecodeError:
+        data = {}
 
-        # Check if the user has the right to delete this highlight
-        if request.user == highlight.user:
-            highlight.delete()
-            user_profile = request.user.profile
+    highlight_id = data.get('highlight_id', highlight_id)
+
+    obj = None
+    is_article = False
+
+    # 1) Try normal media/chat Highlight
+    try:
+        obj = Highlight.objects.get(pk=highlight_id, user=request.user)
+        is_article = False
+    except Highlight.DoesNotExist:
+        # 2) Try ArticleHighlight
+        try:
+            obj = ArticleHighlight.objects.get(pk=highlight_id, user=request.user)
+            is_article = True
+        except ArticleHighlight.DoesNotExist:
+            return JsonResponse(
+                {'status': 'error', 'message': 'Highlight not found'},
+                status=404
+            )
+
+    # If it’s a regular Highlight, keep your old profile counter logic
+    if not is_article:
+        user_profile = request.user.profile
+        if user_profile.total_highlights > 0:
             user_profile.total_highlights -= 1
             user_profile.save()
-            return JsonResponse({'status': 'success'})
 
-        else:
-            return JsonResponse({'status': 'error', 'message': 'Permission denied'})
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)})
+    obj.delete()
+    return JsonResponse({'status': 'success'})
 
 def modify_highlight(request, highlight_id):
     if request.method == 'PUT':
@@ -309,41 +328,58 @@ def get_all_highlights(request):
 def highlights(request):
     user = request.user
 
-    # 1) Video / chat highlights (old model)
-    video_highlights = (
+    # Media + chat highlights (assuming Highlight has a "source" field)
+    all_highlights = (
         Highlight.objects
         .filter(user=user)
         .select_related('media')
         .order_by('-created_at')
     )
 
-    # 2) Article / web highlights (new model)
+    # Article highlights
     article_highlights = (
         ArticleHighlight.objects
         .filter(user=user)
         .order_by('-created_at')
     )
 
-    # 3) Normalize into a single list for the template
+    # Build a unified list so the template can treat everything the same
     unified = []
 
-    for h in video_highlights:
-        # Make sure .source exists (media / chat)
-        if not getattr(h, "source", None):
-            h.source = "media" if getattr(h, "media_id", None) else "chat"
-        unified.append(h)
+    for h in all_highlights:
+        unified.append({
+            'id': h.id,
+            'source': getattr(h, 'source', 'media'),  # 'media' or 'chat'
+            'highlighted_text': h.highlighted_text,
+            'created_at': h.created_at,
+            'media': h.media,
+            'page_title': None,
+            'page_url': None,
+            'is_article': False,
+        })
 
-    for ah in article_highlights:
-        # Make ArticleHighlight "look like" Highlight for the template
-        ah.source = "article"
-        ah.highlighted_text = ah.text        # alias to match template
-        ah.media = None                      # so media checks don't fail
-        unified.append(ah)
+    for a in article_highlights:
+        unified.append({
+            'id': a.id,
+            'source': 'article',
+            'highlighted_text': a.text,
+            'created_at': a.created_at,
+            'media': None,
+            'page_title': a.page_title,
+            'page_url': a.page_url,
+            'is_article': True,
+        })
 
-    # Sort everything by created_at descending
-    unified.sort(key=lambda obj: obj.created_at, reverse=True)
+    # Sort newest first
+    unified.sort(key=lambda h: h['created_at'], reverse=True)
 
-    # Only video titles for the dropdown filter
+    # Stats counts
+    video_count = sum(1 for h in unified if h['source'] == 'media')
+    chat_count = sum(1 for h in unified if h['source'] == 'chat')
+    article_count = sum(1 for h in unified if h['source'] == 'article')
+    total_count = video_count + chat_count + article_count
+
+    # Video titles for the dropdown
     video_titles = (
         Media.objects
         .filter(highlights__user=user)
@@ -351,14 +387,17 @@ def highlights(request):
         .distinct()
     )
 
-    return render(
-        request,
-        'accounts/highlights.html',
-        {
-            'highlights': unified,
-            'video_titles': video_titles,
+    return render(request, 'accounts/highlights.html', {
+        'highlights': unified,
+        'video_titles': video_titles,
+        'stats': {
+            'video': video_count,
+            'chat': chat_count,
+            'article': article_count,
+            'total': total_count,
         },
-    )
+    })
+
 
 
 @login_required
