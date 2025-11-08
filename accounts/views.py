@@ -1088,7 +1088,7 @@ def handle_payment_success(request):
                 print(f"Redirecting to Home: /")
                 return redirect('/')  # Redirect to home page
             else:
-                # Clear messages and handle payment not completed
+                # Clear messages and handle payment not completedr
                 storage = messages.get_messages(request)
                 for message in storage:
                     pass
