@@ -1,65 +1,103 @@
+{% extends "base.html" %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Read – Chinese Articles</title>
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
-  <link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet">
-  <link href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet">
-  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-  <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet">
-  <style>
-    .article-card {
-      border-radius: 16px;
-      padding: 16px 18px;
-      background: #ffffff;
-      box-shadow: 0 8px 20px rgba(15,23,42,0.05);
-      border: 1px solid #e5e7eb;
-      margin-bottom: 12px;
-      cursor: pointer;
-      transition: box-shadow .15s, transform .1s;
-    }
-    .article-card:hover {
-      box-shadow: 0 10px 25px rgba(15,23,42,0.12);
-      transform: translateY(-1px);
-    }
-    .article-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
-    .article-meta { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
-    .article-summary { font-size: 13px; color: #4b5563; }
-  </style>
-</head>
-<body class="g-sidenav-show bg-gray-100">
-
-  {% include 'accounts/navbar.html' %}
-  {% include 'accounts/sidebar.html' %}
-
-  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
-    <div class="container-fluid py-4">
-      <h5 class="mb-3">Read – Chinese Articles</h5>
-
-      {% if articles %}
-        {% for article in articles %}
-          <a href="{% url 'read_detail' article.slug %}" style="text-decoration:none;">
-            <div class="article-card">
-              <div class="article-title">{{ article.title }}</div>
-              <div class="article-meta">
-                {{ article.level|default:"" }} • {{ article.created_at|date:"Y-m-d" }}
-              </div>
-              {% if article.description %}
-                <div class="article-summary">
-                  {{ article.description|truncatechars:140 }}
-                </div>
-              {% endif %}
-            </div>
-          </a>
-        {% endfor %}
-      {% else %}
-        <p>No articles yet. Add some in the admin.</p>
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row mb-3">
+    <div class="col">
+      <a href="{% url 'read_list' %}"
+         class="text-sm text-primary text-decoration-none mb-2 d-inline-flex align-items-center">
+        <i class="fas fa-arrow-left me-1"></i> Back to articles
+      </a>
+      <h4 class="mb-1">{{ article.title }}</h4>
+      {% if article.level %}
+        <span class="badge bg-gradient-warning text-xs me-2">{{ article.level }}</span>
+      {% endif %}
+      {% if article.description %}
+        <p class="text-muted mt-2 mb-0">{{ article.description }}</p>
       {% endif %}
     </div>
-  </main>
+  </div>
 
-</body>
-</html>
+  <div class="row">
+    <div class="col-lg-9">
+      <div id="article-reader" class="card shadow-sm border-0">
+        <div class="card-body">
+          <div id="article-content"
+               class="article-content"
+               onmouseup="handleArticleSelection()">
+            {{ article.content|linebreaksbr }}
+          </div>
+        </div>
+      </div>
+      <small class="text-muted d-block mt-2">
+        Select text to save a highlight to your notebook.
+      </small>
+    </div>
+
+    <div class="col-lg-3">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h6 class="mb-2">Highlights</h6>
+          <div id="article-highlights" class="small text-muted">
+            Highlights you create will appear in your global <strong>Highlights</strong> tab.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function getSelectionText() {
+  var text = "";
+  if (window.getSelection) {
+    text = window.getSelection().toString();
+  } else if (document.selection && document.selection.type !== "Control") {
+    text = document.selection.createRange().text;
+  }
+  return text.trim();
+}
+
+function handleArticleSelection() {
+  var selected = getSelectionText();
+  if (!selected) return;
+
+  if (!confirm("Save this as a highlight?\n\n" + selected)) {
+    return;
+  }
+
+  fetch("{% url 'chat_highlights' %}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": "{{ csrf_token }}"
+    },
+    body: JSON.stringify({ text: selected })
+  })
+  .then(function (res) {
+    if (!res.ok) throw new Error("Request failed");
+    return res.json();
+  })
+  .then(function () {
+    alert("Saved to your highlights.");
+  })
+  .catch(function (err) {
+    console.error(err);
+    alert("Could not save highlight.");
+  });
+}
+</script>
+
+<style>
+.article-content {
+  font-size: 1rem;
+  line-height: 1.9;
+  letter-spacing: 0.02em;
+  white-space: pre-wrap;
+}
+.article-content::selection {
+  background: #fde68a;
+}
+</style>
+{% endblock %}

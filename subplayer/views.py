@@ -1529,9 +1529,5 @@ def read_list(request):
 
 @login_required
 def read_detail(request, slug):
-    """
-    /read/<slug>/ – read a specific article.
-    Highlights will use the existing Highlight model with source='article'.
-    """
     article = get_object_or_404(Article, slug=slug)
     return render(request, "read/read_detail.html", {"article": article})
