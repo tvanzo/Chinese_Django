@@ -84,6 +84,7 @@ def register(request):
         form = CustomUserCreationForm()
 
     return render(request, 'accounts/register.html', {'form': form})
+
 @login_required
 def media_list(request):
     media_data = serializers.serialize('json', Media.objects.all())
@@ -229,6 +230,7 @@ def create_highlight(request):
         return JsonResponse({'error': f'Missing key in request data: {e}'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
 def delete_highlight(request, highlight_id):
     try:
         data = json.loads(request.body.decode('utf-8'))  # Parse JSON from the request body
@@ -357,13 +359,6 @@ def download_subtitles(request):
 def list_media_by_status(request, status):
     media_statuses = UserMediaStatus.objects.filter(user=request.user, status=status)
     return render(request, 'media/list_by_status.html', {'media_statuses': media_statuses})
-
-# assigning srt variable with the list
-# of dictionaries obtained by the get_transcript() function
-#srt = YouTubeTranscriptApi.get_transcript("Ku507_9m2s8", languages=['zh'])
-
-# prints the result
-#print(srt)
 
 
 
@@ -532,8 +527,6 @@ def update_media_status(request, media_id, status=None):
 
 
 
-
-
 def get_words_read_data(user):
     one_month_ago = datetime.now() - timedelta(days=30)
     words_read_per_day = (
@@ -586,7 +579,6 @@ import os
 @login_required
 @login_required
 @login_required
-
 def stats_view(request):
     user = request.user
     profile = user.profile
@@ -1003,6 +995,7 @@ def create_checkout_session(request):
     except Exception as e:
         print(f"Exception: {str(e)}")  # Log the exception
         return JsonResponse({'error': 'Internal server error'}, status=500)
+
 @csrf_exempt
 def stripe_webhook(request):
     payload = request.body
@@ -1026,7 +1019,6 @@ def stripe_webhook(request):
     return HttpResponse(status=200)
 
 from django.contrib.auth import login
-from stripe.error import StripeError
 from django.urls import reverse
 from django.contrib.auth import login
 
@@ -1038,7 +1030,6 @@ from django.contrib.auth import login
 from django.contrib import messages
 from django.urls import reverse
 from django.shortcuts import redirect
-from stripe.error import StripeError
 
 from django.utils import timezone
 from datetime import datetime
@@ -1123,6 +1114,7 @@ def handle_payment_success(request):
 
     # This line should not be reached if all conditions are handled, but just in case:
     return redirect('register')
+
 @login_required
 def account_view(request):
     try:
@@ -1171,6 +1163,7 @@ def account_view(request):
     }
 
     return render(request, 'accounts/account.html', context)
+
 @login_required
 def update_payment_view(request):
     profile = Profile.objects.get(user=request.user)
