@@ -67,13 +67,17 @@ function handleArticleSelection() {
     return;
   }
 
-  fetch("{% url 'chat_highlights' %}", {
+  fetch("{% url 'create_article_highlight' %}", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "X-CSRFToken": "{{ csrf_token }}"
     },
-    body: JSON.stringify({ text: selected })
+    body: JSON.stringify({
+      text: selected,
+      page_url: window.location.href,
+      page_title: "{{ article.title|escapejs }}"
+    })
   })
   .then(function (res) {
     if (!res.ok) throw new Error("Request failed");
@@ -88,6 +92,7 @@ function handleArticleSelection() {
   });
 }
 </script>
+
 
 <style>
 .article-content {

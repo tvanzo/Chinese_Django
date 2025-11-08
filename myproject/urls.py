@@ -93,7 +93,7 @@ urlpatterns = [
     path('api/generate-highlight-study-guide/', subplayer_views.generate_highlight_study_guide, name='generate_highlight_study_guide'),
     path('api/generate-highlights-study-guide/', subplayer_views.generate_all_highlights_study_guide, name='generate_all_highlights_study_guide'),
 path("api/web-highlight/", subplayer_views.web_highlight, name="web_highlight"),
-
+path("api/article-highlight/", subplayer_views.api_article_highlight, name="api_article_highlight"),
     # Channel subscription
     path('subscribe/<int:channel_id>/', subplayer_views.subscribe_to_channel, name='subscribe_to_channel'),
     path('unsubscribe/<int:channel_id>/', subplayer_views.unsubscribe_from_channel, name='unsubscribe_from_channel'),
@@ -102,6 +102,7 @@ path("api/web-highlight/", subplayer_views.web_highlight, name="web_highlight"),
     path('read/', subplayer_views.read_list, name='read_list'),
     path('read/<slug:slug>/', subplayer_views.read_detail, name='read_detail'),
 
+    path("read/highlight/", subplayer_views.create_article_highlight, name="create_article_highlight"),
     # Chat app
     path("chat/", include(("chat.urls", "chat"), namespace="chat")),
 

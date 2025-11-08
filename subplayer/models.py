@@ -121,12 +121,46 @@ class Highlight(models.Model):
         return f'[{self.source}] {self.highlighted_text[:50]}'
 
 class Article(models.Model):
-    slug = models.SlugField(unique=True)
     title = models.CharField(max_length=255)
-    level = models.CharField(max_length=20, blank=True)
+    slug = models.SlugField(unique=True)
+    level = models.CharField(max_length=50, blank=True)
     description = models.TextField(blank=True)
     content = models.TextField()
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    # for Chrome-extension / external pages:
+    source_url = models.URLField(blank=True, null=True)
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="articles"
+    )
 
     def __str__(self):
         return self.title
+
+
+class ArticleHighlight(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="article_highlights"
+    )
+
+    # NEW: link directly to Article (can be null for old rows)
+    article = models.ForeignKey(
+        Article,
+        on_delete=models.CASCADE,
+        related_name="highlights",
+        null=True,
+        blank=True,
+    )
+
+    # keep these so the extension can send raw info, and they still work
+    page_url = models.URLField(max_length=500)
+    page_title = models.CharField(max_length=255, blank=True)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        label = self.page_title or self.page_url
+        return f"{self.user} – {label} – {self.text[:40]}"

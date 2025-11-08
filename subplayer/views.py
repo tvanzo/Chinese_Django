@@ -9,7 +9,9 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.views.decorators.http import require_POST
 from django.utils import timezone
-
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+from django.utils.text import slugify
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
@@ -1531,3 +1533,93 @@ def read_list(request):
 def read_detail(request, slug):
     article = get_object_or_404(Article, slug=slug)
     return render(request, "read/read_detail.html", {"article": article})
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+
+from .models import ArticleHighlight   # make sure this import is present
+
+
+@csrf_exempt
+@login_required
+def create_article_highlight(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    text = (data.get("text") or "").strip()
+    page_url = data.get("page_url") or request.build_absolute_uri()
+    page_title = data.get("page_title") or ""
+
+    if not text:
+        return JsonResponse({"error": "No text provided"}, status=400)
+
+    highlight = ArticleHighlight.objects.create(
+        user=request.user,
+        text=text,
+        page_url=page_url,
+        page_title=page_title,
+    )
+
+    return JsonResponse(
+        {
+            "id": highlight.id,
+            "text": highlight.text,
+            "page_url": highlight.page_url,
+            "page_title": highlight.page_title,
+            "created_at": highlight.created_at.isoformat(),
+        },
+        status=201,
+    )
+@csrf_exempt  # OK for now since it’s a browser extension; you can tighten later
+@require_POST
+@login_required
+def api_article_highlight(request):
+    try:
+        data = json.loads(request.body or "{}")
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    page_url = data.get("page_url")
+    page_title = (data.get("page_title") or "").strip()
+    text = (data.get("text") or "").strip()
+
+    if not page_url or not text:
+        return JsonResponse({"error": "page_url and text are required"}, status=400)
+
+    # 1) Ensure there is an Article for this URL (per user)
+    default_title = page_title or page_url
+    article, created = Article.objects.get_or_create(
+        source_url=page_url,
+        created_by=request.user,
+        defaults={
+            "title": default_title[:255],
+            "slug": slugify(default_title)[:50] or slugify(str(hash(page_url)))[:50],
+            "level": "",
+            "description": "",
+            "content": "",  # you can later store a snapshot of the article here
+        },
+    )
+
+    # 2) Save the highlight itself
+    highlight = ArticleHighlight.objects.create(
+        user=request.user,
+        page_url=page_url,
+        page_title=page_title[:255],
+        text=text,
+    )
+
+    return JsonResponse(
+        {
+            "id": highlight.id,
+            "article_id": article.id,
+            "created": True,
+        },
+        status=201,
+    )
