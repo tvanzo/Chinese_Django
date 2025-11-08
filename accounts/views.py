@@ -35,6 +35,7 @@ from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from .forms import CustomUserCreationForm
 from django.contrib import messages
+from subplayer.models import ArticleHighlight
 
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
@@ -307,18 +308,57 @@ def get_all_highlights(request):
 @login_required
 def highlights(request):
     user = request.user
-    profile = Profile.objects.get(user=user)
 
-    # Fetch all highlights for the user
-    all_highlights = Highlight.objects.filter(user=user).select_related('media').order_by('created_at')
+    # 1) Video / chat highlights (old model)
+    video_highlights = (
+        Highlight.objects
+        .filter(user=user)
+        .select_related('media')
+        .order_by('-created_at')
+    )
 
-    # Get unique video titles
-    video_titles = Media.objects.filter(highlights__user=user).values_list('title', flat=True).distinct()
+    # 2) Article / web highlights (new model)
+    article_highlights = (
+        ArticleHighlight.objects
+        .filter(user=user)
+        .order_by('-created_at')
+    )
 
-    return render(request, 'accounts/highlights.html', {
-        'highlights': all_highlights,
-        'video_titles': video_titles,  # Pass video titles to the template
-    })
+    # 3) Normalize into a single list for the template
+    unified = []
+
+    for h in video_highlights:
+        # Make sure .source exists (media / chat)
+        if not getattr(h, "source", None):
+            h.source = "media" if getattr(h, "media_id", None) else "chat"
+        unified.append(h)
+
+    for ah in article_highlights:
+        # Make ArticleHighlight "look like" Highlight for the template
+        ah.source = "article"
+        ah.highlighted_text = ah.text        # alias to match template
+        ah.media = None                      # so media checks don't fail
+        unified.append(ah)
+
+    # Sort everything by created_at descending
+    unified.sort(key=lambda obj: obj.created_at, reverse=True)
+
+    # Only video titles for the dropdown filter
+    video_titles = (
+        Media.objects
+        .filter(highlights__user=user)
+        .values_list('title', flat=True)
+        .distinct()
+    )
+
+    return render(
+        request,
+        'accounts/highlights.html',
+        {
+            'highlights': unified,
+            'video_titles': video_titles,
+        },
+    )
 
 
 @login_required

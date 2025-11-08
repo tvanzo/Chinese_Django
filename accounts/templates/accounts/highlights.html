@@ -731,15 +731,32 @@
         <div class="highlights-grid">
           {% for highlight in highlights %}
             <div class="highlight-card"
-                 data-video-title="{{ highlight.media.title|default_if_none:'' }}">
+                 data-video-title="{% if highlight.source == 'media' and highlight.media %}{{ highlight.media.title }}{% else %}{% endif %}">
               <div class="highlight-header-line">
                 <span class="highlight-source
-                  {% if highlight.source == 'media' %}highlight-source-media{% else %}highlight-source-chat{% endif %}">
-                  {% if highlight.source == 'media' %}Video{% else %}Chat{% endif %}
+                  {% if highlight.source == 'media' %}
+                    highlight-source-media
+                  {% elif highlight.source == 'article' %}
+                    highlight-source-media
+                  {% else %}
+                    highlight-source-chat
+                  {% endif %}">
+                  {% if highlight.source == 'media' %}
+                    Video
+                  {% elif highlight.source == 'article' %}
+                    Article
+                  {% else %}
+                    Chat
+                  {% endif %}
                 </span>
+
                 {% if highlight.source == 'media' and highlight.media %}
                   <span style="font-size: 0.75rem; opacity: 0.7;">
                     {{ highlight.media.title }}
+                  </span>
+                {% elif highlight.source == 'article' %}
+                  <span style="font-size: 0.75rem; opacity: 0.7;">
+                    {{ highlight.page_title|default:highlight.page_url }}
                   </span>
                 {% endif %}
               </div>
@@ -751,6 +768,8 @@
               <div class="highlight-content">
                 {% if highlight.source == 'media' and highlight.media %}
                   From video <strong>{{ highlight.media.title }}</strong>
+                {% elif highlight.source == 'article' %}
+                  From article <strong>{{ highlight.page_title|default:highlight.page_url }}</strong>
                 {% else %}
                   From chat conversation
                 {% endif %}
@@ -768,7 +787,16 @@
                        title="Open video">
                       <i class="fas fa-external-link-alt"></i>
                     </a>
+                  {% elif highlight.source == 'article' and highlight.page_url %}
+                    <a href="{{ highlight.page_url }}"
+                       class="action-btn"
+                       target="_blank"
+                       rel="noopener"
+                       title="Open article">
+                      <i class="fas fa-external-link-alt"></i>
+                    </a>
                   {% endif %}
+
                   <form method="POST"
                         class="delete-form"
                         data-id="{{ highlight.id }}"
@@ -803,7 +831,7 @@
           link.click();
         }
 
-        // Filter by video title; chat highlights only appear in "All Videos"
+        // Filter by video title; article + chat highlights only appear in "All Videos"
         document.addEventListener("DOMContentLoaded", function() {
           const filterDropdown = document.getElementById("videoFilter");
           const highlightCards = document.querySelectorAll(".highlight-card");
@@ -815,7 +843,7 @@
               const videoTitle = (card.getAttribute("data-video-title") || "").toLowerCase();
 
               if (selectedTitle === "all") {
-                // Show everything (media + chat)
+                // Show everything (media + article + chat)
                 card.style.display = "block";
               } else if (videoTitle === selectedTitle) {
                 // Only media highlights from that video
