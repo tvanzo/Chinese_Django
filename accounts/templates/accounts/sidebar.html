@@ -1,189 +1,483 @@
 {% load static %}
 
+<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3"
+       id="sidenav-main">
 
-<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3" id="sidenav-main">
+  <!-- Sidebar collapse handle -->
+  <button type="button"
+          id="sidebar-toggle-btn"
+          class="sidebar-toggle-btn"
+          onclick="toggleSidebarCollapse()"
+          aria-label="Toggle sidebar"
+          title="Toggle sidebar">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+
   <div class="sidenav-inner">
     <!-- Logo Header -->
     <div class="sidenav-header">
-      <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
-      <a class="m-0 d-flex justify-content-center align-items-center" href="/" style="padding-left: 0px; text-decoration: none;">
-        <span class="logo-text" style="font-size: 22px; font-weight: 700; background: linear-gradient(135deg, #1a1f36 0%, #3a9fff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 0px;">Chinese<span class="logo-accent" style="background: linear-gradient(135deg, #3a9fff 0%, #3a72ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Log</span></span>
-        <span class="logo-dot" style="position: relative; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: linear-gradient(135deg, #3a9fff 0%, #3a72ff 100%); animation: pulse 2s infinite; vertical-align: middle; margin-left: 5px; top: -2px;"></span>
+      <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
+         aria-hidden="true" id="iconSidenav"></i>
+
+      <a class="m-0 d-flex justify-content-center align-items-center"
+         href="/"
+         style="padding-left: 0px; text-decoration: none;">
+        <span class="logo-text">
+          Chinese<span class="logo-accent">Log</span>
+        </span>
+        <span class="logo-dot"></span>
       </a>
     </div>
 
     <hr class="horizontal dark mt-0">
 
-    <!-- Navigation Menu - Wrap this in a div with flex-grow: 1 -->
+    <!-- Navigation Menu -->
     <div class="flex-grow-1">
       <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
         <ul class="navbar-nav">
-         <li class="nav-item">
-                <a class="nav-link {% if 'dashboard' in request.path %}active{% endif %}" href="/">
-                    <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center" style="background-color: #FFFFFF; width: 48px; height: 48px; color: #000000;">
-                       <svg width="18px" height="18px" viewBox="-1 0 24 24" id="meteor-icon-kit__solid-analytics" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path fill-rule="evenodd" clip-rule="evenodd" d="M3 13C4.65685 13 6 14.3431 6 16V21C6 22.6569 4.65685 24 3 24C1.34315 24 0 22.6569 0 21V16C0 14.3431 1.34315 13 3 13zM11 0C12.6569 0 14 1.34315 14 3V21C14 22.6569 12.6569 24 11 24C9.3431 24 8 22.6569 8 21V3C8 1.34315 9.3431 0 11 0zM19 7C20.6569 7 22 8.34315 22 10V21C22 22.6569 20.6569 24 19 24C17.3431 24 16 22.6569 16 21V10C16 8.34315 17.3431 7 19 7z" fill="#000000"></path></g></svg>
-                    </div>
-                    <span class="nav-link-text ms-1 d-lg-block d-none">Dashboard</span>
-                </a>
-            </li>
-            <li class="nav-item">
-<a class="nav-link {% if 'watch' in request.path or 'video' in request.path or 'channel' in request.path %}active{% endif %}" href="/watch">
-    <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center" style="background-color: #FFFFFF; width: 48px; height: 48px; color: #000000;">
-<svg width="18px" height="18px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <style type="text/css"> .st0{fill:#000000;} </style> <g> <path class="st0" d="M256,0C114.625,0,0,114.625,0,256c0,141.374,114.625,256,256,256c141.374,0,256-114.626,256-256 C512,114.625,397.374,0,256,0z M351.062,258.898l-144,85.945c-1.031,0.626-2.344,0.657-3.406,0.031 c-1.031-0.594-1.687-1.702-1.687-2.937v-85.946v-85.946c0-1.218,0.656-2.343,1.687-2.938c1.062-0.609,2.375-0.578,3.406,0.031 l144,85.962c1.031,0.586,1.641,1.718,1.641,2.89C352.703,257.187,352.094,258.297,351.062,258.898z"></path> </g> </g></svg>                    </div>
-                    <span class="nav-link-text ms-1 d-lg-block d-none">Watch</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if 'library' in request.path %}active{% endif %}" href="/library">
-                    <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; color: green;">
-                      <svg width="18px" height="18px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <rect width="24" height="24" fill="none"></rect> <path fill-rule="evenodd" clip-rule="evenodd" d="M22 11.9342C22 11.956 22 11.978 22 12L22 16.0658C22 16.9523 22.0001 17.7161 21.9179 18.3278C21.8297 18.9833 21.631 19.6117 21.1213 20.1213C20.6117 20.631 19.9833 20.8297 19.3278 20.9179C18.7161 21.0001 17.9523 21.0001 17.0658 21L6.93416 21C6.04768 21.0001 5.28386 21.0001 4.6722 20.9179C4.01669 20.8297 3.38834 20.631 2.87867 20.1213C2.36901 19.6117 2.17027 18.9833 2.08213 18.3278C1.9999 17.7161 1.99994 16.9523 1.99999 16.0658L1.99999 11.9342C1.99994 11.0477 1.9999 10.2839 2.08213 9.67221C2.17027 9.0167 2.36901 8.38835 2.87867 7.87868C3.38834 7.36902 4.01669 7.17028 4.6722 7.08215C5.28386 6.99991 6.04768 6.99995 6.93417 7L17 7C17.022 7 17.044 7 17.0658 7C17.9523 6.99995 18.7161 6.99991 19.3278 7.08215C19.9833 7.17028 20.6117 7.36902 21.1213 7.87868C21.631 8.38835 21.8297 9.0167 21.9179 9.67221C22.0001 10.2839 22 11.0477 22 11.9342Z" fill="#323232"></path> <path d="M19 6.04361V5.71429C19 4.21523 17.7848 3 16.2857 3H7.71429C6.21523 3 5 4.21523 5 5.71429V6.0436C5.57491 5.99987 6.22076 5.99994 6.88123 6.00001L17.1187 6.00001C17.7792 5.99994 18.4251 5.99987 19 6.04361Z" fill="#323232"></path> </g></svg>
-                    </div>
-                    <span class="nav-link-text ms-1 d-lg-block d-none">My Library</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if 'highlights' in request.path %}active{% endif %}" href="/highlights">
-                    <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center" style="background-color: #FFFFFF; width: 48px; height: 48px;">
-                                               <svg width="18px" height="18px" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>highlight-filled</title> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="drop" fill="#000000" transform="translate(64.000000, 44.956885)"> <path d="M405.333333,381.709781 L362.666667,424.376448 L85.3333333,424.376448 L128,381.709781 L405.333333,381.709781 Z M41.168,299.372 L103.67,361.874 L42.6666667,392.376448 L1.42108547e-14,403.043115 L10.6666667,360.376448 L41.168,299.372 Z M61.1,191.304 L212.137,342.341 L206.971557,347.655494 L201.097332,347.365048 L194.94444,347.269241 C184.457401,347.271762 172.809254,348.085275 160,349.709781 L151.970104,350.837434 L144.123951,352.129117 L136.61735,353.518237 L127.387,355.421 L48.9491375,276.983016 C50.507182,270.709588 52.0860762,262.939495 53.3333333,253.709781 C55.8645145,234.979019 56.7941068,216.011107 56.1221103,196.806047 L59.4284876,193.08414 L61.1,191.304 Z M282.327442,7.10542736e-15 L403.006999,120.679557 L384.970948,143.928809 L352.415716,185.42913 L333.317316,209.393653 L316.302987,230.396289 L304.909911,244.204529 L291.542704,260.023864 L282.884971,269.944627 L275.399527,278.199329 L269.086373,284.787971 L254.094195,299.615469 L227.035,327.069 L75.976,176.01 L78.5389897,173.389008 L116.39305,135.764502 L128.060065,124.568671 L141.033549,112.687653 L152.352994,102.689504 L164.50858,92.2528346 L177.500305,81.3776459 L191.328171,70.0639374 L205.992177,58.3117091 L229.55595,39.8611422 L246.310307,27.0126145 L263.900804,13.7255671 L282.327442,7.10542736e-15 Z" id="Combined-Shape"> </path> </g> </g> </g></svg>
 
-                    </div>
-                    <span class="nav-link-text ms-1 d-lg-block d-none">Highlights</span>
-                </a>
-            </li>
+          <!-- 1. Dashboard -->
+          <li class="nav-item">
+            <a class="nav-link {% if 'dashboard' in request.path or request.path == '/' %}active{% endif %}" href="/">
+              <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                <svg width="18px" height="18px" viewBox="-1 0 24 24"
+                     fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" clip-rule="evenodd"
+                        d="M3 13C4.65685 13 6 14.3431 6 16V21C6 22.6569 4.65685 24 3 24C1.34315 24 0 22.6569 0 21V16C0 14.3431 1.34315 13 3 13zM11 0C12.6569 0 14 1.34315 14 3V21C14 22.6569 12.6569 24 11 24C9.3431 24 8 22.6569 8 21V3C8 1.34315 9.3431 0 11 0zM19 7C20.6569 7 22 8.34315 22 10V21C22 22.6569 20.6569 24 19 24C17.3431 24 16 22.6569 16 21V10C16 8.34315 17.3431 7 19 7z"
+                        fill="#000000"></path>
+                </svg>
+              </div>
+              <span class="nav-link-text ms-1 d-lg-block d-none">Dashboard</span>
+            </a>
+          </li>
+
+          <!-- 2. Chat -->
+          <li class="nav-item">
+            <a class="nav-link {% if 'chat' in request.path %}active{% endif %}" href="/chat">
+              <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                <!-- Simple chat bubble icon -->
+                <svg width="18px" height="18px" viewBox="0 0 24 24"
+                     xmlns="http://www.w3.org/2000/svg" fill="none">
+                  <path d="M4 5C4 3.89543 4.89543 3 6 3H18C19.1046 3 20 3.89543 20 5V13C20 14.1046 19.1046 15 18 15H10L7 18.5C6.55474 19.0328 5.7 18.7153 5.7 18.01V15H6C4.89543 15 4 14.1046 4 13V5Z"
+                        fill="#000000"/>
+                </svg>
+              </div>
+              <span class="nav-link-text ms-1 d-lg-block d-none">Chat</span>
+            </a>
+          </li>
+
+          <!-- 3. Watch -->
+          <li class="nav-item">
+            <a class="nav-link {% if 'watch' in request.path or 'video' in request.path or 'channel' in request.path %}active{% endif %}"
+               href="/watch">
+              <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                <svg width="18px" height="18px" viewBox="0 0 512 512"
+                     xmlns="http://www.w3.org/2000/svg">
+                  <g>
+                    <path d="M256,0C114.625,0,0,114.625,0,256c0,141.374,114.625,256,256,256c141.374,0,256-114.626,256-256
+                    C512,114.625,397.374,0,256,0z M351.062,258.898l-144,85.945c-1.031,0.626-2.344,0.657-3.406,0.031
+                    c-1.031-0.594-1.687-1.702-1.687-2.937v-85.946v-85.946c0-1.218,0.656-2.343,1.687-2.938c1.062-0.609,2.375-0.578,3.406,0.031
+                    l144,85.962c1.031,0.586,1.641,1.718,1.641,2.89C352.703,257.187,352.094,258.297,351.062,258.898z">
+                    </path>
+                  </g>
+                </svg>
+              </div>
+              <span class="nav-link-text ms-1 d-lg-block d-none">Watch</span>
+            </a>
+          </li>
+
+          <!-- 4. Read -->
+          <li class="nav-item">
+            <a class="nav-link {% if 'read' in request.path %}active{% endif %}" href="/read">
+              <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                <!-- Simple book icon -->
+                <svg width="18px" height="18px" viewBox="0 0 24 24"
+                     xmlns="http://www.w3.org/2000/svg" fill="none">
+                  <path d="M5 3C4.44772 3 4 3.44772 4 4V18C4 18.5523 4.44772 19 5 19H11C12.1046 19 13 19.8954 13 21V5C13 3.89543 12.1046 3 11 3H5Z"
+                        fill="#000000"/>
+                  <path d="M19 3H13V21C13 19.8954 13.8954 19 15 19H19C19.5523 19 20 18.5523 20 18V4C20 3.44772 19.5523 3 19 3Z"
+                        fill="#000000"/>
+                </svg>
+              </div>
+              <span class="nav-link-text ms-1 d-lg-block d-none">Read</span>
+            </a>
+          </li>
+
+          <!-- 5. Library -->
+          <li class="nav-item">
+            <a class="nav-link {% if 'library' in request.path %}active{% endif %}" href="/library">
+              <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                <svg width="18px" height="18px" viewBox="0 0 24 24"
+                     fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" clip-rule="evenodd"
+                        d="M22 11.9342C22 11.956 22 11.978 22 12L22 16.0658C22 16.9523 22.0001 17.7161 21.9179 18.3278C21.8297 18.9833 21.631 19.6117 21.1213 20.1213C20.6117 20.631 19.9833 20.8297 19.3278 20.9179C18.7161 21.0001 17.9523 21.0001 17.0658 21L6.93416 21C6.04768 21.0001 5.28386 21.0001 4.6722 20.9179C4.01669 20.8297 3.38834 20.631 2.87867 20.1213C2.36901 19.6117 2.17027 18.9833 2.08213 18.3278C1.9999 17.7161 1.99994 16.9523 1.99999 16.0658L1.99999 11.9342C1.99994 11.0477 1.9999 10.2839 2.08213 9.67221C2.17027 9.0167 2.36901 8.38835 2.87867 7.87868C3.38834 7.36902 4.01669 7.17028 4.6722 7.08215C5.28386 6.99991 6.04768 6.99995 6.93417 7L17 7C17.022 7 17.044 7 17.0658 7C17.9523 6.99995 18.7161 6.99991 19.3278 7.08215C19.9833 7.17028 20.6117 7.36902 21.1213 7.87868C21.631 8.38835 21.8297 9.0167 21.9179 9.67221C22.0001 10.2839 22 11.0477 22 11.9342Z"
+                        fill="#323232"></path>
+                  <path d="M19 6.04361V5.71429C19 4.21523 17.7848 3 16.2857 3H7.71429C6.21523 3 5 4.21523 5 5.71429V6.0436C5.57491 5.99987 6.22076 5.99994 6.88123 6.00001L17.1187 6.00001C17.7792 5.99994 18.4251 5.99987 19 6.04361Z"
+                        fill="#323232"></path>
+                </svg>
+              </div>
+              <span class="nav-link-text ms-1 d-lg-block d-none">My Library</span>
+            </a>
+          </li>
+
+          <!-- 6. Highlights -->
+          <li class="nav-item">
+            <a class="nav-link {% if 'highlights' in request.path %}active{% endif %}" href="/highlights">
+              <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                <svg width="18px" height="18px" viewBox="0 0 512 512"
+                     xmlns="http://www.w3.org/2000/svg">
+                  <title>highlight-filled</title>
+                  <g transform="translate(64.000000, 44.956885)">
+                    <path d="M405.333333,381.709781 L362.666667,424.376448 L85.3333333,424.376448 L128,381.709781 L405.333333,381.709781 Z M41.168,299.372 L103.67,361.874 L42.6666667,392.376448 L0,403.043115 L10.6666667,360.376448 L41.168,299.372 Z M61.1,191.304 L212.137,342.341 L206.971557,347.655494 L201.097332,347.365048 L194.94444,347.269241 C184.457401,347.271762 172.809254,348.085275 160,349.709781 L151.970104,350.837434 L144.123951,352.129117 L136.61735,353.518237 L127.387,355.421 L48.9491375,276.983016 C50.507182,270.709588 52.0860762,262.939495 53.3333333,253.709781 C55.8645145,234.979019 56.7941068,216.011107 56.1221103,196.806047 L59.4284876,193.08414 L61.1,191.304 Z M282.327442,0 L403.006999,120.679557 L384.970948,143.928809 L352.415716,185.42913 L333.317316,209.393653 L316.302987,230.396289 L304.909911,244.204529 L291.542704,260.023864 L282.884971,269.944627 L275.399527,278.199329 L269.086373,284.787971 L254.094195,299.615469 L227.035,327.069 L75.976,176.01 L78.5389897,173.389008 L116.39305,135.764502 L128.060065,124.568671 L141.033549,112.687653 L152.352994,102.689504 L164.50858,92.2528346 L177.500305,81.3776459 L191.328171,70.0639374 L205.992177,58.3117091 L229.55595,39.8611422 L246.310307,27.0126145 L263.900804,13.7255671 L282.327442,0 Z">
+                    </path>
+                  </g>
+                </svg>
+              </div>
+              <span class="nav-link-text ms-1 d-lg-block d-none">Highlights</span>
+            </a>
+          </li>
+
         </ul>
       </div>
     </div>
 
-    <!-- Profile Section - This will now stick to the bottom -->
-   <!-- Profile Section -->
-<div class="sidenav-footer">
-  <div class="profile-container">
-    <div class="profile-image-wrapper">
-      <svg viewBox="0 0 300 300" id="piranha" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <polygon points=" 204,184 232,192 232,212 196,220 " style="fill-rule:evenodd;clip-rule:evenodd;fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"></polygon> <circle cx="128" cy="172" r="88" style="fill-rule:evenodd;clip-rule:evenodd;fill:#595959;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"></circle> <path d=" M252.186,252C235.371,242.6,224,224.627,224,204s11.371-38.6,28.186-48c-0.456,2.847-0.691,5.768-0.691,8.744 c0,15.378,6.32,29.281,16.505,39.256c-10.185,9.975-16.505,23.878-16.505,39.256C251.495,246.232,251.731,249.152,252.186,252z" style="fill-rule:evenodd;clip-rule:evenodd;fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"></path> <circle cx="92" cy="140" r="20" style="fill-rule:evenodd;clip-rule:evenodd;fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"></circle> <circle cx="92" cy="140" r="8" style="fill-rule:evenodd;clip-rule:evenodd;fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"></circle> <path d=" M40,176.888C42.504,223.215,80.386,260,126.747,260c23.899,0,45.548-9.776,61.253-25.596 c-23.587-18.019-74.15-54.444-105.209-60.764C65.657,170.153,51.14,172.695,40,176.888z" style="fill-rule:evenodd;clip-rule:evenodd;fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"></path> <line style="fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" x1="76" x2="76" y1="176" y2="240"></line> <line style="fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" x1="104" x2="104" y1="184" y2="252"></line> <line style="fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;" x1="132" x2="132" y1="196" y2="260"></line> <path d=" M112,80c0,0,28.812-45.979,48.446-27.708C180.075,70.562,112,80,112,80z" style="fill-rule:evenodd;clip-rule:evenodd;fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"></path> <path d=" M108,80c0,0-28.796-45.842-48.441-27.79S108,80,108,80z" style="fill-rule:evenodd;clip-rule:evenodd;fill:#30acbc;stroke:#000000;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"></path> </g> </g></svg>
-    </div>
-    <div class="profile-info">
-<span class="profile-name">
-  {% if request.user.is_authenticated %}
-    {{ request.user.username }}
-  {% else %}
-    Guest
-  {% endif %}
-</span>
-
-
-
-      <span class="profile-level">Level 1</span>
+    <!-- Profile Section -->
+    <div class="sidenav-footer">
+      <div class="profile-container">
+        <div class="profile-avatar">
+          {% if request.user.is_authenticated %}
+            {{ request.user.username|first|upper }}
+          {% else %}
+            G
+          {% endif %}
+        </div>
+        <div class="profile-info">
+          <span class="profile-name">
+            {% if request.user.is_authenticated %}
+              {{ request.user.username }}
+            {% else %}
+              Guest
+            {% endif %}
+          </span>
+          <span class="profile-level">Level 1</span>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 </aside>
 
-
 <style>
-/* Sidebar */
+/* Base sidebar layout */
 .sidenav {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-height: 100vh;
 }
 
 .sidenav-inner {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Sidebar width + positioning */
+#sidenav-main {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 240px;
+  transition: width 0.25s ease;
+  z-index: 1040;
+}
+
+/* Ensure main-content starts to the right of sidebar */
+.main-content {
+  margin-left: 260px;
+  transition: margin-left 0.25s ease;
+}
+
+/* Logo */
+.logo-text {
+  font-size: 22px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1a1f36 0%, #3a9fff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.logo-accent {
+  background: linear-gradient(135deg, #3a9fff 0%, #3a72ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.logo-dot {
+  position: relative;
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3a9fff 0%, #3a72ff 100%);
+  animation: pulse 2s infinite;
+  vertical-align: middle;
+  margin-left: 5px;
+  top: -2px;
 }
 
 /* Header Section */
 .sidenav-header {
-    flex-shrink: 0;
-    padding: 1rem;
-    height: 100px;
+  flex-shrink: 0;
+  padding: 1rem;
+  height: 100px;
 }
 
-/* Navigation Section */
+/* Scrollable nav section */
 .flex-grow-1 {
-    flex-grow: 1;
-    overflow-y: auto;
+  flex-grow: 1;
+  overflow-y: auto;
 }
 
 /* Footer Section */
 .sidenav-footer {
-    margin-top: auto;
-    padding: 1rem 1rem 2rem 1rem; /* Increase bottom padding to ensure space */
+  margin-top: auto;
+  padding: 1rem 1rem 1.5rem 1rem;
 }
 
 /* Profile Section */
 .profile-container {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 0.75rem;
-    margin: 0 1rem;
-    gap: 0.75rem; /* Consistent spacing between elements */
-    min-height: 60px; /* Ensure enough height for image and text */
+  display: flex;
+  align-items: center;
+  padding: 0.65rem 0.75rem;
+  background-color: #f5f7fb;
+  border-radius: 0.75rem;
+  margin: 0 0.25rem;
+  gap: 0.65rem;
 }
 
-.profile-image-wrapper {
-    width: 38px;
-    height: 38px;
-    min-width: 38px;
-    border-radius: 50%;
-    overflow: hidden;
-    background-color: white;
-    border: 2px solid #000000;
-    flex-shrink: 0; /* Prevents image from shrinking */
-}
-
-.profile-image-wrapper svg {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.profile-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 0%, #4f46e5, #1d4ed8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #ffffff;
+  flex-shrink: 0;
 }
 
 .profile-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px; /* Space between name and level */
-    overflow: hidden; /* Contain overflow within profile-info */
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
 }
 
 .profile-name {
-    color: #344767;
-    font-size: 0.875rem;
-    font-weight: 600;
-    line-height: 1.2;
-    margin: 0;
-    white-space: nowrap; /* Prevent wrapping */
-    overflow: hidden;
-    text-overflow: ellipsis; /* Add ellipsis if text is too long */
-    max-width: 150px; /* Limit width to prevent overlap, adjust as needed */
+  color: #111827;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
 }
 
 .profile-level {
-    color: #3a9fff;
-    font-size: 0.75rem;
-    font-weight: 500;
-    line-height: 1.2;
-    margin: 0;
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
 }
 
-/* Active Link Styling */
-.nav-link.active {
-    background: linear-gradient(135deg, #1a1f36 0%, #3a9fff 100%);
-    color: white !important;
+/* Nav links */
+.nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 10px;
+  padding-right: 8px;
+  max-width: calc(100% - 8px);
+  box-sizing: border-box;
+  border-radius: 10px;
+  transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+  color: #4b5563;
 }
 
-.nav-link.active .icon svg {
-    fill: white !important;
-    color: white !important;
+.nav-link .icon {
+  min-width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background-color: #ffffff;
 }
 
-/* Hover Effect */
+/* Hover */
 .nav-link:hover {
-    background-color: rgba(128, 128, 128, 0.1);
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+/* ACTIVE styling – full-width pill in expanded mode */
+.nav-link.active {
+  background-color: #e8f3ff;
+  color: #111827 !important;
+  box-shadow: inset 3px 0 0 #3a9fff;
+}
+
+/* Sidebar collapse handle */
+.sidebar-toggle-btn {
+  position: absolute;
+  top: 50%;
+  right: -18px;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #e5f0ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.25);
+  cursor: pointer;
+  padding: 0;
+  z-index: 1050;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sidebar-toggle-btn i {
+  font-size: 14px;
+  color: #0f172a;
+  transition: transform 0.25s ease;
+}
+
+.sidebar-toggle-btn:hover {
+  background-color: #dbeafe;
+  transform: translateY(-50%) scale(1.05);
+}
+
+/* COLLAPSED STATE – applied to body */
+body.sidebar-collapsed #sidenav-main {
+  width: 72px;
+}
+
+/* When collapsed, content shifts left */
+body.sidebar-collapsed .main-content {
+  margin-left: 90px !important;
+}
+
+/* Hide text when collapsed */
+body.sidebar-collapsed .nav-link-text,
+body.sidebar-collapsed .logo-text,
+body.sidebar-collapsed .logo-dot,
+body.sidebar-collapsed .profile-info {
+  display: none !important;
+}
+
+/* Center logo when collapsed */
+body.sidebar-collapsed .sidenav-header {
+  justify-content: center;
+}
+
+/* Nav icons centered in collapsed mode */
+body.sidebar-collapsed .navbar-nav .nav-link {
+  justify-content: center;
+}
+
+/* Collapsed overrides: remove white card, only highlight icon */
+body.sidebar-collapsed #sidenav-main .navbar-nav .nav-link {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.sidebar-collapsed #sidenav-main .navbar-nav .nav-link .icon,
+body.sidebar-collapsed #sidenav-main .navbar-nav .nav-link .icon-shape {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.sidebar-collapsed #sidenav-main .navbar-nav .nav-link.active .icon,
+body.sidebar-collapsed #sidenav-main .navbar-nav .nav-link.active .icon-shape {
+  background: #d100a8 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Profile avatar centered at bottom when collapsed */
+body.sidebar-collapsed .profile-container {
+  justify-content: center;
+  padding: 0.75rem 0;
+  margin: 0;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+body.sidebar-collapsed .profile-avatar {
+  margin: 0;
+}
+
+/* Rotate chevron when collapsed */
+body.sidebar-collapsed .sidebar-toggle-btn i {
+  transform: rotate(180deg);
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Small screens */
+@media (max-width: 1200px) {
+  #sidenav-main {
+    width: 100%;
+    position: static;
+    height: auto;
+  }
+  .main-content {
+    margin-left: 0 !important;
+  }
 }
 </style>
-</style>
 
+<script>
+(function () {
+  function applySidebarState() {
+    try {
+      var collapsed = localStorage.getItem('sidebarCollapsed') === '1';
+      if (collapsed) {
+        document.body.classList.add('sidebar-collapsed');
+      } else {
+        document.body.classList.remove('sidebar-collapsed');
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  window.toggleSidebarCollapse = function () {
+    var body = document.body;
+    var willCollapse = !body.classList.contains('sidebar-collapsed');
+
+    if (willCollapse) {
+      body.classList.add('sidebar-collapsed');
+    } else {
+      body.classList.remove('sidebar-collapsed');
+    }
+
+    try {
+      localStorage.setItem('sidebarCollapsed', willCollapse ? '1' : '0');
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', applySidebarState);
+})();
+</script>

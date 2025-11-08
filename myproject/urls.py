@@ -4,18 +4,19 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth.views import LoginView, LogoutView
 from django.views.generic import TemplateView
+from django.views.static import serve
+
 from accounts import views as account_views
 from subplayer import views as subplayer_views
-from allauth.account.views import LoginView, LogoutView, SignupView
-from allauth.account.views import PasswordResetView
-from django.views.static import serve
+from allauth.account.views import LoginView, LogoutView, SignupView, PasswordResetView
 from accounts.views import stripe_webhook, create_checkout_session
-from django.views.generic import TemplateView
-
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
     path('', account_views.home_redirect_view, name='home_redirect'),
+
+    # Subplayer / media
     path('subplayer/', TemplateView.as_view(template_name='subplayer.html'), name='subplayer'),
     path('podcast/', subplayer_views.podcast_detail, name='podcast_view'),
     path('video/', subplayer_views.video_detail, name='video_view'),
@@ -27,7 +28,9 @@ urlpatterns = [
     path('channel/<int:channel_id>/', subplayer_views.channel_view, name='channel_view'),
     path('channels/', subplayer_views.channels_list, name='channels_list'),
     path('intro/', subplayer_views.intro_view, name='intro'),
-path('dashboard/', account_views.stats_view, name='stats_view'),
+
+    # Dashboard / stats
+    path('dashboard/', account_views.stats_view, name='stats_view'),
     path('download_subtitles/', account_views.download_subtitles, name='download_subtitles'),
 
     # API paths
@@ -63,9 +66,16 @@ path('dashboard/', account_views.stats_view, name='stats_view'),
     path('login/', LoginView.as_view(template_name='accounts/login.html'), name='login'),
     path('register/', account_views.register, name='register'),
     path('logout/', account_views.custom_logout_view, name='logout'),
-    path('password/reset/', PasswordResetView.as_view(template_name='accounts/password_reset.html'),
-         name='account_reset_password'),
+    path(
+        'password/reset/',
+        PasswordResetView.as_view(template_name='accounts/password_reset.html'),
+        name='account_reset_password'
+    ),
+
+    # Media files
     path('media/<path:path>', serve, {'document_root': settings.MEDIA_ROOT}),
+
+    # Payments / Stripe
     path('create-checkout-session/', create_checkout_session, name='create_checkout_session'),
     path('stripe-webhook/', stripe_webhook, name='stripe_webhook'),
     path('checkout/', TemplateView.as_view(template_name='accounts/checkout.html'), name='checkout'),
@@ -77,9 +87,24 @@ path('dashboard/', account_views.stats_view, name='stats_view'),
     path('cancel-subscription/', account_views.cancel_subscription, name='cancel_subscription'),
     path('reactivate-subscription/', account_views.reactivate_subscription, name='reactivate_subscription'),
     path('upgrade/', account_views.upgrade_plan, name='upgrade_plan'),
+
+    # Study guide APIs
     path('api/generate-pdf/', subplayer_views.generate_pdf, name='generate_pdf'),
     path('api/generate-highlight-study-guide/', subplayer_views.generate_highlight_study_guide, name='generate_highlight_study_guide'),
+    path('api/generate-highlights-study-guide/', subplayer_views.generate_all_highlights_study_guide, name='generate_all_highlights_study_guide'),
+path("api/web-highlight/", subplayer_views.web_highlight, name="web_highlight"),
+
+    # Channel subscription
     path('subscribe/<int:channel_id>/', subplayer_views.subscribe_to_channel, name='subscribe_to_channel'),
     path('unsubscribe/<int:channel_id>/', subplayer_views.unsubscribe_from_channel, name='unsubscribe_from_channel'),
+
+    # READ feature
+    path('read/', subplayer_views.read_list, name='read_list'),
+    path('read/<slug:slug>/', subplayer_views.read_detail, name='read_detail'),
+
+    # Chat app
+    path("chat/", include(("chat.urls", "chat"), namespace="chat")),
+
 ]
+
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

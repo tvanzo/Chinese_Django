@@ -33,6 +33,7 @@
       font-family: 'Open Sans', sans-serif;
       background-color: var(--light-color);
       color: var(--dark-color);
+      transition: padding-top 0.3s ease-in-out;
     }
 
     .container-fluid {
@@ -98,31 +99,47 @@
       background: rgba(255, 255, 255, 0.25);
     }
 
-  .btn-download {
-    padding: 0.5rem 1rem; /* Reduced padding from 0.75rem 1.5rem */
-    border-radius: 10px;
-    border: none;
-    background: var(--primary-color);
-    color: white;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(58, 159, 255, 0.3);
-    font-size: 0.875rem; /* Added explicit font size */
-  }
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-left: 15px;
+    }
 
-  .btn-download:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(58, 159, 255, 0.4);
-  }
+    .btn-download {
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.875rem;
+      white-space: nowrap;
+    }
 
-  .btn-download svg {
-    width: 16px; /* Added specific width */
-    height: 16px; /* Added specific height */
-  }
+    .btn-download svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .btn-download.primary {
+      background: var(--primary-color);
+      color: white;
+      box-shadow: 0 4px 15px rgba(58, 159, 255, 0.3);
+    }
+
+    .btn-download.secondary {
+      background: var(--accent-color);
+      color: white;
+      box-shadow: 0 4px 15px rgba(203, 11, 160, 0.3);
+    }
+
+    .btn-download:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
 
     .video-grid {
       display: grid;
@@ -343,6 +360,134 @@
       color: var(--accent-color);
     }
 
+    /* Study Guide Popup Styles */
+    #study-guide-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      background-color: white;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 12px;
+      z-index: 1000;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #study-guide-popup.active {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+      pointer-events: auto;
+    }
+
+    #study-guide-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    #study-guide-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .popup-content {
+      text-align: center;
+    }
+
+    .popup-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+
+    .popup-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+      color: #344767;
+    }
+
+    .popup-message {
+      font-size: 14px;
+      color: #67748e;
+      margin-bottom: 20px;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .upgrade-button, .close-button {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .upgrade-button {
+      background-color: #2F88FF;
+      color: white;
+      border: none;
+    }
+
+    .upgrade-button:hover {
+      background-color: #1a73e8;
+    }
+
+    .close-button {
+      background-color: #e9ecef;
+      color: #344767;
+      border: none;
+    }
+
+    .close-button:hover {
+      background-color: #d3d8de;
+    }
+
+    .warning-icon svg {
+      color: #f1c40f;
+      margin-right: 10px;
+    }
+
+    #download-notification {
+      background-color: #f8f9fa;
+      color: #344767;
+      border: none;
+      border-bottom: 2px solid #e9ecef;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      padding: 10px 15px;
+      font-size: 14px;
+      width: 100%;
+      text-align: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1060;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+      display: none;
+    }
+
+    #download-notification.show {
+      opacity: 1;
+      display: block;
+    }
+
     @media (max-width: 768px) {
       .page-header {
         flex-direction: column;
@@ -352,6 +497,17 @@
       .filter-group {
         width: 100%;
         flex-wrap: wrap;
+      }
+      .action-buttons {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 10px;
+        justify-content: space-between;
+      }
+      .btn-download {
+        flex: 1;
+        justify-content: center;
+        padding: 0.6rem 0.8rem;
       }
       .video-grid {
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -369,395 +525,6 @@
       }
     }
   </style>
-    <style>
-    body{
-      transition: padding-top 0.3s ease-in-out; /* Smooth transition for padding change */
-
-    }
-.text-warning { color: #dcb234; } /* Custom dark yellow */
-.text-success { color: #3c763d; } /* Custom dark green */
-.title-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 50px; /* Adjusted height to provide more control */
-}
-.title-container p {
-    margin: 0;
-    line-height: 1.1; /* Tighter line spacing */
-    text-align: center;
-    white-space: pre-line; /* Ensures proper line breaking */
-    font-size: 0.75rem; /* Adjust size as needed */
-}
-.nav-link.active .icon svg {
-    fill: #FFD700 !important;
-    color: #FFD700 !important;
-}
-.xp-points-bar {
-    background-color: #f8f9fa;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
-.xp-points-bar h2 {
-    margin: 0;
-    font-size: 24px;
-    font-weight: normal;
-}
-.xp-points-bar #xp-points {
-    font-size: 20px;
-    font-weight: bold;
-    color: #007bff;
-}
-.xp-circle {
-    width: 20px; /* Adjust size as needed */
-    height: 20px; /* Adjust size as needed */
-    border-radius: 50%;
-    background-color: #ffc40c; /* Yellow color */
-    color: #ffffff; /* White text */
-    font-weight: bold;
-    font-size: 12px; /* Adjust size as needed */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-#xp-points {
-    font-size: 14px; /* Adjust size as needed */
-    font-weight: bold;
-    color: #ffffff; /* Adjust color as needed */
-}
-.btn-purple {
-    background-color: #d00c9c; /* Purple color */
-    color: #ffffff; /* White text */
-    border-color: #6f42c1;
-}
-.compact-btn {
-    padding: 0.25rem 0.5rem; /* Less padding for a more compact button */
-}
-#unique-xp-display {
-    background-color: #d00c9c; /* Change the color to your preference */
-    color: white; /* Ensure the text color contrasts well */
-    padding: 3px 8px; /* Adjust padding to make it smaller */
-    border-radius: 8px; /* Increased border radius to make corners more rounded */
-}
-#unique-xp-display .unique-xp-circle {
-    background-color: #ffc40c; /* Change the color to your preference */
-    color: white; /* Ensure the text color contrasts well */
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 5px; /* Adjust margin as needed */
-}
-#unique-xp-points {
-    font-weight: bold;
-    font-size: 14px; /* Adjust font size as needed */
-}
-#sidenav-main {
-    background-color: #ffffff; /* White background */
-    border-radius: 12px; /* Adjust the border radius to your preference */
-    padding: 10px; /* Add padding if necessary */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for better visibility */
-    margin-bottom: 20px; /* Add margin to ensure the bottom border is visible */
-    max-height: calc(100vh - 40px); /* Ensure the sidebar fits within the viewport */
-    overflow-y: auto; /* Add vertical scrolling if necessary */
-}
-@media (max-width: 1200px) {
-    #sidenav-main {
-        display: none;
-    }
-    #top-nav {
-        display: block;
-    }
-}
-@media (min-width: 1201px) {
-    #top-nav {
-        display: none;
-    }
-}
-#welcome-banner {
-  background-color: #e9ecef; /* Light grey background */
-  border-radius: 0 0 10px 10px; /* Rounded bottom corners */
-  padding: 15px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow */
-  text-align: left;
-  width: 100%; /* Full width */
-}
-
-#welcome-banner .alert-heading {
-  font-weight: 700;
-  color: #28a745; /* Green color for success */
-}
-
-#welcome-banner button.btn-close {
-  background: transparent;
-  border: none;
-  color: #6c757d;
-}
-
-#welcome-banner button.btn-close:hover {
-  color: #343a40;
-}
-
-
-.sidenav-header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100px;  /* Adjust this height as needed */
-}
-.custom-logo-size {
-    height: 50px !important; /* Increase by 20% from 80px */
-    /* If you also need to adjust width while maintaining aspect ratio, you can uncomment the following line */
-    /* width: auto; */
-}
-#welcome-banner {
-  background-color: #f8f9fa; /* Light grey for a subtle modern look */
-  color: #344767; /* Darker text for contrast */
-  border: none;
-  border-bottom: 2px solid #e9ecef; /* A bit more pronounced bottom line */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Subtle shadow for depth */
-  padding: 10px 15px; /* Adjust for a thinner, modern look */
-  font-size: 14px; /* Smaller text size for a cleaner appearance */
-  width: 100%;
-  text-align: left;
-}
-
-#welcome-banner .close {
-  background: transparent;
-  border: none;
-  color: #6c757d;
-  padding: 0;
-  font-size: 20px; /* Size of the 'X' */
-  line-height: 1;
-  opacity: 0.5;
-  transition: opacity 0.15s ease-in-out;
-}
-
-#welcome-banner .close:hover {
-  opacity: 1;
-}
-
-#welcome-banner .close:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-
-    #welcome-banner .close:hover {
-  opacity: 1;
-}
-
-#welcome-banner .close:focus {
-  outline: none;
-  box-shadow: none;
-}
-        :root {
-      --primary-color: #3a9fff;
-      --accent-color: #cb0ba0;
-      --dark-color: #1e293b;
-      --light-color: #f8fafc;
-      --border-radius: 16px;
-      --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-      --hover-transform: translateY(-8px);
-    }
-
-    body {
-      font-family: 'Open Sans', sans-serif;
-      background-color: var(--light-color);
-      color: var(--dark-color);
-    }
-
-    .container-fluid {
-      max-width: 1200px;
-      padding: 2rem 1rem;
-    }
-
-    .navbar-main {
-      padding: 0 !important;
-      margin: 0 !important;
-    }
-
-    .navbar-main .container-fluid {
-      padding: 0 !important;
-      width: 100%;
-      max-width: none;
-    }
-
-    .navbar-main .navbar-collapse {
-      justify-content: flex-end;
-      padding-right: 0 !important;
-      margin-right: 0 !important;
-    }
-
-    .navbar-main .navbar-nav.ms-auto {
-      margin-right: 0 !important;
-      padding-right: 0 !important;
-    }
-
-    .page-header {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      margin-bottom: 2rem;
-      padding-right: 0;
-    }
-
-    .filter-group {
-      display: flex;
-      gap: 0.75rem;
-      background: white;
-      padding: 0.5rem;
-      border-radius: var(--border-radius);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
-
-    .btn-filter {
-      padding: 0.75rem 1.25rem;
-      border-radius: 10px;
-      border: none;
-      background: transparent;
-      color: #64748b;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .btn-filter.active {
-      background: var(--primary-color);
-      color: white;
-    }
-
-    .btn-count {
-      min-width: 20px;
-      height: 20px;
-      padding: 0 6px;
-      border-radius: 10px;
-      background: rgba(0, 0, 0, 0.1);
-      font-size: 0.75rem;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .btn-filter.active .btn-count {
-      background: rgba(255, 255, 255, 0.25);
-    }
-
-    .btn-download {
-      padding: 0.5rem 1rem;
-      border-radius: 10px;
-      border: none;
-      background: var(--primary-color);
-      color: white;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(58, 159, 255, 0.3);
-      font-size: 0.875rem;
-      margin-left: 1rem;
-    }
-         :root {
-    --primary-color: #3a9fff;
-    --accent-color: #cb0ba0;
-    --dark-color: #1e293b;
-    --light-color: #f8fafc;
-    --border-radius: 16px;
-    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-    --hover-transform: translateY(-8px);
-  }
-
-  :root {
-    --primary-color: #3a9fff;
-    --accent-color: #cb0ba0;
-    --dark-color: #1e293b;
-    --light-color: #f8fafc;
-    --border-radius: 16px;
-    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-    --hover-transform: translateY(-8px);
-  }
-
-:root {
-    --primary-color: #3a9fff;
-    --accent-color: #cb0ba0;
-    --dark-color: #1e293b;
-    --light-color: #f8fafc;
-    --border-radius: 16px;
-    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-    --hover-transform: translateY(-8px);
-  }
-
- :root {
-    --primary-color: #3a9fff;
-    --accent-color: #cb0ba0;
-    --dark-color: #1e293b;
-    --light-color: #f8fafc;
-    --border-radius: 16px;
-    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-    --hover-transform: translateY(-8px);
-  }
-
-  :root {
-    --primary-color: #3a9fff;
-    --accent-color: #cb0ba0;
-    --dark-color: #1e293b;
-    --light-color: #f8fafc;
-    --border-radius: 16px;
-    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-    --hover-transform: translateY(-8px);
-  }
-
-  body {
-    font-family: 'Open Sans', sans-serif;
-    background-color: var(--light-color);
-    color: var(--dark-color);
-  }
-
-  .container-fluid {
-    max-width: 1200px;
-    padding: 2rem 1rem;
-  }
-
-  /* Increase right padding to move all navbar items farther left */
-  .navbar-main {
-    padding: 0.75rem 5rem !important; /* 0.75rem top/bottom, 5rem left/right */
-    margin: 0 !important;
-  }
-
-  .navbar-main .container-fluid {
-    padding: 0 !important;
-    width: 100%;
-    max-width: none;
-  }
-
-  .navbar-main .navbar-collapse {
-    justify-content: flex-end;
-    padding-right: 0 !important;
-    margin-right: 0 !important;
-  }
-
-  .navbar-main .navbar-nav.ms-auto {
-    margin-right: 0 !important;
-    padding-right: 0 !important;
-  }
-
-  .page-header {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding-right: 0;
-  }
-</style>
 </head>
 
 <body class="g-sidenav-show bg-gray-100">
@@ -765,6 +532,14 @@
   {% include 'accounts/sidebar.html' %}
 
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+    <div id="download-notification" class="alert alert-light fade fixed-top" role="alert">
+      <div class="container-fluid py-2">
+        <div class="d-flex align-items-center justify-content-center">
+          <span>Your study guide is downloading. This may take a couple of minutes...</span>
+        </div>
+      </div>
+    </div>
+
     <div class="container-fluid py-4">
       <div class="page-header">
         <div class="filter-group">
@@ -781,92 +556,123 @@
             <span class="btn-count">{{ completed_count }}</span>
           </button>
         </div>
-        <button class="btn-download" onclick="downloadSubtitles()">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          Download Subtitles
-        </button>
+
+        <div class="action-buttons">
+          <button class="btn-download primary" onclick="downloadSubtitles()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Download Subtitles</span>
+          </button>
+          <button class="btn-download secondary" id="study-guide-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <line x1="10" y1="9" x2="8" y2="9"></line>
+            </svg>
+            <span>Study Guide</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Within the video-grid section, update the in-progress SVGs -->
-<div class="video-grid" id="video-list">
-  {% if media %}
-    {% for video in media %}
-    <div class="achievement-badge" data-status="{{ video.status|default:'all' }}">
-      <a href="{% url 'video_detail' video.media_id %}" class="badge-link">
-        <div class="badge-banner">
-          <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}" class="badge-img">
-          <div class="badge-overlay"></div>
-          <div class="badge-icon">
-            {% if video.status == 'completed' %}
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
-              </svg>
-            {% else %}
-              <!-- New in-progress SVG for badge icon with white fill -->
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" clip-rule="evenodd"
-                      d="M10.9965 4.00001C11.4368 3.99846 11.8263 4.28508 11.9558 4.70591L15.1231 14.9997L18.0715 7.62861C18.1964 7.31651 18.4697 7.08801 18.7989 7.02042C19.1282 6.95284 19.4694 7.0552 19.7071 7.29289L22.7071 10.2929C23.0976 10.6834 23.0976 11.3166 22.7071 11.7071C22.3166 12.0976 21.6834 12.0976 21.2929 11.7071L19.3652 9.77946L15.9285 18.3714C15.771 18.765 15.3826 19.0165 14.959 18.9992C14.5355 18.9818 14.1689 18.6992 14.0442 18.2941L11.0121 8.43973L8.95782 15.2873C8.84938 15.6488 8.54667 15.9185 8.17511 15.9845C7.80355 16.0506 7.42643 15.9019 7.2 15.6L5 12.6667L2.8 15.6C2.46863 16.0418 1.84183 16.1314 1.4 15.8C0.95817 15.4686 0.868627 14.8418 1.2 14.4L4.2 10.4C4.38885 10.1482 4.68524 10 5 10C5.31475 10 5.61114 10.1482 5.8 10.4L7.6114 12.8152L10.0422 4.71265C10.1687 4.29092 10.5562 4.00156 10.9965 4.00001Z"
-                      fill="white"/>
-              </svg>
-            {% endif %}
+      <div class="video-grid" id="video-list">
+        {% if media %}
+          {% for video in media %}
+          <div class="achievement-badge" data-status="{{ video.status|default:'all' }}">
+            <a href="{% url 'video_detail' video.media_id %}" class="badge-link">
+              <div class="badge-banner">
+                <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}" class="badge-img">
+                <div class="badge-overlay"></div>
+                <div class="badge-icon">
+                  {% if video.status == 'completed' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                      <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                    </svg>
+                  {% else %}
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M10.9965 4.00001C11.4368 3.99846 11.8263 4.28508 11.9558 4.70591L15.1231 14.9997L18.0715 7.62861C18.1964 7.31651 18.4697 7.08801 18.7989 7.02042C19.1282 6.95284 19.4694 7.0552 19.7071 7.29289L22.7071 10.2929C23.0976 10.6834 23.0976 11.3166 22.7071 11.7071C22.3166 12.0976 21.6834 12.0976 21.2929 11.7071L19.3652 9.77946L15.9285 18.3714C15.771 18.765 15.3826 19.0165 14.959 18.9992C14.5355 18.9818 14.1689 18.6992 14.0442 18.2941L11.0121 8.43973L8.95782 15.2873C8.84938 15.6488 8.54667 15.9185 8.17511 15.9845C7.80355 16.0506 7.42643 15.9019 7.2 15.6L5 12.6667L2.8 15.6C2.46863 16.0418 1.84183 16.1314 1.4 15.8C0.95817 15.4686 0.868627 14.8418 1.2 14.4L4.2 10.4C4.38885 10.1482 4.68524 10 5 10C5.31475 10 5.61114 10.1482 5.8 10.4L7.6114 12.8152L10.0422 4.71265C10.1687 4.29092 10.5562 4.00156 10.9965 4.00001Z"
+                            fill="white"/>
+                    </svg>
+                  {% endif %}
+                </div>
+                <div class="badge-stats">
+                  <span class="stat highlights">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                    </svg>
+                    {{ video.user_highlights_count }}
+                  </span>
+                  <span class="stat duration">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    {{ video.formatted_video_length }}
+                  </span>
+                </div>
+              </div>
+              <div class="badge-content">
+                <h3 class="badge-title">{{ video.title }}</h3>
+                <p class="badge-description">{{ video.description|truncatechars:100 }}</p>
+                <div class="badge-progress">
+                  <div class="progress-bar" style="width: {{ video.progress_percent }}%;"></div>
+                </div>
+                <div class="badge-footer">
+                  <span class="badge-channel">{{ video.channel.name }}</span>
+                  <span class="status-badge {{ video.status|default:'in-progress' }}">
+                    {% if video.status == 'completed' %}
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 6L9 17L4 12"/>
+                      </svg>
+                      Completed
+                    {% else %}
+                      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M10.9965 4.00001C11.4368 3.99846 11.8263 4.28508 11.9558 4.70591L15.1231 14.9997L18.0715 7.62861C18.1964 7.31651 18.4697 7.08801 18.7989 7.02042C19.1282 6.95284 19.4694 7.0552 19.7071 7.29289L22.7071 10.2929C23.0976 10.6834 23.0976 11.3166 22.7071 11.7071C22.3166 12.0976 21.6834 12.0976 21.2929 11.7071L19.3652 9.77946L15.9285 18.3714C15.771 18.765 15.3826 19.0165 14.959 18.9992C14.5355 18.9818 14.1689 18.6992 14.0442 18.2941L11.0121 8.43973L8.95782 15.2873C8.84938 15.6488 8.54667 15.9185 8.17511 15.9845C7.80355 16.0506 7.42643 15.9019 7.2 15.6L5 12.6667L2.8 15.6C2.46863 16.0418 1.84183 16.1314 1.4 15.8C0.95817 15.4686 0.868627 14.8418 1.2 14.4L4.2 10.4C4.38885 10.1482 4.68524 10 5 10C5.31475 10 5.61114 10.1482 5.8 10.4L7.6114 12.8152L10.0422 4.71265C10.1687 4.29092 10.5562 4.00156 10.9965 4.00001Z"
+                              fill="none" stroke="var(--primary-color)" stroke-width="2"/>
+                      </svg>
+                      In Progress
+                    {% endif %}
+                  </span>
+                </div>
+              </div>
+            </a>
           </div>
+          {% endfor %}
+        {% else %}
+          <div class="col-12 text-center py-5">
+            <p>No videos found.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
 
-          <div class="badge-stats">
-            <span class="stat highlights">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-              </svg>
-              {{ video.user_highlights_count }}
-            </span>
-            <span class="stat duration">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
-              </svg>
-              {{ video.formatted_video_length }}
-            </span>
+    <!-- Study Guide Popup -->
+    <div id="study-guide-popup" class="limit-popup">
+      <div class="popup-content">
+        <div class="popup-header">
+          <div class="warning-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12" y2="17"></line>
+            </svg>
           </div>
+          <h3 class="popup-title">Want to download your study guide?</h3>
         </div>
-        <div class="badge-content">
-          <h3 class="badge-title">{{ video.title }}</h3>
-          <p class="badge-description">{{ video.description|truncatechars:100 }}</p>
-          <div class="badge-progress">
-            <div class="progress-bar" style="width: {% if video.status == 'completed' %}100%{% elif video.status == 'in_progress' %}65%{% else %}0%{% endif %}"></div>
-          </div>
-          <div class="badge-footer">
-            <span class="badge-channel">{{ video.channel.name }}</span>
-            <span class="status-badge {{ video.status|default:'in-progress' }}">
-              {% if video.status == 'completed' %}
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M20 6L9 17L4 12"/>
-                </svg>
-                Completed
-              {% else %}
-                <!-- New in-progress SVG for status badge with var(--primary-color) stroke -->
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path fill-rule="evenodd" clip-rule="evenodd"
-                        d="M10.9965 4.00001C11.4368 3.99846 11.8263 4.28508 11.9558 4.70591L15.1231 14.9997L18.0715 7.62861C18.1964 7.31651 18.4697 7.08801 18.7989 7.02042C19.1282 6.95284 19.4694 7.0552 19.7071 7.29289L22.7071 10.2929C23.0976 10.6834 23.0976 11.3166 22.7071 11.7071C22.3166 12.0976 21.6834 12.0976 21.2929 11.7071L19.3652 9.77946L15.9285 18.3714C15.771 18.765 15.3826 19.0165 14.959 18.9992C14.5355 18.9818 14.1689 18.6992 14.0442 18.2941L11.0121 8.43973L8.95782 15.2873C8.84938 15.6488 8.54667 15.9185 8.17511 15.9845C7.80355 16.0506 7.42643 15.9019 7.2 15.6L5 12.6667L2.8 15.6C2.46863 16.0418 1.84183 16.1314 1.4 15.8C0.95817 15.4686 0.868627 14.8418 1.2 14.4L4.2 10.4C4.38885 10.1482 4.68524 10 5 10C5.31475 10 5.61114 10.1482 5.8 10.4L7.6114 12.8152L10.0422 4.71265C10.1687 4.29092 10.5562 4.00156 10.9965 4.00001Z"
-                        fill="none" stroke="var(--primary-color)" stroke-width="2"/>
-                </svg>
-                In Progress
-              {% endif %}
-            </span>
-          </div>
+        <p class="popup-message">Click the button below to download your study guide.</p>
+        <div class="button-container">
+          <button class="upgrade-button" onclick="downloadStudyGuide()">Download Now</button>
+          <button class="close-button" onclick="hideStudyGuidePopup()">Close</button>
         </div>
-      </a>
+      </div>
     </div>
-    {% endfor %}
-  {% else %}
-    <div class="col-12 text-center py-5">
-      <p>No videos found.</p>
-    </div>
-  {% endif %}
-</div>
-    </div>
+    <div id="study-guide-overlay" class="overlay"></div>
   </main>
 
   <!-- Core JS Files -->
@@ -875,6 +681,9 @@
   <script src="{% static 'accounts/js/plugins/perfect-scrollbar.min.js' %}"></script>
   <script src="{% static 'accounts/js/plugins/smooth-scrollbar.min.js' %}"></script>
   <script src="{% static 'accounts/js/soft-ui-dashboard.min.js?v=1.0.7' %}"></script>
+
+  <!-- Add CSRF token for POST requests -->
+  {% csrf_token %}
 
   <script>
     var win = navigator.platform.indexOf('Win') > -1;
@@ -904,9 +713,81 @@
       link.download = 'combined_subtitles.txt';
       link.click();
     }
+
+    function generateAllHighlightsStudyGuide() {
+      const url = "{% url 'generate_all_highlights_study_guide' %}";
+      const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken,
+          'Accept': 'application/pdf'
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok: ' + response.statusText);
+        }
+        return response.blob();
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'all_highlights_study_guide.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      })
+      .catch(error => {
+        console.error('Error generating study guide:', error);
+        alert('Failed to generate study guide. Please try again.');
+      });
+    }
+
+    // Popup Functions
+    function showStudyGuidePopup() {
+      const popup = document.getElementById('study-guide-popup');
+      const overlay = document.getElementById('study-guide-overlay');
+      popup.classList.add('active');
+      overlay.classList.add('active');
+    }
+
+    function hideStudyGuidePopup() {
+      const popup = document.getElementById('study-guide-popup');
+      const overlay = document.getElementById('study-guide-overlay');
+      popup.classList.remove('active');
+      overlay.classList.remove('active');
+    }
+
+    function downloadStudyGuide() {
+      const notification = document.getElementById('download-notification');
+      notification.style.display = 'block';
+      notification.classList.add('show');
+
+      generateAllHighlightsStudyGuide(); // Trigger the actual download
+
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+          notification.style.display = 'none';
+        }, 300);
+      }, 3000);
+
+      hideStudyGuidePopup();
+    }
+
+    // Event Listener for Study Guide Button
+    document.getElementById('study-guide-btn').addEventListener('click', function(event) {
+      event.preventDefault();
+      showStudyGuidePopup();
+    });
+
+    // Close Popup on Overlay Click
+    document.getElementById('study-guide-overlay').addEventListener('click', hideStudyGuidePopup);
   </script>
 </body>
 
 </html>
-
-

@@ -71,20 +71,62 @@ class UserMediaStatus(models.Model):
 
 
 class Highlight(models.Model):
+    SOURCE_CHOICES = (
+        ('media', 'Media'),   # subtitles / video page
+        ('chat', 'Chat'),     # chat page
+        ('web', 'Web'),       # from Chrome extension / external pages
+    )
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='highlights')
-    media = models.ForeignKey(Media, on_delete=models.CASCADE, related_name='highlights')
-    start_time = models.DecimalField(max_digits=6, decimal_places=2)
-    end_time = models.DecimalField(max_digits=6, decimal_places=2)
+    source = models.CharField(max_length=10, choices=SOURCE_CHOICES, default='media')
+
+    media = models.ForeignKey(
+        Media,
+        on_delete=models.CASCADE,
+        related_name='highlights',
+        null=True,
+        blank=True
+    )
+
+    start_time = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    end_time = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+
     highlighted_text = models.TextField()
-    start_index = models.IntegerField()
-    end_index = models.IntegerField()
-    start_sentence_index = models.IntegerField()
-    end_sentence_index = models.IntegerField()
-    frame_index = models.IntegerField()
+
+    start_index = models.IntegerField(null=True, blank=True)
+    end_index = models.IntegerField(null=True, blank=True)
+    start_sentence_index = models.IntegerField(null=True, blank=True)
+    end_sentence_index = models.IntegerField(null=True, blank=True)
+    frame_index = models.IntegerField(null=True, blank=True)
+
+    # NEW: where the highlight came from (for web highlights)
+    page_url = models.URLField(blank=True, null=True)
+    page_title = models.CharField(max_length=500, blank=True, null=True)
+
     created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
-        unique_together = ['user', 'media', 'start_time', 'end_time', 'highlighted_text']
+        unique_together = [
+            'user',
+            'source',
+            'media',
+            'start_time',
+            'end_time',
+            'highlighted_text',
+        ]
 
     def __str__(self):
-        return f'Highlight from {self.start_time} to {self.end_time} by {self.user.username}'
+        if self.source == 'media' and self.media:
+            return f'[{self.source}] {self.media.title}: {self.highlighted_text[:50]}'
+        return f'[{self.source}] {self.highlighted_text[:50]}'
+
+class Article(models.Model):
+    slug = models.SlugField(unique=True)
+    title = models.CharField(max_length=255)
+    level = models.CharField(max_length=20, blank=True)
+    description = models.TextField(blank=True)
+    content = models.TextField()
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.title

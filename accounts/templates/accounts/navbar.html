@@ -124,8 +124,72 @@
     font-weight: 600;
     color: white;
 }
+      /* Adjust container-fluid to allow full width for navbar */
+.container-fluid {
+  max-width: 1200px; /* Keep for content below navbar */
+  padding: 2rem 1rem; /* Keep for content below navbar */
+}
 
+/* Target only the navbar’s container-fluid */
+.navbar-main .container-fluid {
+  max-width: none; /* Remove width constraint for navbar */
+  padding: 0 !important; /* Remove padding to match template 2 */
+}
 
+/* Navbar Main Styling */
+.navbar-main {
+  padding: 0.75rem 5rem !important; /* Match template 2 padding: top/bottom 0.75rem, left/right 5rem */
+  margin: 0 !important;
+  background-color: transparent; /* Ensure no background interferes */
+}
+
+/* Ensure navbar collapse aligns right */
+.navbar-main .navbar-collapse {
+  justify-content: flex-end;
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Ensure navbar-nav aligns properly */
+.navbar-main .navbar-nav.ms-auto {
+  margin-right: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Keep nav-link styling consistent */
+.nav-link {
+  color: #64748b;
+  transition: all 0.2s ease;
+  padding: 0.75rem 1.25rem;
+  font-weight: 500;
+}
+
+.nav-link:hover {
+  color: var(--primary-color);
+}
+
+/* Keep container-fluid for content below navbar */
+.container-fluid {
+  max-width: 1200px; /* Maintain centered content */
+  padding: 2rem 2rem; /* Increase right padding from 1rem to 2rem */
+}
+
+/* Add padding to video-grid to match template 2 */
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  padding: 0 1.5rem; /* Add 1.5rem padding on left and right */
+}
+
+/* Adjust page-header padding */
+.page-header {
+  display: flex;
+  justify-content: space-between; /* Changed from flex-end to space-between for better spacing */
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 0 1.5rem; /* Add 1.5rem padding on left and right */
+}
   </style>
 </head>
 <body>

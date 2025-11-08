@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row mb-3">
+    <div class="col">
+      <a href="{% url 'read_list' %}"
+         class="text-sm text-primary text-decoration-none mb-2 d-inline-flex align-items-center">
+        <i class="fas fa-arrow-left me-1"></i> Back to articles
+      </a>
+      <h4 class="mb-1">{{ article.title }}</h4>
+      {% if article.level %}
+        <span class="badge bg-gradient-warning text-xs me-2">{{ article.level }}</span>
+      {% endif %}
+      {% if article.description %}
+        <p class="text-muted mt-2 mb-0">{{ article.description }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-9">
+      <div id="article-reader" class="card shadow-sm border-0">
+        <div class="card-body">
+          <div id="article-content"
+               class="article-content"
+               onmouseup="handleArticleSelection()">
+            {{ article.content|linebreaksbr }}
+          </div>
+        </div>
+      </div>
+      <small class="text-muted d-block mt-2">
+        Select text to save a highlight to your notebook.
+      </small>
+    </div>
+
+    <div class="col-lg-3">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h6 class="mb-2">Highlights</h6>
+          <div id="article-highlights" class="small text-muted">
+            Highlights you create will appear in your global <strong>Highlights</strong> tab.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function getSelectionText() {
+  var text = "";
+  if (window.getSelection) {
+    text = window.getSelection().toString();
+  } else if (document.selection && document.selection.type !== "Control") {
+    text = document.selection.createRange().text;
+  }
+  return text.trim();
+}
+
+function handleArticleSelection() {
+  var selected = getSelectionText();
+  if (!selected) return;
+
+  if (!confirm("Save this as a highlight?\n\n" + selected)) {
+    return;
+  }
+
+  fetch("{% url 'chat_highlights' %}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": "{{ csrf_token }}"
+    },
+    body: JSON.stringify({ text: selected })
+  })
+  .then(function (res) {
+    if (!res.ok) throw new Error("Request failed");
+    return res.json();
+  })
+  .then(function () {
+    alert("Saved to your highlights.");
+  })
+  .catch(function (err) {
+    console.error(err);
+    alert("Could not save highlight.");
+  });
+}
+</script>
+
+<style>
+.article-content {
+  font-size: 1rem;
+  line-height: 1.9;
+  letter-spacing: 0.02em;
+  white-space: pre-wrap;
+}
+.article-content::selection {
+  background: #fde68a;
+}
+</style>
+{% endblock %}

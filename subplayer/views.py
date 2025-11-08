@@ -1,51 +1,67 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.files.base import ContentFile
-from django.db.models import Sum
+from django.db.models import Sum, Count, Exists, OuterRef, Q, Subquery
 from django.core.serializers import serialize
 from django.conf import settings
-from django.db.models import Count, Exists, OuterRef, Q
-from subplayer.models import Category
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.views.decorators.http import require_POST
+from django.utils import timezone
 
-from django.http import HttpResponse
 from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+from googleapiclient.discovery import build
 
 import logging
 import json
 import os
 import re
 from math import ceil
+from datetime import timedelta, datetime
+from io import BytesIO
+import requests
 
-from .models import Media, Highlight, UserMediaStatus, Channel
-from accounts.models import Profile, MediaProgress
+from accounts.models import Profile, MediaProgress, Subscription
+from .models import (
+    Category,
+    Channel,
+    Media,
+    UserMediaStatus,
+    Highlight,
+    Article,  # Article model for Read feature
+    # DictionaryEntry,   # ⬅️ uncomment if this actually exists here
+)
 from .forms import MediaForm, SearchForm
-from .youtube_utils import fetch_video_details, process_and_save_subtitles, parse_duration,  get_channel_profile_pic, fetch_channel_details
-from googleapiclient.discovery import build
-from django.utils import timezone
-from datetime import timedelta
-from django.db.models import Count, Q
+from .youtube_utils import (
+    fetch_video_details,
+    process_and_save_subtitles,
+    parse_duration,
+    get_channel_profile_pic,
+    fetch_channel_details,
+)
 
-from django.shortcuts import get_object_or_404, render
-from django.core.serializers import serialize
-from django.db.models import Sum, Count, Q, Subquery, OuterRef
-from django.db.models.functions import TruncDay
-from django.utils import timezone
-import json
-from django.shortcuts import get_object_or_404, render
-from django.core.serializers import serialize
-from django.db.models import Count
-import json
+logger = logging.getLogger(__name__)
+
+
 def format_duration(seconds):
     """Helper function to convert seconds to 'minutes:seconds' format."""
     minutes = seconds // 60
     remainder_seconds = seconds % 60
     return f"{minutes}m {remainder_seconds}s"
 
+
 # Set up logging
 logger = logging.getLogger(__name__)
 from django.contrib import messages
+
 
 @login_required
 def add_media(request):
@@ -130,22 +146,27 @@ def add_media(request):
                 return JsonResponse({'status': 'error', 'message': 'Failed to add new media.'})
         else:
             logger.error(f"Failed to fetch video details for {youtube_url}: {video_details['message']}")
-            return JsonResponse({'status': 'error', 'message': video_details.get('message', 'Failed to fetch video details.')})
+            return JsonResponse(
+                {'status': 'error', 'message': video_details.get('message', 'Failed to fetch video details.')})
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
 
 @login_required
 def myapp_view(request):
     return render(request, 'subplayer.html')
+
 
 def podcast_view(request):
     media_id = request.GET.get('media_id')  # Get the media_id parameter from the URL
     context = {'media_id': media_id}
     return render(request, 'podcast.html', context)
 
+
 def video_view(request):
     media_id = request.GET.get('media_id')  # Get the media_id parameter from the URL
     context = {'media_id': media_id}
     return render(request, 'video.html', context)
+
 
 @login_required
 def podcast_detail(request, media_id):
@@ -163,12 +184,10 @@ def podcast_detail(request, media_id):
     context = {'media': media, 'media_json': media_json}
     return render(request, 'subplayer.html', context)
 
-@login_required
-@login_required
 
 @login_required
-
-
+@login_required
+@login_required
 @login_required
 @login_required
 @login_required
@@ -213,10 +232,10 @@ def video_detail(request, media_id):
     }
 
     return render(request, 'subplayer.html', context)
+
+
 import os
 
-
-
 from django.db.models import Exists, OuterRef
 
 from django.db.models import OuterRef, Exists
@@ -224,6 +243,7 @@ from django.db.models import OuterRef, Exists
 from django.db.models import OuterRef, Exists
 
 from django.db.models import Exists, OuterRef
+
 
 @login_required
 def media_list(request):
@@ -259,7 +279,8 @@ def media_list(request):
     # Fetch subscribed media (Subscriptions section)
     profile = Profile.objects.get(user=user)
     subscribed_channels = profile.subscribed_channels.all()
-    subscribed_media = Media.objects.filter(channel__in=subscribed_channels).select_related('channel').prefetch_related('categories', 'channel__categories').annotate(
+    subscribed_media = Media.objects.filter(channel__in=subscribed_channels).select_related('channel').prefetch_related(
+        'categories', 'channel__categories').annotate(
         user_highlights_count=Count('highlights', filter=Q(highlights__user=user)),
         is_in_log=Exists(UserMediaStatus.objects.filter(media=OuterRef('pk'), user=user)) |
                   Exists(user.added_media.filter(id=OuterRef('pk')))
@@ -322,7 +343,6 @@ def dictionary_lookup(request):
         return JsonResponse({'error': 'Word not found'}, status=404)
 
 
-
 def search(request):
     search_results = []
     form = SearchForm(request.POST or None)
@@ -338,7 +358,7 @@ def search(request):
         try:
             # Perform the search
             response = filmot.search(query, limit=2, language=Language.ENGLISH)
-            
+
             # Process the response
             if response:  # Ensure response is not None
                 for video in response[:1]:
@@ -389,7 +409,8 @@ def channel_view(request, channel_id):  # Change channel_name to channel_id
         user_highlights_count=Count('highlights', filter=Q(highlights__user=user))
     )
 
-    media_statuses = {entry.media_id: entry.status for entry in UserMediaStatus.objects.filter(media__in=media_list, user=user)}
+    media_statuses = {entry.media_id: entry.status for entry in
+                      UserMediaStatus.objects.filter(media__in=media_list, user=user)}
 
     for media in media_list:
         media.status = media_statuses.get(media.id, "Not Available")
@@ -401,14 +422,19 @@ def channel_view(request, channel_id):  # Change channel_name to channel_id
         'media_list': media_list,
     }
     return render(request, 'channel.html', context)
+
+
 def channels_list(request):
     channels = Channel.objects.annotate(media_count=Count('media'))
     context = {
         'channels': channels
     }
     return render(request, 'channels.html', context)
+
+
 def intro_view(request):
     return render(request, 'intro.html')
+
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -417,6 +443,7 @@ from django.utils import timezone
 
 from django.utils import timezone
 from datetime import datetime
+
 
 def time_ago(datetime_str):
     # First, convert the string to a datetime object if it's not already one
@@ -447,6 +474,8 @@ def time_ago(datetime_str):
     else:
         years = diff.days // 365
         return f"{years} year{'s' if years > 1 else ''} ago"
+
+
 import os
 import json
 import logging
@@ -480,6 +509,7 @@ try:
     pdfmetrics.registerFont(TTFont('NotoSerifBold', font_path_bold))
 except Exception as e:
     logger.warning(f"Font registration failed: {e}. Ensure font files are in {font_path_regular} and {font_path_bold}.")
+
 
 @csrf_protect  # Replace csrf_exempt with proper CSRF protection
 def generate_pdf(request):
@@ -580,7 +610,8 @@ Script Chunk 1 of {len(script_chunks)}:
         payload = {
             "model": "deepseek-chat",
             "messages": [
-                {"role": "system", "content": "You are a Chinese language expert creating comprehensive study guides for intermediate-to-advanced learners from 30-minute video transcripts."},
+                {"role": "system",
+                 "content": "You are a Chinese language expert creating comprehensive study guides for intermediate-to-advanced learners from 30-minute video transcripts."},
                 {"role": "user", "content": first_chunk_prompt}
             ],
             "stream": False,
@@ -673,7 +704,8 @@ Script Chunk {i + 1} of {len(script_chunks)}:
             response = requests.post("https://api.deepseek.com/chat/completions", headers=headers, json={
                 "model": "deepseek-chat",
                 "messages": [
-                    {"role": "system", "content": "You are a Chinese language expert creating comprehensive study guides for intermediate-to-advanced learners from 30-minute video transcripts."},
+                    {"role": "system",
+                     "content": "You are a Chinese language expert creating comprehensive study guides for intermediate-to-advanced learners from 30-minute video transcripts."},
                     {"role": "user", "content": chunk_prompt}
                 ],
                 "stream": False,
@@ -722,12 +754,19 @@ Script Chunk {i + 1} of {len(script_chunks)}:
 
         # Define styles
         styles = getSampleStyleSheet()
-        title_style = ParagraphStyle('CustomTitle', parent=styles['Title'], fontName='NotoSerifBold', fontSize=20, leading=24, alignment=1, textColor=colors.HexColor('#2C3E50'), spaceAfter=16)
-        heading_style = ParagraphStyle('CustomHeading', parent=styles['Heading1'], fontName='NotoSerifBold', fontSize=16, leading=20, textColor=colors.HexColor('#3498DB'), spaceBefore=24, spaceAfter=12)
-        normal_style = ParagraphStyle('CustomNormal', parent=styles['Normal'], fontName='NotoSerif', fontSize=11, leading=16, spaceBefore=4, spaceAfter=4)
+        title_style = ParagraphStyle('CustomTitle', parent=styles['Title'], fontName='NotoSerifBold', fontSize=20,
+                                     leading=24, alignment=1, textColor=colors.HexColor('#2C3E50'), spaceAfter=16)
+        heading_style = ParagraphStyle('CustomHeading', parent=styles['Heading1'], fontName='NotoSerifBold',
+                                       fontSize=16, leading=20, textColor=colors.HexColor('#3498DB'), spaceBefore=24,
+                                       spaceAfter=12)
+        normal_style = ParagraphStyle('CustomNormal', parent=styles['Normal'], fontName='NotoSerif', fontSize=11,
+                                      leading=16, spaceBefore=4, spaceAfter=4)
         vocab_style = ParagraphStyle('VocabStyle', parent=normal_style, leftIndent=20, firstLineIndent=-20)
-        example_style = ParagraphStyle('ExampleStyle', parent=normal_style, leftIndent=30, spaceBefore=6, spaceAfter=6, borderWidth=1, borderColor=colors.HexColor('#E0E0E0'), borderPadding=8, borderRadius=5)
-        note_style = ParagraphStyle('NoteStyle', parent=normal_style, fontName='NotoSerif', fontSize=10, leading=14, textColor=colors.HexColor('#7F8C8D'), leftIndent=20)
+        example_style = ParagraphStyle('ExampleStyle', parent=normal_style, leftIndent=30, spaceBefore=6, spaceAfter=6,
+                                       borderWidth=1, borderColor=colors.HexColor('#E0E0E0'), borderPadding=8,
+                                       borderRadius=5)
+        note_style = ParagraphStyle('NoteStyle', parent=normal_style, fontName='NotoSerif', fontSize=10, leading=14,
+                                    textColor=colors.HexColor('#7F8C8D'), leftIndent=20)
 
         # Add page numbers and header
         def add_page_number(canvas, doc):
@@ -749,7 +788,8 @@ Script Chunk {i + 1} of {len(script_chunks)}:
         flowables = [Paragraph(study_guide["title"], title_style)]
         flowables.append(Paragraph("内容摘要", heading_style))
         flowables.append(Paragraph(study_guide["summary"], normal_style))
-        flowables.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#E0E0E0'), spaceBefore=12, spaceAfter=12))
+        flowables.append(
+            HRFlowable(width="100%", thickness=1, color=colors.HexColor('#E0E0E0'), spaceBefore=12, spaceAfter=12))
 
         # Vocabulary
         if study_guide["vocabulary"]:
@@ -767,7 +807,8 @@ Script Chunk {i + 1} of {len(script_chunks)}:
                 flowables.append(Spacer(1, 10))
         else:
             flowables.append(Paragraph("未提供重点词汇。", normal_style))
-        flowables.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#E0E0E0'), spaceBefore=12, spaceAfter=12))
+        flowables.append(
+            HRFlowable(width="100%", thickness=1, color=colors.HexColor('#E0E0E0'), spaceBefore=12, spaceAfter=12))
 
         # Phrases
         if study_guide["phrases"]:
@@ -780,7 +821,8 @@ Script Chunk {i + 1} of {len(script_chunks)}:
                 flowables.append(Spacer(1, 8))
         else:
             flowables.append(Paragraph("未提供实用短语。", normal_style))
-        flowables.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#E0E0E0'), spaceBefore=12, spaceAfter=12))
+        flowables.append(
+            HRFlowable(width="100%", thickness=1, color=colors.HexColor('#E0E0E0'), spaceBefore=12, spaceAfter=12))
 
         # Grammar Points
         if study_guide["grammar_points"]:
@@ -793,7 +835,8 @@ Script Chunk {i + 1} of {len(script_chunks)}:
                 flowables.append(Spacer(1, 8))
         else:
             flowables.append(Paragraph("未提供语法要点。", normal_style))
-        flowables.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#E0E0E0'), spaceBefore=12, spaceAfter=12))
+        flowables.append(
+            HRFlowable(width="100%", thickness=1, color=colors.HexColor('#E0E0E0'), spaceBefore=12, spaceAfter=12))
 
         # Cultural Notes
         if study_guide["cultural_notes"]:
@@ -825,6 +868,7 @@ Script Chunk {i + 1} of {len(script_chunks)}:
     except Exception as e:
         logger.exception("Unexpected error generating PDF: %s", str(e))
         return HttpResponse(f"Internal error: {str(e)}", status=500)
+
 
 @csrf_protect
 def generate_highlight_study_guide(request):
@@ -906,7 +950,8 @@ Highlights:
         payload = {
             "model": "deepseek-chat",
             "messages": [
-                {"role": "system", "content": "You are a Chinese language expert creating study guides for intermediate-to-advanced learners."},
+                {"role": "system",
+                 "content": "You are a Chinese language expert creating study guides for intermediate-to-advanced learners."},
                 {"role": "user", "content": prompt}
             ],
             "stream": False,
@@ -933,13 +978,21 @@ Highlights:
 
         # Define styles
         styles = getSampleStyleSheet()
-        title_style = ParagraphStyle('CustomTitle', parent=styles['Title'], fontName='NotoSerifBold', fontSize=20, leading=24, alignment=1, textColor=colors.HexColor('#2C3E50'), spaceAfter=16)
-        heading_style = ParagraphStyle('CustomHeading', parent=styles['Heading1'], fontName='NotoSerifBold', fontSize=16, leading=20, textColor=colors.HexColor('#3498DB'), spaceBefore=24, spaceAfter=12)
-        normal_style = ParagraphStyle('CustomNormal', parent=styles['Normal'], fontName='NotoSerif', fontSize=11, leading=16, spaceBefore=4, spaceAfter=4)
+        title_style = ParagraphStyle('CustomTitle', parent=styles['Title'], fontName='NotoSerifBold', fontSize=20,
+                                     leading=24, alignment=1, textColor=colors.HexColor('#2C3E50'), spaceAfter=16)
+        heading_style = ParagraphStyle('CustomHeading', parent=styles['Heading1'], fontName='NotoSerifBold',
+                                       fontSize=16, leading=20, textColor=colors.HexColor('#3498DB'), spaceBefore=24,
+                                       spaceAfter=12)
+        normal_style = ParagraphStyle('CustomNormal', parent=styles['Normal'], fontName='NotoSerif', fontSize=11,
+                                      leading=16, spaceBefore=4, spaceAfter=4)
         highlight_style = ParagraphStyle('HighlightStyle', parent=normal_style, leftIndent=20, firstLineIndent=-20)
-        example_style = ParagraphStyle('ExampleStyle', parent=normal_style, leftIndent=30, spaceBefore=6, spaceAfter=6, borderWidth=1, borderColor=colors.HexColor('#E0E0E0'), borderPadding=8, borderRadius=5)
-        synonym_style = ParagraphStyle('SynonymStyle', parent=normal_style, leftIndent=30, textColor=colors.HexColor('#27AE60'))
-        antonym_style = ParagraphStyle('AntonymStyle', parent=normal_style, leftIndent=30, textColor=colors.HexColor('#E74C3C'))
+        example_style = ParagraphStyle('ExampleStyle', parent=normal_style, leftIndent=30, spaceBefore=6, spaceAfter=6,
+                                       borderWidth=1, borderColor=colors.HexColor('#E0E0E0'), borderPadding=8,
+                                       borderRadius=5)
+        synonym_style = ParagraphStyle('SynonymStyle', parent=normal_style, leftIndent=30,
+                                       textColor=colors.HexColor('#27AE60'))
+        antonym_style = ParagraphStyle('AntonymStyle', parent=normal_style, leftIndent=30,
+                                       textColor=colors.HexColor('#E74C3C'))
 
         # Add page numbers and header
         def add_page_number(canvas, doc):
@@ -961,7 +1014,8 @@ Highlights:
         flowables = [Paragraph(title, title_style)]
         flowables.append(Paragraph("内容摘要", heading_style))
         flowables.append(Paragraph(summary, normal_style))
-        flowables.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#E0E0E0'), spaceBefore=12, spaceAfter=12))
+        flowables.append(
+            HRFlowable(width="100%", thickness=1, color=colors.HexColor('#E0E0E0'), spaceBefore=12, spaceAfter=12))
 
         # Highlights
         if highlights_data:
@@ -1017,6 +1071,200 @@ Highlights:
 
 
 @login_required
+@csrf_protect
+def generate_all_highlights_study_guide(request):
+    """Generate a PDF study guide with all highlights for a user across all media."""
+    if request.method != "POST":
+        return HttpResponse("Invalid request method", status=405)
+
+    try:
+        # Get all highlights for the authenticated user
+        user = request.user
+        highlights = Highlight.objects.filter(user=user).values_list('highlighted_text', flat=True)
+
+        if not highlights:
+            logger.error("No highlights found for user: %s", user.id)
+            return HttpResponse("No highlights found for this user", status=400)
+
+        highlights_list = list(highlights)
+        logger.info("Retrieved %d highlights for user %s", len(highlights_list), user.id)
+
+        # Prepare prompt for DeepSeek API
+        highlight_text = "\n".join(highlights_list)
+        prompt = f"""Using all provided Chinese highlights for a user, create a JSON study guide for intermediate-to-advanced Chinese learners (HSK 5-6 level). Focus on all highlights across all media, teaching each phrase with examples, synonyms, and antonyms where applicable.
+
+Structure the JSON as follows:
+{{
+  "title": "用户所有媒体亮点的中文学习指南",
+  "summary": "基于用户所有媒体亮点的中文学习指南，涵盖所有相关词汇和短语，帮助中高级学习者深入理解和应用。(100-150 characters)",
+  "highlights": [
+    {{
+      "chinese": "Highlight phrase",
+      "pinyin": "Accurate pinyin with tones",
+      "english": "Precise English translation",
+      "examples": [
+        {{
+          "chinese": "Example sentence using the highlight",
+          "pinyin": "Full pinyin with tones",
+          "english": "Natural English translation"
+        }},
+        ...3 unique example sentences per highlight
+      ],
+      "synonyms": [
+        {{
+          "chinese": "Synonym in Chinese",
+          "pinyin": "Pinyin with tones",
+          "english": "English translation"
+        }},
+        ...2-3 synonyms per highlight
+      ],
+      "antonyms": [
+        {{
+          "chinese": "Antonym in Chinese",
+          "pinyin": "Pinyin with tones",
+          "english": "English translation"
+        }},
+        ...1-2 antonyms per highlight if applicable, otherwise empty list
+      ]
+    }},
+    ...one entry per highlight
+  ]
+}}
+
+Requirements:
+1. All Chinese text must be in simplified characters.
+2. Pinyin must include tone marks and proper spacing.
+3. Provide 3 unique example sentences per highlight.
+4. Include 2-3 synonyms per highlight.
+5. Include 1-2 antonyms per highlight if applicable; otherwise, leave the list empty.
+6. Ensure translations are natural and contextually appropriate.
+
+Highlights:
+{highlight_text}
+"""
+
+        # Call DeepSeek API
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {DEEPSEEK_API_KEY}"
+        }
+        payload = {
+            "model": "deepseek-chat",
+            "messages": [
+                {"role": "system",
+                 "content": "You are a Chinese language expert creating study guides for intermediate-to-advanced learners."},
+                {"role": "user", "content": prompt}
+            ],
+            "stream": False,
+            "response_format": {"type": "json_object"}
+        }
+        response = requests.post("https://api.deepseek.com/chat/completions", headers=headers, json=payload)
+        if response.status_code != 200:
+            logger.error("DeepSeek API Error: %s", response.text)
+            return HttpResponse(f"DeepSeek API Error: {response.text}", status=500)
+
+        # Parse response
+        try:
+            study_guide = json.loads(response.json()["choices"][0]["message"]["content"])
+            title = study_guide["title"]
+            summary = study_guide["summary"]
+            highlights_data = study_guide.get("highlights", [])
+        except (KeyError, json.JSONDecodeError) as e:
+            logger.error("Invalid JSON response: %s", str(e))
+            return HttpResponse(f"Invalid JSON response: {str(e)}", status=500)
+
+        # Set up PDF
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter, leftMargin=60, rightMargin=60, topMargin=72, bottomMargin=72)
+
+        # Define styles (consistent with generate_highlight_study_guide)
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle('CustomTitle', parent=styles['Title'], fontName='NotoSerifBold', fontSize=20,
+                                     leading=24, alignment=1, textColor=colors.HexColor('#2C3E50'), spaceAfter=16)
+        heading_style = ParagraphStyle('CustomHeading', parent=styles['Heading1'], fontName='NotoSerifBold',
+                                       fontSize=16, leading=20, textColor=colors.HexColor('#3498DB'), spaceBefore=24,
+                                       spaceAfter=12)
+        normal_style = ParagraphStyle('CustomNormal', parent=styles['Normal'], fontName='NotoSerif', fontSize=11,
+                                      leading=16, spaceBefore=4, spaceAfter=4)
+        highlight_style = ParagraphStyle('HighlightStyle', parent=normal_style, leftIndent=20, firstLineIndent=-20)
+        example_style = ParagraphStyle('ExampleStyle', parent=normal_style, leftIndent=30, spaceBefore=6, spaceAfter=6,
+                                       borderWidth=1, borderColor=colors.HexColor('#E0E0E0'), borderPadding=8,
+                                       borderRadius=5)
+        synonym_style = ParagraphStyle('SynonymStyle', parent=normal_style, leftIndent=30,
+                                       textColor=colors.HexColor('#27AE60'))
+        antonym_style = ParagraphStyle('AntonymStyle', parent=normal_style, leftIndent=30,
+                                       textColor=colors.HexColor('#E74C3C'))
+
+        # Add page numbers and header
+        def add_page_number(canvas, doc):
+            canvas.saveState()
+            canvas.setFont('NotoSerifBold', 10)
+            canvas.setFillColor(colors.HexColor('#3498DB'))
+            canvas.drawString(72, 720, title)
+            canvas.setFont('NotoSerif', 10)
+            canvas.setFillColor(colors.gray)
+            page_num = canvas.getPageNumber()
+            text = f"第 {page_num} 页"
+            canvas.drawRightString(540, 36, text)
+            canvas.setStrokeColor(colors.HexColor('#E0E0E0'))
+            canvas.line(72, 710, 540, 710)
+            canvas.line(72, 50, 540, 50)
+            canvas.restoreState()
+
+        # Build flowables
+        flowables = [Paragraph(title, title_style)]
+        flowables.append(Paragraph("内容摘要", heading_style))
+        flowables.append(Paragraph(summary, normal_style))
+        flowables.append(
+            HRFlowable(width="100%", thickness=1, color=colors.HexColor('#E0E0E0'), spaceBefore=12, spaceAfter=12))
+
+        if highlights_data:
+            flowables.append(Paragraph("所有亮点学习", heading_style))
+            for i, highlight in enumerate(highlights_data):
+                highlight_text = f'<b>{i + 1}. <font color="#E74C3C">{highlight.get("chinese", "未知")}</font></b> <font color="#7F8C8D">[{highlight.get("pinyin", "无拼音")}]</font><br/><b>翻译：</b>{highlight.get("english", "无翻译")}'
+                flowables.append(Paragraph(highlight_text, highlight_style))
+
+                flowables.append(Paragraph("<b>例句：</b>", normal_style))
+                for ex in highlight.get("examples", []):
+                    ex_text = f'<font color="black">{ex.get("chinese", "无例句")}</font><br/><font color="gray">{ex.get("pinyin", "无拼音")}</font><br/><font color="gray">{ex.get("english", "无翻译")}</font>'
+                    flowables.append(Paragraph(ex_text, example_style))
+
+                flowables.append(Paragraph("<b>近义词：</b>", normal_style))
+                for syn in highlight.get("synonyms", []):
+                    syn_text = f'{syn.get("chinese", "无近义词")} [{syn.get("pinyin", "无拼音")}] - {syn.get("english", "无翻译")}'
+                    flowables.append(Paragraph(syn_text, synonym_style))
+
+                if highlight.get("antonyms"):
+                    flowables.append(Paragraph("<b>反义词：</b>", normal_style))
+                    for ant in highlight.get("antonyms", []):
+                        ant_text = f'{ant.get("chinese", "无反义词")} [{ant.get("pinyin", "无拼音")}] - {ant.get("english", "无翻译")}'
+                        flowables.append(Paragraph(ant_text, antonym_style))
+
+                flowables.append(Spacer(1, 10))
+        else:
+            flowables.append(Paragraph("未找到用户亮点内容。", normal_style))
+
+        # Build PDF
+        doc.build(flowables, onFirstPage=add_page_number, onLaterPages=add_page_number)
+
+        # Prepare response
+        pdf = buffer.getvalue()
+        buffer.close()
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{title}_{user.id}_all_highlights_study_guide.pdf"'
+        response.write(pdf)
+        logger.info("All highlights study guide PDF generated and sent successfully for user %s", user.id)
+        return response
+
+    except requests.RequestException as e:
+        logger.error("API request failed: %s", str(e))
+        return HttpResponse(f"API request failed: {str(e)}", status=500)
+    except Exception as e:
+        logger.exception("Unexpected error generating PDF: %s", str(e))
+        return HttpResponse(f"Internal error: {str(e)}", status=500)
+
+
+@login_required
 def subscribe_to_channel(request, channel_id):
     channel = get_object_or_404(Channel, id=channel_id)
     profile = Profile.objects.get(user=request.user)
@@ -1052,3 +1300,238 @@ def user_subscribed_channels(request):
     subscribed_channels = profile.subscribed_channels.all()
     return render(request, 'subscribed_channels.html', {'subscribed_channels': subscribed_channels})
 
+
+def chat(request):
+    return render(request, "chat.html")
+
+
+@csrf_exempt
+def chat_api(request):
+    # 1) Parse input safely
+    try:
+        payload_in = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        return JsonResponse({"error": "Invalid JSON body."}, status=400)
+
+    user_msg = (payload_in.get("message") or "").strip()
+    if not user_msg:
+        return JsonResponse({"error": "Empty message."}, status=400)
+
+    # 2) Resolve API key
+    api_key = getattr(settings, "DEEPSEEK_API_KEY", None) or os.getenv("DEEPSEEK_API_KEY")
+    if not api_key:
+        logger.error("DEEPSEEK_API_KEY missing")
+        return JsonResponse({"error": "Server not configured for DeepSeek."}, status=500)
+
+    # 3) Build request
+    system_prompt = (
+        "You are a patient, upbeat language tutor. "
+        "Use simple, clear explanations and give 1-2 examples. "
+        "If user is learning Chinese, add pinyin when useful."
+    )
+    body = {
+        "model": "deepseek-chat",
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_msg},
+        ],
+        "stream": False,
+    }
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    # 4) Call DeepSeek with robust error handling
+    try:
+        r = requests.post(
+            "https://api.deepseek.com/chat/completions",
+            headers=headers,
+            json=body,
+            timeout=30,
+        )
+    except requests.Timeout:
+        logger.exception("DeepSeek timeout")
+        return JsonResponse({"error": "Upstream timeout. Please try again."}, status=504)
+    except Exception as e:
+        logger.exception("DeepSeek request failed")
+        return JsonResponse({"error": f"Upstream error: {e}"}, status=502)
+
+    # 5) Handle non-200 responses gracefully
+    if r.status_code != 200:
+        logger.error("DeepSeek non-200: %s %s", r.status_code, r.text[:500])
+        return JsonResponse(
+            {"error": f"DeepSeek error {r.status_code}", "details": r.text[:500]},
+            status=502,
+        )
+
+    # 6) Extract reply safely
+    try:
+        data = r.json()
+        reply = data["choices"][0]["message"]["content"]
+    except Exception:
+        logger.exception("Unexpected DeepSeek payload: %s", r.text[:1000])
+        return JsonResponse({"error": "Unexpected response shape from DeepSeek."}, status=502)
+
+    return JsonResponse({"reply": reply})
+
+
+from django.views.decorators.http import require_http_methods
+
+
+# already imported: Highlight, Profile, Subscription, timezone, json, login_required
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def chat_highlights(request):
+    """
+    /chat/api/highlights/
+    GET  -> list all chat highlights for this user  [{id, text}, ...]
+    POST -> create a new chat highlight from selected text {text: "..."}
+    Uses same daily limit logic as video highlights.
+    """
+    user = request.user
+
+    if request.method == "GET":
+        highlights = Highlight.objects.filter(user=user, source='chat').order_by('created_at')
+        data = [{"id": h.id, "text": h.highlighted_text} for h in highlights]
+        return JsonResponse(data, safe=False)
+
+    # POST
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    text = (data.get("text") or "").strip()
+    if not text:
+        return JsonResponse({"error": "Text is required"}, status=400)
+
+    # Daily limit: reuse same rule as create_highlight (3 / day for FREE)
+    try:
+        subscription = Subscription.objects.get(user=user)
+    except Subscription.DoesNotExist:
+        subscription = None
+
+    if subscription and subscription.tier == 'FREE':
+        today = timezone.now().date()
+        highlights_today = Highlight.objects.filter(
+            user=user,
+            created_at__date=today
+        ).count()
+        if highlights_today >= 3:
+            return JsonResponse({
+                "error": "You have reached the daily limit of 3 highlights. Upgrade to create more.",
+                "limit_reached": True,
+            }, status=403)
+
+    # Create chat highlight (no media, timing or indices used)
+    new_highlight = Highlight.objects.create(
+        user=user,
+        source='chat',
+        media=None,
+        highlighted_text=text,
+        start_time=0,
+        end_time=0,
+        start_index=0,
+        end_index=len(text),
+        start_sentence_index=0,
+        end_sentence_index=0,
+        frame_index=0,
+    )
+
+    # Update profile highlight count like your video create_highlight
+    profile = user.profile
+    profile.total_highlights += 1
+    profile.save()
+
+    return JsonResponse(
+        {
+            "id": new_highlight.id,
+            "text": new_highlight.highlighted_text,
+            "total_points": profile.total_points,  # if you want, same as video endpoint
+        },
+        status=201,
+    )
+
+@csrf_exempt
+@login_required
+def web_highlight(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Only POST allowed"}, status=405)
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    text = (data.get("text") or "").strip()
+    page_url = (data.get("page_url") or "").strip()
+    page_title = (data.get("page_title") or "").strip()
+
+    if not text:
+        return JsonResponse({"error": "Text is required"}, status=400)
+
+    user = request.user
+
+    try:
+        subscription = Subscription.objects.get(user=user)
+    except Subscription.DoesNotExist:
+        subscription = None
+
+    if subscription and subscription.tier == 'FREE':
+        today = timezone.now().date()
+        highlights_today = Highlight.objects.filter(
+            user=user,
+            created_at__date=today
+        ).count()
+        if highlights_today >= 3:
+            return JsonResponse({
+                "error": "You have reached the daily limit of 3 highlights. Upgrade to create more.",
+                "limit_reached": True,
+            }, status=403)
+
+    h = Highlight.objects.create(
+        user=user,
+        source='web',
+        media=None,
+        highlighted_text=text,
+        start_time=0,
+        end_time=0,
+        start_index=0,
+        end_index=len(text),
+        start_sentence_index=0,
+        end_sentence_index=0,
+        frame_index=0,
+        page_url=page_url,
+        page_title=page_title,
+    )
+
+    profile = user.profile
+    profile.total_highlights += 1
+    profile.save()
+
+    return JsonResponse({
+        "id": h.id,
+        "text": h.highlighted_text,
+        "page_url": h.page_url,
+        "page_title": h.page_title,
+    }, status=201)
+
+@login_required
+def read_list(request):
+    """
+    /read/ – list of Chinese reading articles.
+    """
+    articles = Article.objects.all().order_by("-created_at")
+    return render(request, "read/read_list.html", {"articles": articles})
+
+
+@login_required
+def read_detail(request, slug):
+    """
+    /read/<slug>/ – read a specific article.
+    Highlights will use the existing Highlight model with source='article'.
+    """
+    article = get_object_or_404(Article, slug=slug)
+    return render(request, "read/read_detail.html", {"article": article})

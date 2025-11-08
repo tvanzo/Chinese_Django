@@ -4,1254 +4,881 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Chinese Log</title>
-        <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
+  <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
 
   <!-- Fonts and icons -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
   <!-- Nucleo Icons -->
   <link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet">
   <link href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet">
-  <!-- Font Awesome Icons -->
-<!-- Font Awesome Latest Version -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Font Awesome Latest Version -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- CSS Files -->
   <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet">
-<style>
-:root {
-     --bg: #f9f9fa;
-     --header: #fbf4f6;
-     --text: #2e2e2f;
-     --white: #fff;
-     --light-grey: #c4cad3;
-     --tag-1: #ceecfd;
-     --tag-1-text: #2e87ba;
-     --tag-2: #d6ede2;
-     --tag-2-text: #13854e;
-     --tag-3: #ceecfd;
-     --tag-3-text: #2d86ba;
-     --tag-4: #f2dcf5;
-     --tag-4-text: #a734ba;
-     --purple: #7784ee;
-}
- * {
-     margin: 0;
-     padding: 0;
-     box-sizing: border-box;
-     font-family: 'Open Sans', sans-serif;
-}
- body {
-     color: var(--text);
-}
- .app {
-     background-color: var(--bg);
-     width: 100%;
-     min-height: 100vh;
-}
- h1 {
-     font-size: 30px;
-}
- .project {
-     padding: 2rem;
-     max-width: 75%;
-     width: 100%;
-     display: inline-block;
-}
- .project-info {
-     padding: 2rem 0;
-     display: flex;
-     width: 100%;
-     justify-content: space-between;
-     align-items: center;
-}
- .project-participants {
-     display: flex;
-     align-items: center;
-}
- .project-participants span, .project-participants__add {
-     width: 30px;
-     height: 30px;
-     display: inline-block;
-     background: var(--purple);
-     border-radius: 100rem;
-     margin: 0 0.2rem;
-}
- .project-participants__add {
-     background: transparent;
-     border: 1px dashed #969696;
-     font-size: 0;
-     cursor: pointer;
-     position: relative;
-}
- .project-participants__add:after {
-     content: "+";
-     font-size: 15px;
-     color: #969696;
-}
- .project-tasks {
-     display: grid;
-     grid-template-columns: repeat(4, 1fr);
-     width: 100%;
-     grid-column-gap: 1.5rem;
-     padding-left: 20px; /* Added padding to the left */
-}
- .project-column-heading {
-     margin-bottom: 1rem;
-     display: flex;
-     align-items: center;
-     justify-content: space-between;
-}
- .project-column-heading__title {
-     font-size: 20px;
-}
- .project-column-heading__options {
-     background: transparent;
-     color: var(--light-grey);
-     font-size: 18px;
-     border: 0;
-     cursor: pointer;
-}
- .task {
-     cursor: move;
-     background-color: var(--white);
-     padding: 1rem;
-     border-radius: 8px;
-     width: 100%;
-     box-shadow: rgba(99, 99, 99, 0.1) 0px 2px 8px 0px;
-     margin-bottom: 1rem;
-     border: 3px dashed transparent;
-     margin-left: 0; /* Removed left margin */
-}
- .task:hover {
-     box-shadow: rgba(99, 99, 99, 0.3) 0px 2px 8px 0px;
-     border-color: rgba(162, 179, 207, 0.2) !important;
-}
- .task p {
-     font-size: 15px;
-     margin: 1.2rem 0;
-}
- .task__tag {
-     border-radius: 100px;
-     padding: 2px 13px;
-     font-size: 12px;
-}
- .task__tag--copyright {
-     color: var(--tag-4-text);
-     background-color: var(--tag-4);
-}
- .task__tag--design {
-     color: var(--tag-3-text);
-     background-color: var(--tag-3);
-}
- .task__tag--illustration {
-     color: var(--tag-2-text);
-     background-color: var(--tag-2);
-}
- .task__tags {
-     width: 100%;
-     display: flex;
-     align-items: center;
-     justify-content: space-between;
-}
- .task__options {
-     background: transparent;
-     border: 0;
-     color: var(--light-grey);
-     font-size: 17px;
-}
- .task__stats {
-     position: relative;
-     width: 100%;
-     color: var(--light-grey);
-     font-size: 12px;
-}
- .task__stats span:not(:last-of-type) {
-     margin-right: 1rem;
-}
- .task__stats svg {
-     margin-right: 5px;
-}
- .task__owner {
-     width: 25px;
-     height: 25px;
-     border-radius: 100rem;
-     background: var(--purple);
-     position: absolute;
-     display: inline-block;
-     right: 0;
-     bottom: 0;
-}
- .task-hover {
-     border: 3px dashed var(--light-grey) !important;
-}
- .task-details {
-     width: 24%;
-     border-left: 1px solid #d9e0e9;
-     display: inline-block;
-     height: 100%;
-     vertical-align: top;
-     padding: 3rem 2rem;
-}
- .tag-progress {
-     margin: 1.5rem 0;
-}
- .tag-progress h2 {
-     font-size: 16px;
-     margin-bottom: 1rem;
-}
- .tag-progress p {
-     display: flex;
-     width: 100%;
-     justify-content: space-between;
-}
- .tag-progress p span {
-     color: #b4b4b4;
-}
- .tag-progress .progress {
-     width: 100%;
-     -webkit-appearance: none;
-     appearance: none;
-     border: none;
-     border-radius: 10px;
-     height: 10px;
-}
- .tag-progress .progress::-webkit-progress-bar, .tag-progress .progress::-webkit-progress-value {
-     border-radius: 10px;
-}
- .tag-progress .progress--copyright::-webkit-progress-bar {
-     background-color: #ecd8e6;
-}
- .tag-progress .progress--copyright::-webkit-progress-value {
-     background: #d459e8;
-}
- .tag-progress .progress--illustration::-webkit-progress-bar {
-     background-color: #dee7e3;
-}
- .tag-progress .progress--illustration::-webkit-progress-value {
-     background-color: #46bd84;
-}
- .tag-progress .progress--design::-webkit-progress-bar {
-     background-color: #d8e7f4;
-}
- .tag-progress .progress--design::-webkit-progress-value {
-     background-color: #08a0f7;
-}
- .task-activity h2 {
-     font-size: 16px;
-     margin-bottom: 1rem;
-}
- .task-activity li {
-     list-style: none;
-     margin: 1rem 0;
-     padding: 0rem 1rem 1rem 3rem;
-     position: relative;
-}
- .task-activity time {
-     display: block;
-     color: var(--light-grey);
-}
- .task-icon {
-     width: 30px;
-     height: 30px;
-     border-radius: 100rem;
-     position: absolute;
-     top: 0;
-     left: 0;
-     display: flex;
-     align-items: center;
-     justify-content: center;
-}
- .task-icon svg {
-     font-size: 12px;
-     color: var(--white);
-}
- .task-icon--attachment {
-     background-color: #fba63c;
-}
- .task-icon--comment {
-     background-color: #5dc983;
-}
- .task-icon--edit {
-     background-color: #7784ee;
-}
- @media only screen and (max-width: 1300px) {
-     .project {
-         max-width: 100%;
-    }
-     .task-details {
-         width: 100%;
-         display: flex;
-    }
-     .tag-progress, .task-activity {
-         flex-basis: 50%;
-         background: var(--white);
-         padding: 1rem;
-         border-radius: 8px;
-         margin: 1rem;
-    }
-}
- @media only screen and (max-width: 1000px) {
-     .project-column:nth-child(2), .project-column:nth-child(3) {
-         display: none;
-    }
-     .project-tasks {
-         grid-template-columns: 1fr 1fr;
-    }
-}
- @media only screen and (max-width: 600px) {
-     .project-column:nth-child(4) {
-         display: none;
-    }
-     .project-tasks {
-         grid-template-columns: 1fr;
-    }
-     .task-details {
-         flex-wrap: wrap;
-         padding: 3rem 1rem;
-    }
-     .tag-progress, .task-activity {
-         flex-basis: 100%;
-    }
-     h1 {
-         font-size: 25px;
-    }
-}
- .nav-link.active .icon svg {
-  fill: #FFD700 !important;
-  color: #FFD700 !important;
-}
 
-  .sidenav {
+  <style>
+    :root {
+      --bg: #f9f9fa;
+      --header: #fbf4f6;
+      --text: #2e2e2f;
+      --white: #fff;
+      --light-grey: #c4cad3;
+      --tag-1: #ceecfd;
+      --tag-1-text: #2e87ba;
+      --tag-2: #d6ede2;
+      --tag-2-text: #13854e;
+      --tag-3: #ceecfd;
+      --tag-3-text: #2d86ba;
+      --tag-4: #f2dcf5;
+      --tag-4-text: #a734ba;
+      --purple: #7784ee;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Open Sans', sans-serif;
+    }
+    body {
+      color: var(--text);
+    }
+    .app {
+      background-color: var(--bg);
+      width: 100%;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 30px;
+    }
+    .project {
+      padding: 2rem;
+      max-width: 75%;
+      width: 100%;
+      display: inline-block;
+    }
+    .project-info {
+      padding: 2rem 0;
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .project-participants {
+      display: flex;
+      align-items: center;
+    }
+    .project-participants span, .project-participants__add {
+      width: 30px;
+      height: 30px;
+      display: inline-block;
+      background: var(--purple);
+      border-radius: 100rem;
+      margin: 0 0.2rem;
+    }
+    .project-participants__add {
+      background: transparent;
+      border: 1px dashed #969696;
+      font-size: 0;
+      cursor: pointer;
+      position: relative;
+    }
+    .project-participants__add:after {
+      content: "+";
+      font-size: 15px;
+      color: #969696;
+    }
+    .project-tasks {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      width: 100%;
+      grid-column-gap: 1.5rem;
+      padding-left: 20px;
+    }
+    .project-column-heading {
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .project-column-heading__title {
+      font-size: 20px;
+    }
+    .project-column-heading__options {
+      background: transparent;
+      color: var(--light-grey);
+      font-size: 18px;
+      border: 0;
+      cursor: pointer;
+    }
+    .task {
+      cursor: move;
+      background-color: var(--white);
+      padding: 1rem;
+      border-radius: 8px;
+      width: 100%;
+      box-shadow: rgba(99, 99, 99, 0.1) 0px 2px 8px 0px;
+      margin-bottom: 1rem;
+      border: 3px dashed transparent;
+      margin-left: 0;
+    }
+    .task:hover {
+      box-shadow: rgba(99, 99, 99, 0.3) 0px 2px 8px 0px;
+      border-color: rgba(162, 179, 207, 0.2) !important;
+    }
+    .task p {
+      font-size: 15px;
+      margin: 1.2rem 0;
+    }
+    .task__tag {
+      border-radius: 100px;
+      padding: 2px 13px;
+      font-size: 12px;
+    }
+    .task__tag--copyright {
+      color: var(--tag-4-text);
+      background-color: var(--tag-4);
+    }
+    .task__tag--design {
+      color: var(--tag-3-text);
+      background-color: var(--tag-3);
+    }
+    .task__tag--illustration {
+      color: var(--tag-2-text);
+      background-color: var(--tag-2);
+    }
+    .task__tags {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .task__options {
+      background: transparent;
+      border: 0;
+      color: var(--light-grey);
+      font-size: 17px;
+    }
+    .task__stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      width: 100%;
+      color: var(--light-grey);
+      font-size: 12px;
+    }
+    .task__stats span:not(:last-of-type) {
+      margin-right: 1rem;
+    }
+    .task__stats svg {
+      margin-right: 5px;
+    }
+    .task__owner {
+      width: 25px;
+      height: 25px;
+      border-radius: 100rem;
+      background: var(--purple);
+      position: absolute;
+      display: inline-block;
+      right: 0;
+      bottom: 0;
+    }
+    .task-hover {
+      border: 3px dashed var(--light-grey) !important;
+    }
+    .task-details {
+      width: 24%;
+      border-left: 1px solid #d9e0e9;
+      display: inline-block;
+      height: 100%;
+      vertical-align: top;
+      padding: 3rem 2rem;
+    }
+    .tag-progress {
+      margin: 1.5rem 0;
+    }
+    .tag-progress h2 {
+      font-size: 16px;
+      margin-bottom: 1rem;
+    }
+    .tag-progress p {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+    }
+    .tag-progress p span {
+      color: #b4b4b4;
+    }
+    .tag-progress .progress {
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+      border: none;
+      border-radius: 10px;
+      height: 10px;
+    }
+    .tag-progress .progress::-webkit-progress-bar,
+    .tag-progress .progress::-webkit-progress-value {
+      border-radius: 10px;
+    }
+    .tag-progress .progress--copyright::-webkit-progress-bar {
+      background-color: #ecd8e6;
+    }
+    .tag-progress .progress--copyright::-webkit-progress-value {
+      background: #d459e8;
+    }
+    .tag-progress .progress--illustration::-webkit-progress-bar {
+      background-color: #dee7e3;
+    }
+    .tag-progress .progress--illustration::-webkit-progress-value {
+      background-color: #46bd84;
+    }
+    .tag-progress .progress--design::-webkit-progress-bar {
+      background-color: #d8e7f4;
+    }
+    .tag-progress .progress--design::-webkit-progress-value {
+      background-color: #08a0f7;
+    }
+    .task-activity h2 {
+      font-size: 16px;
+      margin-bottom: 1rem;
+    }
+    .task-activity li {
+      list-style: none;
+      margin: 1rem 0;
+      padding: 0rem 1rem 1rem 3rem;
+      position: relative;
+    }
+    .task-activity time {
+      display: block;
+      color: var(--light-grey);
+    }
+    .task-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 100rem;
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .task-icon svg {
+      font-size: 12px;
+      color: var(--white);
+    }
+    .task-icon--attachment {
+      background-color: #fba63c;
+    }
+    .task-icon--comment {
+      background-color: #5dc983;
+    }
+    .task-icon--edit {
+      background-color: #7784ee;
+    }
+    @media only screen and (max-width: 1300px) {
+      .project {
+        max-width: 100%;
+      }
+      .task-details {
+        width: 100%;
         display: flex;
-        flex-direction: column;
-        height: 100vh;
+      }
+      .tag-progress,
+      .task-activity {
+        flex-basis: 50%;
+        background: var(--white);
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem;
+      }
+    }
+    @media only screen and (max-width: 1000px) {
+      .project-column:nth-child(2),
+      .project-column:nth-child(3) {
+        display: none;
+      }
+      .project-tasks {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media only screen and (max-width: 600px) {
+      .project-column:nth-child(4) {
+        display: none;
+      }
+      .project-tasks {
+        grid-template-columns: 1fr;
+      }
+      .task-details {
+        flex-wrap: wrap;
+        padding: 3rem 1rem;
+      }
+      .tag-progress,
+      .task-activity {
+        flex-basis: 100%;
+      }
+      h1 {
+        font-size: 25px;
+      }
     }
 
+    .nav-link.active .icon svg {
+      fill: #FFD700 !important;
+      color: #FFD700 !important;
+    }
+
+    .sidenav {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
     .sidenav-footer {
-        margin-top: 135px;
-        padding-bottom: 1rem;
+      margin-top: 135px;
+      padding-bottom: 1rem;
     }
-.xp-circle {
-  width: 20px; /* Adjust size as needed */
-  height: 20px; /* Adjust size as needed */
-  border-radius: 50%;
-  background-color: #ffc40c; /* Yellow color */
-  color: #ffffff; /* White text */
-  font-weight: bold;
-  font-size: 12px; /* Adjust size as needed */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#xp-points {
-  font-size: 14px; /* Adjust size as needed */
-  font-weight: bold;
-  color: #ffffff; /* White text */
-}
-      .sidenav {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
+    .xp-circle {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background-color: #ffc40c;
+      color: #ffffff;
+      font-weight: bold;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-
-    .sidenav-footer {
-        margin-top: 135px;
-        padding-bottom: 1rem;
+    #xp-points {
+      font-size: 14px;
+      font-weight: bold;
+      color: #ffffff;
     }
-       .btn-purple {
-  background-color: #d00c9c; /* Purple color */
-  color: #ffffff; /* White text */
-  border-color: #6f42c1;
-}
-       #unique-xp-display {
-  background-color: #d00c9c; /* Change the color to your preference */
-  color: white; /* Ensure the text color contrasts well */
-  padding: 3px 8px; /* Adjust padding to make it smaller */
-  border-radius: 8px; /* Increased border radius to make corners more rounded */
-}
-
-#unique-xp-display .unique-xp-circle {
-  background-color: #ffc40c; /* Change the color to your preference */
-  color: white; /* Ensure the text color contrasts well */
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 5px; /* Adjust margin as needed */
-}
-
-#unique-xp-points {
-  font-weight: bold;
-  font-size: 14px; /* Adjust font size as needed */
-}
-   /* Sidebar styles */
-#sidenav-main {
-  background-color: #ffffff; /* White background */
-  border-radius: 12px; /* Adjust the border radius to your preference */
-  padding: 10px; /* Add padding if necessary */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for better visibility */
-  margin-bottom: 20px; /* Add margin to ensure the bottom border is visible */
-  max-height: calc(100vh - 40px); /* Ensure the sidebar fits within the viewport */
-  overflow-y: auto; /* Add vertical scrolling if necessary */
-}
-.task__stats {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    width: 100%;
-    color: var(--light-grey);
-    font-size: 12px;
-}
-
-.task__date {
-    flex-grow: 1;
-}
-
-.task__actions {
-    display: flex;
-    gap: 5px;
-}
-
-.task__actions .btn {
-    padding: 2px 6px;
-}
-.task__stats {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    width: 100%;
-    color: var(--light-grey);
-    font-size: 12px;
-}
-
-.task__date {
-    flex-grow: 1;
-}
-
-.task__actions {
-    display: flex;
-    gap: 5px;
-}
-
-.task__actions .btn {
-    padding: 2px 6px;
-    color: var(--light-grey); /* Ensure the icons are not red */
-}
-
-.task__actions .btn .fas {
-    color: var(--light-grey); /* Ensure the icons are not red */
-}
-.task__stats {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    width: 100%;
-    color: var(--light-grey);
-    font-size: 12px;
-}
-
-.task__date {
-    flex-grow: 1;
-    align-self: center;
-}
-
-.task__actions {
-    display: flex;
-    gap: 5px;
-}
-
-.task__actions .btn {
-    padding: 2px 6px;
-    color: var(--light-grey); /* Ensure the icons are not red */
-}
-
-.task__actions .btn .fas {
-    color: var(--light-grey); /* Ensure the icons are not red */
-    font-size: 115%; /* Increase icon size by 15% */
-}
-.btn {
-    margin-bottom: 0 !important; /* Override the bottom margin of the .btn class */
-}
-
-.task__stats {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    width: 100%;
-    color: var(--light-grey);
-    font-size: 12px;
-}
-
-.task__date {
-    flex-grow: 1;
-    align-self: center;
-}
-
-.task__actions {
-    display: flex;
-    gap: 5px;
-}
-
-.task__actions .btn {
-    padding: 2px 6px;
-    color: var(--light-grey); /* Ensure the icons are not red */
-}
-
-.task__actions .btn .fas {
-    color: var(--light-grey); /* Ensure the icons are not red */
-    font-size: 115%; /* Increase icon size by 15% */
-}
-
-.btn {
-  margin-bottom: 0 !important; /* Override the bottom margin of the .btn class */
-}
-.task__stats {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    width: 100%;
-    color: var(--light-grey);
-    font-size: 12px;
-}
-
-.task__date {
-    flex-grow: 1;
-    align-self: center;
-}
-
-.task__actions {
-    display: flex;
-    gap: 5px;
-}
-
-.task__actions .btn {
-    padding: 2px 6px;
-    color: var(--light-grey); /* Ensure the icons are not red */
-}
-
-.task__actions .btn .fas {
-    color: var(--light-grey); /* Ensure the icons are not red */
-    font-size: 115%; /* Increase icon size by 15% */
-}
-
-.btn {
-  margin-bottom: 0 !important; /* Override the bottom margin of the .btn class */
-}
-@media (max-width: 1200px) {
-  #sidenav-main {
-    display: none;
-  }
-  #top-nav {
-    display: block;
-  }
-}
-
-@media (min-width: 1201px) {
-  #top-nav {
-    display: none;
-  }
-}
-        .custom-logo-size {
-  height: 50px !important; /* Increase by 20% from 80px */
-  /* If you also need to adjust width while maintaining aspect ratio, you can uncomment the following line */
-  /* width: auto; */
-}
-  .sidenav-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100px;  /* Adjust this height as needed */
-}
-
-.custom-logo-size {
-  max-height: 80%;
-  width: auto;
-}
-.text-warning { color: #dcb234; } /* Custom dark yellow */
-.text-success { color: #3c763d; } /* Custom dark green */
-.title-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 50px; /* Adjusted height to provide more control */
-}
-.title-container p {
-    margin: 0;
-    line-height: 1.1; /* Tighter line spacing */
-    text-align: center;
-    white-space: pre-line; /* Ensures proper line breaking */
-    font-size: 0.75rem; /* Adjust size as needed */
-}
-.nav-link.active .icon svg {
-    fill: #FFD700 !important;
-    color: #FFD700 !important;
-}
-.xp-points-bar {
-    background-color: #f8f9fa;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
-.xp-points-bar h2 {
-    margin: 0;
-    font-size: 24px;
-    font-weight: normal;
-}
-.xp-points-bar #xp-points {
-    font-size: 20px;
-    font-weight: bold;
-    color: #007bff;
-}
-.xp-circle {
-    width: 20px; /* Adjust size as needed */
-    height: 20px; /* Adjust size as needed */
-    border-radius: 50%;
-    background-color: #ffc40c; /* Yellow color */
-    color: #ffffff; /* White text */
-    font-weight: bold;
-    font-size: 12px; /* Adjust size as needed */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-#xp-points {
-    font-size: 14px; /* Adjust size as needed */
-    font-weight: bold;
-    color: #ffffff; /* Adjust color as needed */
-}
-.btn-purple {
-    background-color: #d00c9c; /* Purple color */
-    color: #ffffff; /* White text */
-    border-color: #6f42c1;
-}
-.compact-btn {
-    padding: 0.25rem 0.5rem; /* Less padding for a more compact button */
-}
-#unique-xp-display {
-    background-color: #d00c9c; /* Change the color to your preference */
-    color: white; /* Ensure the text color contrasts well */
-    padding: 3px 8px; /* Adjust padding to make it smaller */
-    border-radius: 8px; /* Increased border radius to make corners more rounded */
-}
-#unique-xp-display .unique-xp-circle {
-    background-color: #ffc40c; /* Change the color to your preference */
-    color: white; /* Ensure the text color contrasts well */
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 5px; /* Adjust margin as needed */
-}
-#unique-xp-points {
-    font-weight: bold;
-    font-size: 14px; /* Adjust font size as needed */
-}
-#sidenav-main {
-    background-color: #ffffff; /* White background */
-    border-radius: 12px; /* Adjust the border radius to your preference */
-    padding: 10px; /* Add padding if necessary */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for better visibility */
-    margin-bottom: 20px; /* Add margin to ensure the bottom border is visible */
-    max-height: calc(100vh - 40px); /* Ensure the sidebar fits within the viewport */
-    overflow-y: auto; /* Add vertical scrolling if necessary */
-}
-@media (max-width: 1200px) {
+    .btn-purple {
+      background-color: #d00c9c;
+      color: #ffffff;
+      border-color: #6f42c1;
+    }
+    #unique-xp-display {
+      background-color: #d00c9c;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 8px;
+    }
+    #unique-xp-display .unique-xp-circle {
+      background-color: #ffc40c;
+      color: white;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 5px;
+    }
+    #unique-xp-points {
+      font-weight: bold;
+      font-size: 14px;
+    }
     #sidenav-main {
-        display: none;
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
     }
-    #top-nav {
+
+    .task__date {
+      flex-grow: 1;
+      align-self: center;
+    }
+    .task__actions {
+      display: flex;
+      gap: 5px;
+    }
+    .task__actions .btn {
+      padding: 2px 6px;
+      color: var(--light-grey);
+      margin-bottom: 0 !important;
+    }
+    .task__actions .btn .fas {
+      color: var(--light-grey);
+      font-size: 115%;
+    }
+
+    @media (max-width: 1200px) {
+      #sidenav-main {
+        display: none;
+      }
+      #top-nav {
         display: block;
+      }
     }
-}
-@media (min-width: 1201px) {
-    #top-nav {
+    @media (min-width: 1201px) {
+      #top-nav {
         display: none;
+      }
     }
-}
-#welcome-banner {
-  background-color: #e9ecef; /* Light grey background */
-  border-radius: 0 0 10px 10px; /* Rounded bottom corners */
-  padding: 15px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow */
-  text-align: left;
-  width: 100%; /* Full width */
-}
+    .custom-logo-size {
+      height: 50px !important;
+    }
+    .sidenav-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100px;
+    }
+    .custom-logo-size {
+      max-height: 80%;
+      width: auto;
+    }
+    .text-warning { color: #dcb234; }
+    .text-success { color: #3c763d; }
+    .title-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 50px;
+    }
+    .title-container p {
+      margin: 0;
+      line-height: 1.1;
+      text-align: center;
+      white-space: pre-line;
+      font-size: 0.75rem;
+    }
+    .xp-points-bar {
+      background-color: #f8f9fa;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    .xp-points-bar h2 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: normal;
+    }
+    .xp-points-bar #xp-points {
+      font-size: 20px;
+      font-weight: bold;
+      color: #007bff;
+    }
 
-#welcome-banner .alert-heading {
-  font-weight: 700;
-  color: #28a745; /* Green color for success */
-}
-
-#welcome-banner button.btn-close {
-  background: transparent;
-  border: none;
-  color: #6c757d;
-}
-
-#welcome-banner button.btn-close:hover {
-  color: #343a40;
-}
-
-
-.sidenav-header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100px;  /* Adjust this height as needed */
-}
-.custom-logo-size {
-    height: 50px !important; /* Increase by 20% from 80px */
-    /* If you also need to adjust width while maintaining aspect ratio, you can uncomment the following line */
-    /* width: auto; */
-}
-#welcome-banner {
-  background-color: #f8f9fa; /* Light grey for a subtle modern look */
-  color: #344767; /* Darker text for contrast */
-  border: none;
-  border-bottom: 2px solid #e9ecef; /* A bit more pronounced bottom line */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Subtle shadow for depth */
-  padding: 10px 15px; /* Adjust for a thinner, modern look */
-  font-size: 14px; /* Smaller text size for a cleaner appearance */
-  width: 100%;
-  text-align: left;
-}
-
-#welcome-banner .close {
-  background: transparent;
-  border: none;
-  color: #6c757d;
-  padding: 0;
-  font-size: 20px; /* Size of the 'X' */
-  line-height: 1;
-  opacity: 0.5;
-  transition: opacity 0.15s ease-in-out;
-}
-
-#welcome-banner .close:hover {
-  opacity: 1;
-}
-
-#welcome-banner .close:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-
+    #welcome-banner {
+      background-color: #f8f9fa;
+      color: #344767;
+      border: none;
+      border-bottom: 2px solid #e9ecef;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      padding: 10px 15px;
+      font-size: 14px;
+      width: 100%;
+      text-align: left;
+    }
+    #welcome-banner .close {
+      background: transparent;
+      border: none;
+      color: #6c757d;
+      padding: 0;
+      font-size: 20px;
+      line-height: 1;
+      opacity: 0.5;
+      transition: opacity 0.15s ease-in-out;
+    }
     #welcome-banner .close:hover {
-  opacity: 1;
-}
-
-#welcome-banner .close:focus {
-  outline: none;
-  box-shadow: none;
-}
-  </style>
-</head>
-<body class="g-sidenav-show  bg-gray-100">
-{% include 'accounts/navbar.html' %}
-
-  {% include 'accounts/sidebar.html' %}
-
-  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
-    <!-- Navbar -->
-   <!-- Navbar -->
-<!-- Navbar -->
-<!-- Navbar -->
-<!-- Navbar -->
-<!-- Navbar -->
-<!-- Navbar -->
-<!-- Navbar -->
-
-  <!-- Main content -->
-{% block content %}
-
-<main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
-
-
-<div class="highlights-container">
-     <div class="header">
-    <div class="header-content">
-        <h1>My Highlights</h1>
-        <div class="header-controls">
-            <div class="select-wrapper">
-                <select id="videoFilter" class="filter-dropdown">
-                    <option value="all">All Videos</option>
-                    {% for title in video_titles %}
-                        <option value="{{ title }}">{{ title }}</option>
-                    {% endfor %}
-                </select>
-                <i class="fas fa-chevron-down select-icon"></i>
-            </div>
-            <button class="download-btn" onclick="downloadHighlights()">
-                <i class="fas fa-download"></i>
-                <span>Download All</span>
-            </button>
-        </div>
-    </div>
-</div>
-
-
-        <div class="highlights-grid">
-    {% for highlight in highlights %}
-    <div class="highlight-card" data-video-title="{{ highlight.media.title }}">
-        <div class="highlight-text">{{ highlight.highlighted_text }}</div>
-        <div class="highlight-content">{{ highlight.text }}</div>
-        <div class="highlight-footer">
-            <span class="highlight-date">{{ highlight.created_at|date:"M d, Y" }}</span>
-            <div class="highlight-actions">
-                <a href="{% url 'video_detail' highlight.media.media_id %}" class="action-btn">
-                    <i class="fas fa-external-link-alt"></i>
-                </a>
-                <form method="POST" class="delete-form" data-id="{{ highlight.id }}"
-                      action="{% url 'delete_highlight' highlight.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="action-btn">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-    {% empty %}
-    <p>No highlights found.</p>
-    {% endfor %}
-</div>
-</div>
-
-    <script>
-        function downloadHighlights() {
-            const url = "{% url 'download_highlights' %}";
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'highlights.txt';
-            link.click();
-        }
-    </script>
-  <!--   Core JS Files   -->
-  <!-- CSS Files -->
-<link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}?v=1.0.7" rel="stylesheet">
-
-<!-- JS Files -->
-<script src="{% static 'accounts/js/core/popper.min.js' %}"></script>
-<script src="{% static 'accounts/js/core/bootstrap.min.js' %}"></script>
-<script src="{% static 'accounts/js/plugins/perfect-scrollbar.min.js' %}"></script>
-<script src="{% static 'accounts/js/plugins/smooth-scrollbar.min.js' %}"></script>
-<script src="{% static 'accounts/js/soft-ui-dashboard.min.js' %}?v=1.0.7"></script>
-
-</div>
-
-</div>
-<script>
-    function downloadHighlights() {
-        const url = "{% url 'download_highlights' %}";
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'highlights.txt';
-        link.click();
+      opacity: 1;
     }
-</script>
-
-  <script>
-document.addEventListener('DOMContentLoaded', (event) => {
-
-  var dragSrcEl = null;
-
-  function handleDragStart(e) {
-    this.style.opacity = '0.1';
-    this.style.border = '3px dashed #c4cad3';
-
-    dragSrcEl = this;
-
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', this.innerHTML);
-  }
-
-  function handleDragOver(e) {
-    if (e.preventDefault) {
-      e.preventDefault();
+    #welcome-banner .close:focus {
+      outline: none;
+      box-shadow: none;
     }
 
-    e.dataTransfer.dropEffect = 'move';
-
-    return false;
-  }
-
-  function handleDragEnter(e) {
-    this.classList.add('task-hover');
-  }
-
-  function handleDragLeave(e) {
-    this.classList.remove('task-hover');
-  }
-
-  function handleDrop(e) {
-    if (e.stopPropagation) {
-      e.stopPropagation(); // stops the browser from redirecting.
+    /* Highlights page specific */
+    :root {
+      --primary-color: #3a9fff;
+      --text-color: #344767;
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --hover-color: #f3f4f6;
+    }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    .highlights-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .highlights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .highlight-card {
+      background: var(--card-bg);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .highlight-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .highlight-header-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .highlight-source {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .highlight-source-media {
+      background-color: #e0f2ff;
+      color: #1e88e5;
+    }
+    .highlight-source-chat {
+      background-color: #ffe7f4;
+      color: #d00c9c;
+    }
+    .highlight-text {
+      color: var(--primary-color);
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .highlight-content {
+      color: var(--text-color);
+      margin-bottom: 1rem;
+      line-height: 1.4;
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+    .highlight-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #666;
+      font-size: 0.85rem;
+    }
+    .highlight-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+    .action-btn {
+      background: none;
+      border: none;
+      color: #666;
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 0.25rem;
+      transition: background-color 0.2s;
+    }
+    .action-btn:hover {
+      background-color: var(--hover-color);
+    }
+    .action-btn i {
+      font-size: 1rem;
     }
 
-    if (dragSrcEl != this) {
-      dragSrcEl.innerHTML = this.innerHTML;
-      this.innerHTML = e.dataTransfer.getData('text/html');
+    .header {
+      background: linear-gradient(to right, #ffffff, #f8f9fa);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+      margin-bottom: 2rem;
     }
-
-    return false;
-  }
-
-  function handleDragEnd(e) {
-    this.style.opacity = '1';
-    this.style.border = 0;
-
-    items.forEach(function (item) {
-      item.classList.remove('task-hover');
-    });
-  }
-
-
-  let items = document.querySelectorAll('.task');
-  items.forEach(function(item) {
-    item.addEventListener('dragstart', handleDragStart, false);
-    item.addEventListener('dragenter', handleDragEnter, false);
-    item.addEventListener('dragover', handleDragOver, false);
-    item.addEventListener('dragleave', handleDragLeave, false);
-    item.addEventListener('drop', handleDrop, false);
-    item.addEventListener('dragend', handleDragEnd, false);
-  });
-});
-
-</script>
-      <script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.delete-form').forEach(function(form) {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
-            const highlightId = form.getAttribute('data-id');
-            const url = form.action;
-            const csrfToken = form.querySelector('[name="csrfmiddlewaretoken"]').value;
-
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrfToken,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ highlight_id: highlightId })
-            }).then(response => response.json())
-              .then(data => {
-                  if (data.status === 'success') {
-                      document.querySelector(`[data-id="${highlightId}"]`).closest('.task').remove();
-                  } else {
-                      console.error('Error:', data.message);
-                  }
-              }).catch(error => console.error('Error:', error));
-        });
-    });
-});
-
-</script>
-
-      <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const sidenav = document.getElementById('sidenav-main');
-  const topNav = document.getElementById('top-nav');
-  const iconSidenav = document.getElementById('iconSidenav');
-
-  iconSidenav.addEventListener('click', function() {
-    if (window.innerWidth < 992) {
-      sidenav.classList.toggle('d-none');
-      topNav.classList.toggle('d-none');
-    }
-  });
-});
-</script>
- <style>
-        :root {
-            --primary-color: #3a9fff;
-            --text-color: #344767;
-            --bg-color: #f8f9fa;
-            --card-bg: #ffffff;
-            --hover-color: #f3f4f6;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        }
-
-        .highlights-container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .download-btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .download-btn:hover {
-            opacity: 0.9;
-        }
-
-        .highlights-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .highlight-card {
-            background: var(--card-bg);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .highlight-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .highlight-text {
-            color: var(--primary-color);
-            font-weight: 500;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-        }
-
-        .highlight-content {
-            color: var(--text-color);
-            margin-bottom: 1rem;
-            line-height: 1.5;
-        }
-
-        .highlight-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #666;
-            font-size: 0.85rem;
-        }
-
-        .highlight-actions {
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        .action-btn {
-            background: none;
-            border: none;
-            color: #666;
-            cursor: pointer;
-            padding: 0.25rem;
-            border-radius: 0.25rem;
-            transition: background-color 0.2s;
-        }
-
-        .action-btn:hover {
-            background-color: var(--hover-color);
-        }
-
-        .action-btn i {
-            font-size: 1rem;
-        }
-
-        @media (max-width: 768px) {
-            .highlights-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-     .header {
-    background: linear-gradient(to right, #ffffff, #f8f9fa);
-    padding: 2rem;
-    border-radius: 1rem;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-    margin-bottom: 2rem;
-}
-
-.header-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.header h1 {
-    font-size: 1.8rem;
-    color: #344767;
-    margin: 0;
-    font-weight: 600;
-}
-
-.header-controls {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-}
-
-.select-wrapper {
-    position: relative;
-    min-width: 200px;
-}
-
-.select-wrapper .select-icon {
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #6c757d;
-    pointer-events: none;
-}
-
-.filter-dropdown {
-    width: 100%;
-    padding: 0.75rem 2.5rem 0.75rem 1rem;
-    font-size: 0.9rem;
-    color: #344767;
-    background-color: #ffffff;
-    border: 1px solid #e9ecef;
-    border-radius: 0.5rem;
-    appearance: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.filter-dropdown:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(58, 159, 255, 0.1);
-}
-
-.download-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 0.75rem 1.25rem;
-    border-radius: 0.5rem;
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.download-btn:hover {
-    background: #2b8ae8;
-    transform: translateY(-1px);
-}
-
-.download-btn:active {
-    transform: translateY(0);
-}
-
-.download-btn i {
-    font-size: 1rem;
-}
-
-@media (max-width: 768px) {
     .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .header h1 {
+      font-size: 1.8rem;
+      color: #344767;
+      margin: 0;
+      font-weight: 600;
+    }
+    .header-controls {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    .select-wrapper {
+      position: relative;
+      min-width: 200px;
+    }
+    .select-wrapper .select-icon {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
+      pointer-events: none;
+    }
+    .filter-dropdown {
+      width: 100%;
+      padding: 0.75rem 2.5rem 0.75rem 1rem;
+      font-size: 0.9rem;
+      color: #344767;
+      background-color: #ffffff;
+      border: 1px solid #e9ecef;
+      border-radius: 0.5rem;
+      appearance: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .filter-dropdown:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(58, 159, 255, 0.1);
+    }
+    .download-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .download-btn:hover {
+      background: #2b8ae8;
+      transform: translateY(-1px);
+    }
+    .download-btn:active {
+      transform: translateY(0);
+    }
+    .download-btn i {
+      font-size: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .highlights-grid {
+        grid-template-columns: 1fr;
+      }
+      .header-content {
         flex-direction: column;
         align-items: stretch;
-    }
-
-    .header-controls {
+      }
+      .header-controls {
         flex-direction: column;
-    }
-
-    .select-wrapper {
+      }
+      .select-wrapper {
         width: 100%;
-    }
-
-    .download-btn {
+      }
+      .download-btn {
         width: 100%;
         justify-content: center;
+      }
     }
-}
-    </style>
-    <script>
-document.addEventListener("DOMContentLoaded", function() {
-    const filterDropdown = document.getElementById("videoFilter");
-    const highlightCards = document.querySelectorAll(".highlight-card");
+  </style>
+</head>
 
-    filterDropdown.addEventListener("change", function() {
-        const selectedTitle = this.value.toLowerCase();
+<body class="g-sidenav-show bg-gray-100">
+  {% include 'accounts/navbar.html' %}
+  {% include 'accounts/sidebar.html' %}
 
-        highlightCards.forEach(card => {
-            const videoTitle = card.getAttribute("data-video-title").toLowerCase();
+  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+    {% block content %}
 
-            if (selectedTitle === "all" || videoTitle === selectedTitle) {
+    <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+      <div class="highlights-container">
+        <div class="header">
+          <div class="header-content">
+            <h1>My Highlights</h1>
+            <div class="header-controls">
+              <div class="select-wrapper">
+                <select id="videoFilter" class="filter-dropdown">
+                  <option value="all">All Videos</option>
+                  {% for title in video_titles %}
+                    <option value="{{ title }}">{{ title }}</option>
+                  {% endfor %}
+                </select>
+                <i class="fas fa-chevron-down select-icon"></i>
+              </div>
+              <button class="download-btn" onclick="downloadHighlights()">
+                <i class="fas fa-download"></i>
+                <span>Download All</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="highlights-grid">
+          {% for highlight in highlights %}
+            <div class="highlight-card"
+                 data-video-title="{{ highlight.media.title|default_if_none:'' }}">
+              <div class="highlight-header-line">
+                <span class="highlight-source
+                  {% if highlight.source == 'media' %}highlight-source-media{% else %}highlight-source-chat{% endif %}">
+                  {% if highlight.source == 'media' %}Video{% else %}Chat{% endif %}
+                </span>
+                {% if highlight.source == 'media' and highlight.media %}
+                  <span style="font-size: 0.75rem; opacity: 0.7;">
+                    {{ highlight.media.title }}
+                  </span>
+                {% endif %}
+              </div>
+
+              <div class="highlight-text">
+                {{ highlight.highlighted_text }}
+              </div>
+
+              <div class="highlight-content">
+                {% if highlight.source == 'media' and highlight.media %}
+                  From video <strong>{{ highlight.media.title }}</strong>
+                {% else %}
+                  From chat conversation
+                {% endif %}
+              </div>
+
+              <div class="highlight-footer">
+                <span class="highlight-date">
+                  {{ highlight.created_at|date:"M d, Y" }}
+                </span>
+
+                <div class="highlight-actions">
+                  {% if highlight.source == 'media' and highlight.media %}
+                    <a href="{% url 'video_detail' highlight.media.media_id %}"
+                       class="action-btn"
+                       title="Open video">
+                      <i class="fas fa-external-link-alt"></i>
+                    </a>
+                  {% endif %}
+                  <form method="POST"
+                        class="delete-form"
+                        data-id="{{ highlight.id }}"
+                        action="{% url 'delete_highlight' highlight.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="action-btn" title="Delete highlight">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <p>No highlights found.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Core JS Files -->
+      <script src="{% static 'accounts/js/core/popper.min.js' %}"></script>
+      <script src="{% static 'accounts/js/core/bootstrap.min.js' %}"></script>
+      <script src="{% static 'accounts/js/plugins/perfect-scrollbar.min.js' %}"></script>
+      <script src="{% static 'accounts/js/plugins/smooth-scrollbar.min.js' %}"></script>
+      <script src="{% static 'accounts/js/soft-ui-dashboard.min.js' %}?v=1.0.7"></script>
+
+      <script>
+        function downloadHighlights() {
+          const url = "{% url 'download_highlights' %}";
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'highlights.txt';
+          link.click();
+        }
+
+        // Filter by video title; chat highlights only appear in "All Videos"
+        document.addEventListener("DOMContentLoaded", function() {
+          const filterDropdown = document.getElementById("videoFilter");
+          const highlightCards = document.querySelectorAll(".highlight-card");
+
+          filterDropdown.addEventListener("change", function() {
+            const selectedTitle = this.value.toLowerCase();
+
+            highlightCards.forEach(card => {
+              const videoTitle = (card.getAttribute("data-video-title") || "").toLowerCase();
+
+              if (selectedTitle === "all") {
+                // Show everything (media + chat)
                 card.style.display = "block";
-            } else {
+              } else if (videoTitle === selectedTitle) {
+                // Only media highlights from that video
+                card.style.display = "block";
+              } else {
                 card.style.display = "none";
-            }
+              }
+            });
+          });
         });
-    });
-});
+
+        // Delete highlight via AJAX and remove from DOM
         document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.delete-form').forEach(function(form) {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
+          document.querySelectorAll('.delete-form').forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+              event.preventDefault();
 
-            const highlightId = form.getAttribute('data-id');
-            const url = form.action;
-            const csrfToken = form.querySelector('[name="csrfmiddlewaretoken"]').value;
-            const highlightCard = form.closest('.highlight-card'); // Get the card element
+              const highlightId = form.getAttribute('data-id');
+              const url = form.action;
+              const csrfToken = form.querySelector('[name="csrfmiddlewaretoken"]').value;
+              const highlightCard = form.closest('.highlight-card');
 
-            fetch(url, {
+              fetch(url, {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': csrfToken,
-                    'Content-Type': 'application/json'
+                  'X-CSRFToken': csrfToken,
+                  'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ highlight_id: highlightId })
-            })
-            .then(response => response.json())
-            .then(data => {
+              })
+              .then(response => response.json())
+              .then(data => {
                 if (data.status === 'success') {
-                    highlightCard.remove(); // Remove the card from the UI
+                  if (highlightCard) {
+                    highlightCard.remove();
+                  }
                 } else {
-                    console.error('Error:', data.message);
+                  console.error('Error:', data.message);
                 }
-            })
-            .catch(error => console.error('Error:', error));
+              })
+              .catch(error => console.error('Error:', error));
+            });
+          });
         });
-    });
-});
 
-</script>
+        // Mobile sidenav toggle
+        document.addEventListener('DOMContentLoaded', function() {
+          const sidenav = document.getElementById('sidenav-main');
+          const topNav = document.getElementById('top-nav');
+          const iconSidenav = document.getElementById('iconSidenav');
+
+          if (iconSidenav && sidenav && topNav) {
+            iconSidenav.addEventListener('click', function() {
+              if (window.innerWidth < 992) {
+                sidenav.classList.toggle('d-none');
+                topNav.classList.toggle('d-none');
+              }
+            });
+          }
+        });
+      </script>
+    </main>
 
     {% endblock %}
+  </main>
+</body>

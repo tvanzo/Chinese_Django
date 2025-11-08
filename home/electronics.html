@@ -1,0 +1,54 @@
+<!-- ========= 3. electronics.html (indigo theme) ========= -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Electronics & IoT Tours | China Factory Tours</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 font-sans text-gray-800">
+  <section class="relative isolate overflow-hidden bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 text-white">
+    <div class="mx-auto max-w-6xl px-6 py-20 text-center">
+      <h1 class="text-4xl font-extrabold">Electronics & IoT Supply Chain Tours</h1>
+      <p class="mt-4 text-lg">PCB fabrication, SMT lines, and rapid‑prototyping hubs.</p>
+      <a href="#form" class="mt-8 inline-block rounded-xl bg-white/10 px-8 py-3 font-semibold shadow hover:bg-white/20 transition">Request Tour Dates</a>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-6 py-16 grid gap-12 md:grid-cols-2">
+    <div>
+      <h2 class="text-2xl font-bold mb-4">Tour Highlights</h2>
+      <ul class="list-disc list-inside space-y-2">
+        <li>HDI PCB fabrication with 24‑layer capability</li>
+        <li>State‑of‑the‑art SMT lines (0201, BGA)</li>
+        <li>Component markets & flex‑cable factories</li>
+        <li>Quality‑control & IP briefings for export</li>
+      </ul>
+    </div>
+    <div>
+      <h2 class="text-2xl font-bold mb-4">Ideal Attendees</h2>
+      <ul class="list-disc list-inside space-y-2">
+        <li>Hardware startups & scale‑ups</li>
+        <li>Sourcing managers reducing BOM cost</li>
+        <li>Supply‑chain journalists</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="bg-slate-900 text-white py-16" id="form">
+    <div class="mx-auto max-w-xl px-6 text-center">
+      <h2 class="text-2xl font-bold mb-4">Get the Electronics Tour PDF</h2>
+      <form action="FORM_ENDPOINT" method="POST" class="flex flex-col gap-4">
+        <input type="text" name="name" placeholder="Your name" class="rounded-md p-3 text-gray-900" required />
+        <input type="email" name="email" placeholder="Business email" class="rounded-md p-3 text-gray-900" required />
+        <button type="submit" class="rounded-md bg-indigo-600 px-6 py-3 font-semibold shadow hover:bg-indigo-500 transition">Send Me Details</button>
+      </form>
+    </div>
+  </section>
+
+  <footer class="bg-slate-800 text-slate-400 text-center text-sm py-6">
+    <a href="index.html" class="underline">China Factory Tours</a> · Electronics Track
+  </footer>
+</body>
+</html>
