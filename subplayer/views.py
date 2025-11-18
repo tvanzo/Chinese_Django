@@ -1549,32 +1549,55 @@ def web_highlight(request):
     }, status=201)
 
 @login_required
-def read_list(request):
-    """
-    /read/ – list of Chinese reading articles.
-    """
-    articles = Article.objects.all().order_by("-created_at")
-    return render(request, "read/read_list.html", {"articles": articles})
-
+# subplayer/views.py
+from django.db.models import Count
 
 @login_required
-def read_detail(request, slug):
-    article = get_object_or_404(
-        Article,
-        slug=slug,
-        created_by=request.user  # security!
-    )
-
-    # Get all web highlights for this exact URL (not article.id, because old ones used page_url)
-    highlights = Highlight.objects.filter(
-        user=request.user,
-        source='web',
-        page_url=article.source_url
+def read_list(request):
+    # 1. Curated Chinese articles (the ones you add in admin, no creator)
+    curated_articles = Article.objects.filter(
+        created_by__isnull=True  # or however you separate them
     ).order_by('-created_at')
 
-    return render(request, "read/read_detail.html", {
-        "article": article,
-        "highlights": highlights,
+    # 2. Web articles saved by the current user via Chrome extension
+    web_articles = Article.objects.filter(
+        created_by=request.user,
+        source_url__isnull=False
+    ).order_by('-created_at')
+
+    # Attach highlight count to each web article (simple & fast)
+    for article in web_articles:
+        article.highlight_count = Highlight.objects.filter(
+            user=request.user,
+            source='web',
+            page_url=article.source_url
+        ).count()
+
+    context = {
+        'articles': curated_articles,   # top section
+        'web_articles': web_articles,   # bottom section
+    }
+    return render(request, 'read/read_list.html', context)
+
+# Same file — add or replace read_detail
+@login_required
+def read_detail(request, slug):
+    article = get_object_or_404(Article, slug=slug)
+
+    # For web articles: show highlights from that exact URL
+    if article.source_url:
+        highlights = Highlight.objects.filter(
+            user=request.user,
+            source='web',
+            page_url=article.source_url
+        ).order_by('-created_at')
+    else:
+        # For curated articles you can show something else, or nothing
+        highlights = Highlight.objects.none()
+
+    return render(request, 'read/read_detail.html', {
+        'article': article,
+        'highlights': highlights,
     })
 
 import json

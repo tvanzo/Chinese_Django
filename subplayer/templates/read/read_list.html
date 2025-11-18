@@ -1,10 +1,9 @@
 {% load static %}
-{% load article_extras %}  <!-- add this for the highlight_count filter -->
 
 {% block content %}
 <div class="container-fluid py-4">
 
-  <!-- ========== SECTION 1: Curated Chinese Articles (your original) ========== -->
+  <!-- ==================== CURATED CHINESE ARTICLES ==================== -->
   <div class="row mb-5">
     <div class="col">
       <h5 class="mb-1">Read – Chinese Articles</h5>
@@ -36,56 +35,49 @@
           </a>
         {% endfor %}
       {% else %}
-        <div class="card border-0 shadow-sm">
-          <div class="card-body text-sm text-muted">
-            No articles yet. Add some in the admin.
-          </div>
-        </div>
+        <p class="text-muted">No curated articles yet.</p>
       {% endif %}
     </div>
   </div>
 
-  <!-- ========== SECTION 2: My Web Highlights (from Chrome extension) ========== -->
+  <!-- ==================== MY WEB HIGHLIGHTS ==================== -->
   <div class="row">
     <div class="col">
       <div class="d-flex align-items-center mb-4">
         <h5 class="mb-0 me-3">My Web Highlights</h5>
-        <small class="text-muted">
-          Pages you highlighted with the Chrome extension
-        </small>
+        <small class="text-muted">Pages you highlighted anywhere on the internet</small>
       </div>
 
       {% if web_articles %}
         {% for article in web_articles %}
-          {% with highlight_count=article|highlight_count:user %}
           <a href="{% url 'read_detail' article.slug %}" class="text-decoration-none">
-            <div class="article-card mb-3 position-relative">
+            <div class="article-card mb-3">
               <div class="d-flex justify-content-between align-items-start">
                 <div class="flex-grow-1 me-3">
                   <div class="article-title">
                     {{ article.title|default:"Untitled page" }}
                   </div>
-                  <div class="article-meta">
-                    {{ article.created_at|date:"M d" }}
+                  <small class="text-muted">
+                    {{ article.created_at|date:"M d, Y" }}
                     {% if article.source_url %}
                       • {{ article.source_url|truncatechars:60 }}
                     {% endif %}
-                  </div>
+                  </small>
                 </div>
-                <div class="text-end">
-                  <span class="badge bg-primary rounded-pill fs-6">
-                    {{ highlight_count }} highlight{{ highlight_count|pluralize }}
-                  </span>
+                <div>
+                  {% if article.highlight_count > 0 %}
+                    <span class="badge bg-primary rounded-pill">
+                      {{ article.highlight_count }} highlight{{ article.highlight_count|pluralize }}
+                    </span>
+                  {% endif %}
                 </div>
               </div>
             </div>
           </a>
-          {% endwith %}
         {% endfor %}
       {% else %}
         <div class="text-center py-5 text-muted">
-          <i class="fas fa-globe fa-3x mb-3 opacity-50"></i>
-          <p>No web highlights yet.<br>Start highlighting anywhere on the web!</p>
+          <p>No web highlights yet — start selecting text anywhere!</p>
         </div>
       {% endif %}
     </div>
@@ -93,7 +85,6 @@
 
 </div>
 
-<!-- Your original styles + tiny addition for badge -->
 <style>
 .article-card {
   border-radius: 16px;
@@ -102,24 +93,14 @@
   box-shadow: 0 8px 20px rgba(15,23,42,0.05);
   border: 1px solid #e5e7eb;
   cursor: pointer;
-  transition: box-shadow .15s, transform .1s;
+  transition: all .15s;
 }
 .article-card:hover {
   box-shadow: 0 10px 25px rgba(15,23,42,0.12);
   transform: translateY(-1px);
 }
-.article-title {
-  font-weight: 600;
-  font-size: 15px;
-  color: #111827;
-}
-.article-meta {
-  font-size: 12px;
-  color: #6b7280;
-}
-.article-summary {
-  font-size: 13px;
-  color: #4b5563;
-}
+.article-title { font-weight: 600; font-size: 15px; color: #111827; }
+.article-meta  { font-size: 12px; color: #6b7280; }
+.article-summary { font-size: 13px; color: #4b5563; }
 </style>
 {% endblock %}
