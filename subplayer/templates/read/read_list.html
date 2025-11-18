@@ -1,48 +1,99 @@
 {% load static %}
+{% load article_extras %}  <!-- add this for the highlight_count filter -->
 
 {% block content %}
 <div class="container-fluid py-4">
-  <div class="row mb-3">
+
+  <!-- ========== SECTION 1: Curated Chinese Articles (your original) ========== -->
+  <div class="row mb-5">
     <div class="col">
       <h5 class="mb-1">Read – Chinese Articles</h5>
-      <p class="text-sm text-muted mb-0">
+      <p class="text-sm text-muted mb-4">
         Browse short Chinese texts and save new words to your notebook.
       </p>
+
+      {% if articles %}
+        {% for article in articles %}
+          <a href="{% url 'read_detail' article.slug %}" class="text-decoration-none">
+            <div class="article-card mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <div class="article-title">
+                  {{ article.title }}
+                </div>
+                {% if article.level %}
+                  <span class="badge bg-gradient-warning text-xxs">{{ article.level }}</span>
+                {% endif %}
+              </div>
+              <div class="article-meta mb-1">
+                {{ article.created_at|date:"Y-m-d" }}
+              </div>
+              {% if article.description %}
+                <div class="article-summary">
+                  {{ article.description|truncatechars:140 }}
+                </div>
+              {% endif %}
+            </div>
+          </a>
+        {% endfor %}
+      {% else %}
+        <div class="card border-0 shadow-sm">
+          <div class="card-body text-sm text-muted">
+            No articles yet. Add some in the admin.
+          </div>
+        </div>
+      {% endif %}
     </div>
   </div>
 
-  {% if articles %}
-    {% for article in articles %}
-      <a href="{% url 'read_detail' article.slug %}" class="text-decoration-none">
-        <div class="article-card mb-2">
-          <div class="d-flex justify-content-between align-items-center mb-1">
-            <div class="article-title">
-              {{ article.title }}
-            </div>
-            {% if article.level %}
-              <span class="badge bg-gradient-warning text-xxs">{{ article.level }}</span>
-            {% endif %}
-          </div>
-          <div class="article-meta mb-1">
-            {{ article.created_at|date:"Y-m-d" }}
-          </div>
-          {% if article.description %}
-            <div class="article-summary">
-              {{ article.description|truncatechars:140 }}
-            </div>
-          {% endif %}
-        </div>
-      </a>
-    {% endfor %}
-  {% else %}
-    <div class="card border-0 shadow-sm">
-      <div class="card-body text-sm text-muted">
-        No articles yet. Add some in the admin.
+  <!-- ========== SECTION 2: My Web Highlights (from Chrome extension) ========== -->
+  <div class="row">
+    <div class="col">
+      <div class="d-flex align-items-center mb-4">
+        <h5 class="mb-0 me-3">My Web Highlights</h5>
+        <small class="text-muted">
+          Pages you highlighted with the Chrome extension
+        </small>
       </div>
+
+      {% if web_articles %}
+        {% for article in web_articles %}
+          {% with highlight_count=article|highlight_count:user %}
+          <a href="{% url 'read_detail' article.slug %}" class="text-decoration-none">
+            <div class="article-card mb-3 position-relative">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1 me-3">
+                  <div class="article-title">
+                    {{ article.title|default:"Untitled page" }}
+                  </div>
+                  <div class="article-meta">
+                    {{ article.created_at|date:"M d" }}
+                    {% if article.source_url %}
+                      • {{ article.source_url|truncatechars:60 }}
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="text-end">
+                  <span class="badge bg-primary rounded-pill fs-6">
+                    {{ highlight_count }} highlight{{ highlight_count|pluralize }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </a>
+          {% endwith %}
+        {% endfor %}
+      {% else %}
+        <div class="text-center py-5 text-muted">
+          <i class="fas fa-globe fa-3x mb-3 opacity-50"></i>
+          <p>No web highlights yet.<br>Start highlighting anywhere on the web!</p>
+        </div>
+      {% endif %}
     </div>
-  {% endif %}
+  </div>
+
 </div>
 
+<!-- Your original styles + tiny addition for badge -->
 <style>
 .article-card {
   border-radius: 16px;

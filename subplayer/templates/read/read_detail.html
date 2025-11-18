@@ -1,107 +1,64 @@
+<!-- templates/read/read_detail.html -->
 {% load static %}
 
 {% block content %}
 <div class="container-fluid py-4">
-  <div class="row mb-3">
+  <div class="row mb-4">
     <div class="col">
-      <a href="{% url 'read_list' %}"
-         class="text-sm text-primary text-decoration-none mb-2 d-inline-flex align-items-center">
-        <i class="fas fa-arrow-left me-1"></i> Back to articles
+      <a href="{% url 'my_web_articles' %}" class="text-sm text-primary text-decoration-none d-inline-flex align-items-center">
+        <i class="fas fa-arrow-left me-1"></i> Back to My Web Articles
       </a>
-      <h4 class="mb-1">{{ article.title }}</h4>
-      {% if article.level %}
-        <span class="badge bg-gradient-warning text-xs me-2">{{ article.level }}</span>
-      {% endif %}
-      {% if article.description %}
-        <p class="text-muted mt-2 mb-0">{{ article.description }}</p>
+      <h4 class="mt-3 mb-1">{{ article.title }}</h4>
+      {% if article.source_url %}
+        <a href="{{ article.source_url }}" target="_blank" class="text-sm text-muted">
+          <i class="fas fa-external-link-alt me-1"></i> Open original
+        </a>
       {% endif %}
     </div>
   </div>
 
+  <!-- Highlights Section -->
   <div class="row">
-    <div class="col-lg-9">
-      <div id="article-reader" class="card shadow-sm border-0">
-        <div class="card-body">
-          <div id="article-content"
-               class="article-content"
-               onmouseup="handleArticleSelection()">
-            {{ article.content|linebreaksbr }}
-          </div>
-        </div>
-      </div>
-      <small class="text-muted d-block mt-2">
-        Select text to save a highlight to your notebook.
-      </small>
-    </div>
-
-    <div class="col-lg-3">
+    <div class="col-lg-8">
       <div class="card shadow-sm border-0">
         <div class="card-body">
-          <h6 class="mb-2">Highlights</h6>
-          <div id="article-highlights" class="small text-muted">
-            Highlights you create will appear in your global <strong>Highlights</strong> tab.
-          </div>
+          <h5 class="mb-3">
+            Your Highlights 
+            <span class="badge bg-primary rounded-pill">{{ highlights.count }}</span>
+          </h5>
+
+          {% if highlights %}
+            <div class="highlights-list">
+              {% for h in highlights %}
+                <div class="highlight-item mb-3 p-3 rounded-3 border-start border-warning border-4 bg-light">
+                  <p class="mb-2 fw-medium">{{ h.highlighted_text }}</p>
+                  <small class="text-muted">
+                    Saved {{ h.created_at|date:"M d, Y \a\t g:i A" }}
+                  </small>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-muted">No highlights yet. Go to the original page and start highlighting!</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body text-center py-5">
+          <i class="fas fa-lightbulb fa-3x text-warning mb-3"></i>
+          <h6>Pro tip</h6>
+          <p class="text-sm text-muted">
+            Your highlights are automatically saved to your global notebook too!
+          </p>
+          <a href="{% url 'highlights' %}" class="btn btn-sm btn-outline-primary">
+            View All Highlights
+          </a>
         </div>
       </div>
     </div>
   </div>
 </div>
-
-<script>
-function getSelectionText() {
-  var text = "";
-  if (window.getSelection) {
-    text = window.getSelection().toString();
-  } else if (document.selection && document.selection.type !== "Control") {
-    text = document.selection.createRange().text;
-  }
-  return text.trim();
-}
-
-function handleArticleSelection() {
-  var selected = getSelectionText();
-  if (!selected) return;
-
-  if (!confirm("Save this as a highlight?\n\n" + selected)) {
-    return;
-  }
-
-  fetch("{% url 'create_article_highlight' %}", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRFToken": "{{ csrf_token }}"
-    },
-    body: JSON.stringify({
-      text: selected,
-      page_url: window.location.href,
-      page_title: "{{ article.title|escapejs }}"
-    })
-  })
-  .then(function (res) {
-    if (!res.ok) throw new Error("Request failed");
-    return res.json();
-  })
-  .then(function () {
-    alert("Saved to your highlights.");
-  })
-  .catch(function (err) {
-    console.error(err);
-    alert("Could not save highlight.");
-  });
-}
-</script>
-
-
-<style>
-.article-content {
-  font-size: 1rem;
-  line-height: 1.9;
-  letter-spacing: 0.02em;
-  white-space: pre-wrap;
-}
-.article-content::selection {
-  background: #fde68a;
-}
-</style>
 {% endblock %}

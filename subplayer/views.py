@@ -1559,8 +1559,23 @@ def read_list(request):
 
 @login_required
 def read_detail(request, slug):
-    article = get_object_or_404(Article, slug=slug)
-    return render(request, "read/read_detail.html", {"article": article})
+    article = get_object_or_404(
+        Article,
+        slug=slug,
+        created_by=request.user  # security!
+    )
+
+    # Get all web highlights for this exact URL (not article.id, because old ones used page_url)
+    highlights = Highlight.objects.filter(
+        user=request.user,
+        source='web',
+        page_url=article.source_url
+    ).order_by('-created_at')
+
+    return render(request, "read/read_detail.html", {
+        "article": article,
+        "highlights": highlights,
+    })
 
 import json
 from django.http import JsonResponse
