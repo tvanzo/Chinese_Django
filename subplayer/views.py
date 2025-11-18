@@ -19,6 +19,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from django.db.models import Count
 
 from googleapiclient.discovery import build
 
@@ -1550,8 +1551,6 @@ def web_highlight(request):
 
 @login_required
 # subplayer/views.py
-from django.db.models import Count
-
 @login_required
 def read_list(request):
     # 1. Curated Chinese articles (the ones you add in admin, no creator)
