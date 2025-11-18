@@ -35,7 +35,8 @@ from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from .forms import CustomUserCreationForm
 from django.contrib import messages
-from subplayer.models import ArticleHighlight
+
+
 
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
@@ -250,11 +251,17 @@ def delete_highlight(request, highlight_id):
         obj = Highlight.objects.get(pk=highlight_id, user=request.user)
         is_article = False
     except Highlight.DoesNotExist:
-        # 2) Try ArticleHighlight
-        try:
-            obj = ArticleHighlight.objects.get(pk=highlight_id, user=request.user)
-            is_article = True
-        except ArticleHighlight.DoesNotExist:
+        # 2) Try ArticleHighlight only if the model exists
+        if ArticleHighlight is not None:
+            try:
+                obj = ArticleHighlight.objects.get(pk=highlight_id, user=request.user)
+                is_article = True
+            except ArticleHighlight.DoesNotExist:
+                return JsonResponse(
+                    {'status': 'error', 'message': 'Highlight not found'},
+                    status=404
+                )
+        else:
             return JsonResponse(
                 {'status': 'error', 'message': 'Highlight not found'},
                 status=404
@@ -336,11 +343,10 @@ def highlights(request):
         .order_by('-created_at')
     )
 
-    # Article highlights
+    # Article highlights from separate model only if present
     article_highlights = (
-        ArticleHighlight.objects
-        .filter(user=user)
-        .order_by('-created_at')
+        ArticleHighlight.objects.filter(user=user).order_by('-created_at')
+        if ArticleHighlight is not None else []
     )
 
     # Build a unified list so the template can treat everything the same
@@ -355,7 +361,7 @@ def highlights(request):
             'media': h.media,
             'page_title': None,
             'page_url': None,
-            'is_article': False,
+            'is_article': (getattr(h, 'source', '') == 'article'),
         })
 
     for a in article_highlights:

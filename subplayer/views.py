@@ -1471,53 +1471,81 @@ def web_highlight(request):
     page_url = (data.get("page_url") or "").strip()
     page_title = (data.get("page_title") or "").strip()
 
-    if not text:
-        return JsonResponse({"error": "Text is required"}, status=400)
+    if not text or not page_url:
+        return JsonResponse({"error": "Text and page_url are required"}, status=400)
 
     user = request.user
 
-    try:
-        subscription = Subscription.objects.get(user=user)
-    except Subscription.DoesNotExist:
-        subscription = None
-
-    if subscription and subscription.tier == 'FREE':
-        today = timezone.now().date()
-        highlights_today = Highlight.objects.filter(
-            user=user,
-            created_at__date=today
-        ).count()
-        if highlights_today >= 3:
-            return JsonResponse({
-                "error": "You have reached the daily limit of 3 highlights. Upgrade to create more.",
-                "limit_reached": True,
-            }, status=403)
-
-    h = Highlight.objects.create(
+    # === 1. Always create the highlight immediately (your original behavior) ===
+    highlight = Highlight.objects.create(
         user=user,
         source='web',
-        media=None,
         highlighted_text=text,
-        start_time=0,
-        end_time=0,
-        start_index=0,
-        end_index=len(text),
-        start_sentence_index=0,
-        end_sentence_index=0,
-        frame_index=0,
         page_url=page_url,
         page_title=page_title,
     )
 
+    # Update points
     profile = user.profile
     profile.total_highlights += 1
     profile.save()
 
+    # === 2. NEW: If this is the VERY FIRST highlight from this URL → fetch article ===
+    first_highlight_from_this_page = not Highlight.objects.filter(
+        user=user,
+        source='web',
+        page_url=page_url
+    ).exclude(id=highlight.id).exists()   # exclude the one we just created
+
+    article = None
+    if first_highlight_from_this_page:
+        # Try to get existing Article (in case it was created another way)
+        try:
+            article = Article.objects.get(source_url=page_url, created_by=user)
+        except Article.DoesNotExist:
+            # Scrape the page (fire-and-forget style – user doesn’t wait)
+            try:
+                headers = {"User-Agent": "Mozilla/5.0 (compatible; ChineseLogBot/1.0)"}
+                resp = requests.get(page_url, headers=headers, timeout=12)
+                resp.raise_for_status()
+                soup = BeautifulSoup(resp.text, 'html.parser')
+
+                # Aggressive cleanup
+                for trash in soup(["script", "style", "nav", "header", "footer", "aside", "advert"]):
+                    trash.decompose()
+
+                # Best guess for main content
+                main = soup.find("article") or soup.find("main") or soup.find("div", class_=re.compile(r"content|post|article|story", re.I)) or soup.body
+
+                clean_text = main.get_text(separator="\n", strip=True) if main else ""
+
+                article = Article.objects.create(
+                    title=page_title[:255] or "Untitled Web Article",
+                    slug=slugify(page_title or page_url.split("/")[-1])[:40] + "-" + str(int(timezone.now().timestamp()))[-4:],
+                    content=clean_text[:1_000_000],  # safety cap
+                    source_url=page_url,
+                    created_by=user,
+                )
+            except Exception as e:
+                # If scraping fails → we still have the highlight! Just no full article.
+                logger.warning(f"Failed to scrape {page_url}: {e}")
+                article = None
+
+        # Optional: link ALL existing highlights from this page to the article
+        if article:
+            Highlight.objects.filter(
+                user=user,
+                source='web',
+                page_url=page_url
+            ).update(page_title=article.title)  # nice cleanup
+
     return JsonResponse({
-        "id": h.id,
-        "text": h.highlighted_text,
-        "page_url": h.page_url,
-        "page_title": h.page_title,
+        "id": highlight.id,
+        "text": highlight.highlighted_text,
+        "page_url": page_url,
+        "page_title": page_title,
+        "article_saved": bool(article),        # ← new, for future use if you want
+        "article_slug": article.slug if article else None,
     }, status=201)
 
 @login_required

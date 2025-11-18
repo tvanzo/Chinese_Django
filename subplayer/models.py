@@ -120,22 +120,19 @@ class Highlight(models.Model):
             return f'[{self.source}] {self.media.title}: {self.highlighted_text[:50]}'
         return f'[{self.source}] {self.highlighted_text[:50]}'
 
+# subplayer/models.py
 class Article(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
     level = models.CharField(max_length=50, blank=True)
     description = models.TextField(blank=True)
-    content = models.TextField()
+    content = models.TextField(blank=True)  # ← this will store the cleaned text
     created_at = models.DateTimeField(auto_now_add=True)
 
-    # for Chrome-extension / external pages:
-    source_url = models.URLField(blank=True, null=True)
+    source_url = models.URLField(blank=True, null=True, unique=True)  # ← add unique!
     created_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True, related_name="articles"
     )
-
-    def __str__(self):
-        return self.title
 
 
 class ArticleHighlight(models.Model):

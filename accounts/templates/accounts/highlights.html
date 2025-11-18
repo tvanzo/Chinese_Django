@@ -8,7 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
 
   <!-- Fonts and icons -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700"
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
   <!-- Nucleo Icons -->
   <link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet">
@@ -24,39 +24,45 @@
 
   <style>
     :root {
-      --bg: #f9f9fa;
+      --bg: #f8f9fc;
       --header: #fbf4f6;
-      --text: #2e2e2f;
+      --text: #1a202c;
+      --text-secondary: #64748b;
       --white: #fff;
-      --light-grey: #c4cad3;
-      --tag-1: #ceecfd;
-      --tag-1-text: #2e87ba;
-      --tag-2: #d6ede2;
-      --tag-2-text: #13854e;
-      --tag-3: #ceecfd;
-      --tag-3-text: #2d86ba;
-      --tag-4: #f2dcf5;
-      --tag-4-text: #a734ba;
-      --purple: #7784ee;
+      --light-grey: #cbd5e1;
+      --border-color: #e2e8f0;
 
-      --primary-color: #3a9fff;
-      --text-color: #344767;
-      --bg-color: #f8f9fa;
+      --tag-video-bg: #dbeafe;
+      --tag-video-text: #1e40af;
+      --tag-article-bg: #dcfce7;
+      --tag-article-text: #166534;
+      --tag-chat-bg: #fce7f3;
+      --tag-chat-text: #be185d;
+
+      --purple: #7c3aed;
+      --primary-color: #3b82f6;
+      --primary-hover: #2563eb;
+      --text-color: #334155;
+      --bg-color: #f8f9fc;
       --card-bg: #ffffff;
-      --hover-color: #f3f4f6;
+      --hover-color: #f1f5f9;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-xl: 0 16px 22px -5px rgba(0, 0, 0, 0.1), 0 8px 8px -5px rgba(0, 0, 0, 0.04);
     }
 
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Open Sans', sans-serif;
     }
 
     body {
       color: var(--text);
       background-color: var(--bg-color);
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
     }
 
     .app {
@@ -65,10 +71,368 @@
       min-height: 100vh;
     }
 
-    h1 {
-      font-size: 30px;
+    /* Highlights page specific styles */
+    .highlights-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.75rem 1.5rem 2rem;
     }
 
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 1.5rem 2rem;
+      border-radius: 1.1rem;
+      box-shadow: var(--shadow-xl);
+      margin-bottom: 1.75rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      opacity: 0.4;
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .header-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .header h1 {
+      font-size: 1.9rem;
+      color: #ffffff;
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .select-wrapper {
+      position: relative;
+      min-width: 180px;
+    }
+
+    .select-wrapper .select-icon {
+      position: absolute;
+      right: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      pointer-events: none;
+      font-size: 0.8rem;
+    }
+
+    .filter-dropdown {
+      width: 100%;
+      padding: 0.7rem 2.3rem 0.7rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-color);
+      background-color: #ffffff;
+      border: 2px solid transparent;
+      border-radius: 0.7rem;
+      appearance: none;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .filter-dropdown:hover {
+      border-color: var(--primary-color);
+      box-shadow: var(--shadow);
+    }
+
+    .filter-dropdown:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #ffffff;
+      color: var(--primary-color);
+      border: 2px solid #ffffff;
+      padding: 0.7rem 1.3rem;
+      border-radius: 0.7rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+      box-shadow: var(--shadow);
+    }
+
+    .download-btn:hover {
+      background: var(--primary-color);
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .download-btn:active {
+      transform: translateY(0);
+    }
+
+    .download-btn i {
+      font-size: 0.95rem;
+    }
+
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 0.1rem;
+    }
+
+    .stat-pill {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      border-radius: 999px;
+      padding: 0.55rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 3px 5px -2px rgba(0, 0, 0, 0.18);
+      transition: all 0.15s ease;
+    }
+
+    .stat-pill:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .stat-pill .stat-label {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+
+    .stat-pill .stat-value {
+      font-weight: 700;
+      color: #0f172a;
+      font-size: 1.05rem;
+    }
+
+    .highlights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.5rem;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .highlight-card {
+      background: var(--card-bg);
+      border-radius: 1rem;
+      padding: 1.75rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .highlight-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--primary-color), var(--purple));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .highlight-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary-color);
+    }
+
+    .highlight-card:hover::before {
+      opacity: 1;
+    }
+
+    .highlight-header-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      gap: 0.75rem;
+    }
+
+    .highlight-source {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      padding: 0.375rem 0.875rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .highlight-source-media {
+      background-color: var(--tag-video-bg);
+      color: var(--tag-video-text);
+    }
+
+    .highlight-source-article {
+      background-color: var(--tag-article-bg);
+      color: var(--tag-article-text);
+    }
+
+    .highlight-source-chat {
+      background-color: var(--tag-chat-bg);
+      color: var(--tag-chat-text);
+    }
+
+    .video-title-badge {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 180px;
+    }
+
+    .highlight-text {
+      color: var(--text);
+      font-weight: 600;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .highlight-content {
+      color: var(--text-secondary);
+      margin-bottom: 1.25rem;
+      line-height: 1.5;
+      font-size: 0.875rem;
+    }
+
+    .highlight-content strong {
+      color: var(--text-color);
+      font-weight: 600;
+    }
+
+    .highlight-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .highlight-date {
+      color: var(--text-secondary);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+
+    .highlight-date::before {
+      content: '📅';
+      font-size: 0.875rem;
+    }
+
+    .highlight-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      background: var(--hover-color);
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      transition: all 0.2s ease;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .action-btn:hover {
+      background-color: var(--primary-color);
+      color: #ffffff;
+      transform: scale(1.1);
+    }
+
+    .action-btn:active {
+      transform: scale(0.95);
+    }
+
+    .action-btn i {
+      font-size: 0.875rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    .empty-state-text {
+      font-size: 1.125rem;
+      font-weight: 500;
+    }
+
+    /* Legacy styles for other components */
     .project {
       padding: 2rem;
       max-width: 75%;
@@ -169,18 +533,18 @@
     }
 
     .task__tag--copyright {
-      color: var(--tag-4-text);
-      background-color: var(--tag-4);
+      color: var(--tag-chat-text);
+      background-color: var(--tag-chat-bg);
     }
 
     .task__tag--design {
-      color: var(--tag-3-text);
-      background-color: var(--tag-3);
+      color: var(--tag-video-text);
+      background-color: var(--tag-video-bg);
     }
 
     .task__tag--illustration {
-      color: var(--tag-2-text);
-      background-color: var(--tag-2);
+      color: var(--tag-article-text);
+      background-color: var(--tag-article-bg);
     }
 
     .task__tags {
@@ -342,61 +706,6 @@
       background-color: #7784ee;
     }
 
-    @media only screen and (max-width: 1300px) {
-      .project {
-        max-width: 100%;
-      }
-
-      .task-details {
-        width: 100%;
-        display: flex;
-      }
-
-      .tag-progress,
-      .task-activity {
-        flex-basis: 50%;
-        background: var(--white);
-        padding: 1rem;
-        border-radius: 8px;
-        margin: 1rem;
-      }
-    }
-
-    @media only screen and (max-width: 1000px) {
-      .project-column:nth-child(2),
-      .project-column:nth-child(3) {
-        display: none;
-      }
-
-      .project-tasks {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-
-    @media only screen and (max-width: 600px) {
-      .project-column:nth-child(4) {
-        display: none;
-      }
-
-      .project-tasks {
-        grid-template-columns: 1fr;
-      }
-
-      .task-details {
-        flex-wrap: wrap;
-        padding: 3rem 1rem;
-      }
-
-      .tag-progress,
-      .task-activity {
-        flex-basis: 100%;
-      }
-
-      h1 {
-        font-size: 25px;
-      }
-    }
-
     .nav-link.active .icon svg {
       fill: #FFD700 !important;
       color: #FFD700 !important;
@@ -493,22 +802,6 @@
       font-size: 115%;
     }
 
-    @media (max-width: 1200px) {
-      #sidenav-main {
-        display: none;
-      }
-
-      #top-nav {
-        display: block;
-      }
-    }
-
-    @media (min-width: 1201px) {
-      #top-nav {
-        display: none;
-      }
-    }
-
     .custom-logo-size {
       height: 50px !important;
     }
@@ -600,238 +893,69 @@
       box-shadow: none;
     }
 
-    /* Highlights page */
-    .highlights-container {
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 0 1rem;
+    @media (max-width: 1200px) {
+      #sidenav-main {
+        display: none;
+      }
+
+      #top-nav {
+        display: block;
+      }
+
+      .project-column:nth-child(2),
+      .project-column:nth-child(3) {
+        display: none;
+      }
+
+      .project-tasks {
+        grid-template-columns: 1fr 1fr;
+      }
     }
 
-    .highlights-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1.5rem;
+    @media (min-width: 1201px) {
+      #top-nav {
+        display: none;
+      }
     }
 
-    .highlight-card {
-      background: var(--card-bg);
-      border-radius: 1rem;
-      padding: 1.5rem;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
+    @media (max-width: 1000px) {
+      .project-column:nth-child(4) {
+        display: none;
+      }
 
-    .highlight-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
+      .project-tasks {
+        grid-template-columns: 1fr;
+      }
 
-    .highlight-header-line {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.75rem;
-    }
+      .task-details {
+        width: 100%;
+        display: flex;
+      }
 
-    .highlight-source {
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 0.15rem 0.5rem;
-      border-radius: 999px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .highlight-source-media {
-      background-color: #e0f2ff;
-      color: #1e88e5;
-    }
-
-    .highlight-source-chat {
-      background-color: #ffe7f4;
-      color: #d00c9c;
-    }
-
-    .highlight-text {
-      color: var(--primary-color);
-      font-weight: 500;
-      margin-bottom: 0.75rem;
-      font-size: 0.9rem;
-      line-height: 1.5;
-      white-space: pre-wrap;
-    }
-
-    .highlight-content {
-      color: var(--text-color);
-      margin-bottom: 1rem;
-      line-height: 1.4;
-      font-size: 0.8rem;
-      opacity: 0.8;
-    }
-
-    .highlight-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: #666;
-      font-size: 0.85rem;
-    }
-
-    .highlight-actions {
-      display: flex;
-      gap: 0.75rem;
-    }
-
-    .action-btn {
-      background: none;
-      border: none;
-      color: #666;
-      cursor: pointer;
-      padding: 0.25rem;
-      border-radius: 0.25rem;
-      transition: background-color 0.2s;
-    }
-
-    .action-btn:hover {
-      background-color: var(--hover-color);
-    }
-
-    .action-btn i {
-      font-size: 1rem;
-    }
-
-    .header {
-      background: linear-gradient(to right, #ffffff, #f8f9fa);
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
-      margin-bottom: 2rem;
-    }
-
-    .header-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .header-top-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .header h1 {
-      font-size: 1.8rem;
-      color: #344767;
-      margin: 0;
-      font-weight: 600;
-    }
-
-    .header-controls {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .select-wrapper {
-      position: relative;
-      min-width: 180px;
-    }
-
-    .select-wrapper .select-icon {
-      position: absolute;
-      right: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #6c757d;
-      pointer-events: none;
-    }
-
-    .filter-dropdown {
-      width: 100%;
-      padding: 0.75rem 2.5rem 0.75rem 1rem;
-      font-size: 0.9rem;
-      color: #344767;
-      background-color: #ffffff;
-      border: 1px solid #e9ecef;
-      border-radius: 0.5rem;
-      appearance: none;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .filter-dropdown:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(58, 159, 255, 0.1);
-    }
-
-    .download-btn {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: var(--primary-color);
-      color: white;
-      border: none;
-      padding: 0.75rem 1.25rem;
-      border-radius: 0.5rem;
-      font-size: 0.9rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-    }
-
-    .download-btn:hover {
-      background: #2b8ae8;
-      transform: translateY(-1px);
-    }
-
-    .download-btn:active {
-      transform: translateY(0);
-    }
-
-    .download-btn i {
-      font-size: 1rem;
-    }
-
-    .stats-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-top: 0.5rem;
-    }
-
-    .stat-pill {
-      background: #ffffff;
-      border-radius: 999px;
-      padding: 0.5rem 1rem;
-      display: flex;
-      align-items: baseline;
-      gap: 0.4rem;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-      font-size: 0.85rem;
-    }
-
-    .stat-pill .stat-label {
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      font-weight: 600;
-      color: #6b7280;
-    }
-
-    .stat-pill .stat-value {
-      font-weight: 700;
-      color: #111827;
-      font-size: 0.95rem;
+      .tag-progress,
+      .task-activity {
+        flex-basis: 50%;
+        background: var(--white);
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem;
+      }
     }
 
     @media (max-width: 768px) {
+      .highlights-container {
+        padding: 1.25rem 1rem 1.75rem;
+      }
+
+      .header {
+        padding: 1.3rem 1.5rem;
+        margin-bottom: 1.3rem;
+      }
+
+      .header h1 {
+        font-size: 1.65rem;
+      }
+
       .highlights-grid {
         grid-template-columns: 1fr;
       }
@@ -847,11 +971,41 @@
 
       .select-wrapper {
         width: 100%;
+        min-width: auto;
       }
 
       .download-btn {
         width: 100%;
         justify-content: center;
+      }
+
+      .task-details {
+        flex-wrap: wrap;
+        padding: 3rem 1rem;
+      }
+
+      .tag-progress,
+      .task-activity {
+        flex-basis: 100%;
+      }
+
+      .highlight-card {
+        padding: 1.5rem;
+      }
+
+      .video-title-badge {
+        max-width: 120px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .stat-pill {
+        flex: 1 1 calc(50% - 0.4rem);
+        min-width: 135px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
       }
     }
   </style>
@@ -864,258 +1018,269 @@
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
     {% block content %}
 
-    <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
-      <div class="highlights-container">
-        <div class="header">
-          <div class="header-content">
-            <div class="header-top-row">
-              <h1>My Highlights</h1>
+    <div class="highlights-container">
+      <div class="header">
+        <div class="header-content">
+          <div class="header-top-row">
+            <h1>✨ My Highlights</h1>
 
-              <div class="header-controls">
-                <!-- Source filter: All / Video / Article / Chat -->
-                <div class="select-wrapper">
-                  <select id="sourceFilter" class="filter-dropdown">
-                    <option value="all">All Types</option>
-                    <option value="media">Video</option>
-                    <option value="article">Article</option>
-                    <option value="chat">Chat</option>
-                  </select>
-                  <i class="fas fa-filter select-icon"></i>
-                </div>
-
-                <!-- Video-only filter -->
-                <div class="select-wrapper">
-                  <select id="videoFilter" class="filter-dropdown">
-                    <option value="all">All Videos</option>
-                    {% for title in video_titles %}
-                      <option value="{{ title }}">{{ title }}</option>
-                    {% endfor %}
-                  </select>
-                  <i class="fas fa-chevron-down select-icon"></i>
-                </div>
-
-                <button class="download-btn" onclick="downloadHighlights()">
-                  <i class="fas fa-download"></i>
-                  <span>Download All</span>
-                </button>
+            <div class="header-controls">
+              <!-- Source filter: All / Video / Article / Chat -->
+              <div class="select-wrapper">
+                <select id="sourceFilter" class="filter-dropdown">
+                  <option value="all">All Types</option>
+                  <option value="media">Video</option>
+                  <option value="article">Article</option>
+                  <option value="chat">Chat</option>
+                </select>
+                <i class="fas fa-filter select-icon"></i>
               </div>
+
+              <!-- Video-only filter -->
+              <div class="select-wrapper">
+                <select id="videoFilter" class="filter-dropdown">
+                  <option value="all">All Videos</option>
+                  {% for title in video_titles %}
+                    <option value="{{ title }}">{{ title }}</option>
+                  {% endfor %}
+                </select>
+                <i class="fas fa-chevron-down select-icon"></i>
+              </div>
+
+              <button class="download-btn" onclick="downloadHighlights()">
+                <i class="fas fa-download"></i>
+                <span>Export All</span>
+              </button>
             </div>
+          </div>
 
-            <!-- Motivational stats row -->
-            <div class="stats-row">
-              <div class="stat-pill">
-                <span class="stat-label">Total</span>
-                <span class="stat-value">{{ stats.total }}</span>
-              </div>
-              <div class="stat-pill">
-                <span class="stat-label">Video</span>
-                <span class="stat-value">{{ stats.video }}</span>
-              </div>
-              <div class="stat-pill">
-                <span class="stat-label">Article</span>
-                <span class="stat-value">{{ stats.article }}</span>
-              </div>
-              <div class="stat-pill">
-                <span class="stat-label">Chat</span>
-                <span class="stat-value">{{ stats.chat }}</span>
-              </div>
+          <!-- Motivational stats row -->
+          <div class="stats-row">
+            <div class="stat-pill">
+              <span class="stat-label">Total</span>
+              <span class="stat-value">{{ stats.total }}</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-label">Videos</span>
+              <span class="stat-value">{{ stats.video }}</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-label">Articles</span>
+              <span class="stat-value">{{ stats.article }}</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-label">Chats</span>
+              <span class="stat-value">{{ stats.chat }}</span>
             </div>
           </div>
         </div>
-
-        <div class="highlights-grid">
-          {% for highlight in highlights %}
-            <div class="highlight-card"
-                 data-source="{{ highlight.source }}"
-                 data-video-title="{% if highlight.source == 'media' and highlight.media %}{{ highlight.media.title }}{% else %}{% endif %}">
-              <div class="highlight-header-line">
-                <span class="highlight-source
-                  {% if highlight.source == 'media' %}
-                    highlight-source-media
-                  {% elif highlight.source == 'article' %}
-                    highlight-source-media
-                  {% else %}
-                    highlight-source-chat
-                  {% endif %}">
-                  {% if highlight.source == 'media' %}
-                    Video
-                  {% elif highlight.source == 'article' %}
-                    Article
-                  {% else %}
-                    Chat
-                  {% endif %}
-                </span>
-
-                {% if highlight.source == 'media' and highlight.media %}
-                  <span style="font-size: 0.75rem; opacity: 0.7;">
-                    {{ highlight.media.title }}
-                  </span>
-                {% elif highlight.source == 'article' %}
-                  <span style="font-size: 0.75rem; opacity: 0.7;">
-                    {{ highlight.page_title|default:highlight.page_url }}
-                  </span>
-                {% endif %}
-              </div>
-
-              <div class="highlight-text">
-                {{ highlight.highlighted_text }}
-              </div>
-
-              <div class="highlight-content">
-                {% if highlight.source == 'media' and highlight.media %}
-                  From video <strong>{{ highlight.media.title }}</strong>
-                {% elif highlight.source == 'article' %}
-                  From article <strong>{{ highlight.page_title|default:highlight.page_url }}</strong>
-                {% else %}
-                  From chat conversation
-                {% endif %}
-              </div>
-
-              <div class="highlight-footer">
-                <span class="highlight-date">
-                  {{ highlight.created_at|date:"M d, Y" }}
-                </span>
-
-                <div class="highlight-actions">
-                  {% if highlight.source == 'media' and highlight.media %}
-                    <a href="{% url 'video_detail' highlight.media.media_id %}"
-                       class="action-btn"
-                       title="Open video">
-                      <i class="fas fa-external-link-alt"></i>
-                    </a>
-                  {% elif highlight.source == 'article' and highlight.page_url %}
-                    <a href="{{ highlight.page_url }}"
-                       class="action-btn"
-                       target="_blank"
-                       rel="noopener"
-                       title="Open article">
-                      <i class="fas fa-external-link-alt"></i>
-                    </a>
-                  {% endif %}
-
-                  <form method="POST"
-                        class="delete-form"
-                        data-id="{{ highlight.id }}"
-                        action="{% url 'delete_highlight' highlight.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="action-btn" title="Delete highlight">
-                      <i class="fas fa-trash-alt"></i>
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </div>
-          {% empty %}
-            <p>No highlights found.</p>
-          {% endfor %}
-        </div>
       </div>
 
-      <!-- Core JS Files -->
-      <script src="{% static 'accounts/js/core/popper.min.js' %}"></script>
-      <script src="{% static 'accounts/js/core/bootstrap.min.js' %}"></script>
-      <script src="{% static 'accounts/js/plugins/perfect-scrollbar.min.js' %}"></script>
-      <script src="{% static 'accounts/js/plugins/smooth-scrollbar.min.js' %}"></script>
-      <script src="{% static 'accounts/js/soft-ui-dashboard.min.js' %}?v=1.0.7"></script>
+      <div class="highlights-grid">
+        {% for highlight in highlights %}
+          <div class="highlight-card"
+               data-source="{{ highlight.source }}"
+               data-video-title="{% if highlight.source == 'media' and highlight.media %}{{ highlight.media.title }}{% else %}{% endif %}">
+            <div class="highlight-header-line">
+              <span class="highlight-source
+                {% if highlight.source == 'media' %}
+                  highlight-source-media
+                {% elif highlight.source == 'article' %}
+                  highlight-source-article
+                {% else %}
+                  highlight-source-chat
+                {% endif %}">
+                {% if highlight.source == 'media' %}
+                  🎥 Video
+                {% elif highlight.source == 'article' %}
+                  📄 Article
+                {% else %}
+                  💬 Chat
+                {% endif %}
+              </span>
 
-      <script>
-        function downloadHighlights() {
-          const url = "{% url 'download_highlights' %}";
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = 'highlights.txt';
-          link.click();
+              {% if highlight.source == 'media' and highlight.media %}
+                <span class="video-title-badge" title="{{ highlight.media.title }}">
+                  {{ highlight.media.title }}
+                </span>
+              {% elif highlight.source == 'article' %}
+                <span class="video-title-badge" title="{{ highlight.page_title|default:highlight.page_url }}">
+                  {{ highlight.page_title|default:highlight.page_url }}
+                </span>
+              {% endif %}
+            </div>
+
+            <div class="highlight-text">
+              {{ highlight.highlighted_text }}
+            </div>
+
+            <div class="highlight-content">
+              {% if highlight.source == 'media' and highlight.media %}
+                From video <strong>{{ highlight.media.title }}</strong>
+              {% elif highlight.source == 'article' %}
+                From article <strong>{{ highlight.page_title|default:highlight.page_url }}</strong>
+              {% else %}
+                From chat conversation
+              {% endif %}
+            </div>
+
+            <div class="highlight-footer">
+              <span class="highlight-date">
+                {{ highlight.created_at|date:"M d, Y" }}
+              </span>
+
+              <div class="highlight-actions">
+                {% if highlight.source == 'media' and highlight.media %}
+                  <a href="{% url 'video_detail' highlight.media.media_id %}"
+                     class="action-btn"
+                     title="Open video">
+                    <i class="fas fa-external-link-alt"></i>
+                  </a>
+                {% elif highlight.source == 'article' and highlight.page_url %}
+                  <a href="{{ highlight.page_url }}"
+                     class="action-btn"
+                     target="_blank"
+                     rel="noopener"
+                     title="Open article">
+                    <i class="fas fa-external-link-alt"></i>
+                  </a>
+                {% endif %}
+
+                <form method="POST"
+                      class="delete-form"
+                      data-id="{{ highlight.id }}"
+                      action="{% url 'delete_highlight' highlight.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="action-btn" title="Delete highlight">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="empty-state">
+            <div class="empty-state-icon">📝</div>
+            <p class="empty-state-text">No highlights yet. Start highlighting content to see them here!</p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Core JS Files -->
+    <script src="{% static 'accounts/js/core/popper.min.js' %}"></script>
+    <script src="{% static 'accounts/js/core/bootstrap.min.js' %}"></script>
+    <script src="{% static 'accounts/js/plugins/perfect-scrollbar.min.js' %}"></script>
+    <script src="{% static 'accounts/js/plugins/smooth-scrollbar.min.js' %}"></script>
+    <script src="{% static 'accounts/js/soft-ui-dashboard.min.js' %}?v=1.0.7"></script>
+
+    <script>
+      function downloadHighlights() {
+        const url = "{% url 'download_highlights' %}";
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'highlights.txt';
+        link.click();
+      }
+
+      document.addEventListener("DOMContentLoaded", function() {
+        const sourceFilter = document.getElementById("sourceFilter");
+        const videoFilter = document.getElementById("videoFilter");
+        const highlightCards = document.querySelectorAll(".highlight-card");
+
+        function applyFilters() {
+          const selectedSource = sourceFilter.value;
+          const selectedVideoTitle = videoFilter.value.toLowerCase();
+
+          highlightCards.forEach(card => {
+            const cardSource = (card.getAttribute("data-source") || "").toLowerCase();
+            const cardVideoTitle = (card.getAttribute("data-video-title") || "").toLowerCase();
+
+            let matchesSource = (selectedSource === "all") || (cardSource === selectedSource);
+            let matchesVideo = true;
+
+            if (selectedVideoTitle !== "all") {
+              if (cardSource === "media") {
+                matchesVideo = (cardVideoTitle === selectedVideoTitle);
+              } else {
+                matchesVideo = false;
+              }
+            }
+
+            if (matchesSource && matchesVideo) {
+              card.style.display = "block";
+            } else {
+              card.style.display = "none";
+            }
+          });
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-          const sourceFilter = document.getElementById("sourceFilter");
-          const videoFilter = document.getElementById("videoFilter");
-          const highlightCards = document.querySelectorAll(".highlight-card");
+        sourceFilter.addEventListener("change", applyFilters);
+        videoFilter.addEventListener("change", applyFilters);
+      });
 
-          function applyFilters() {
-            const selectedSource = sourceFilter.value; // all, media, article, chat
-            const selectedVideoTitle = videoFilter.value.toLowerCase();
+      document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.delete-form').forEach(function(form) {
+          form.addEventListener('submit', function(event) {
+            event.preventDefault();
 
-            highlightCards.forEach(card => {
-              const cardSource = (card.getAttribute("data-source") || "").toLowerCase();
-              const cardVideoTitle = (card.getAttribute("data-video-title") || "").toLowerCase();
+            const highlightId = form.getAttribute('data-id');
+            const url = form.action;
+            const csrfToken = form.querySelector('[name="csrfmiddlewaretoken"]').value;
+            const highlightCard = form.closest('.highlight-card');
 
-              let matchesSource = (selectedSource === "all") || (cardSource === selectedSource);
-              let matchesVideo = true;
-
-              // Video filter only applies to media highlights
-              if (selectedVideoTitle !== "all") {
-                if (cardSource === "media") {
-                  matchesVideo = (cardVideoTitle === selectedVideoTitle);
-                } else {
-                  // Non-video highlights are hidden when a specific video is selected
-                  matchesVideo = false;
+            fetch(url, {
+              method: 'POST',
+              headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ highlight_id: highlightId })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.status === 'success') {
+                if (highlightCard) {
+                  highlightCard.style.animation = 'fadeOut 0.3s ease-out';
+                  setTimeout(() => highlightCard.remove(), 300);
                 }
-              }
-
-              if (matchesSource && matchesVideo) {
-                card.style.display = "block";
               } else {
-                card.style.display = "none";
+                console.error('Error:', data.message);
               }
-            });
-          }
-
-          sourceFilter.addEventListener("change", applyFilters);
-          videoFilter.addEventListener("change", applyFilters);
-        });
-
-        // Delete highlight via AJAX and remove from DOM
-        document.addEventListener('DOMContentLoaded', function() {
-          document.querySelectorAll('.delete-form').forEach(function(form) {
-            form.addEventListener('submit', function(event) {
-              event.preventDefault();
-
-              const highlightId = form.getAttribute('data-id');
-              const url = form.action;
-              const csrfToken = form.querySelector('[name="csrfmiddlewaretoken"]').value;
-              const highlightCard = form.closest('.highlight-card');
-
-              fetch(url, {
-                method: 'POST',
-                headers: {
-                  'X-CSRFToken': csrfToken,
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ highlight_id: highlightId })
-              })
-              .then(response => response.json())
-              .then(data => {
-                if (data.status === 'success') {
-                  if (highlightCard) {
-                    highlightCard.remove();
-                  }
-                } else {
-                  console.error('Error:', data.message);
-                }
-              })
-              .catch(error => console.error('Error:', error));
-            });
+            })
+            .catch(error => console.error('Error:', error));
           });
         });
+      });
 
-        // Mobile sidenav toggle
-        document.addEventListener('DOMContentLoaded', function() {
-          const sidenav = document.getElementById('sidenav-main');
-          const topNav = document.getElementById('top-nav');
-          const iconSidenav = document.getElementById('iconSidenav');
+      document.addEventListener('DOMContentLoaded', function() {
+        const sidenav = document.getElementById('sidenav-main');
+        const topNav = document.getElementById('top-nav');
+        const iconSidenav = document.getElementById('iconSidenav');
 
-          if (iconSidenav && sidenav && topNav) {
-            iconSidenav.addEventListener('click', function() {
-              if (window.innerWidth < 992) {
-                sidenav.classList.toggle('d-none');
-                topNav.classList.toggle('d-none');
-              }
-            });
-          }
-        });
-      </script>
-    </main>
+        if (iconSidenav && sidenav && topNav) {
+          iconSidenav.addEventListener('click', function() {
+            if (window.innerWidth < 992) {
+              sidenav.classList.toggle('d-none');
+              topNav.classList.toggle('d-none');
+            }
+          });
+        }
+      });
+    </script>
+
+    <style>
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
+          transform: scale(1);
+        }
+        to {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+      }
+    </style>
 
     {% endblock %}
   </main>
