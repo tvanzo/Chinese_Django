@@ -1598,56 +1598,77 @@ def read_detail(request, slug):
         'highlights': highlights,
     })
 
-import json
-from django.http import JsonResponse
+# subplayer/views.py
+
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from django.utils.text import slugify
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from urllib.parse import urlparse
+from .models import Article, Highlight
+import json
+import hashlib
 
+def _slug_from(title: str, url: str) -> str:
+    base = slugify((title or "").strip())[:50] or slugify(urlparse(url).netloc)
+    # prevent unique collisions by appending a short hash of the URL
+    h = hashlib.sha1(url.encode("utf-8")).hexdigest()[:8]
+    return f"{base}-{h}" if base else h
 
-
-@csrf_exempt  # OK for now since it’s a browser extension; you can tighten later
-@require_POST
+@csrf_exempt
+@require_http_methods(["POST", "OPTIONS"])
 @login_required
 def api_article_highlight(request):
-    try:
-        data = json.loads(request.body or "{}")
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    # CORS/preflight (if your extension needs it)
+    if request.method == "OPTIONS":
+        resp = JsonResponse({"ok": True})
+        resp["Access-Control-Allow-Origin"] = "*"
+        resp["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        resp["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        return resp
 
-    page_url = data.get("page_url")
-    page_title = (data.get("page_title") or "").strip()
-    text = (data.get("text") or "").strip()
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        return JsonResponse({"error": "Invalid JSON body"}, status=400)
+
+    page_url = (payload.get("page_url") or payload.get("url") or "").strip()
+    page_title = (payload.get("page_title") or payload.get("title") or "").strip()
+    text = (payload.get("text") or payload.get("highlighted_text") or "").strip()
 
     if not page_url or not text:
         return JsonResponse({"error": "page_url and text are required"}, status=400)
 
-    # 1) Ensure there is an Article for this URL (per user)
-    default_title = page_title or page_url
-    article, created = Article.objects.get_or_create(
+    # Create/find a lightweight Article record keyed by the source_url.
+    # Only use fields that exist on your current Article model.
+    slug = _slug_from(page_title, page_url)
+    article, _created = Article.objects.get_or_create(
         source_url=page_url,
-        created_by=request.user,
         defaults={
-            "title": default_title[:255],
-            "slug": slugify(default_title)[:50] or slugify(str(hash(page_url)))[:50],
-            "level": "",
-            "description": "",
-            "content": "",  # you can later store a snapshot of the article here
+            "title": page_title[:255] or urlparse(page_url).netloc,
+            "slug": slug,
+            "created_by": request.user,
         },
     )
 
-    # 2) Save the highlight itself
-    highlight = ArticleHighlight.objects.create(
+    # Store the highlight in the unified Highlight table (source='web')
+    h = Highlight.objects.create(
         user=request.user,
+        source="web",
+        media=None,
+        highlighted_text=text,
         page_url=page_url,
-        page_title=page_title[:255],
-        text=text,
+        page_title=page_title[:500] or None,
     )
 
-    return JsonResponse(
-        {
-            "id": highlight.id,
-            "article_id": article.id,
-            "created": True,
-        },
-        status=201,
-    )
+    resp = JsonResponse({
+        "status": "ok",
+        "highlight_id": h.id,
+        "article_id": article.id,
+        "page_url": page_url,
+        "page_title": page_title,
+    })
+    # CORS header if needed for the extension
+    resp["Access-Control-Allow-Origin"] = "*"
+    return resp
