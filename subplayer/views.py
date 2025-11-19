@@ -1600,75 +1600,63 @@ def read_detail(request, slug):
 
 # subplayer/views.py
 
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
-from django.utils.text import slugify
+# subplayer/views.py  (your /api/article-highlight/ handler)
+import json, re, uuid
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from urllib.parse import urlparse
+from django.db import transaction
+from django.utils.text import slugify
 from .models import Article, Highlight
-import json
-import hashlib
 
-def _slug_from(title: str, url: str) -> str:
-    base = slugify((title or "").strip())[:50] or slugify(urlparse(url).netloc)
-    # prevent unique collisions by appending a short hash of the URL
-    h = hashlib.sha1(url.encode("utf-8")).hexdigest()[:8]
-    return f"{base}-{h}" if base else h
+def _unique_slug(base_slug: str) -> str:
+    # keep it short enough for your slug field length
+    base = slugify(base_slug or "untitled")[:45] or "item"
+    return f"{base}-{uuid.uuid4().hex[:6]}"
 
 @csrf_exempt
-@require_http_methods(["POST", "OPTIONS"])
 @login_required
 def api_article_highlight(request):
-    # CORS/preflight (if your extension needs it)
-    if request.method == "OPTIONS":
-        resp = JsonResponse({"ok": True})
-        resp["Access-Control-Allow-Origin"] = "*"
-        resp["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-        resp["Access-Control-Allow-Methods"] = "POST, OPTIONS"
-        return resp
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
 
     try:
-        payload = json.loads(request.body.decode("utf-8"))
-    except Exception:
-        return JsonResponse({"error": "Invalid JSON body"}, status=400)
+        data = json.loads(request.body.decode("utf-8"))
+        page_url   = data.get("page_url") or data.get("url")
+        page_title = data.get("page_title") or data.get("title")
+        text       = data.get("text") or data.get("highlighted_text")
 
-    page_url = (payload.get("page_url") or payload.get("url") or "").strip()
-    page_title = (payload.get("page_title") or payload.get("title") or "").strip()
-    text = (payload.get("text") or payload.get("highlighted_text") or "").strip()
+        if not page_url or not text:
+            return JsonResponse({"error": "page_url and text are required"}, status=400)
 
-    if not page_url or not text:
-        return JsonResponse({"error": "page_url and text are required"}, status=400)
+        # Make a stable-ish slug from title/url
+        base_for_slug = (page_title or page_url)
+        slug_val = slugify(base_for_slug)[:60] or _unique_slug(base_for_slug)
 
-    # Create/find a lightweight Article record keyed by the source_url.
-    # Only use fields that exist on your current Article model.
-    slug = _slug_from(page_title, page_url)
-    article, _created = Article.objects.get_or_create(
-        source_url=page_url,
-        defaults={
-            "title": page_title[:255] or urlparse(page_url).netloc,
-            "slug": slug,
-            "created_by": request.user,
-        },
-    )
+        with transaction.atomic():
+            # IMPORTANT: provide legacy defaults so old NOT NULL columns are satisfied
+            article, _ = Article.objects.get_or_create(
+                source_url=page_url,
+                defaults={
+                    "title": page_title or "Untitled",
+                    "slug": slug_val,
+                    "created_by": request.user,
+                    # legacy columns still on prod DB
+                    "level": "",          # satisfies NOT NULL on level
+                    "description": "",    # if column exists
+                    "content": "",        # if column exists
+                },
+            )
 
-    # Store the highlight in the unified Highlight table (source='web')
-    h = Highlight.objects.create(
-        user=request.user,
-        source="web",
-        media=None,
-        highlighted_text=text,
-        page_url=page_url,
-        page_title=page_title[:500] or None,
-    )
+            h = Highlight.objects.create(
+                user=request.user,
+                source="web",
+                highlighted_text=text,
+                page_url=page_url,
+                page_title=page_title,
+            )
 
-    resp = JsonResponse({
-        "status": "ok",
-        "highlight_id": h.id,
-        "article_id": article.id,
-        "page_url": page_url,
-        "page_title": page_title,
-    })
-    # CORS header if needed for the extension
-    resp["Access-Control-Allow-Origin"] = "*"
-    return resp
+        return JsonResponse({"ok": True, "highlight_id": h.id, "article_id": article.id}, status=201)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

@@ -100,15 +100,17 @@ class Highlight(models.Model):
         if self.source == 'media' and self.media:
             return f'[{self.source}] {self.media.title}: {self.highlighted_text[:50]}'
         return f'[{self.source}] {self.highlighted_text[:50]}'
-
-
-# Article model — only stores metadata, no content needed anymore
+# subplayer/models.py
 class Article(models.Model):
     title = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    slug = models.SlugField(unique=True, max_length=255)
 
-    # Source URL from Chrome extension
+    # Re-add legacy columns with permissive settings
+    level = models.CharField(max_length=50, blank=True, null=True, default="")
+    description = models.TextField(blank=True, null=True, default="")
+    content = models.TextField(blank=True, null=True, default="")
+
+    created_at = models.DateTimeField(auto_now_add=True)
     source_url = models.URLField(blank=True, null=True, unique=True)
     created_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True, related_name="articles"
