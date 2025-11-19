@@ -2,6 +2,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("subplayer", "0003_placeholder"),
+        ("subplayer", "0001_initial"),
     ]
     operations = []

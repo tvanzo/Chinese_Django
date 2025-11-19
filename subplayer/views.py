@@ -1549,7 +1549,6 @@ def web_highlight(request):
         "article_slug": article.slug if article else None,
     }, status=201)
 
-@login_required
 # subplayer/views.py
 @login_required
 def read_list(request):
@@ -1604,44 +1603,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
-from .models import ArticleHighlight   # make sure this import is present
 
 
-@csrf_exempt
-@login_required
-def create_article_highlight(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid method"}, status=405)
-
-    try:
-        data = json.loads(request.body.decode("utf-8"))
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
-
-    text = (data.get("text") or "").strip()
-    page_url = data.get("page_url") or request.build_absolute_uri()
-    page_title = data.get("page_title") or ""
-
-    if not text:
-        return JsonResponse({"error": "No text provided"}, status=400)
-
-    highlight = ArticleHighlight.objects.create(
-        user=request.user,
-        text=text,
-        page_url=page_url,
-        page_title=page_title,
-    )
-
-    return JsonResponse(
-        {
-            "id": highlight.id,
-            "text": highlight.text,
-            "page_url": highlight.page_url,
-            "page_title": highlight.page_title,
-            "created_at": highlight.created_at.isoformat(),
-        },
-        status=201,
-    )
 @csrf_exempt  # OK for now since it’s a browser extension; you can tighten later
 @require_POST
 @login_required
