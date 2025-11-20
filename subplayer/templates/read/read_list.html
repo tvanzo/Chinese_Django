@@ -1,11 +1,20 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Read – ChineseLog</title>
+
+  <!-- Your original assets -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Soft UI assets (needed for sidebar/navbar to look right) -->
+  <link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet" />
+  <link href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet" />
+  <link href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet" />
+
   <style>
     :root {
       --primary-color: #3b82f6;
@@ -195,124 +204,130 @@
       margin: 0;
     }
 
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
+    a { text-decoration: none; color: inherit; }
 
     @media (max-width: 768px) {
-      .article-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-      }
-
-      .section-title {
-        font-size: 1.5rem;
-      }
-
-      .container-fluid {
-        padding: 1rem;
-      }
+      .article-grid { grid-template-columns: 1fr; gap: 1rem; }
+      .section-title { font-size: 1.5rem; }
+      .container-fluid { padding: 1rem; }
     }
   </style>
 </head>
-<body>
+<body class="g-sidenav-show bg-gray-100">
+  {% include 'accounts/navbar.html' %}
+  {% include 'accounts/sidebar.html' %}
 
-<div class="container-fluid">
+  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
 
-  <!-- ==================== CURATED CHINESE ARTICLES ==================== -->
-  <div class="section-header">
-    <h1 class="section-title">
-      <i class="fas fa-book-open"></i>
-      Chinese Articles
-    </h1>
-    <p class="section-subtitle">
-      Browse short Chinese texts and save new words to your notebook
-    </p>
-  </div>
+    <div class="container-fluid">
 
-  {% if articles %}
-    <div class="article-grid">
-      {% for article in articles %}
-        <a href="{% url 'read_detail' article.slug %}">
-          <div class="article-card">
-            <div class="article-header">
-              <h3 class="article-title">{{ article.title }}</h3>
-              {% if article.level %}
-                <span class="article-badge">{{ article.level }}</span>
-              {% endif %}
-            </div>
+      <!-- ==================== CURATED CHINESE ARTICLES ==================== -->
+      <div class="section-header">
+        <h1 class="section-title">
+          <i class="fas fa-book-open"></i>
+          Chinese Articles
+        </h1>
+        <p class="section-subtitle">
+          Browse short Chinese texts and save new words to your notebook
+        </p>
+      </div>
 
-            <div class="article-meta">
-              <i class="fas fa-calendar"></i>
-              <span>{{ article.created_at|date:"M d, Y" }}</span>
-            </div>
+      {% if articles %}
+        <div class="article-grid">
+          {% for article in articles %}
+            <a href="{% url 'read_detail' article.slug %}">
+              <div class="article-card">
+                <div class="article-header">
+                  <h3 class="article-title">{{ article.title }}</h3>
+                  {% if article.level %}
+                    <span class="article-badge">{{ article.level }}</span>
+                  {% endif %}
+                </div>
 
-            {% if article.description %}
-              <div class="article-description">
-                {{ article.description|truncatechars:120 }}
+                <div class="article-meta">
+                  <i class="fas fa-calendar"></i>
+                  <span>{{ article.created_at|date:"M d, Y" }}</span>
+                </div>
+
+                {% if article.description %}
+                  <div class="article-description">
+                    {{ article.description|truncatechars:120 }}
+                  </div>
+                {% endif %}
               </div>
-            {% endif %}
-          </div>
-        </a>
-      {% endfor %}
-    </div>
-  {% else %}
-    <div class="empty-state">
-      <i class="fas fa-book"></i>
-      <p>No curated articles yet</p>
-    </div>
-  {% endif %}
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <i class="fas fa-book"></i>
+          <p>No curated articles yet</p>
+        </div>
+      {% endif %}
 
-  <!-- ==================== MY WEB HIGHLIGHTS ==================== -->
-  <div class="section-header" style="margin-top: 3rem;">
-    <h1 class="section-title">
-      <i class="fas fa-globe"></i>
-      Web Highlights
-    </h1>
-    <p class="section-subtitle">
-      Pages you highlighted anywhere on the internet
-    </p>
-  </div>
+      <!-- ==================== MY WEB HIGHLIGHTS ==================== -->
+      <div class="section-header" style="margin-top: 3rem;">
+        <h1 class="section-title">
+          <i class="fas fa-globe"></i>
+          Web Highlights
+        </h1>
+        <p class="section-subtitle">
+          Pages you highlighted anywhere on the internet
+        </p>
+      </div>
 
-  {% if web_articles %}
-    <div class="article-grid">
-      {% for article in web_articles %}
-        <a href="{% url 'read_detail' article.slug %}">
-          <div class="article-card">
-            <div class="article-header">
-              <h3 class="article-title">{{ article.title|default:"Untitled page" }}</h3>
-              {% if article.highlight_count > 0 %}
-                <span class="highlight-badge">
-                  <i class="fas fa-highlighter"></i>
-                  {{ article.highlight_count }}
-                </span>
-              {% endif %}
-            </div>
+      {% if web_articles %}
+        <div class="article-grid">
+          {% for article in web_articles %}
+            <a href="{% url 'read_detail' article.slug %}">
+              <div class="article-card">
+                <div class="article-header">
+                  <h3 class="article-title">{{ article.title|default:"Untitled page" }}</h3>
+                  {% if article.highlight_count > 0 %}
+                    <span class="highlight-badge">
+                      <i class="fas fa-highlighter"></i>
+                      {{ article.highlight_count }}
+                    </span>
+                  {% endif %}
+                </div>
 
-            <div class="article-meta">
-              <i class="fas fa-calendar"></i>
-              <span>{{ article.created_at|date:"M d, Y" }}</span>
-            </div>
+                <div class="article-meta">
+                  <i class="fas fa-calendar"></i>
+                  <span>{{ article.created_at|date:"M d, Y" }}</span>
+                </div>
 
-            {% if article.source_url %}
-              <div class="article-url">
-                <i class="fas fa-link"></i>
-                <span>{{ article.source_url|truncatechars:50 }}</span>
+                {% if article.source_url %}
+                  <div class="article-url">
+                    <i class="fas fa-link"></i>
+                    <span>{{ article.source_url|truncatechars:50 }}</span>
+                  </div>
+                {% endif %}
               </div>
-            {% endif %}
-          </div>
-        </a>
-      {% endfor %}
-    </div>
-  {% else %}
-    <div class="empty-state">
-      <i class="fas fa-highlighter"></i>
-      <p>No web highlights yet — start selecting text anywhere!</p>
-    </div>
-  {% endif %}
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <i class="fas fa-highlighter"></i>
+          <p>No web highlights yet — start selecting text anywhere!</p>
+        </div>
+      {% endif %}
 
-</div>
+    </div>
 
+  </main>
+
+  <!-- Core JS (Soft UI + your Bootstrap dep) -->
+  <script src="{% static 'accounts/js/core/popper.min.js' %}"></script>
+  <script src="{% static 'accounts/js/core/bootstrap.min.js' %}"></script>
+  <script src="{% static 'accounts/js/plugins/perfect-scrollbar.min.js' %}"></script>
+  <script src="{% static 'accounts/js/plugins/smooth-scrollbar.min.js' %}"></script>
+  <script src="{% static 'accounts/js/soft-ui-dashboard.min.js?v=1.0.7' %}"></script>
+  <script>
+    var win = navigator.platform.indexOf('Win') > -1;
+    if (win && document.querySelector('#sidenav-scrollbar')) {
+      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), { damping: '0.5' });
+    }
+  </script>
 </body>
 </html>

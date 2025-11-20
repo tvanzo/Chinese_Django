@@ -104,6 +104,7 @@ path("api/article-highlight/", subplayer_views.api_article_highlight, name="api_
 
     # Chat app
     path("chat/", include(("chat.urls", "chat"), namespace="chat")),
+    path('read/<slug:slug>/', subplayer_views.read_detail_curated, name='read_detail'),
 
 ]
 

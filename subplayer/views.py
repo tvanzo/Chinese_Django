@@ -1660,3 +1660,87 @@ def api_article_highlight(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+# --- Article highlights (curated + web) ---
+from django.views.decorators.http import require_http_methods
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def read_article_highlights(request, slug):
+    """
+    /read/api/highlights/<slug>/
+    GET  -> list this user's highlights scoped to this article [{id, text}, ...]
+    POST -> create a new highlight {text:"..."} with same daily-limit logic as video/chat
+    - Uses Highlight.source = 'read'
+    - Stores article slug + URL for parity with 'web' source
+    """
+    article = get_object_or_404(Article, slug=slug)
+    user = request.user
+
+    if request.method == "GET":
+        qs = Highlight.objects.filter(
+            user=user,
+            source='read',
+            page_url=request.build_absolute_uri(
+                # normalize on your read_detail route so it’s stable
+                request.build_absolute_uri(
+                    reverse('read_detail', kwargs={'slug': slug})
+                )
+            ) if False else None  # see below
+        )
+
+        # Simpler + robust: filter by article linkage if present, else by slug in page_url
+        qs = Highlight.objects.filter(user=user, source='read', page_title=article.title, page_url=article.source_url or '')
+        # If you prefer explicit slug-scoping without depending on source_url, use a dedicated column.
+        # With current model, we’ll scope by (source='read', page_title=article.title) AND include slug in page_url.
+
+        # Safer: scope by slug stored in page_url
+        qs = Highlight.objects.filter(user=user, source='read', page_url=f"read://{slug}")
+
+        data = [{"id": h.id, "text": h.highlighted_text} for h in qs.order_by('created_at')]
+        return JsonResponse(data, safe=False)
+
+    # POST (create)
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    text = (payload.get("text") or "").strip()
+    if not text:
+        return JsonResponse({"error": "Text is required"}, status=400)
+
+    # Daily limit — identical to your video/chat endpoints
+    try:
+        subscription = Subscription.objects.get(user=user)
+    except Subscription.DoesNotExist:
+        subscription = None
+
+    if subscription and subscription.tier == 'FREE':
+        today = timezone.now().date()
+        highlights_today = Highlight.objects.filter(user=user, created_at__date=today).count()
+        if highlights_today >= 3:
+            return JsonResponse({
+                "error": "You have reached the daily limit of 3 highlights. Upgrade to create more.",
+                "limit_reached": True,
+            }, status=403)
+
+    # Create highlight: mirror “web” shape but with source='read'
+    h = Highlight.objects.create(
+        user=user,
+        source='read',
+        highlighted_text=text,
+        page_title=article.title,             # useful for listing
+        page_url=f"read://{slug}",            # stable per-article identifier
+        start_time=0, end_time=0,             # not time-based
+        start_index=0, end_index=len(text),   # optional indices
+        start_sentence_index=0, end_sentence_index=0,
+        frame_index=0,
+    )
+
+    # Update profile counter to match video/chat
+    profile = user.profile
+    profile.total_highlights += 1
+    profile.save()
+
+    return JsonResponse({"id": h.id, "text": h.highlighted_text}, status=201)
