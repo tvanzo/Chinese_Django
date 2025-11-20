@@ -7,109 +7,310 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <style>
-    body { background-color: #f8f9fa; padding-top: 2rem; }
+    :root {
+      --primary-color: #3b82f6;
+      --primary-light: #dbeafe;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --border-color: #e2e8f0;
+      --card-bg: #ffffff;
+      --hover-bg: #f8fafc;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f0f9ff 0%, #fef3f2 100%);
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      color: var(--text-primary);
+    }
+
+    .container-fluid {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    .section-header {
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-title i {
+      color: var(--primary-color);
+      font-size: 1.5rem;
+    }
+
+    .section-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .article-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 4rem;
+    }
+
     .article-card {
+      background: var(--card-bg);
       border-radius: 16px;
-      padding: 16px 18px;
-      background: #ffffff;
-      box-shadow: 0 8px 20px rgba(15,23,42,0.05);
-      border: 1px solid #e5e7eb;
-      cursor: pointer;
-      transition: all .15s;
+      padding: 1.5rem;
+      border: 1px solid var(--border-color);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
+
+    .article-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--primary-color);
+      transform: scaleY(0);
+      transition: transform 0.2s ease;
+    }
+
     .article-card:hover {
-      box-shadow: 0 10px 25px rgba(15,23,42,0.12);
-      transform: translateY(-1px);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15);
+      border-color: var(--primary-color);
     }
-    .article-title { font-weight: 600; font-size: 15px; color: #111827; }
-    .article-meta  { font-size: 12px; color: #6b7280; }
-    .article-summary { font-size: 13px; color: #4b5563; }
+
+    .article-card:hover::before {
+      transform: scaleY(1);
+    }
+
+    .article-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+      gap: 1rem;
+    }
+
+    .article-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.4;
+      margin: 0;
+      flex: 1;
+    }
+
+    .article-badge {
+      background: var(--primary-light);
+      color: var(--primary-color);
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .article-meta i {
+      font-size: 0.75rem;
+    }
+
+    .article-url {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.25rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .article-description {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-top: auto;
+      padding-top: 0.5rem;
+    }
+
+    .highlight-badge {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .highlight-badge i {
+      font-size: 0.7rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: var(--card-bg);
+      border-radius: 16px;
+      border: 2px dashed var(--border-color);
+    }
+
+    .empty-state i {
+      font-size: 3.5rem;
+      color: var(--text-muted);
+      opacity: 0.5;
+      margin-bottom: 1.5rem;
+    }
+
+    .empty-state p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    @media (max-width: 768px) {
+      .article-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .section-title {
+        font-size: 1.5rem;
+      }
+
+      .container-fluid {
+        padding: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
 
-<div class="container-fluid py-4">
+<div class="container-fluid">
 
   <!-- ==================== CURATED CHINESE ARTICLES ==================== -->
-  <div class="row mb-5">
-    <div class="col">
-      <h5 class="mb-1">Read – Chinese Articles</h5>
-      <p class="text-sm text-muted mb-4">
-        Browse short Chinese texts and save new words to your notebook.
-      </p>
+  <div class="section-header">
+    <h1 class="section-title">
+      <i class="fas fa-book-open"></i>
+      Chinese Articles
+    </h1>
+    <p class="section-subtitle">
+      Browse short Chinese texts and save new words to your notebook
+    </p>
+  </div>
 
-      {% if articles %}
-        {% for article in articles %}
-          <a href="{% url 'read_detail' article.slug %}" class="text-decoration-none">
-            <div class="article-card mb-3">
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <div class="article-title">
-                  {{ article.title }}
-                </div>
-                {% if article.level %}
-                  <span class="badge bg-gradient-warning text-xxs">{{ article.level }}</span>
-                {% endif %}
-              </div>
-              <div class="article-meta mb-1">
-                {{ article.created_at|date:"Y-m-d" }}
-              </div>
-              {% if article.description %}
-                <div class="article-summary">
-                  {{ article.description|truncatechars:140 }}
-                </div>
+  {% if articles %}
+    <div class="article-grid">
+      {% for article in articles %}
+        <a href="{% url 'read_detail' article.slug %}">
+          <div class="article-card">
+            <div class="article-header">
+              <h3 class="article-title">{{ article.title }}</h3>
+              {% if article.level %}
+                <span class="article-badge">{{ article.level }}</span>
               {% endif %}
             </div>
-          </a>
-        {% endfor %}
-      {% else %}
-        <p class="text-muted">No curated articles yet.</p>
-      {% endif %}
+
+            <div class="article-meta">
+              <i class="fas fa-calendar"></i>
+              <span>{{ article.created_at|date:"M d, Y" }}</span>
+            </div>
+
+            {% if article.description %}
+              <div class="article-description">
+                {{ article.description|truncatechars:120 }}
+              </div>
+            {% endif %}
+          </div>
+        </a>
+      {% endfor %}
     </div>
-  </div>
+  {% else %}
+    <div class="empty-state">
+      <i class="fas fa-book"></i>
+      <p>No curated articles yet</p>
+    </div>
+  {% endif %}
 
   <!-- ==================== MY WEB HIGHLIGHTS ==================== -->
-  <div class="row">
-    <div class="col">
-      <div class="d-flex align-items-center mb-4">
-        <h5 class="mb-0 me-3">My Web Highlights</h5>
-        <small class="text-muted">Pages you highlighted anywhere on the internet</small>
-      </div>
-
-      {% if web_articles %}
-        {% for article in web_articles %}
-          <a href="{% url 'read_detail' article.slug %}" class="text-decoration-none">
-            <div class="article-card mb-3">
-              <div class="d-flex justify-content-between align-items-start">
-                <div class="flex-grow-1 me-3">
-                  <div class="article-title">
-                    {{ article.title|default:"Untitled page" }}
-                  </div>
-                  <small class="text-muted">
-                    {{ article.created_at|date:"M d, Y" }}
-                    {% if article.source_url %}
-                      • {{ article.source_url|truncatechars:60 }}
-                    {% endif %}
-                  </small>
-                </div>
-                <div>
-                  {% if article.highlight_count > 0 %}
-                    <span class="badge bg-primary rounded-pill">
-                      {{ article.highlight_count }} highlight{{ article.highlight_count|pluralize }}
-                    </span>
-                  {% endif %}
-                </div>
-              </div>
-            </div>
-          </a>
-        {% endfor %}
-      {% else %}
-        <div class="text-center py-5 text-muted">
-          <i class="fas fa-globe fa-3x mb-3 opacity-50"></i>
-          <p>No web highlights yet — start selecting text anywhere!</p>
-        </div>
-      {% endif %}
-    </div>
+  <div class="section-header" style="margin-top: 3rem;">
+    <h1 class="section-title">
+      <i class="fas fa-globe"></i>
+      Web Highlights
+    </h1>
+    <p class="section-subtitle">
+      Pages you highlighted anywhere on the internet
+    </p>
   </div>
+
+  {% if web_articles %}
+    <div class="article-grid">
+      {% for article in web_articles %}
+        <a href="{% url 'read_detail' article.slug %}">
+          <div class="article-card">
+            <div class="article-header">
+              <h3 class="article-title">{{ article.title|default:"Untitled page" }}</h3>
+              {% if article.highlight_count > 0 %}
+                <span class="highlight-badge">
+                  <i class="fas fa-highlighter"></i>
+                  {{ article.highlight_count }}
+                </span>
+              {% endif %}
+            </div>
+
+            <div class="article-meta">
+              <i class="fas fa-calendar"></i>
+              <span>{{ article.created_at|date:"M d, Y" }}</span>
+            </div>
+
+            {% if article.source_url %}
+              <div class="article-url">
+                <i class="fas fa-link"></i>
+                <span>{{ article.source_url|truncatechars:50 }}</span>
+              </div>
+            {% endif %}
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <i class="fas fa-highlighter"></i>
+      <p>No web highlights yet — start selecting text anywhere!</p>
+    </div>
+  {% endif %}
 
 </div>
 
