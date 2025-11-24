@@ -38,69 +38,35 @@ jobs:
       - name: Ensure static dir exists (avoid W004)
         run: mkdir -p myproject/static
 
-      # 1) Try Django-native fake migrate of 0003 BEFORE full migrate
-      - name: Fake-apply subplayer 0003 (if needed)
-        run: |
-          set -e
-          echo ">> showmigrations before:"
-          python manage.py showmigrations subplayer || true
+      # ---- Fix the migration ordering wobble ----
+      - name: Show subplayer migrations (before)
+        run: python manage.py showmigrations subplayer || true
 
-          # If 0004 is applied and 0003 is not, try Django-native fake migration first
-          python manage.py shell <<'PY'
-          from django.db import connection
-          from django.db.migrations.recorder import MigrationRecorder
-          rec = MigrationRecorder(connection)
-          applied = {(m.app, m.name) for m in rec.applied_migrations()}
-          need_fake = (('subplayer','0004_category_remove_media_category_channel_categories_and_more') in applied
-                       and ('subplayer','0003_placeholder') not in applied)
-          print("need_fake=", need_fake)
-          PY
+      - name: Fake-apply subplayer 0003 (safe no-op if already applied)
+        run: python manage.py migrate subplayer 0003 --fake --noinput || true
 
-          # This will succeed if Django allows backfilling 0003 even though 0004 is present
-          python manage.py migrate subplayer 0003 --fake --noinput || true
+      - name: Show subplayer migrations (after fake)
+        run: python manage.py showmigrations subplayer || true
+      # -------------------------------------------
 
-          echo ">> showmigrations after attempt:"
-          python manage.py showmigrations subplayer || true
-
-      # 2) Guard-rail: if 0003 still not marked applied, force-record it
-      - name: Record 0003 via MigrationRecorder as last resort
-        run: |
-          python manage.py shell <<'PY'
-          from django.db import connection
-          from django.db.migrations.recorder import MigrationRecorder
-          rec = MigrationRecorder(connection)
-          applied = {(m.app, m.name) for m in rec.applied_migrations()}
-          if ('subplayer','0004_category_remove_media_category_channel_categories_and_more') in applied \
-             and ('subplayer','0003_placeholder') not in applied:
-              rec.record_applied('subplayer','0003_placeholder')
-              print("✅ Force-recorded subplayer.0003_placeholder")
-          else:
-              print("ℹ️ No force-record needed")
-          PY
-
-          echo ">> confirm:"
-          python manage.py showmigrations subplayer || true
-
-      # 3) Now run the full migrate
       - name: Run migrations
         run: python manage.py migrate --noinput
 
-      - name: Create superuser if missing
+      - name: Create superuser (idempotent)
         run: |
-          python manage.py shell <<'PY'
+          python manage.py createsuperuser --noinput || true
+          python - <<'PY'
           import os
           from django.contrib.auth import get_user_model
           User = get_user_model()
           u = os.environ.get('DJANGO_SUPERUSER_USERNAME')
           e = os.environ.get('DJANGO_SUPERUSER_EMAIL')
           p = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
-          if not u or not p:
-              print("⚠️ Missing superuser env; skip.")
-          elif not User.objects.filter(username=u).exists():
+          if u and p and not User.objects.filter(username=u).exists():
               User.objects.create_superuser(username=u, email=e, password=p)
-              print(f"✅ Created superuser {u}")
+              print(f"Created superuser {u}")
           else:
-              print(f"ℹ️ Superuser {u} already exists")
+              print("Superuser exists or env missing; skipping explicit create.")
           PY
 
       - name: Collect static files
