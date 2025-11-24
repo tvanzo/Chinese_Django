@@ -2,7 +2,8 @@ name: Deploy to Render
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -15,11 +16,11 @@ jobs:
       ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
       DEBUG: ${{ secrets.DEBUG }}
       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-      RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-      RENDER_SERVICE_ID: srv-cpoif12ju9rs738p174g
       DJANGO_SUPERUSER_USERNAME: ${{ secrets.DJANGO_SUPERUSER_USERNAME }}
       DJANGO_SUPERUSER_EMAIL: ${{ secrets.DJANGO_SUPERUSER_EMAIL }}
       DJANGO_SUPERUSER_PASSWORD: ${{ secrets.DJANGO_SUPERUSER_PASSWORD }}
+      RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+      RENDER_SERVICE_ID: srv-cpoif12ju9rs738p174g
 
     steps:
       - name: Checkout code
@@ -28,60 +29,100 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Ensure static dir exists (silence W004)
-        run: mkdir -p myproject/static
-
-      - name: Show subplayer migrations (before)
-        run: python manage.py showmigrations subplayer || true
-
-      # Brutal but reliable: directly record 0002 and 0003 as applied
-      - name: Force-record missing ancestors (0002, 0003)
+      - name: Show migrations (before)
         run: |
-          python manage.py shell -c "
-from django.db import connections
-from django.db.migrations.recorder import MigrationRecorder
-conn = connections['default']
-rec = MigrationRecorder(connection=conn)
-applied = set(rec.applied_migrations())
-need = [('subplayer','0002_placeholder'), ('subplayer','0003_placeholder')]
-for item in need:
-    if item not in applied:
-        rec.record_applied(*item)
-print('Recorded:', [i for i in need if i not in applied])
-"
+          python manage.py showmigrations subplayer || true
 
-      - name: Show subplayer migrations (after force-record)
-        run: python manage.py showmigrations subplayer || true
+      - name: Fix inconsistent migration history (force-record placeholders)
+        run: |
+          python - <<'PY'
+          import os, sys
+          os.environ.setdefault('DJANGO_SETTINGS_MODULE', os.environ.get('DJANGO_SETTINGS_MODULE', 'myproject.settings'))
+
+          # Django setup
+          import django
+          django.setup()
+
+          from django.db import connections
+          from django.db.migrations.recorder import MigrationRecorder
+
+          conn = connections['default']
+          recorder = MigrationRecorder(conn)
+          applied = set(recorder.migration_qs.values_list('app', 'name'))
+
+          to_record = [
+              ('subplayer', '0002_placeholder'),
+              ('subplayer', '0003_placeholder'),
+          ]
+
+          changed = False
+          for app, name in to_record:
+              if (app, name) not in applied:
+                  recorder.record_applied(app, name)
+                  print(f"Recorded {app}.{name}")
+                  changed = True
+              else:
+                  print(f"Already present: {app}.{name}")
+
+          if not changed:
+              print("No missing placeholder migrations to record.")
+          PY
 
       - name: Run migrations
-        run: python manage.py migrate --noinput
+        run: |
+          python manage.py migrate --noinput
+
+      - name: Show migrations (after)
+        run: |
+          python manage.py showmigrations subplayer || true
 
       - name: Create superuser (idempotent)
         run: |
-          python manage.py createsuperuser --noinput || true
           python - <<'PY'
-import os
-from django.contrib.auth import get_user_model
-User = get_user_model()
-u = os.environ.get('DJANGO_SUPERUSER_USERNAME')
-e = os.environ.get('DJANGO_SUPERUSER_EMAIL')
-p = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
-if u and p and not User.objects.filter(username=u).exists():
-    User.objects.create_superuser(username=u, email=e, password=p)
-    print(f"Created superuser {u}")
-else:
-    print("Superuser exists or env missing; skipping explicit create.")
-PY
+          import os
+          os.environ.setdefault('DJANGO_SETTINGS_MODULE', os.environ.get('DJANGO_SETTINGS_MODULE', 'myproject.settings'))
+          import django
+          django.setup()
+          from django.contrib.auth import get_user_model
+
+          username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
+          email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
+          password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
+
+          User = get_user_model()
+          u, created = User.objects.get_or_create(username=username, defaults={
+              'email': email,
+              'is_staff': True,
+              'is_superuser': True,
+          })
+          if created:
+              u.set_password(password)
+              u.save(update_fields=['password'])
+              print(f"Created superuser: {username}")
+          else:
+              # ensure flags are set even if user existed
+              updated = False
+              if not u.is_staff:
+                  u.is_staff = True; updated = True
+              if not u.is_superuser:
+                  u.is_superuser = True; updated = True
+              if updated:
+                  u.save(update_fields=['is_staff','is_superuser'])
+                  print(f"Updated existing user flags for: {username}")
+              else:
+                  print(f"Superuser already present: {username}")
+          PY
 
       - name: Collect static files
-        run: python manage.py collectstatic --noinput
+        run: |
+          python manage.py collectstatic --noinput
 
       - name: Trigger Render deploy
         run: |
