@@ -8,8 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     env:
+      # App secrets
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
@@ -36,16 +36,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Optional: silence the staticfiles warning during CI
-      - name: Ensure static directory exists
-        run: |
-          mkdir -p myproject/static
-
-      - name: Show migrations (before)
-        run: |
-          python manage.py showmigrations subplayer || true
-
-      - name: Fix migration history (placeholders + guard duplicate table)
+      # --- Fix migration history inconsistencies safely before migrate ---
+      - name: Fix migration history (guard 0002/0003/0005/0006)
         run: |
           python - <<'PY'
           import os
@@ -68,26 +60,37 @@ jobs:
               else:
                   print(f"Already present: {app}.{name}")
 
-          # 1) Ensure 0002/0003 placeholders exist (to resolve the prior inconsistency)
+          # Ensure earlier placeholders appear as applied in history
           record('subplayer', '0002_placeholder')
           record('subplayer', '0003_placeholder')
 
-          # 2) If the Category table already exists, fake-apply 0005 so migrate won't try to re-create it
+          # If Category table already exists, fake-apply 0005
           tables = set(connections['default'].introspection.table_names())
           if 'subplayer_category' in tables:
               record('subplayer', '0005_category_alter_highlight_unique_together_and_more')
           else:
-              print("subplayer_category not found; will let migrate create it normally.")
+              print("subplayer_category not found; 0005 will run normally if needed.")
 
+          # If Article already has the columns 0006 adds, fake-apply 0006
+          needed_cols = {'content', 'description', 'level'}
+          with conn.cursor() as cur:
+              cur.execute("""
+                  SELECT column_name
+                  FROM information_schema.columns
+                  WHERE table_name = 'subplayer_article'
+              """)
+              existing_cols = {r[0] for r in cur.fetchall()}
+
+          missing = needed_cols - existing_cols
+          if not missing:
+              record('subplayer', '0006_article_content_article_description_article_level_and_more')
+          else:
+              print(f"subplayer_article missing {missing}; 0006 will run to add them.")
           PY
 
       - name: Run migrations
         run: |
           python manage.py migrate --noinput
-
-      - name: Show migrations (after)
-        run: |
-          python manage.py showmigrations subplayer || true
 
       - name: Create superuser (idempotent)
         run: |
@@ -103,37 +106,35 @@ jobs:
           password = os.environ['DJANGO_SUPERUSER_PASSWORD']
 
           User = get_user_model()
-          u, created = User.objects.get_or_create(username=username, defaults={
-              'email': email,
-              'is_staff': True,
-              'is_superuser': True,
-          })
+          u, created = User.objects.get_or_create(username=username, defaults={'email': email})
           if created:
               u.set_password(password)
-              u.save(update_fields=['password'])
-              print(f"Created superuser: {username}")
+              u.is_superuser = True
+              u.is_staff = True
+              u.save()
+              print("Superuser created.")
           else:
-              updated = False
-              if not u.is_staff:
-                  u.is_staff = True; updated = True
+              changed = False
               if not u.is_superuser:
-                  u.is_superuser = True; updated = True
-              if updated:
-                  u.save(update_fields=['is_staff','is_superuser'])
-                  print(f"Updated existing user flags for: {username}")
+                  u.is_superuser = True; changed = True
+              if not u.is_staff:
+                  u.is_staff = True; changed = True
+              if changed:
+                  u.save()
+                  print("Superuser flags updated.")
               else:
-                  print(f"Superuser already present: {username}")
+                  print("Superuser already exists.")
           PY
 
       - name: Collect static files
         run: |
-          python manage.py collectstatic --noinput
+          python manage.py collectstatic --noinput || true
 
-      - name: Trigger Render deploy
+      - name: Deploy to Render
         run: |
           curl -X POST \
             -H "Accept: application/json" \
             -H "Authorization: Bearer ${RENDER_API_KEY}" \
             -H "Content-Type: application/json" \
             --data "{\"serviceId\": \"${RENDER_SERVICE_ID}\"}" \
-            https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys
+            "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys"
