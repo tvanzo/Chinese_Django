@@ -36,17 +36,21 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # Optional: silence the staticfiles warning during CI
+      - name: Ensure static directory exists
+        run: |
+          mkdir -p myproject/static
+
       - name: Show migrations (before)
         run: |
           python manage.py showmigrations subplayer || true
 
-      - name: Fix inconsistent migration history (force-record placeholders)
+      - name: Fix migration history (placeholders + guard duplicate table)
         run: |
           python - <<'PY'
-          import os, sys
+          import os
           os.environ.setdefault('DJANGO_SETTINGS_MODULE', os.environ.get('DJANGO_SETTINGS_MODULE', 'myproject.settings'))
 
-          # Django setup
           import django
           django.setup()
 
@@ -57,22 +61,24 @@ jobs:
           recorder = MigrationRecorder(conn)
           applied = set(recorder.migration_qs.values_list('app', 'name'))
 
-          to_record = [
-              ('subplayer', '0002_placeholder'),
-              ('subplayer', '0003_placeholder'),
-          ]
-
-          changed = False
-          for app, name in to_record:
+          def record(app, name):
               if (app, name) not in applied:
                   recorder.record_applied(app, name)
                   print(f"Recorded {app}.{name}")
-                  changed = True
               else:
                   print(f"Already present: {app}.{name}")
 
-          if not changed:
-              print("No missing placeholder migrations to record.")
+          # 1) Ensure 0002/0003 placeholders exist (to resolve the prior inconsistency)
+          record('subplayer', '0002_placeholder')
+          record('subplayer', '0003_placeholder')
+
+          # 2) If the Category table already exists, fake-apply 0005 so migrate won't try to re-create it
+          tables = set(connections['default'].introspection.table_names())
+          if 'subplayer_category' in tables:
+              record('subplayer', '0005_category_alter_highlight_unique_together_and_more')
+          else:
+              print("subplayer_category not found; will let migrate create it normally.")
+
           PY
 
       - name: Run migrations
@@ -92,9 +98,9 @@ jobs:
           django.setup()
           from django.contrib.auth import get_user_model
 
-          username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
-          email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
-          password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
+          username = os.environ['DJANGO_SUPERUSER_USERNAME']
+          email = os.environ['DJANGO_SUPERUSER_EMAIL']
+          password = os.environ['DJANGO_SUPERUSER_PASSWORD']
 
           User = get_user_model()
           u, created = User.objects.get_or_create(username=username, defaults={
@@ -107,7 +113,6 @@ jobs:
               u.save(update_fields=['password'])
               print(f"Created superuser: {username}")
           else:
-              # ensure flags are set even if user existed
               updated = False
               if not u.is_staff:
                   u.is_staff = True; updated = True
