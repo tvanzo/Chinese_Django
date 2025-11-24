@@ -35,19 +35,30 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Ensure static dir exists (avoid W004)
+      - name: Ensure static dir exists (silence W004)
         run: mkdir -p myproject/static
 
-      # ---- Fix the migration ordering wobble ----
       - name: Show subplayer migrations (before)
         run: python manage.py showmigrations subplayer || true
 
-      - name: Fake-apply subplayer 0003 (safe no-op if already applied)
-        run: python manage.py migrate subplayer 0003 --fake --noinput || true
+      # Brutal but reliable: directly record 0002 and 0003 as applied
+      - name: Force-record missing ancestors (0002, 0003)
+        run: |
+          python manage.py shell -c "
+from django.db import connections
+from django.db.migrations.recorder import MigrationRecorder
+conn = connections['default']
+rec = MigrationRecorder(connection=conn)
+applied = set(rec.applied_migrations())
+need = [('subplayer','0002_placeholder'), ('subplayer','0003_placeholder')]
+for item in need:
+    if item not in applied:
+        rec.record_applied(*item)
+print('Recorded:', [i for i in need if i not in applied])
+"
 
-      - name: Show subplayer migrations (after fake)
+      - name: Show subplayer migrations (after force-record)
         run: python manage.py showmigrations subplayer || true
-      # -------------------------------------------
 
       - name: Run migrations
         run: python manage.py migrate --noinput
@@ -56,18 +67,18 @@ jobs:
         run: |
           python manage.py createsuperuser --noinput || true
           python - <<'PY'
-          import os
-          from django.contrib.auth import get_user_model
-          User = get_user_model()
-          u = os.environ.get('DJANGO_SUPERUSER_USERNAME')
-          e = os.environ.get('DJANGO_SUPERUSER_EMAIL')
-          p = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
-          if u and p and not User.objects.filter(username=u).exists():
-              User.objects.create_superuser(username=u, email=e, password=p)
-              print(f"Created superuser {u}")
-          else:
-              print("Superuser exists or env missing; skipping explicit create.")
-          PY
+import os
+from django.contrib.auth import get_user_model
+User = get_user_model()
+u = os.environ.get('DJANGO_SUPERUSER_USERNAME')
+e = os.environ.get('DJANGO_SUPERUSER_EMAIL')
+p = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
+if u and p and not User.objects.filter(username=u).exists():
+    User.objects.create_superuser(username=u, email=e, password=p)
+    print(f"Created superuser {u}")
+else:
+    print("Superuser exists or env missing; skipping explicit create.")
+PY
 
       - name: Collect static files
         run: python manage.py collectstatic --noinput
