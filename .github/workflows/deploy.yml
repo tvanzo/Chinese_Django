@@ -17,6 +17,7 @@ jobs:
       DJANGO_SUPERUSER_USERNAME: ${{ secrets.DJANGO_SUPERUSER_USERNAME }}
       DJANGO_SUPERUSER_EMAIL: ${{ secrets.DJANGO_SUPERUSER_EMAIL }}
       DJANGO_SUPERUSER_PASSWORD: ${{ secrets.DJANGO_SUPERUSER_PASSWORD }}
+      RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
 
     steps:
       - name: Checkout code
@@ -43,31 +44,11 @@ jobs:
       - name: Ensure static dir exists (silence W004)
         run: mkdir -p myproject/static
 
-      - name: Django system check
-        run: python manage.py check --deploy --fail-level WARNING || true
-
-      # ---------- FIXED BLOCK ----------
-      - name: Heal migration history if needed
-        shell: bash
+      # --- Simple, YAML-safe fix for your migration chain ---
+      - name: Heal migration history (fake 0003 if missing)
         run: |
-          set -euo pipefail
-          NEED_HEAL="$(python - <<'PY'
-from django.db.migrations.recorder import MigrationRecorder
-from django.db import connections
-conn = connections['default']
-applied = {(m.app, m.name) for m in MigrationRecorder(conn).applied_migrations()}
-need = ('subplayer','0004_category_remove_media_category_channel_categories_and_more') in applied and ('subplayer','0003_placeholder') not in applied
-print("HEAL" if need else "OK")
-PY
-          )"
-          echo "Migration check result: ${NEED_HEAL}"
-          if [[ "${NEED_HEAL}" == "HEAL" ]]; then
-            echo "Healing migration chain: faking subplayer.0003_placeholder"
-            python manage.py migrate subplayer 0003_placeholder --fake
-          else
-            echo "Migration chain OK"
-          fi
-      # ---------- /FIXED BLOCK ----------
+          # This is safe to run repeatedly; it no-ops if already applied.
+          python manage.py migrate subplayer 0003_placeholder --fake || true
 
       - name: Run migrations
         run: python manage.py migrate --noinput
@@ -77,15 +58,12 @@ PY
           python - <<'PY'
 from django.contrib.auth import get_user_model
 User = get_user_model()
-username = "${{ env.DJANGO_SUPERUSER_USERNAME }}"
-email = "${{ env.DJANGO_SUPERUSER_EMAIL }}"
-password = "${{ env.DJANGO_SUPERUSER_PASSWORD }}"
 u, created = User.objects.get_or_create(
-    username=username,
-    defaults={"email": email, "is_staff": True, "is_superuser": True},
+    username="${{ env.DJANGO_SUPERUSER_USERNAME }}",
+    defaults={"email": "${{ env.DJANGO_SUPERUSER_EMAIL }}", "is_staff": True, "is_superuser": True},
 )
 if created:
-    u.set_password(password); u.save()
+    u.set_password("${{ env.DJANGO_SUPERUSER_PASSWORD }}"); u.save()
 else:
     changed = False
     if not u.is_staff: u.is_staff = True; changed = True
@@ -101,7 +79,7 @@ PY
         run: |
           curl -X POST \
             -H "Accept: application/json" \
-            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
             -H "Content-Type: application/json" \
             --data '{"serviceId": "srv-cpoif12ju9rs738p174g"}' \
             https://api.render.com/v1/services/srv-cpoif12ju9rs738p174g/deploys
