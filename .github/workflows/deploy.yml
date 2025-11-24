@@ -46,30 +46,28 @@ jobs:
       - name: Django system check
         run: python manage.py check --deploy --fail-level WARNING || true
 
-      # --- Migration healer: fix "0004 applied before 0003_placeholder" once, then migrate normally
+      # ---------- FIXED BLOCK ----------
       - name: Heal migration history if needed
+        shell: bash
         run: |
-          set -e
-          # If 0004 is applied and 0003_placeholder is not, fake-apply 0003 then proceed.
-          if python - <<'PY'
-from django.core.management import call_command
-from django.apps import apps
-from django.db import connections
+          set -euo pipefail
+          NEED_HEAL="$(python - <<'PY'
 from django.db.migrations.recorder import MigrationRecorder
-
+from django.db import connections
 conn = connections['default']
-rec = MigrationRecorder(conn)
-applied = {(m.app, m.name) for m in rec.applied_migrations()}
-need_heal = ('subplayer','0004_category_remove_media_category_channel_categories_and_more') in applied \
-            and ('subplayer','0003_placeholder') not in applied
-print("HEAL" if need_heal else "OK")
+applied = {(m.app, m.name) for m in MigrationRecorder(conn).applied_migrations()}
+need = ('subplayer','0004_category_remove_media_category_channel_categories_and_more') in applied and ('subplayer','0003_placeholder') not in applied
+print("HEAL" if need else "OK")
 PY
-          | grep -q HEAL; then
+          )"
+          echo "Migration check result: ${NEED_HEAL}"
+          if [[ "${NEED_HEAL}" == "HEAL" ]]; then
             echo "Healing migration chain: faking subplayer.0003_placeholder"
             python manage.py migrate subplayer 0003_placeholder --fake
           else
             echo "Migration chain OK"
           fi
+      # ---------- /FIXED BLOCK ----------
 
       - name: Run migrations
         run: python manage.py migrate --noinput
@@ -79,19 +77,16 @@ PY
           python - <<'PY'
 from django.contrib.auth import get_user_model
 User = get_user_model()
+username = "${{ env.DJANGO_SUPERUSER_USERNAME }}"
+email = "${{ env.DJANGO_SUPERUSER_EMAIL }}"
+password = "${{ env.DJANGO_SUPERUSER_PASSWORD }}"
 u, created = User.objects.get_or_create(
-    username="${{ env.DJANGO_SUPERUSER_USERNAME }}",
-    defaults={
-        "email": "${{ env.DJANGO_SUPERUSER_EMAIL }}",
-        "is_staff": True,
-        "is_superuser": True,
-    },
+    username=username,
+    defaults={"email": email, "is_staff": True, "is_superuser": True},
 )
 if created:
-    u.set_password("${{ env.DJANGO_SUPERUSER_PASSWORD }}")
-    u.save()
+    u.set_password(password); u.save()
 else:
-    # ensure flags are set even if user existed already
     changed = False
     if not u.is_staff: u.is_staff = True; changed = True
     if not u.is_superuser: u.is_superuser = True; changed = True
