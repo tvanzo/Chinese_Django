@@ -44,33 +44,16 @@ jobs:
       - name: Ensure static dir exists (silence W004)
         run: mkdir -p myproject/static
 
-      # --- Simple, YAML-safe fix for your migration chain ---
-      - name: Heal migration history (fake 0003 if missing)
-        run: |
-          # This is safe to run repeatedly; it no-ops if already applied.
-          python manage.py migrate subplayer 0003_placeholder --fake || true
+      # Fix your inconsistent migration chain safely:
+      - name: Heal migration history (fake 0003 if needed)
+        run: python manage.py migrate subplayer 0003_placeholder --fake --noinput || true
 
       - name: Run migrations
         run: python manage.py migrate --noinput
 
-      - name: Create/ensure superuser
-        run: |
-          python - <<'PY'
-from django.contrib.auth import get_user_model
-User = get_user_model()
-u, created = User.objects.get_or_create(
-    username="${{ env.DJANGO_SUPERUSER_USERNAME }}",
-    defaults={"email": "${{ env.DJANGO_SUPERUSER_EMAIL }}", "is_staff": True, "is_superuser": True},
-)
-if created:
-    u.set_password("${{ env.DJANGO_SUPERUSER_PASSWORD }}"); u.save()
-else:
-    changed = False
-    if not u.is_staff: u.is_staff = True; changed = True
-    if not u.is_superuser: u.is_superuser = True; changed = True
-    if changed: u.save()
-print("Superuser ready:", u.username)
-PY
+      # Use env-driven createsuperuser; no inline Python, no heredocs.
+      - name: Create superuser (idempotent)
+        run: python manage.py createsuperuser --noinput || true
 
       - name: Collect static files
         run: python manage.py collectstatic --noinput
