@@ -1155,12 +1155,34 @@
     const highlightSelectionPill = document.getElementById("highlightSelectionPill");
 
     /* ✅ Translate toggle */
-    const toggleTranslateBtn = document.getElementById("toggleTranslateBtn");
-    let translateMode = false;
+   /* ✅ Translate toggle */
+const toggleTranslateBtn = document.getElementById("toggleTranslateBtn");
+let translateMode = false;
 
-    function setTranslateMode(on) {
-      translateMode = !!on;
-      if (toggleTranslateBtn) toggleTranslateBtn.classList.toggle("active", translateMode);
+function setTranslateMode(on) {
+  translateMode = !!on;
+  if (toggleTranslateBtn) toggleTranslateBtn.classList.toggle("active", translateMode);
+
+  userInput.placeholder = translateMode
+    ? "Translate: paste text here…"
+    : "Message your AI tutor...";
+
+  try { localStorage.setItem("translateMode", translateMode ? "1" : "0"); } catch (e) {}
+  console.log("translateMode set to:", translateMode);
+}
+
+function loadTranslateMode() {
+  let on = false;
+  try { on = localStorage.getItem("translateMode") === "1"; } catch (e) {}
+  setTranslateMode(on);
+}
+
+if (toggleTranslateBtn) {
+  toggleTranslateBtn.addEventListener("click", () => {
+    setTranslateMode(!translateMode);
+  });
+}
+
 
       // UX: placeholder communicates state
       userInput.placeholder = translateMode
@@ -1391,48 +1413,56 @@
     }
 
     async function sendMessageWithCustomPayload(message, mode) {
-      appendMessage({ role: "user", text: message });
-      showTyping();
+  appendMessage({ role: "user", text: message });
+  showTyping();
 
-      try {
-        const res = await fetch("/chat/api/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": CSRF_TOKEN,
-          },
-          body: JSON.stringify({
-            message,
-            mode: mode || (translateMode ? "translate" : "normal"),
-            target: "english",
-            session_id: {{ current_session.id }},
-          }),
-        });
+  const payload = {
+    message,
+    mode: mode || (translateMode ? "translate" : "normal"),
+    session_id: {{ current_session.id|default:"null" }},
+  };
 
-        const data = await res.json();
-        hideTyping();
+  console.log("POST /chat/api/ payload:", payload);
 
-        if (!res.ok) {
-          appendMessage({
-            role: "bot",
-            text: data.error || "Something went wrong. Please try again.",
-          });
-        } else {
-          appendMessage({
-            role: "bot",
-            text: data.reply || "(No response)",
-          });
-        }
-      } catch (err) {
-        hideTyping();
-        appendMessage({
-          role: "bot",
-          text: "Network error. Please try again.",
-        });
-      } finally {
-        userInput.focus();
+  try {
+    const res = await fetch("/chat/api/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": CSRF_TOKEN,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    hideTyping();
+
+    if (!res.ok) {
+      appendMessage({
+        role: "bot",
+        text: data.error || "Something went wrong. Please try again.",
+      });
+    } else {
+      // optional debug to confirm backend received mode
+      if (data.debug_mode_received) {
+        console.log("Backend received mode:", data.debug_mode_received);
       }
+      appendMessage({
+        role: "bot",
+        text: data.reply || "(No response)",
+      });
     }
+  } catch (err) {
+    hideTyping();
+    appendMessage({
+      role: "bot",
+      text: "Network error. Please try again.",
+    });
+  } finally {
+    userInput.focus();
+  }
+}
+
 
     userInput.focus();
 
