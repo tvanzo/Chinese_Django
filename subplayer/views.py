@@ -1308,50 +1308,82 @@ def chat(request):
     return render(request, "chat.html")
 
 
+def contains_cjk(text: str) -> bool:
+    """Fast heuristic: treat any CJK ideograph as 'Chinese present'."""
+    return bool(re.search(r"[\u4e00-\u9fff]", text or ""))
+
+
 @csrf_exempt
+@require_http_methods(["POST"])
 def chat_api(request):
-    # 1) Parse input safely
+    """
+    Expects JSON:
+      {
+        "message": "user text",
+        "mode": "translate" | "review" | "chat",
+        "target": "English" | "Chinese" | "Simplified Chinese" | "Traditional Chinese" (optional)
+      }
+
+    Behavior:
+      - translate mode:
+          if input contains Chinese -> translate to English
+          else -> translate to Chinese (default Simplified Chinese)
+          outputs ONLY translation (no extra text)
+      - review/chat:
+          tutoring style (your original behavior)
+    """
+    # 0) Parse JSON safely
     try:
-        payload_in = json.loads(request.body.decode("utf-8"))
+        payload = request.json if hasattr(request, "json") else None
+        if payload is None:
+            import json
+            payload = json.loads(request.body.decode("utf-8") or "{}")
     except Exception:
-        return JsonResponse({"error": "Invalid JSON body."}, status=400)
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
 
-    user_msg = (payload_in.get("message") or "").strip()
+    user_msg = (payload.get("message") or "").strip()
+    mode = (payload.get("mode") or "chat").strip().lower()
+    target_override = (payload.get("target") or "").strip()
+
     if not user_msg:
-        return JsonResponse({"error": "Empty message."}, status=400)
+        return JsonResponse({"error": "Missing 'message'."}, status=400)
 
-    mode = (payload_in.get("mode") or "normal").strip().lower()
-    target = (payload_in.get("target") or "english").strip().lower()  # optional
-
-    # 2) Resolve API key
-    api_key = getattr(settings, "DEEPSEEK_API_KEY", None) or os.getenv("DEEPSEEK_API_KEY")
+    # 1) API key
+    api_key = getattr(settings, "DEEPSEEK_API_KEY", None) or getattr(settings, "DEEPSEEK_KEY", None)
     if not api_key:
-        logger.error("DEEPSEEK_API_KEY missing")
-        return JsonResponse({"error": "Server not configured for DeepSeek."}, status=500)
+        return JsonResponse({"error": "Server missing DeepSeek API key."}, status=500)
 
-    # 3) Pick system prompt by mode
+    # 2) Choose system prompt by mode
     if mode == "translate":
-        # very strict instruction: translate ONLY, no tutoring, no extra text
+        # Decide direction deterministically (product behavior)
+        # - If user provides target explicitly, use it.
+        # - Else: Chinese present => English, otherwise => Simplified Chinese.
+        if target_override:
+            target = target_override
+        else:
+            target = "English" if contains_cjk(user_msg) else "Simplified Chinese"
+
         system_prompt = (
-            "You are a professional translator.\n"
-            f"Task: Translate the user's input into {target}.\n"
-            "Rules:\n"
+            "You are a translation engine.\n"
+            f"Translate the user's text into {target}.\n"
+            "STRICT RULES:\n"
             "- Output ONLY the translation.\n"
-            "- Do NOT add explanations, notes, pinyin, or extra formatting.\n"
-            "- Preserve the original meaning, tone, names, numbers, and punctuation.\n"
-            "- If the input is already in the target language, return it unchanged.\n"
+            "- Do NOT add explanations, notes, pinyin, examples, or formatting.\n"
+            "- Preserve meaning, tone, proper nouns, numbers, punctuation, and line breaks.\n"
+            "- If parts are already in the target language, keep them as-is.\n"
         )
     elif mode == "review":
         system_prompt = (
-            "You are a patient, upbeat language tutor. "
-            "Use simple, clear explanations and give 1-2 examples. "
-            "If user is learning Chinese, add pinyin when useful."
+            "You are a patient, upbeat language tutor.\n"
+            "Help the user improve their message.\n"
+            "Give a corrected version first, then 2-4 short bullet explanations.\n"
+            "If the user is learning Chinese, add pinyin ONLY when it helps pronunciation.\n"
         )
     else:
         system_prompt = (
-            "You are a patient, upbeat language tutor. "
-            "Use simple, clear explanations and give 1-2 examples. "
-            "If user is learning Chinese, add pinyin when useful."
+            "You are a patient, upbeat language tutor.\n"
+            "Use simple, clear explanations and give 1-2 examples when helpful.\n"
+            "If user is learning Chinese, add pinyin when useful.\n"
         )
 
     body = {
@@ -1361,6 +1393,8 @@ def chat_api(request):
             {"role": "user", "content": user_msg},
         ],
         "stream": False,
+        # Optional: reduce creativity for translation consistency
+        "temperature": 0.1 if mode == "translate" else 0.7,
     }
 
     headers = {
@@ -1368,14 +1402,9 @@ def chat_api(request):
         "Content-Type": "application/json",
     }
 
-    # 4) Call DeepSeek with robust error handling
+    # 3) Call DeepSeek
     try:
-        r = requests.post(
-            "https://api.deepseek.com/chat/completions",
-            headers=headers,
-            json=body,
-            timeout=30,
-        )
+        r = requests.post(DEEPSEEK_URL, headers=headers, json=body, timeout=30)
     except requests.Timeout:
         logger.exception("DeepSeek timeout")
         return JsonResponse({"error": "Upstream timeout. Please try again."}, status=504)
@@ -1383,7 +1412,7 @@ def chat_api(request):
         logger.exception("DeepSeek request failed")
         return JsonResponse({"error": f"Upstream error: {e}"}, status=502)
 
-    # 5) Handle non-200 responses gracefully
+    # 4) Handle non-200 responses
     if r.status_code != 200:
         logger.error("DeepSeek non-200: %s %s", r.status_code, r.text[:500])
         return JsonResponse(
@@ -1391,7 +1420,7 @@ def chat_api(request):
             status=502,
         )
 
-    # 6) Extract reply safely
+    # 5) Extract reply
     try:
         data = r.json()
         reply = data["choices"][0]["message"]["content"]
