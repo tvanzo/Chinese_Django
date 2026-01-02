@@ -1320,18 +1320,40 @@ def chat_api(request):
     if not user_msg:
         return JsonResponse({"error": "Empty message."}, status=400)
 
+    mode = (payload_in.get("mode") or "normal").strip().lower()
+    target = (payload_in.get("target") or "english").strip().lower()  # optional
+
     # 2) Resolve API key
     api_key = getattr(settings, "DEEPSEEK_API_KEY", None) or os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
         logger.error("DEEPSEEK_API_KEY missing")
         return JsonResponse({"error": "Server not configured for DeepSeek."}, status=500)
 
-    # 3) Build request
-    system_prompt = (
-        "You are a patient, upbeat language tutor. "
-        "Use simple, clear explanations and give 1-2 examples. "
-        "If user is learning Chinese, add pinyin when useful."
-    )
+    # 3) Pick system prompt by mode
+    if mode == "translate":
+        # very strict instruction: translate ONLY, no tutoring, no extra text
+        system_prompt = (
+            "You are a professional translator.\n"
+            f"Task: Translate the user's input into {target}.\n"
+            "Rules:\n"
+            "- Output ONLY the translation.\n"
+            "- Do NOT add explanations, notes, pinyin, or extra formatting.\n"
+            "- Preserve the original meaning, tone, names, numbers, and punctuation.\n"
+            "- If the input is already in the target language, return it unchanged.\n"
+        )
+    elif mode == "review":
+        system_prompt = (
+            "You are a patient, upbeat language tutor. "
+            "Use simple, clear explanations and give 1-2 examples. "
+            "If user is learning Chinese, add pinyin when useful."
+        )
+    else:
+        system_prompt = (
+            "You are a patient, upbeat language tutor. "
+            "Use simple, clear explanations and give 1-2 examples. "
+            "If user is learning Chinese, add pinyin when useful."
+        )
+
     body = {
         "model": "deepseek-chat",
         "messages": [
@@ -1340,6 +1362,7 @@ def chat_api(request):
         ],
         "stream": False,
     }
+
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
@@ -1377,8 +1400,6 @@ def chat_api(request):
         return JsonResponse({"error": "Unexpected response shape from DeepSeek."}, status=502)
 
     return JsonResponse({"reply": reply})
-
-
 from django.views.decorators.http import require_http_methods
 
 

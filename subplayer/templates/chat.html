@@ -275,6 +275,12 @@
     }
     .round-btn svg { width: 18px; height: 18px; display: block; }
 
+    /* Active state for translate toggle */
+    .round-btn.active {
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 4px rgba(59,130,246,0.18);
+    }
+
     /* Only show ONE desktop chat-history toggle */
     body:not(.chat-history-collapsed) #expandChatHistoryBtn { display: none !important; }
     body.chat-history-collapsed #collapseChatHistoryBtn { display: none !important; }
@@ -804,7 +810,6 @@
     }
 
     .chat-category-btn-primary:hover { background: #2563eb; }
-
   </style>
 </head>
 
@@ -928,6 +933,16 @@
             <div class="chat-title">
               {{ current_session.title|default:"AI Tutor Chat" }}
             </div>
+
+            <!-- ✅ Translate toggle -->
+            <button class="round-btn" id="toggleTranslateBtn" aria-label="Toggle translate mode" title="Translate mode" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M4 19h6"></path>
+                <path d="M7 19V5h3"></path>
+                <path d="M14 7h6"></path>
+                <path d="M17 7v12"></path>
+              </svg>
+            </button>
           </div>
 
           <div class="chat-messages" id="chatMessages">
@@ -1139,6 +1154,32 @@
     /* Mobile highlight pill */
     const highlightSelectionPill = document.getElementById("highlightSelectionPill");
 
+    /* ✅ Translate toggle */
+    const toggleTranslateBtn = document.getElementById("toggleTranslateBtn");
+    let translateMode = false;
+
+    function setTranslateMode(on) {
+      translateMode = !!on;
+      if (toggleTranslateBtn) toggleTranslateBtn.classList.toggle("active", translateMode);
+
+      // UX: placeholder communicates state
+      userInput.placeholder = translateMode
+        ? "Translate: paste text here…"
+        : "Message your AI tutor...";
+
+      try { localStorage.setItem("translateMode", translateMode ? "1" : "0"); } catch (e) {}
+    }
+
+    function loadTranslateMode() {
+      let on = false;
+      try { on = localStorage.getItem("translateMode") === "1"; } catch (e) {}
+      setTranslateMode(on);
+    }
+
+    if (toggleTranslateBtn) {
+      toggleTranslateBtn.addEventListener("click", () => setTranslateMode(!translateMode));
+    }
+
     function getCookie(name) {
       let cookieValue = null;
       if (document.cookie && document.cookie !== "") {
@@ -1324,7 +1365,7 @@
 
       const msg = document.createElement("div");
       msg.className = "message bot-message chat-message-text";
-      msg.textContent = "Typing...";
+      msg.textContent = translateMode ? "Translating..." : "Typing...";
 
       typing.appendChild(avatar);
       typing.appendChild(msg);
@@ -1345,7 +1386,8 @@
       userInput.style.height = "auto";
       sendButton.disabled = true;
 
-      await sendMessageWithCustomPayload(message, "normal");
+      // ✅ mode is now auto: translate toggle controls default
+      await sendMessageWithCustomPayload(message, null);
     }
 
     async function sendMessageWithCustomPayload(message, mode) {
@@ -1361,7 +1403,8 @@
           },
           body: JSON.stringify({
             message,
-            mode,
+            mode: mode || (translateMode ? "translate" : "normal"),
+            target: "english",
             session_id: {{ current_session.id }},
           }),
         });
@@ -1577,6 +1620,8 @@
         "\n\nPlease help me REVIEW them: create a short quiz, example sentences, and quick explanations with characters, pinyin, and brief English.";
 
       reviewPanel.style.display = "none";
+
+      // ✅ Explicitly force review mode (bypasses translate toggle)
       sendMessageWithCustomPayload(prompt, "review");
     });
 
@@ -1665,6 +1710,7 @@
     /* Init */
     fetchChatHighlights();
     loadChatHistoryCollapsed();
+    loadTranslateMode();
   </script>
 
 </body>
