@@ -1312,6 +1312,7 @@ def contains_cjk(text: str) -> bool:
     """Fast heuristic: treat any CJK ideograph as 'Chinese present'."""
     return bool(re.search(r"[\u4e00-\u9fff]", text or ""))
 
+from django.views.decorators.http import require_http_methods
 
 @csrf_exempt
 @require_http_methods(["POST"])
