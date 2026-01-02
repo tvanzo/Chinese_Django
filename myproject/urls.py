@@ -8,6 +8,8 @@ from django.views.static import serve
 
 from accounts import views as account_views
 from subplayer import views as subplayer_views
+from chat import views as chat_views
+
 from allauth.account.views import LoginView, LogoutView, SignupView, PasswordResetView
 from accounts.views import stripe_webhook, create_checkout_session
 

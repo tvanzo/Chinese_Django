@@ -7,19 +7,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Account Settings</title>
 
-  <!-- Fonts and icons -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
-  <!-- Nucleo Icons -->
   <link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet">
   <link href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet">
-  <!-- Font Awesome Icons -->
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-
-  <!-- CSS Files -->
   <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet">
 
   <style>
-    /* CSS from your previous example */
     :root {
       --transition-duration: .2s;
       --transition-timing-function: linear;
@@ -31,8 +25,6 @@
       --bg-demo-light: #fff;
       --bg-demo-dark: #2c2c2c;
     }
-
-    /* ... rest of your CSS here ... */
 
     @media only screen and (max-width: 600px) {
       .project-column:nth-child(4) {
@@ -59,14 +51,14 @@
     }
 
     .custom-logo-size {
-      height: 50px !important; /* Increase by 20% from 80px */
+      height: 50px !important;
     }
 
     .sidenav-header {
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100px;  /* Adjust this height as needed */
+      height: 100px;
     }
 
     .custom-logo-size {
@@ -75,35 +67,38 @@
     }
 
     .card__price {
-      font-size: 24px;  /* Adjust this down from whatever it was */
+      font-size: 24px;
     }
 
     .card__price span {
-      font-size: 18px;  /* Adjust this down from whatever it was */
+      font-size: 18px;
     }
-      .card-body p {
-    font-size: 14px; /* Adjust this value as needed */
-}
 
-.card-body strong {
-    font-size: 14px; /* If you want strong text to match the smaller size */
-}
+    .card-body p {
+      font-size: 14px;
+    }
 
-.header__title {
-    font-size: 24px; /* Adjust the header title if you want it smaller too */
-}
-      .header {
-    max-width: 500px;
-    margin: 0 auto; /* This centers the header */
-    padding-top: 50px; /* Adjust padding as needed */
-    text-align: center; /* This ensures the text is centered */
-}
+    .card-body strong {
+      font-size: 14px;
+    }
 
-.header__title {
-    font-size: 24px; /* Or whatever size you decided for smaller text */
-    margin-bottom: 2rem; /* Keep this if you want space below the title */
-}
-     .toggle-log {
+    .header__title {
+      font-size: 24px;
+    }
+
+    .header {
+      max-width: 500px;
+      margin: 0 auto;
+      padding-top: 50px;
+      text-align: center;
+    }
+
+    .header__title {
+      font-size: 24px;
+      margin-bottom: 2rem;
+    }
+
+    .toggle-log {
       background: #f0f2f5;
       width: 32px;
       height: 32px;
@@ -114,11 +109,12 @@
       transition: all 0.2s ease;
       flex-shrink: 0;
       margin-left: auto;
-      margin-top: -16px; /* Move the button up into the card body */
+      margin-top: -16px;
       position: relative;
-      z-index: 1; /* Ensure button is above other content */
+      z-index: 1;
     }
-       .toggle-log {
+
+    .toggle-log {
       background: #f0f2f5;
       width: 32px;
       height: 32px;
@@ -128,26 +124,46 @@
       justify-content: center;
       transition: all 0.2s ease;
       flex-shrink: 0;
-
-      /* Positioning the button within the card */
       position: absolute;
-      top: -16px; /* This moves the button up into the card body */
-      right: 16px; /* Adjust this to position from the right */
-      z-index: 1; /* Ensure button is above other content */
+      top: -16px;
+      right: 16px;
+      z-index: 1;
     }
 
     .card-body {
-      padding: 1rem 1.25rem 2rem; /* Increased bottom padding to accommodate the button */
+      padding: 1rem 1.25rem 2rem;
     }
 
+    /* =========================
+       Drawer safety overrides
+       ========================= */
+    @media (max-width: 1200px) {
+      #sidenav-main { display: block !important; }
+    }
+
+    #sidenav-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(2px);
+      z-index: 5000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    body.site-sidenav-open #sidenav-backdrop {
+      opacity: 1;
+      pointer-events: auto;
+    }
   </style>
 </head>
 
 <body class="g-sidenav-show bg-gray-100">
+  <div id="sidenav-backdrop"></div>
+
   <div class="app">
     {% include 'accounts/sidebar.html' %}
 
-    <!-- Main content -->
     <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
       {% include 'accounts/navbar.html' %}
 
@@ -158,7 +174,6 @@
       <div class="content">
         <div class="container">
           {% if user.is_authenticated %}
-            <!-- Plan Overview -->
             <div class="card mb-4">
               <div class="card-header">
                 <h3>Plan Overview</h3>
@@ -199,7 +214,6 @@
               </div>
             </div>
 
-            <!-- Payment Information -->
             <div class="card mb-4">
               <div class="card-header">
                 <h3>Payment Information</h3>
@@ -218,7 +232,6 @@
               </div>
             </div>
 
-            <!-- Account Details -->
             <div class="card mb-4">
               <div class="card-header">
                 <h3>Account Details</h3>
@@ -235,7 +248,6 @@
     </main>
   </div>
 
-  <!-- JS Files -->
   <script src="{% static 'accounts/js/core/popper.min.js' %}"></script>
   <script src="{% static 'accounts/js/core/bootstrap.min.js' %}"></script>
   <script src="{% static 'accounts/js/plugins/perfect-scrollbar.min.js' %}"></script>
@@ -277,7 +289,7 @@
 
       function handleDrop(e) {
         if (e.stopPropagation) {
-          e.stopPropagation(); // stops the browser from redirecting.
+          e.stopPropagation();
         }
 
         if (dragSrcEl != this) {
@@ -307,85 +319,150 @@
         item.addEventListener('dragend', handleDragEnd, false);
       });
     });
-      let player;
-        let observer;
 
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                height: '100%',
-                width: '100%',
-                videoId: 'c2jmFFsGCYs', // Replace with your YouTube video ID
-                playerVars: {
-                    'rel': 0,
-                    'modestbranding': 1,
-                    'controls': 1,
-                    'showinfo': 0,
-                    'fs': 1
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
+    let player;
+    let observer;
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: '100%',
+        width: '100%',
+        videoId: 'c2jmFFsGCYs',
+        playerVars: {
+          'rel': 0,
+          'modestbranding': 1,
+          'controls': 1,
+          'showinfo': 0,
+          'fs': 1
+        },
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
         }
+      });
+    }
 
-        function onPlayerReady(event) {
-            event.target.playVideo();
-        }
+    function onPlayerReady(event) {
+      event.target.playVideo();
+    }
 
-        function onPlayerStateChange(event) {
-            if (event.data === YT.PlayerState.PAUSED) {
-                observeOverlay();
-            } else if (event.data === YT.PlayerState.PLAYING) {
+    function onPlayerStateChange(event) {
+      if (event.data === YT.PlayerState.PAUSED) {
+        observeOverlay();
+      } else if (event.data === YT.PlayerState.PLAYING) {
+        disconnectObserver();
+      }
+    }
+
+    function observeOverlay() {
+      const playerElement = document.getElementById('player');
+
+      const existingOverlay = document.querySelector('.ytp-pause-overlay');
+      if (existingOverlay) {
+        closeOverlay(existingOverlay);
+        return;
+      }
+
+      if (!observer) {
+        observer = new MutationObserver((mutationsList) => {
+          for (let mutation of mutationsList) {
+            if (mutation.type === 'childList') {
+              const overlay = document.querySelector('.ytp-pause-overlay');
+              if (overlay) {
+                closeOverlay(overlay);
                 disconnectObserver();
+              }
             }
+          }
+        });
+
+        observer.observe(playerElement, { childList: true, subtree: true });
+      }
+    }
+
+    function closeOverlay(overlay) {
+      const closeButton = overlay.querySelector('.ytp-pause-overlay-close-button');
+      if (closeButton) {
+        closeButton.click();
+      }
+    }
+
+    function disconnectObserver() {
+      if (observer) {
+        observer.disconnect();
+        observer = null;
+      }
+    }
+
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  </script>
+
+  <script>
+    (function () {
+      function isMobile() {
+        return window.matchMedia("(max-width: 768px)").matches;
+      }
+
+      function openDrawer() {
+        if (!isMobile()) return;
+        document.body.classList.add("site-sidenav-open");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeDrawer() {
+        document.body.classList.remove("site-sidenav-open");
+        document.body.style.overflow = "";
+      }
+
+      function bindTriggers() {
+        const triggers = document.querySelectorAll(
+          "#iconNavbarSidenav, .sidenav-toggler, .navbar-toggler, [data-sidenav-trigger], [data-toggle='sidenav'], [data-bs-toggle='sidenav']"
+        );
+
+        triggers.forEach((btn) => {
+          btn.addEventListener("click", function (e) {
+            if (!isMobile()) return;
+            e.preventDefault();
+            e.stopPropagation();
+            openDrawer();
+          }, { passive: false });
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const backdrop = document.getElementById("sidenav-backdrop");
+        if (backdrop) {
+          backdrop.addEventListener("click", closeDrawer);
         }
 
-        function observeOverlay() {
-            const playerElement = document.getElementById('player');
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") closeDrawer();
+        });
 
-            // Check for existing overlay before creating observer
-            const existingOverlay = document.querySelector('.ytp-pause-overlay');
-            if (existingOverlay) {
-                closeOverlay(existingOverlay);
-                return;
-            }
-
-            if (!observer) {
-                observer = new MutationObserver((mutationsList) => {
-                    for (let mutation of mutationsList) {
-                        if (mutation.type === 'childList') {
-                            const overlay = document.querySelector('.ytp-pause-overlay');
-                            if (overlay) {
-                                closeOverlay(overlay);
-                                disconnectObserver();
-                            }
-                        }
-                    }
-                });
-
-                observer.observe(playerElement, { childList: true, subtree: true });
-            }
+        const sidenav = document.getElementById("sidenav-main");
+        if (sidenav) {
+          sidenav.addEventListener("click", function (e) {
+            if (!isMobile()) return;
+            const link = e.target.closest("a.nav-link");
+            if (link) closeDrawer();
+          });
         }
 
-        function closeOverlay(overlay) {
-            const closeButton = overlay.querySelector('.ytp-pause-overlay-close-button');
-            if (closeButton) {
-                closeButton.click();
-            }
-        }
+        bindTriggers();
 
-        function disconnectObserver() {
-            if (observer) {
-                observer.disconnect();
-                observer = null;
-            }
-        }
+        window.addEventListener("resize", function () {
+          if (!isMobile()) {
+            closeDrawer();
+          }
+        });
+      });
 
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      window.openSiteSidenav = openDrawer;
+      window.closeSiteSidenav = closeDrawer;
+    })();
   </script>
 
 </body>

@@ -4,7 +4,6 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 import os
 
-
 class Category(models.Model):
     name = models.CharField(max_length=255, unique=True)
 
@@ -64,21 +63,34 @@ class UserMediaStatus(models.Model):
         unique_together = ('user', 'media')
 
 
-# SINGLE HIGHLIGHT MODEL FOR EVERYTHING (videos + web)
+
 class Highlight(models.Model):
     SOURCE_CHOICES = (
-        ('media', 'Media'),   # video/audio subtitles
+        ('media', 'Media'),
         ('chat', 'Chat'),
-        ('web', 'Web'),       # from Chrome extension
+        ('web', 'Web'),
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='highlights')
-    source = models.CharField(max_length=10, choices=SOURCE_CHOICES, default='media')
+    source = models.CharField(max_length=10, choices=SOURCE_CHOICES)
 
-    # For video/audio highlights
-    media = models.ForeignKey(Media, on_delete=models.CASCADE, related_name='highlights', null=True, blank=True)
+    media = models.ForeignKey(
+        Media,
+        on_delete=models.CASCADE,
+        related_name='highlights',
+        null=True,
+        blank=True
+    )
 
-    # Timing / positioning (used for videos)
+    chat_session = models.ForeignKey(
+        "accounts.ChatSession",
+        on_delete=models.CASCADE,
+        related_name="chat_highlights",
+        null=True,
+        blank=True
+    )
+
+    # ===== MEDIA-SPECIFIC FIELDS =====
     start_time = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     end_time = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     start_index = models.IntegerField(null=True, blank=True)
@@ -87,14 +99,12 @@ class Highlight(models.Model):
     end_sentence_index = models.IntegerField(null=True, blank=True)
     frame_index = models.IntegerField(null=True, blank=True)
 
-    # The actual highlighted text
+    # ===== SHARED =====
     highlighted_text = models.TextField()
-
-    # For web highlights (from Chrome extension)
     page_url = models.URLField(blank=True, null=True)
     page_title = models.CharField(max_length=500, blank=True, null=True)
-
     created_at = models.DateTimeField(default=timezone.now)
+
 
     def __str__(self):
         if self.source == 'media' and self.media:

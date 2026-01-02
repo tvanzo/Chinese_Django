@@ -335,7 +335,7 @@ def get_all_highlights(request):
 def highlights(request):
     user = request.user
 
-    # Media + chat highlights (assuming Highlight has a "source" field)
+    # Unified highlights (media + chat + web) all live in Highlight now
     all_highlights = (
         Highlight.objects
         .filter(user=user)
@@ -343,49 +343,30 @@ def highlights(request):
         .order_by('-created_at')
     )
 
-    # Article highlights from separate model only if present
-    article_highlights = (
-        ArticleHighlight.objects.filter(user=user).order_by('-created_at')
-        if ArticleHighlight is not None else []
-    )
-
-    # Build a unified list so the template can treat everything the same
     unified = []
-
     for h in all_highlights:
+        src = getattr(h, 'source', 'media') or 'media'
         unified.append({
             'id': h.id,
-            'source': getattr(h, 'source', 'media'),  # 'media' or 'chat'
+            'source': src,  # 'media' | 'chat' | 'web'
             'highlighted_text': h.highlighted_text,
             'created_at': h.created_at,
-            'media': h.media,
-            'page_title': None,
-            'page_url': None,
-            'is_article': (getattr(h, 'source', '') == 'article'),
+            'media': h.media if src == 'media' else None,
+            'page_title': h.page_title if src == 'web' else None,
+            'page_url': h.page_url if src == 'web' else None,
+            'is_article': False,
         })
 
-    for a in article_highlights:
-        unified.append({
-            'id': a.id,
-            'source': 'article',
-            'highlighted_text': a.text,
-            'created_at': a.created_at,
-            'media': None,
-            'page_title': a.page_title,
-            'page_url': a.page_url,
-            'is_article': True,
-        })
+    # Sort newest first (already ordered, but keep identical behavior)
+    unified.sort(key=lambda x: x['created_at'], reverse=True)
 
-    # Sort newest first
-    unified.sort(key=lambda h: h['created_at'], reverse=True)
-
-    # Stats counts
+    # Stats counts (no more "article" model; use "web" instead)
     video_count = sum(1 for h in unified if h['source'] == 'media')
     chat_count = sum(1 for h in unified if h['source'] == 'chat')
-    article_count = sum(1 for h in unified if h['source'] == 'article')
-    total_count = video_count + chat_count + article_count
+    web_count = sum(1 for h in unified if h['source'] == 'web')
+    total_count = video_count + chat_count + web_count
 
-    # Video titles for the dropdown
+    # Video titles for dropdown (only for media highlights)
     video_titles = (
         Media.objects
         .filter(highlights__user=user)
@@ -399,7 +380,8 @@ def highlights(request):
         'stats': {
             'video': video_count,
             'chat': chat_count,
-            'article': article_count,
+            'article': 0,     # kept for template compatibility
+            'web': web_count, # new
             'total': total_count,
         },
     })

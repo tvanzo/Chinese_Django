@@ -1,280 +1,260 @@
 {% load static %}
 
-<!-- navbar.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>Chinese Log Navbar</title>
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
-  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-  <link id="pagestyle" href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet" />
-  <link id="pagestyle" href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet" />
-  <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet" />
-  <style>
-/* Global Styles */
-:root {
-    --primary-color: #3a9fff; /* Blue */
-    --secondary-color: #7a1ea0; /* Deep Purple */
-    --accent-color: #d00c9c; /* Pink */
-    --gradient-start: var(--primary-color);
-    --gradient-middle: var(--secondary-color);
-    --gradient-end: var(--accent-color);
-    --text-color: white;
-}
+<style>
+  :root {
+    --primary-color: #3a9fff;
+    --secondary-color: #7a1ea0;
+    --accent-color: #d00c9c;
+  }
 
-/* XP Button */
-#unique-xp-display {
-    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-middle) 50%, var(--gradient-end) 100%);
-    color: var(--text-color) !important;
-    padding: 5px 12px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: bold;
-    font-size: 0.9rem;
-    box-shadow: 0 4px 10px rgba(58, 159, 255, 0.3);
-    transition: all 0.3s ease-in-out;
-    border: none;
-}
+  /* Navbar layout */
+  .navbar-main {
+    padding: 0.75rem 1rem !important;
+    margin: 0 !important;
+    background: transparent;
+  }
+  .navbar-main .container-fluid {
+    max-width: none !important;
+    padding: 0 0.5rem !important;
+  }
 
-/* Hover Effect */
-#unique-xp-display:hover {
-    background: linear-gradient(135deg, #3a72ff 0%, #682b88 50%, #bc0c85 100%);
-    box-shadow: 0 6px 15px rgba(58, 159, 255, 0.4);
-}
-
-/* XP Circle */
-#unique-xp-display .unique-xp-circle {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 0.9rem;
-}
-
-/* Compact Button for Mobile */
-.compact-btn {
-    padding: 0.25rem 0.5rem;
-}
-
-/* Navbar Link Styles */
-.nav-link {
+  /* Avoid navbar squeezing */
+  .navbar-main .nav-link {
     color: #64748b;
-    transition: all 0.2s ease;
-    padding: 0.75rem 1.25rem;
-    font-weight: 500;
-}
+    padding: 0.5rem 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .navbar-main .nav-link:hover { color: var(--primary-color); }
 
-.nav-link:hover {
-    color: var(--primary-color);
-}
-
-/* Responsive Adjustments */
-@media (max-width: 1200px) {
-    #top-nav {
-        display: block;
-    }
-}
-
-@media (min-width: 1201px) {
-    #top-nav {
-        display: none;
-    }
-}
-      /* XP Button Styling */
-#unique-xp-display {
+  /* XP pill */
+  #unique-xp-display {
     background: linear-gradient(135deg, #1a1f36 0%, #3a9fff 100%);
-    color: white;
-    padding: 8px 16px;
+    color: #fff !important;
+    padding: 8px 14px;
     border-radius: 12px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 4px 12px rgba(58, 159, 255, 0.2);
-    transition: all 0.3s ease;
-}
-
-#unique-xp-display:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(58, 159, 255, 0.3);
-}
-
-#unique-xp-display .unique-xp-circle {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
+    box-shadow: 0 4px 12px rgba(58, 159, 255, 0.18);
+    border: none;
+    white-space: nowrap;
+  }
+  #unique-xp-display .unique-xp-circle {
+    background: rgba(255, 255, 255, 0.22);
     width: 24px;
     height: 24px;
-    border-radius: 50%;
-    display: flex;
+    border-radius: 999px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    font-size: 0.9rem;
-}
+    font-weight: 800;
+    font-size: 0.85rem;
+  }
+  #unique-xp-points { font-weight: 800; }
 
-#unique-xp-points {
-    font-weight: 600;
-    color: white;
-}
-      /* Adjust container-fluid to allow full width for navbar */
-.container-fluid {
-  max-width: 1200px; /* Keep for content below navbar */
-  padding: 2rem 1rem; /* Keep for content below navbar */
-}
+  /* Mobile hamburger (ONE button) */
+  .mobile-sidenav-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+    flex-shrink: 0;
+  }
+  .mobile-sidenav-btn:hover {
+    background: #f3f4f6;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+  }
+  @media (max-width: 768px) {
+    .mobile-sidenav-btn { display: inline-flex; }
+  }
 
-/* Target only the navbar’s container-fluid */
-.navbar-main .container-fluid {
-  max-width: none; /* Remove width constraint for navbar */
-  padding: 0 !important; /* Remove padding to match template 2 */
-}
+  /* Drawer backdrop + right tap zone */
+  .site-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.50);
+    display: none;
+    z-index: 5000;
+  }
+  .site-drawer-backdrop.open { display: block; }
 
-/* Navbar Main Styling */
-.navbar-main {
-  padding: 0.75rem 5rem !important; /* Match template 2 padding: top/bottom 0.75rem, left/right 5rem */
-  margin: 0 !important;
-  background-color: transparent; /* Ensure no background interferes */
-}
+  .site-drawer-right-tap {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 15vw;
+    display: none;
+    z-index: 5002;
+  }
+  .site-drawer-right-tap.open { display: block; }
 
-/* Ensure navbar collapse aligns right */
-.navbar-main .navbar-collapse {
-  justify-content: flex-end;
-  padding-right: 0 !important;
-  margin-right: 0 !important;
-}
+  /* Prevent scroll when drawer open */
+  @media (max-width: 768px) {
+    body.site-sidenav-open { overflow: hidden; }
+  }
+</style>
 
-/* Ensure navbar-nav aligns properly */
-.navbar-main .navbar-nav.ms-auto {
-  margin-right: 0 !important;
-  padding-right: 0 !important;
-}
+<nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl"
+     id="navbarBlur" navbar-scroll="true">
+  <div class="container-fluid py-1 px-3 d-flex align-items-center justify-content-between">
 
-/* Keep nav-link styling consistent */
-.nav-link {
-  color: #64748b;
-  transition: all 0.2s ease;
-  padding: 0.75rem 1.25rem;
-  font-weight: 500;
-}
+    <!-- Left: mobile menu -->
+    <button class="mobile-sidenav-btn" id="siteSidenavOpenBtn" type="button" aria-label="Open menu">
+      <i class="fas fa-bars"></i>
+    </button>
 
-.nav-link:hover {
-  color: var(--primary-color);
-}
-
-/* Keep container-fluid for content below navbar */
-.container-fluid {
-  max-width: 1200px; /* Maintain centered content */
-  padding: 2rem 2rem; /* Increase right padding from 1rem to 2rem */
-}
-
-/* Add padding to video-grid to match template 2 */
-.video-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2rem;
-  padding: 0 1.5rem; /* Add 1.5rem padding on left and right */
-}
-
-/* Adjust page-header padding */
-.page-header {
-  display: flex;
-  justify-content: space-between; /* Changed from flex-end to space-between for better spacing */
-  align-items: center;
-  margin-bottom: 2rem;
-  padding: 0 1.5rem; /* Add 1.5rem padding on left and right */
-}
-  </style>
-</head>
-<body>
-<nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" navbar-scroll="true">
-  <div class="container-fluid py-1 px-3">
-
-
-      <nav id="top-nav">
-   <ul class="navbar-nav">
-
-    <li class="nav-item">
-      <a class="nav-link" href="/media_list">
-        <span class="nav-link-text ms-1">Search</span>
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="/user_videos">
-        <span class="nav-link-text ms-1">My Library</span>
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="/highlights">
-        <span class="nav-link-text ms-1">Highlights</span>
-      </a>
-    </li>
-  </ul>
-</nav>
-
-    <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
-      <ul class="navbar-nav ms-auto d-flex align-items-center">
-    <li class="nav-item d-flex align-items-center">
-    <div class="btn btn-purple btn-sm mb-0 d-flex align-items-center compact-btn" id="unique-xp-display">
-        <div class="unique-xp-circle d-flex align-items-center justify-content-center me-2">XP</div>
-        <span id="unique-xp-points">{{ total_points }}</span>
+    <!-- Center: brand -->
+    <div class="d-flex align-items-center" style="gap:10px; min-width:0;">
+      <span class="d-none d-md-inline" style="font-weight:800; color:#111827;">
+        Chinese Log
+      </span>
     </div>
-</li>
 
-<li class="nav-item d-flex align-items-center">
-    <a href="/account" class="nav-link">
-        <div class="ms-2" style="position: relative; top: -2px;" data-bs-toggle="tooltip" data-bs-placement="bottom"
+    <!-- Right: actions -->
+    <div class="d-flex align-items-center" style="gap:10px;">
+      <div class="btn btn-sm mb-0 d-flex align-items-center" id="unique-xp-display">
+        <div class="unique-xp-circle">XP</div>
+        <span id="unique-xp-points">{{ total_points }}</span>
+      </div>
+
+      <a href="/account" class="nav-link" style="display:inline-flex; align-items:center;">
+        <div class="ms-2"
+             style="position: relative; top: -2px;"
+             data-bs-toggle="tooltip"
+             data-bs-placement="bottom"
              title="{% if user.subscriptions.first.tier == 'PREMIUM' %}Premium Subscription{% else %}Free Subscription{% endif %}">
-            <svg width="20px" height="20px" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"
-                 stroke="{% if user.subscriptions.first.tier == 'PREMIUM' %}#ffc40c{% else %}#808080{% endif %}"
-                 stroke-width="1.064">
-                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"
-                   stroke="{% if user.subscriptions.first.tier == 'PREMIUM' %}#ffc40c{% else %}#808080{% endif %}"
-                   stroke-width="0.784">
-                    <path d="M21.2501 3C21.4925 3 21.7176 3.11688 21.8574 3.30983L21.9119 3.39706L25.9186 10.9098L25.9615 11.0122L25.9731 11.05L25.9901 11.1273L25.9994 11.2153L25.9973 11.3147L26.0001 11.25C26.0001 11.3551 25.9785 11.4552 25.9394 11.5461L25.9106 11.6057L25.87 11.6723L25.8173 11.7408L14.6 24.7047C14.4999 24.8391 14.3628 24.9277 14.2139 24.9703L14.1559 24.9844L14.0585 24.9979L13.9999 25L13.8993 24.9932L13.8142 24.9771L13.7109 24.9432L13.6852 24.931C13.5949 24.8911 13.5119 24.8316 13.4425 24.7535L2.17081 11.7263L2.1087 11.6387L2.06079 11.5456L2.02611 11.4463L2.00297 11.3152L2.00269 11.1878L2.01755 11.0891L2.02714 11.0499L2.06104 10.9538L2.08838 10.8971L6.08838 3.39706C6.20243 3.18321 6.41149 3.0396 6.64753 3.00704L6.75014 3H21.2501ZM17.9061 12H10.0911L14.0011 22.16L17.9061 12ZM8.48514 12H4.38914L11.7621 20.518L8.48514 12ZM23.6081 12H19.5151L16.2421 20.511L23.6081 12ZM10.0241 4.499H7.19914L3.99814 10.5H8.42314L10.0241 4.499ZM16.4231 4.499H11.5761L9.97514 10.5H18.0231L16.4231 4.499ZM20.8001 4.499H17.9751L19.5761 10.5H23.9991L20.8001 4.499Z"
-                          fill="{% if user.subscriptions.first.tier == 'PREMIUM' %}#ffc40c{% else %}#808080{% endif %}"></path>
-                </g>
-                <g id="SVGRepo_iconCarrier">
-                    <path d="M21.2501 3C21.4925 3 21.7176 3.11688 21.8574 3.30983L21.9119 3.39706L25.9186 10.9098L25.9615 11.0122L25.9731 11.05L25.9901 11.1273L25.9994 11.2153L25.9973 11.3147L26.0001 11.25C26.0001 11.3551 25.9785 11.4552 25.9394 11.5461L25.9106 11.6057L25.87 11.6723L25.8173 11.7408L14.6 24.7047C14.4999 24.8391 14.3628 24.9277 14.2139 24.9703L14.1559 24.9844L14.0585 24.9979L13.9999 25L13.8993 24.9932L13.8142 24.9771L13.7109 24.9432L13.6852 24.931C13.5949 24.8911 13.5119 24.8316 13.4425 24.7535L2.17081 11.7263L2.1087 11.6387L2.06079 11.5456L2.02611 11.4463L2.00297 11.3152L2.00269 11.1878L2.01755 11.0891L2.02714 11.0499L2.06104 10.9538L2.08838 10.8971L6.08838 3.39706C6.20243 3.18321 6.41149 3.0396 6.64753 3.00704L6.75014 3H21.2501ZM17.9061 12H10.0911L14.0011 22.16L17.9061 12ZM8.48514 12H4.38914L11.7621 20.518L8.48514 12ZM23.6081 12H19.5151L16.2421 20.511L23.6081 12ZM10.0241 4.499H7.19914L3.99814 10.5H8.42314L10.0241 4.499ZM16.4231 4.499H11.5761L9.97514 10.5H18.0231L16.4231 4.499ZM20.8001 4.499H17.9751L19.5761 10.5H23.9991L20.8001 4.499Z"
-                          fill="{% if user.subscriptions.first.tier == 'PREMIUM' %}#ffc40c{% else %}#808080{% endif %}"></path>
-                </g>
-            </svg>
+          <svg width="20px" height="20px" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"
+               stroke="{% if user.subscriptions.first.tier == 'PREMIUM' %}#ffc40c{% else %}#808080{% endif %}"
+               stroke-width="1.064">
+            <path d="M21.2501 3C21.4925 3 21.7176 3.11688 21.8574 3.30983L21.9119 3.39706L25.9186 10.9098L25.9615 11.0122L25.9731 11.05L25.9901 11.1273L25.9994 11.2153L25.9973 11.3147L26.0001 11.25C26.0001 11.3551 25.9785 11.4552 25.9394 11.5461L25.9106 11.6057L25.87 11.6723L25.8173 11.7408L14.6 24.7047C14.4999 24.8391 14.3628 24.9277 14.2139 24.9703L14.1559 24.9844L14.0585 24.9979L13.9999 25L13.8993 24.9932L13.8142 24.9771L13.7109 24.9432L13.6852 24.931C13.5949 24.8911 13.5119 24.8316 13.4425 24.7535L2.17081 11.7263L2.1087 11.6387L2.06079 11.5456L2.02611 11.4463L2.00297 11.3152L2.00269 11.1878L2.01755 11.0891L2.02714 11.0499L2.06104 10.9538L2.08838 10.8971L6.08838 3.39706C6.20243 3.18321 6.41149 3.0396 6.64753 3.00704L6.75014 3H21.2501Z"
+                  fill="{% if user.subscriptions.first.tier == 'PREMIUM' %}#ffc40c{% else %}#808080{% endif %}"></path>
+          </svg>
         </div>
-    </a>
-</li>
-        <li class="nav-item d-flex align-items-center">
-          <a href="{% url 'logout' %}" class="ms-2" style="position: relative; top: -2px;">
-            <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-              <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-              <g id="SVGRepo_iconCarrier">
-                <path d="M15 12L2 12M2 12L5.5 9M2 12L5.5 15" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                <path d="M9.00195 7C9.01406 4.82497 9.11051 3.64706 9.87889 2.87868C10.7576 2 12.1718 2 15.0002 2L16.0002 2C18.8286 2 20.2429 2 21.1215 2.87868C22.0002 3.75736 22.0002 5.17157 22.0002 8L22.0002 16C22.0002 18.8284 22.0002 20.2426 21.1215 21.1213C20.3531 21.8897 19.1752 21.9862 17 21.9983M9.00195 17C9.01406 19.175 9.11051 20.3529 9.87889 21.1213C10.5202 21.7626 11.4467 21.9359 13 21.9827" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"></path>
-              </g>
-            </svg>
-          </a>
-        </li>
-      </ul>
+      </a>
+
+      <a href="{% url 'logout' %}" class="ms-2" style="position: relative; top: -2px;" aria-label="Logout">
+        <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 12L2 12M2 12L5.5 9M2 12L5.5 15"
+                stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M9.00195 7C9.01406 4.82497 9.11051 3.64706 9.87889 2.87868C10.7576 2 12.1718 2 15.0002 2L16.0002 2C18.8286 2 20.2429 2 21.1215 2.87868C22.0002 3.75736 22.0002 5.17157 22.0002 8L22.0002 16C22.0002 18.8284 22.0002 20.2426 21.1215 21.1213C20.3531 21.8897 19.1752 21.9862 17 21.9983M9.00195 17C9.01406 19.175 9.11051 20.3529 9.87889 21.1213C10.5202 21.7626 11.4467 21.9359 13 21.9827"
+                stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"></path>
+        </svg>
+      </a>
     </div>
   </div>
 </nav>
 
-<script src="{% static 'accounts/js/core/popper.min.js' %}"></script>
-<script src="{% static 'accounts/js/core/bootstrap.min.js' %}"></script>
+<div id="siteDrawerBackdrop" class="site-drawer-backdrop" aria-hidden="true"></div>
+<div id="siteDrawerRightTap" class="site-drawer-right-tap" aria-hidden="true"></div>
+
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl)
-    });
+    if (window.bootstrap) {
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.map(function (el) { return new bootstrap.Tooltip(el); });
+    }
   });
+
+  (function () {
+    const openBtn = document.getElementById("siteSidenavOpenBtn");
+    const backdrop = document.getElementById("siteDrawerBackdrop");
+    const rightTap = document.getElementById("siteDrawerRightTap");
+
+    function isMobile() {
+      return window.matchMedia("(max-width: 768px)").matches;
+    }
+
+    function openSidenav() {
+      if (!isMobile()) return;
+      document.body.classList.add("site-sidenav-open");
+      backdrop.classList.add("open");
+      rightTap.classList.add("open");
+      backdrop.setAttribute("aria-hidden", "false");
+      rightTap.setAttribute("aria-hidden", "false");
+    }
+
+    function closeSidenav() {
+      document.body.classList.remove("site-sidenav-open");
+      backdrop.classList.remove("open");
+      rightTap.classList.remove("open");
+      backdrop.setAttribute("aria-hidden", "true");
+      rightTap.setAttribute("aria-hidden", "true");
+    }
+
+    if (openBtn) openBtn.addEventListener("click", openSidenav);
+    if (backdrop) backdrop.addEventListener("click", closeSidenav);
+    if (rightTap) rightTap.addEventListener("click", closeSidenav);
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeSidenav();
+    });
+
+    // close drawer after clicking a sidebar link
+    document.addEventListener("click", (e) => {
+      if (!isMobile()) return;
+      if (!document.body.classList.contains("site-sidenav-open")) return;
+
+      const sidenav = document.getElementById("sidenav-main");
+      if (!sidenav) return;
+
+      const a = e.target.closest("a");
+      if (a && sidenav.contains(a)) closeSidenav();
+    });
+
+    // swipe-to-close (right swipe)
+    let startX = null, startY = null, started = false;
+
+    function onTouchStart(ev) {
+      if (!isMobile()) return;
+      if (!document.body.classList.contains("site-sidenav-open")) return;
+      const t = ev.touches && ev.touches[0];
+      if (!t) return;
+      startX = t.clientX;
+      startY = t.clientY;
+      started = true;
+    }
+
+    function onTouchMove(ev) {
+      if (!started) return;
+      const t = ev.touches && ev.touches[0];
+      if (!t) return;
+
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+
+      if (Math.abs(dx) > Math.abs(dy) && dx > 60) {
+        started = false;
+        closeSidenav();
+      }
+    }
+
+    function onTouchEnd() {
+      started = false;
+      startX = null;
+      startY = null;
+    }
+
+    if (backdrop) {
+      backdrop.addEventListener("touchstart", onTouchStart, { passive: true });
+      backdrop.addEventListener("touchmove", onTouchMove, { passive: true });
+      backdrop.addEventListener("touchend", onTouchEnd, { passive: true });
+    }
+    if (rightTap) {
+      rightTap.addEventListener("touchstart", onTouchStart, { passive: true });
+      rightTap.addEventListener("touchmove", onTouchMove, { passive: true });
+      rightTap.addEventListener("touchend", onTouchEnd, { passive: true });
+    }
+
+    window.addEventListener("resize", () => {
+      if (!isMobile()) closeSidenav();
+    });
+  })();
 </script>
-</body>
-</html>

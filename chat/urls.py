@@ -4,7 +4,14 @@ from . import views
 app_name = "chat"
 
 urlpatterns = [
+    # Page
     path("", views.chat, name="chat"),
+
+    # Chat API
     path("api/", views.chat_api, name="chat_api"),
     path("api/highlights/", views.chat_highlights, name="chat_highlights"),
+
+    # ✅ Chat categories
+    path("api/categories/", views.create_chat_category, name="create_chat_category"),
+    path("api/set-category/", views.set_chat_category, name="set_chat_category"),
 ]

@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Q
 
 from accounts.models import (
     Subscription,
@@ -18,145 +19,136 @@ from accounts.models import (
     ChatSession,
     ChatMessage,
 )
-from subplayer.models import Highlight  # Highlight lives in subplayer
+from subplayer.models import Highlight  # unified highlight model
 
 logger = logging.getLogger(__name__)
 
 
+# =========================
+# CHAT PAGE
+# =========================
+from accounts.models import ChatCategory  # add import
+
 @login_required
 def chat(request: HttpRequest) -> HttpResponse:
-    """
-    Render the main chat page with:
-    - list of this user's ChatSession objects (history)
-    - the currently selected session
-    - that session's messages
-    """
     user = request.user
 
-    # If ?new=1, create a fresh session
+    # ---- category filter ----
+    category_id = request.GET.get("category")  # optional
+
+    # ---- resolve active session ----
     if request.GET.get("new") == "1":
         session = ChatSession.objects.create(user=user, title="")
     else:
-        # If ?session=<id>, try to load that
         session_id = request.GET.get("session")
         session = None
+
         if session_id:
             session = ChatSession.objects.filter(user=user, pk=session_id).first()
 
-        # Fallback: last updated session
         if session is None:
-            session = (
-                ChatSession.objects.filter(user=user)
-                .order_by("-updated_at")
-                .first()
-            )
+            session = ChatSession.objects.filter(user=user).order_by("-updated_at").first()
 
-        # If still none, create a new one
         if session is None:
             session = ChatSession.objects.create(user=user, title="")
 
-    # All sessions for left-side history list
-    sessions = (
+    # categories for UI
+    categories = ChatCategory.objects.filter(user=user).order_by("name")
+
+    sessions_qs = (
         ChatSession.objects.filter(user=user)
-        .order_by("-updated_at")
+        .annotate(
+            highlight_count=Count(
+                "chat_highlights",
+                filter=Q(chat_highlights__source="chat")
+            )
+        )
     )
 
-    # Messages for the current session
-    messages = session.messages.all()
+    # apply filter
+    if category_id == "none":
+        sessions_qs = sessions_qs.filter(category__isnull=True)
+    elif category_id:
+        sessions_qs = sessions_qs.filter(category_id=category_id)
+
+    sessions = sessions_qs.order_by("-updated_at")
+
+    messages = session.messages.all().order_by("created_at")
+
+    current_highlight_count = Highlight.objects.filter(
+        user=user,
+        source="chat",
+        chat_session=session,
+    ).count()
 
     context = {
+        "categories": categories,
+        "selected_category": category_id or "",
         "sessions": sessions,
         "current_session": session,
         "messages": messages,
+        "current_highlight_count": current_highlight_count,
     }
-    # Your template is currently in subplayer/templates/chat.html, but
-    # since it's named "chat.html" this render will still find it.
     return render(request, "chat.html", context)
 
-
+# =========================
+# CHAT API (messages)
+# =========================
 @login_required
-@csrf_exempt  # you *are* sending CSRF, but keeping this avoids issues if token ever missing
+@csrf_exempt
 def chat_api(request: HttpRequest) -> JsonResponse:
-    """
-    POST /chat/api/
-    JSON body: { "message": "...", "mode": "normal|explain|roleplay|quiz|review" }
-
-    Uses the most recently updated ChatSession for this user,
-    saves user+assistant messages, and returns: { "reply": "..." } or { "error": "..." }
-    """
     if request.method != "POST":
         return JsonResponse({"error": "Only POST allowed."}, status=405)
 
-    # 1) Parse input safely
     try:
-        payload_in = json.loads(request.body.decode("utf-8"))
+        payload = json.loads(request.body.decode("utf-8"))
     except Exception:
         return JsonResponse({"error": "Invalid JSON body."}, status=400)
 
-    user_msg = (payload_in.get("message") or "").strip()
-    mode = (payload_in.get("mode") or "normal").lower()
+    user_msg = (payload.get("message") or "").strip()
+    mode = (payload.get("mode") or "normal").lower()
+
     if not user_msg:
         return JsonResponse({"error": "Empty message."}, status=400)
 
     user = request.user
 
-    # 2) Get or create the active ChatSession for this user
-    session = (
-        ChatSession.objects.filter(user=user)
-        .order_by("-updated_at")
-        .first()
-    )
-    if session is None:
-        session = ChatSession.objects.create(user=user, title="")
+    # ✅ IMPORTANT: use the session_id coming from the frontend
+    session_id = payload.get("session_id")
+    if session_id:
+        session = ChatSession.objects.filter(user=user, pk=session_id).first()
+        if session is None:
+            return JsonResponse({"error": "Session not found."}, status=404)
+    else:
+        session = (
+            ChatSession.objects.filter(user=user)
+            .order_by("-updated_at")
+            .first()
+        )
+        if session is None:
+            session = ChatSession.objects.create(user=user, title="")
 
-    # Save the user message
+    # save user message
     ChatMessage.objects.create(
         session=session,
         role="user",
         content=user_msg,
     )
 
-    # 3) Resolve API key
     api_key = getattr(settings, "DEEPSEEK_API_KEY", None) or os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
-        logger.error("DEEPSEEK_API_KEY missing")
-        return JsonResponse({"error": "Server not configured for DeepSeek."}, status=500)
+        return JsonResponse({"error": "Server not configured."}, status=500)
 
-    # 4) Build system prompt based on mode
     base_prompt = (
         "You are a patient, upbeat Chinese language tutor. "
-        "Use simple, clear explanations and give 1–2 examples. "
-        "When you use Chinese characters, also provide pinyin and brief English glosses "
-        "for key words. Keep answers focused and practical."
+        "Use simple explanations with examples. "
+        "Include pinyin and brief English glosses for key words."
     )
 
-    if mode == "explain":
-        system_prompt = (
-            base_prompt
-            + " The user wants detailed breakdowns of Chinese sentences: "
-              "explain grammar, give pinyin, tone hints, and key vocabulary."
-        )
-    elif mode == "roleplay":
-        system_prompt = (
-            base_prompt
-            + " The user wants a role-play conversation: stay mostly in Chinese, "
-              "keep responses short and interactive, correct mistakes gently, "
-              "and occasionally explain in English when needed."
-        )
-    elif mode == "quiz":
-        system_prompt = (
-            base_prompt
-            + " The user wants to be quizzed on Chinese. Ask short questions "
-              "(sometimes multiple-choice or fill-in-the-blank), wait for answers, "
-              "and then correct and explain."
-        )
-    elif mode == "review":
-        system_prompt = (
-            base_prompt
-            + " The user is reviewing previously highlighted Chinese snippets. "
-              "Use ONLY the provided highlight texts to create quizzes, example sentences, "
-              "or reading comprehension activities that help them recall and internalize "
-              "the phrases."
+    if mode == "review":
+        system_prompt = base_prompt + (
+            " The user is reviewing previously highlighted Chinese snippets. "
+            "Use ONLY the provided highlight texts."
         )
     else:
         system_prompt = base_prompt
@@ -165,7 +157,6 @@ def chat_api(request: HttpRequest) -> JsonResponse:
         "model": "deepseek-chat",
         "messages": [
             {"role": "system", "content": system_prompt},
-            # Simple context: just system + latest user message
             {"role": "user", "content": user_msg},
         ],
         "stream": False,
@@ -176,77 +167,73 @@ def chat_api(request: HttpRequest) -> JsonResponse:
         "Content-Type": "application/json",
     }
 
-    # 5) Call DeepSeek with robust error handling
-    try:
-        r = requests.post(
-            "https://api.deepseek.com/chat/completions",
-            headers=headers,
-            json=body,
-            timeout=30,
-        )
-    except requests.Timeout:
-        logger.exception("DeepSeek timeout")
-        return JsonResponse({"error": "Upstream timeout. Please try again."}, status=504)
-    except Exception as e:
-        logger.exception("DeepSeek request failed")
-        return JsonResponse({"error": f"Upstream error: {e}"}, status=502)
+    r = requests.post(
+        "https://api.deepseek.com/chat/completions",
+        headers=headers,
+        json=body,
+        timeout=30,
+    )
 
-    # 6) Handle non-200 responses
     if r.status_code != 200:
-        logger.error("DeepSeek non-200: %s %s", r.status_code, r.text[:500])
-        return JsonResponse(
-            {"error": f"DeepSeek error {r.status_code}", "details": r.text[:500]},
-            status=502,
-        )
+        return JsonResponse({"error": "LLM error"}, status=502)
 
-    # 7) Extract reply safely
-    try:
-        data = r.json()
-        reply = data["choices"][0]["message"]["content"]
-    except Exception:
-        logger.exception("Unexpected DeepSeek payload: %s", r.text[:1000])
-        return JsonResponse({"error": "Unexpected response shape from DeepSeek."}, status=502)
+    reply = r.json()["choices"][0]["message"]["content"]
 
-    # Save assistant message
+    # save assistant message
     ChatMessage.objects.create(
         session=session,
         role="assistant",
         content=reply,
     )
 
-    # Update session timestamps and title (first user message snippet as title)
+    # update title + timestamp
     if not session.title:
-        session.title = (user_msg[:80] + "…") if len(user_msg) > 80 else user_msg
+        session.title = user_msg[:80]
     session.updated_at = timezone.now()
     session.save(update_fields=["title", "updated_at"])
 
     return JsonResponse({"reply": reply})
 
-
+# =========================
+# CHAT HIGHLIGHTS API
+# =========================
 @login_required
 @require_http_methods(["GET", "POST"])
 def chat_highlights(request: HttpRequest) -> JsonResponse:
     """
     /chat/api/highlights/
 
-    GET  -> list all chat highlights for this user:  [{id, text}, ...]
-    POST -> create a new chat highlight from selected text: {text: "..."}
-
-    Reuses same daily limit logic as video highlights for FREE users.
+    GET  -> list chat highlights (optionally by ?session=<id>)
+    POST -> create a chat highlight
     """
     user = request.user
 
-    # ------ GET: list highlights ------
+    # ---- resolve session safely ----
+    session_id = request.GET.get("session")
+    session = None
+    if session_id:
+        session = ChatSession.objects.filter(user=user, pk=session_id).first()
+
+    if session is None:
+        session = (
+            ChatSession.objects.filter(user=user)
+            .order_by("-updated_at")
+            .first()
+        )
+
+    # ---- GET ----
     if request.method == "GET":
-        highlights = Highlight.objects.filter(
+        qs = Highlight.objects.filter(
             user=user,
             source="chat",
-        ).order_by("created_at")
+        )
+        if session:
+            qs = qs.filter(chat_session=session)
 
-        data = [{"id": h.id, "text": h.highlighted_text} for h in highlights]
+        data = [{"id": h.id, "text": h.highlighted_text} for h in qs.order_by("created_at")]
         return JsonResponse(data, safe=False)
 
-    # ------ POST: create highlight ------
+    # ---- POST ----
     try:
         payload = json.loads(request.body.decode("utf-8"))
     except Exception:
@@ -256,53 +243,77 @@ def chat_highlights(request: HttpRequest) -> JsonResponse:
     if not text:
         return JsonResponse({"error": "Text is required"}, status=400)
 
-    # Daily limit: reuse same rule as create_highlight (3 / day for FREE)
-    try:
-        subscription = Subscription.objects.get(user=user)
-    except Subscription.DoesNotExist:
-        subscription = None
-
+    # ---- daily limit (ALL highlights count, same as before) ----
+    subscription = Subscription.objects.filter(user=user).first()
     if subscription and subscription.tier == "FREE":
         today = timezone.now().date()
-        highlights_today = Highlight.objects.filter(
-            user=user,
-            created_at__date=today,
-        ).count()
-
-        if highlights_today >= 3:
+        if Highlight.objects.filter(user=user, created_at__date=today).count() >= 3:
             return JsonResponse(
-                {
-                    "error": "You have reached the daily limit of 3 highlights. Upgrade to create more.",
-                    "limit_reached": True,
-                },
+                {"error": "Daily highlight limit reached", "limit_reached": True},
                 status=403,
             )
 
-    # Create chat highlight (no media/timing)
+    # ✅ IMPORTANT: chat highlights DO NOT set media timing fields
     new_highlight = Highlight.objects.create(
         user=user,
         source="chat",
-        media=None,
+        chat_session=session,
         highlighted_text=text,
-        start_time=0,
-        end_time=0,
-        start_index=0,
-        end_index=len(text),
-        start_sentence_index=0,
-        end_sentence_index=0,
-        frame_index=0,
     )
 
-    # Update profile highlight count
-    profile: Profile = user.profile
+    profile = user.profile
     profile.total_highlights += 1
-    profile.save()
+    profile.save(update_fields=["total_highlights"])
 
     return JsonResponse(
         {
             "id": new_highlight.id,
             "text": new_highlight.highlighted_text,
-            "total_points": profile.total_points,
         },
         status=201,
     )
+@login_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def set_chat_category(request: HttpRequest) -> JsonResponse:
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    session_id = payload.get("session_id")
+    category_id = payload.get("category_id")  # can be null/None to clear
+
+    if not session_id:
+        return JsonResponse({"error": "session_id is required"}, status=400)
+
+    session = ChatSession.objects.filter(user=request.user, pk=session_id).first()
+    if not session:
+        return JsonResponse({"error": "Session not found"}, status=404)
+
+    if category_id in (None, "", "none"):
+        session.category = None
+    else:
+        category = ChatCategory.objects.filter(user=request.user, pk=category_id).first()
+        if not category:
+            return JsonResponse({"error": "Category not found"}, status=404)
+        session.category = category
+
+    session.save(update_fields=["category", "updated_at"])
+    return JsonResponse({"ok": True})
+
+@login_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def create_chat_category(request: HttpRequest) -> JsonResponse:
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    name = (payload.get("name") or "").strip()
+    if not name:
+        return JsonResponse({"error": "name is required"}, status=400)
+
+    obj, created = ChatCategory.objects.get_or_create(user=request.user, name=name)
+    return JsonResponse({"id": obj.id, "name": obj.name, "created": created})
