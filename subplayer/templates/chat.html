@@ -298,6 +298,11 @@
       display: flex;
       padding: 18px 14px;
       border-bottom: 1px solid #f1f1f1;
+      position: relative;
+    }
+
+    .message-container:hover .message-highlight-btn {
+      opacity: 1;
     }
 
     .user-message-container { background-color: #ffffff; }
@@ -328,6 +333,56 @@
       overflow-wrap: break-word;
       white-space: pre-wrap;
       padding-right: 4px;
+    }
+
+    /* =========================================================
+       ⭐ NEW: Highlight button for each message
+       ========================================================= */
+    .message-highlight-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      cursor: pointer;
+      color: #6b7280;
+      transition: all 0.2s ease;
+      opacity: 0;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+    }
+
+    .message-highlight-btn:hover {
+      background: #fef3c7;
+      color: #d97706;
+      border-color: #fbbf24;
+      box-shadow: 0 4px 12px rgba(251, 191, 36, 0.25);
+      transform: scale(1.05);
+    }
+
+    .message-highlight-btn.highlighted {
+      opacity: 1;
+      background: #fef3c7;
+      color: #d97706;
+      border-color: #fbbf24;
+    }
+
+    .message-highlight-btn svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+
+    /* Mobile: always show highlight button */
+    @media (max-width: 768px) {
+      .message-highlight-btn {
+        opacity: 1;
+      }
     }
 
     .tip {
@@ -948,13 +1003,21 @@
           <div class="chat-messages" id="chatMessages">
             {% if messages %}
               {% for m in messages %}
-                <div class="message-container {% if m.role == 'user' %}user-message-container{% else %}bot-message-container{% endif %}">
+                <div class="message-container {% if m.role == 'user' %}user-message-container{% else %}bot-message-container{% endif %}" data-message-id="{{ m.id }}">
                   <div class="avatar {% if m.role == 'user' %}user-avatar{% endif %}">
                     {% if m.role == 'user' %}You{% else %}AI{% endif %}
                   </div>
                   <div class="message {% if m.role == 'user' %}user-message{% else %}bot-message{% endif %} chat-message-text">
                     {{ m.content }}
                   </div>
+                  {% if m.role != 'user' %}
+                    <button class="message-highlight-btn" data-message-id="{{ m.id }}" aria-label="Highlight this response" title="Highlight this response" type="button">
+                      <!-- star icon -->
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                      </svg>
+                    </button>
+                  {% endif %}
                 </div>
               {% endfor %}
             {% else %}
@@ -968,7 +1031,7 @@
           </div>
 
           <div class="tip">
-            Press Enter to send • Shift+Enter for a new line • <strong>Shift to save a highlight</strong>
+            Press Enter to send • Shift+Enter for a new line • <strong>Click ⭐ to highlight a response</strong>
           </div>
 
           <div class="highlight-review-toggle">
@@ -1162,7 +1225,6 @@
       translateMode = !!on;
       if (toggleTranslateBtn) toggleTranslateBtn.classList.toggle("active", translateMode);
 
-      // UX: placeholder communicates state
       userInput.placeholder = translateMode
         ? "Translate: paste text here…"
         : "Message your AI tutor...";
@@ -1276,7 +1338,6 @@
     if (siteSidenavBackdrop) siteSidenavBackdrop.addEventListener("click", closeSiteSidenav);
     if (siteSidenavRightTap) siteSidenavRightTap.addEventListener("click", closeSiteSidenav);
 
-    /* Close if user taps a link inside the sitewide sidenav */
     document.addEventListener("click", (e) => {
       if (!isMobile()) return;
       if (!document.body.classList.contains("site-sidenav-open")) return;
@@ -1286,7 +1347,6 @@
       if (a && sidenav && sidenav.contains(a)) closeSiteSidenav();
     });
 
-    /* Escape closes whichever is open */
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
       closeDrawer();
@@ -1294,7 +1354,6 @@
       if (reviewPanel) reviewPanel.style.display = "none";
     });
 
-    /* Resize safety */
     window.addEventListener("resize", () => {
       if (!isMobile()) {
         closeDrawer();
@@ -1329,11 +1388,15 @@
 
     sendButton.addEventListener("click", sendMessage);
 
-    function appendMessage({ role, text }) {
+    function appendMessage({ role, text, messageId }) {
       const container = document.createElement("div");
       container.className =
         "message-container " +
         (role === "user" ? "user-message-container" : "bot-message-container");
+
+      if (messageId) {
+        container.setAttribute("data-message-id", messageId);
+      }
 
       const avatar = document.createElement("div");
       avatar.className = "avatar " + (role === "user" ? "user-avatar" : "");
@@ -1348,6 +1411,28 @@
 
       container.appendChild(avatar);
       container.appendChild(msg);
+
+      // Add highlight button for bot messages
+      if (role !== "user") {
+        const highlightBtn = document.createElement("button");
+        highlightBtn.className = "message-highlight-btn";
+        highlightBtn.setAttribute("type", "button");
+        highlightBtn.setAttribute("aria-label", "Highlight this response");
+        highlightBtn.setAttribute("title", "Highlight this response");
+        if (messageId) {
+          highlightBtn.setAttribute("data-message-id", messageId);
+        }
+        highlightBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        `;
+        container.appendChild(highlightBtn);
+
+        // Attach click handler
+        highlightBtn.addEventListener("click", handleMessageHighlight);
+      }
+
       chatMessages.appendChild(container);
       chatMessages.scrollTop = chatMessages.scrollHeight;
 
@@ -1386,7 +1471,6 @@
       userInput.style.height = "auto";
       sendButton.disabled = true;
 
-      // ✅ mode is now auto: translate toggle controls default
       await sendMessageWithCustomPayload(message, null);
     }
 
@@ -1421,6 +1505,7 @@
           appendMessage({
             role: "bot",
             text: data.reply || "(No response)",
+            messageId: data.message_id
           });
         }
       } catch (err) {
@@ -1437,7 +1522,142 @@
     userInput.focus();
 
     /* =========================================================
-       Highlights
+       ⭐ NEW: Message-level highlight functionality
+       ========================================================= */
+    let messageHighlights = new Set(); // Store highlighted message IDs
+
+   async function handleMessageHighlight(e) {
+    const btn = e.currentTarget;
+    const messageId = btn.getAttribute("data-message-id");
+    const container = btn.closest(".message-container");
+    const messageEl = container?.querySelector(".chat-message-text");
+
+    if (!messageId || !messageEl) return;
+
+    const text = messageEl.textContent.trim();
+    const isHighlighted = messageHighlights.has(messageId);
+
+    if (isHighlighted) {
+        const success = await removeMessageHighlight(messageId);
+        if (success) {
+            messageHighlights.delete(messageId);
+            btn.classList.remove("highlighted");
+        }
+    } else {
+        const success = await createMessageHighlight(messageId, text);
+        if (success) {
+            messageHighlights.add(messageId);
+            btn.classList.add("highlighted");
+        }
+    }
+}
+
+    // 1. Create highlight (this is the one that needs the biggest change)
+async function createMessageHighlight(messageId, text) {
+    try {
+        const res = await fetch("/chat/api/highlights/", {  // ← your existing endpoint!
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": CSRF_TOKEN,
+            },
+            body: JSON.stringify({
+                message_id: messageId,   // ← very important!
+                text: text.trim()        // the AI response text
+            }),
+        });
+
+        if (!res.ok) {
+            const data = await res.json();
+            if (data.limit_reached) {
+                alert("You've reached your daily highlight limit (3 for free users). Upgrade for unlimited!");
+            } else {
+                console.error("Highlight creation failed:", data);
+                alert("Failed to save highlight. Please try again.");
+            }
+            return false;
+        }
+
+        const data = await res.json();
+        chatHighlights.push(data);  // Add to local array for review panel
+        return true;
+
+    } catch (e) {
+        console.error("Network error creating highlight:", e);
+        alert("Network error. Please check your connection.");
+        return false;
+    }
+}
+
+// 2. Remove highlight (toggle off)
+async function removeMessageHighlight(messageId) {
+    try {
+        const res = await fetch(`/chat/api/highlights/${messageId}/`, {
+            method: "DELETE",
+            headers: {
+                "X-CSRFToken": CSRF_TOKEN,
+            },
+        });
+
+        if (res.ok) {
+            // Remove from local array
+            chatHighlights = chatHighlights.filter(h => h.message_id !== messageId);
+            return true;
+        } else {
+            console.error("Failed to delete highlight");
+            return false;
+        }
+    } catch (e) {
+        console.error("Error removing highlight:", e);
+        return false;
+    }
+}
+
+// 3. Fetch all highlights (update to recognize message_id)
+async function fetchMessageHighlights() {
+    try {
+        const res = await fetch(`/chat/api/highlights/?session={{ current_session.id }}`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+        chatHighlights = data;
+
+        // Update which messages are highlighted
+        messageHighlights.clear();
+        data.forEach(h => {
+            if (h.message_id) {
+                messageHighlights.add(h.message_id.toString());
+            }
+        });
+
+        updateHighlightButtons();
+        applyAllChatHighlights(); // optional, if you want visual spans
+    } catch (e) {
+        console.error("Error fetching message highlights:", e);
+    }
+}
+
+    function updateHighlightButtons() {
+      const allBtns = document.querySelectorAll(".message-highlight-btn");
+      allBtns.forEach(btn => {
+        const msgId = btn.getAttribute("data-message-id");
+        if (msgId && messageHighlights.has(msgId)) {
+          btn.classList.add("highlighted");
+          btn.setAttribute("title", "Remove highlight");
+        } else {
+          btn.classList.remove("highlighted");
+          btn.setAttribute("title", "Highlight this response");
+        }
+      });
+    }
+
+    // Attach event listeners to existing highlight buttons
+    document.querySelectorAll(".message-highlight-btn").forEach(btn => {
+      btn.addEventListener("click", handleMessageHighlight);
+    });
+
+    /* =========================================================
+       Text selection highlights (original functionality)
        ========================================================= */
     let chatHighlights = [];
 
@@ -1498,7 +1718,6 @@
       el.innerHTML = html;
     }
 
-    /* Desktop: Shift to highlight selection */
     document.addEventListener("keydown", async function (e) {
       if (e.key !== "Shift") return;
 
@@ -1526,7 +1745,6 @@
       selection.removeAllRanges();
     });
 
-    /* Mobile: click "Highlight selection" */
     async function highlightCurrentSelection() {
       const selection = window.getSelection();
       if (!selection || !selection.rangeCount) return;
@@ -1573,7 +1791,7 @@
       if (!chatHighlights.length) {
         const empty = document.createElement("div");
         empty.className = "chat-history-empty";
-        empty.textContent = "No highlights yet. Select text and save one.";
+        empty.textContent = "No highlights yet. Click the ⭐ button on any AI response.";
         highlightCardsEl.appendChild(empty);
         return;
       }
@@ -1621,7 +1839,6 @@
 
       reviewPanel.style.display = "none";
 
-      // ✅ Explicitly force review mode (bypasses translate toggle)
       sendMessageWithCustomPayload(prompt, "review");
     });
 
@@ -1709,6 +1926,7 @@
 
     /* Init */
     fetchChatHighlights();
+    fetchMessageHighlights(); // Fetch message-level highlights
     loadChatHistoryCollapsed();
     loadTranslateMode();
   </script>

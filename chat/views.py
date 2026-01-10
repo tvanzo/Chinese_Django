@@ -236,48 +236,51 @@ def chat_api(request):
 def chat_highlights(request: HttpRequest) -> JsonResponse:
     """
     /chat/api/highlights/
-
-    GET  -> list chat highlights (optionally by ?session=<id>)
-    POST -> create a chat highlight
+    GET  → list all chat highlights (optionally ?session=<id>)
+    POST → create a new highlight
+           - Basic: {"text": "..."}                → general text highlight
+           - Message-specific: {"message_id": 123, "text": "..."} → linked to ChatMessage
     """
     user = request.user
 
-    # ---- resolve session safely ----
+    # Resolve session (same as before)
     session_id = request.GET.get("session")
     session = None
     if session_id:
         session = ChatSession.objects.filter(user=user, pk=session_id).first()
+    if not session and request.method == "GET":
+        session = ChatSession.objects.filter(user=user).order_by("-updated_at").first()
 
-    if session is None:
-        session = (
-            ChatSession.objects.filter(user=user)
-            .order_by("-updated_at")
-            .first()
-        )
-
-    # ---- GET ----
+    # ── GET: List highlights ────────────────────────────────────────
     if request.method == "GET":
-        qs = Highlight.objects.filter(
-            user=user,
-            source="chat",
-        )
+        qs = Highlight.objects.filter(user=user, source="chat")
         if session:
             qs = qs.filter(chat_session=session)
 
-        data = [{"id": h.id, "text": h.highlighted_text} for h in qs.order_by("created_at")]
+        # Include message_id if the highlight is linked to a message
+        data = [
+            {
+                "id": h.id,
+                "text": h.highlighted_text,
+                "message_id": h.chat_message_id if hasattr(h, 'chat_message') and h.chat_message else None,
+            }
+            for h in qs.order_by("created_at")
+        ]
         return JsonResponse(data, safe=False)
 
-    # ---- POST ----
+    # ── POST: Create highlight ──────────────────────────────────────
     try:
         payload = json.loads(request.body.decode("utf-8"))
     except Exception:
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
     text = (payload.get("text") or "").strip()
+    message_id = payload.get("message_id")  # ← new optional field
+
     if not text:
         return JsonResponse({"error": "Text is required"}, status=400)
 
-    # ---- daily limit (ALL highlights count, same as before) ----
+    # Daily limit check (same as before)
     subscription = Subscription.objects.filter(user=user).first()
     if subscription and subscription.tier == "FREE":
         today = timezone.now().date()
@@ -287,14 +290,27 @@ def chat_highlights(request: HttpRequest) -> JsonResponse:
                 status=403,
             )
 
-    # ✅ IMPORTANT: chat highlights DO NOT set media timing fields
+    # Optional: validate message_id belongs to user
+    chat_message = None
+    if message_id:
+        try:
+            chat_message = ChatMessage.objects.get(
+                id=message_id,
+                session__user=user
+            )
+        except ChatMessage.DoesNotExist:
+            return JsonResponse({"error": "Invalid message_id"}, status=400)
+
+    # Create the highlight
     new_highlight = Highlight.objects.create(
         user=user,
         source="chat",
-        chat_session=session,
+        chat_session=session or (chat_message.session if chat_message else None),
+        chat_message=chat_message,           # ← this is the key new part!
         highlighted_text=text,
     )
 
+    # Update profile
     profile = user.profile
     profile.total_highlights += 1
     profile.save(update_fields=["total_highlights"])
@@ -303,6 +319,7 @@ def chat_highlights(request: HttpRequest) -> JsonResponse:
         {
             "id": new_highlight.id,
             "text": new_highlight.highlighted_text,
+            "message_id": chat_message.id if chat_message else None,
         },
         status=201,
     )
