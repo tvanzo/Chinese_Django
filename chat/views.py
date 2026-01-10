@@ -96,103 +96,137 @@ def chat(request: HttpRequest) -> HttpResponse:
 # =========================
 @login_required
 @csrf_exempt
-def chat_api(request: HttpRequest) -> JsonResponse:
-    if request.method != "POST":
-        return JsonResponse({"error": "Only POST allowed."}, status=405)
-
+def chat_api(request):
+    """
+    Main chat API endpoint.
+    Handles normal conversation, translate mode, and review mode.
+    """
     try:
         payload = json.loads(request.body.decode("utf-8"))
-    except Exception:
+    except Exception as e:
+        logger.error(f"Invalid JSON body: {e}")
         return JsonResponse({"error": "Invalid JSON body."}, status=400)
 
     user_msg = (payload.get("message") or "").strip()
-    mode = (payload.get("mode") or "normal").lower()
+    mode = (payload.get("mode") or "normal").lower().strip()
+    session_id = payload.get("session_id")
 
     if not user_msg:
-        return JsonResponse({"error": "Empty message."}, status=400)
+        return JsonResponse({"error": "Message is required."}, status=400)
 
     user = request.user
 
-    # ✅ IMPORTANT: use the session_id coming from the frontend
-    session_id = payload.get("session_id")
+    # Debug logging - very useful during development
+    logger.info(
+        "chat_api called | user=%s | mode=%s | session_id=%s | msg_preview=%s...",
+        user.username,
+        mode,
+        session_id,
+        user_msg[:80]
+    )
+
+    # Resolve session
     if session_id:
         session = ChatSession.objects.filter(user=user, pk=session_id).first()
-        if session is None:
+        if not session:
             return JsonResponse({"error": "Session not found."}, status=404)
     else:
-        session = (
-            ChatSession.objects.filter(user=user)
-            .order_by("-updated_at")
-            .first()
-        )
-        if session is None:
-            session = ChatSession.objects.create(user=user, title="")
+        # Fallback: most recent session or create new
+        session = ChatSession.objects.filter(user=user).order_by("-updated_at").first()
+        if not session:
+            session = ChatSession.objects.create(user=user, title="New Chat")
 
-    # save user message
+    # Save user message
     ChatMessage.objects.create(
         session=session,
         role="user",
         content=user_msg,
     )
 
+    # Select system prompt based on mode
+    if mode == "translate":
+        system_prompt = (
+            "You are a professional, precise translator. "
+            "Your ONLY task is to provide the translation. "
+            "Rules you MUST follow strictly:\n"
+            "- Output ONLY the translation — nothing else\n"
+            "- NO explanations, NO greetings, NO notes, NO pinyin, NO chit-chat\n"
+            "- If input contains Chinese characters → translate to natural English\n"
+            "- If input is English or other → translate to natural simplified Chinese\n"
+            "- Preserve tone, swearing, names, numbers, punctuation exactly\n"
+            "- Keep formatting (line breaks, quotes) if present"
+        )
+    elif mode == "review":
+        system_prompt = (
+            "You are a patient, upbeat Chinese language tutor reviewing previously "
+            "highlighted Chinese snippets. Use simple explanations, give 1-2 natural "
+            "examples. Include pinyin when useful. Keep answers clear and encouraging."
+        )
+    else:  # normal conversation/learning mode
+        system_prompt = (
+            "You are a patient, upbeat, encouraging Chinese language tutor. "
+            "Use simple, clear explanations and give 1-2 good example sentences. "
+            "Include pinyin (with tone marks) and brief English glosses when helpful. "
+            "Be friendly and supportive. Keep most answers in Chinese when appropriate."
+        )
+
+    # Build messages for DeepSeek
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_msg},
+    ]
+
+    # Call DeepSeek API
     api_key = getattr(settings, "DEEPSEEK_API_KEY", None) or os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
-        return JsonResponse({"error": "Server not configured."}, status=500)
+        logger.error("DEEPSEEK_API_KEY not configured")
+        return JsonResponse({"error": "Server configuration error"}, status=500)
 
-    base_prompt = (
-        "You are a patient, upbeat Chinese language tutor. "
-        "Use simple explanations with examples. "
-        "Include pinyin and brief English glosses for key words."
-    )
-
-    if mode == "review":
-        system_prompt = base_prompt + (
-            " The user is reviewing previously highlighted Chinese snippets. "
-            "Use ONLY the provided highlight texts."
+    try:
+        response = requests.post(
+            "https://api.deepseek.com/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": "deepseek-chat",
+                "messages": messages,
+                "stream": False,
+                "temperature": 0.7 if mode != "translate" else 0.3,  # lower for translate
+            },
+            timeout=30,
         )
-    else:
-        system_prompt = base_prompt
 
-    body = {
-        "model": "deepseek-chat",
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_msg},
-        ],
-        "stream": False,
-    }
+        response.raise_for_status()
+        data = response.json()
 
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-    }
+        reply = data["choices"][0]["message"]["content"].strip()
 
-    r = requests.post(
-        "https://api.deepseek.com/chat/completions",
-        headers=headers,
-        json=body,
-        timeout=30,
-    )
+    except requests.Timeout:
+        logger.error("DeepSeek API timeout")
+        return JsonResponse({"error": "Request timeout. Please try again."}, status=504)
+    except Exception as e:
+        logger.exception("DeepSeek API error")
+        return JsonResponse({"error": "Failed to get response from AI"}, status=502)
 
-    if r.status_code != 200:
-        return JsonResponse({"error": "LLM error"}, status=502)
-
-    reply = r.json()["choices"][0]["message"]["content"]
-
-    # save assistant message
+    # Save assistant's reply
     ChatMessage.objects.create(
         session=session,
         role="assistant",
         content=reply,
     )
 
-    # update title + timestamp
-    if not session.title:
-        session.title = user_msg[:80]
-    session.updated_at = timezone.now()
-    session.save(update_fields=["title", "updated_at"])
+    # Auto-update session title if it's still empty/default
+    if not session.title or session.title == "New Chat":
+        session.title = user_msg[:60].strip() + "..." if len(user_msg) > 60 else user_msg
+        session.updated_at = timezone.now()
+        session.save(update_fields=["title", "updated_at"])
 
-    return JsonResponse({"reply": reply})
+    return JsonResponse({
+        "reply": reply,
+        "mode_used": mode,           # useful for debugging frontend
+    })
 
 # =========================
 # CHAT HIGHLIGHTS API
