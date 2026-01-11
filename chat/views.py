@@ -97,10 +97,6 @@ def chat(request: HttpRequest) -> HttpResponse:
 @login_required
 @csrf_exempt
 def chat_api(request):
-    """
-    Main chat API endpoint.
-    Handles normal conversation, translate mode, and review mode.
-    """
     try:
         payload = json.loads(request.body.decode("utf-8"))
     except Exception as e:
@@ -116,7 +112,6 @@ def chat_api(request):
 
     user = request.user
 
-    # Debug logging - very useful during development
     logger.info(
         "chat_api called | user=%s | mode=%s | session_id=%s | msg_preview=%s...",
         user.username,
@@ -131,7 +126,6 @@ def chat_api(request):
         if not session:
             return JsonResponse({"error": "Session not found."}, status=404)
     else:
-        # Fallback: most recent session or create new
         session = ChatSession.objects.filter(user=user).order_by("-updated_at").first()
         if not session:
             session = ChatSession.objects.create(user=user, title="New Chat")
@@ -143,7 +137,7 @@ def chat_api(request):
         content=user_msg,
     )
 
-    # Select system prompt based on mode
+    # Select system prompt
     if mode == "translate":
         system_prompt = (
             "You are a professional, precise translator. "
@@ -162,7 +156,7 @@ def chat_api(request):
             "highlighted Chinese snippets. Use simple explanations, give 1-2 natural "
             "examples. Include pinyin when useful. Keep answers clear and encouraging."
         )
-    else:  # normal conversation/learning mode
+    else:
         system_prompt = (
             "You are a patient, upbeat, encouraging Chinese language tutor. "
             "Use simple, clear explanations and give 1-2 good example sentences. "
@@ -170,13 +164,11 @@ def chat_api(request):
             "Be friendly and supportive. Keep most answers in Chinese when appropriate."
         )
 
-    # Build messages for DeepSeek
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_msg},
     ]
 
-    # Call DeepSeek API
     api_key = getattr(settings, "DEEPSEEK_API_KEY", None) or os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
         logger.error("DEEPSEEK_API_KEY not configured")
@@ -193,40 +185,44 @@ def chat_api(request):
                 "model": "deepseek-chat",
                 "messages": messages,
                 "stream": False,
-                "temperature": 0.7 if mode != "translate" else 0.3,  # lower for translate
+                "temperature": 0.7 if mode != "translate" else 0.3,
             },
             timeout=30,
         )
-
         response.raise_for_status()
         data = response.json()
-
         reply = data["choices"][0]["message"]["content"].strip()
 
     except requests.Timeout:
         logger.error("DeepSeek API timeout")
         return JsonResponse({"error": "Request timeout. Please try again."}, status=504)
-    except Exception as e:
+    except Exception:
         logger.exception("DeepSeek API error")
         return JsonResponse({"error": "Failed to get response from AI"}, status=502)
 
-    # Save assistant's reply
-    ChatMessage.objects.create(
+    # Save assistant's reply (IMPORTANT: assign it)
+    assistant_msg = ChatMessage.objects.create(
         session=session,
         role="assistant",
         content=reply,
     )
 
-    # Auto-update session title if it's still empty/default
+    # Update title + updated_at once
+    update_fields = ["updated_at"]
+    session.updated_at = timezone.now()
+
     if not session.title or session.title == "New Chat":
         session.title = user_msg[:60].strip() + "..." if len(user_msg) > 60 else user_msg
-        session.updated_at = timezone.now()
-        session.save(update_fields=["title", "updated_at"])
+        update_fields.append("title")
+
+    session.save(update_fields=update_fields)
 
     return JsonResponse({
         "reply": reply,
-        "mode_used": mode,           # useful for debugging frontend
+        "mode_used": mode,
+        "message_id": assistant_msg.id,  # <-- now valid
     })
+
 
 # =========================
 # CHAT HIGHLIGHTS API
@@ -234,42 +230,40 @@ def chat_api(request):
 @login_required
 @require_http_methods(["GET", "POST"])
 def chat_highlights(request: HttpRequest) -> JsonResponse:
-    """
-    /chat/api/highlights/
-    GET -> list chat highlights (optionally by ?session=<id>)
-    POST -> create a chat highlight
-    """
     user = request.user
-    # ---- resolve session safely ----
-    session_id = request.GET.get("session")
-    session = None
-    if session_id:
-        session = ChatSession.objects.filter(user=user, pk=session_id).first()
-    if session is None:
-        session = (
-            ChatSession.objects.filter(user=user)
-            .order_by("-updated_at")
-            .first()
-        )
-    # ---- GET ----
+
+    # ---------- GET ----------
     if request.method == "GET":
-        qs = Highlight.objects.filter(
-            user=user,
-            source="chat",
-        )
-        if session:
-            qs = qs.filter(chat_session=session)
-        data = [{"id": h.id, "text": h.highlighted_text} for h in qs.order_by("created_at")]
+        session_id = request.GET.get("session")
+        qs = Highlight.objects.filter(user=user, source="chat")
+
+        if session_id:
+            qs = qs.filter(chat_session_id=session_id)
+
+        data = [
+            {
+                "id": h.id,
+                "text": h.highlighted_text,
+                "message_id": h.chat_message_id,   # <-- key change
+            }
+            for h in qs.order_by("created_at")
+        ]
         return JsonResponse(data, safe=False)
-    # ---- POST ----
+
+    # ---------- POST ----------
     try:
         payload = json.loads(request.body.decode("utf-8"))
     except Exception:
         return JsonResponse({"error": "Invalid JSON"}, status=400)
+
     text = (payload.get("text") or "").strip()
+    session_id = payload.get("session_id")
+    message_id = payload.get("message_id")
+
     if not text:
         return JsonResponse({"error": "Text is required"}, status=400)
-    # ---- daily limit (ALL highlights count, same as before) ----
+
+    # Daily limit stays the same
     subscription = Subscription.objects.filter(user=user).first()
     if subscription and subscription.tier == "FREE":
         today = timezone.now().date()
@@ -278,20 +272,65 @@ def chat_highlights(request: HttpRequest) -> JsonResponse:
                 {"error": "Daily highlight limit reached", "limit_reached": True},
                 status=403,
             )
-    # IMPORTANT: chat highlights DO NOT set media timing fields
+
+    # If message_id is provided, infer session from the message
+    chat_message = None
+    session = None
+
+    if message_id:
+        chat_message = ChatMessage.objects.filter(
+            id=message_id,
+            session__user=user
+        ).select_related("session").first()
+
+        if not chat_message:
+            return JsonResponse({"error": "Message not found"}, status=404)
+
+        session = chat_message.session
+
+        # Enforce one highlight per message (toggle behavior)
+        existing = Highlight.objects.filter(
+            user=user,
+            source="chat",
+            chat_message=chat_message
+        ).first()
+        if existing:
+            return JsonResponse(
+                {
+                    "id": existing.id,
+                    "text": existing.highlighted_text,
+                    "message_id": existing.chat_message_id,
+                    "already_exists": True,
+                },
+                status=200,
+            )
+
+    else:
+        # Text selection highlights must provide session_id
+        if not session_id:
+            return JsonResponse({"error": "session_id is required"}, status=400)
+
+        session = ChatSession.objects.filter(user=user, pk=session_id).first()
+        if not session:
+            return JsonResponse({"error": "Session not found"}, status=404)
+
     new_highlight = Highlight.objects.create(
         user=user,
         source="chat",
         chat_session=session,
+        chat_message=chat_message,     # <-- message-level if present
         highlighted_text=text,
     )
+
     profile = user.profile
     profile.total_highlights += 1
     profile.save(update_fields=["total_highlights"])
+
     return JsonResponse(
         {
             "id": new_highlight.id,
             "text": new_highlight.highlighted_text,
+            "message_id": new_highlight.chat_message_id,
         },
         status=201,
     )
@@ -340,3 +379,21 @@ def create_chat_category(request: HttpRequest) -> JsonResponse:
 
     obj, created = ChatCategory.objects.get_or_create(user=request.user, name=name)
     return JsonResponse({"id": obj.id, "name": obj.name, "created": created})
+
+@login_required
+@require_http_methods(["DELETE"])
+def chat_highlight_detail(request: HttpRequest, highlight_id: int) -> JsonResponse:
+    h = Highlight.objects.filter(id=highlight_id, user=request.user, source="chat").first()
+    if not h:
+        return JsonResponse({"error": "Not found"}, status=404)
+
+    h.delete()
+
+    # keep profile count sane
+    profile = request.user.profile
+    if profile.total_highlights > 0:
+        profile.total_highlights -= 1
+        profile.save(update_fields=["total_highlights"])
+
+    return JsonResponse({"ok": True})
+

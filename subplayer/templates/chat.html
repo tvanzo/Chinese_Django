@@ -1388,6 +1388,86 @@
 
     sendButton.addEventListener("click", sendMessage);
 
+    /* =========================================================
+       ✅ HIGHLIGHTS STATE (FIXED)
+       - allHighlights: everything from API (text + message highlights)
+       - selectionHighlights: only text snippets (no message_id)
+       - messageHighlightIdByMessageId: message_id -> highlight.id
+       ========================================================= */
+    let allHighlights = [];
+    let selectionHighlights = [];
+
+    const messageHighlightIdByMessageId = new Map(); // msgId(string) -> highlightId(string)
+    const messageHighlightedIds = new Set();          // msgId(string)
+
+    /* =========================================================
+       Fetch highlights (single source of truth)
+       ========================================================= */
+    async function fetchAllHighlights() {
+      try {
+        const res = await fetch("/chat/api/highlights/?session={{ current_session.id }}", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!res.ok) return;
+
+        const data = await res.json();
+        allHighlights = Array.isArray(data) ? data : [];
+
+        // Reset message maps
+        messageHighlightIdByMessageId.clear();
+        messageHighlightedIds.clear();
+
+        // Split
+        selectionHighlights = [];
+        allHighlights.forEach(h => {
+          if (h && h.message_id) {
+            const mid = String(h.message_id);
+            messageHighlightedIds.add(mid);
+            if (h.id != null) messageHighlightIdByMessageId.set(mid, String(h.id));
+          } else if (h && h.text) {
+            selectionHighlights.push(h);
+          }
+        });
+
+        updateHighlightButtons();
+        applyAllChatHighlights();
+      } catch (e) {
+        console.error("Error fetching highlights:", e);
+      }
+    }
+
+    /* =========================================================
+       Apply selection highlights (yellow span)
+       ========================================================= */
+    function escapeRegExp(str) {
+      return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function applyHighlightsToElement(el) {
+      const originalText = el.textContent;
+      if (!originalText) return;
+
+      let html = originalText;
+
+      selectionHighlights.forEach((h) => {
+        if (!h.text) return;
+        const safe = escapeRegExp(h.text);
+        const re = new RegExp(safe, "g");
+        html = html.replace(re, '<span class="perm-highlight">$&</span>');
+      });
+
+      el.innerHTML = html;
+    }
+
+    function applyAllChatHighlights() {
+      const messageEls = chatMessages.querySelectorAll(".chat-message-text");
+      messageEls.forEach((el) => applyHighlightsToElement(el));
+    }
+
+    /* =========================================================
+       Append message
+       ========================================================= */
     function appendMessage({ role, text, messageId }) {
       const container = document.createElement("div");
       container.className =
@@ -1431,6 +1511,11 @@
 
         // Attach click handler
         highlightBtn.addEventListener("click", handleMessageHighlight);
+
+        // If already highlighted (rare but possible on reload logic), reflect UI
+        if (messageId && messageHighlightedIds.has(String(messageId))) {
+          highlightBtn.classList.add("highlighted");
+        }
       }
 
       chatMessages.appendChild(container);
@@ -1439,6 +1524,9 @@
       applyHighlightsToElement(msg);
     }
 
+    /* =========================================================
+       Typing indicator
+       ========================================================= */
     function showTyping() {
       const typing = document.createElement("div");
       typing.className = "message-container bot-message-container";
@@ -1463,6 +1551,9 @@
       if (el) el.remove();
     }
 
+    /* =========================================================
+       Sending messages
+       ========================================================= */
     async function sendMessage() {
       const message = userInput.value.trim();
       if (!message) return;
@@ -1522,126 +1613,13 @@
     userInput.focus();
 
     /* =========================================================
-       ⭐ NEW: Message-level highlight functionality
+       ⭐ Message-level highlight (FIXED mapping)
        ========================================================= */
-    let messageHighlights = new Set(); // Store highlighted message IDs
-
-   async function handleMessageHighlight(e) {
-    const btn = e.currentTarget;
-    const messageId = btn.getAttribute("data-message-id");
-    const container = btn.closest(".message-container");
-    const messageEl = container?.querySelector(".chat-message-text");
-
-    if (!messageId || !messageEl) return;
-
-    const text = messageEl.textContent.trim();
-    const isHighlighted = messageHighlights.has(messageId);
-
-    if (isHighlighted) {
-        const success = await removeMessageHighlight(messageId);
-        if (success) {
-            messageHighlights.delete(messageId);
-            btn.classList.remove("highlighted");
-        }
-    } else {
-        const success = await createMessageHighlight(messageId, text);
-        if (success) {
-            messageHighlights.add(messageId);
-            btn.classList.add("highlighted");
-        }
-    }
-}
-
-    // 1. Create highlight (this is the one that needs the biggest change)
-async function createMessageHighlight(messageId, text) {
-    try {
-        const res = await fetch("/chat/api/highlights/", {  // ← your existing endpoint!
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": CSRF_TOKEN,
-            },
-            body: JSON.stringify({
-                message_id: messageId,   // ← very important!
-                text: text.trim()        // the AI response text
-            }),
-        });
-
-        if (!res.ok) {
-            const data = await res.json();
-            if (data.limit_reached) {
-                alert("You've reached your daily highlight limit (3 for free users). Upgrade for unlimited!");
-            } else {
-                console.error("Highlight creation failed:", data);
-                alert("Failed to save highlight. Please try again.");
-            }
-            return false;
-        }
-
-        const data = await res.json();
-        chatHighlights.push(data);  // Add to local array for review panel
-        return true;
-
-    } catch (e) {
-        console.error("Network error creating highlight:", e);
-        alert("Network error. Please check your connection.");
-        return false;
-    }
-}
-
-// 2. Remove highlight (toggle off)
-async function removeMessageHighlight(messageId) {
-    try {
-        const res = await fetch(`/chat/api/highlights/${messageId}/`, {
-            method: "DELETE",
-            headers: {
-                "X-CSRFToken": CSRF_TOKEN,
-            },
-        });
-
-        if (res.ok) {
-            // Remove from local array
-            chatHighlights = chatHighlights.filter(h => h.message_id !== messageId);
-            return true;
-        } else {
-            console.error("Failed to delete highlight");
-            return false;
-        }
-    } catch (e) {
-        console.error("Error removing highlight:", e);
-        return false;
-    }
-}
-
-// 3. Fetch all highlights (update to recognize message_id)
-async function fetchMessageHighlights() {
-    try {
-        const res = await fetch(`/chat/api/highlights/?session={{ current_session.id }}`);
-        if (!res.ok) return;
-
-        const data = await res.json();
-        chatHighlights = data;
-
-        // Update which messages are highlighted
-        messageHighlights.clear();
-        data.forEach(h => {
-            if (h.message_id) {
-                messageHighlights.add(h.message_id.toString());
-            }
-        });
-
-        updateHighlightButtons();
-        applyAllChatHighlights(); // optional, if you want visual spans
-    } catch (e) {
-        console.error("Error fetching message highlights:", e);
-    }
-}
-
     function updateHighlightButtons() {
       const allBtns = document.querySelectorAll(".message-highlight-btn");
       allBtns.forEach(btn => {
         const msgId = btn.getAttribute("data-message-id");
-        if (msgId && messageHighlights.has(msgId)) {
+        if (msgId && messageHighlightedIds.has(String(msgId))) {
           btn.classList.add("highlighted");
           btn.setAttribute("title", "Remove highlight");
         } else {
@@ -1651,29 +1629,112 @@ async function fetchMessageHighlights() {
       });
     }
 
-    // Attach event listeners to existing highlight buttons
+    async function createMessageHighlight(messageId, text) {
+      try {
+        const res = await fetch("/chat/api/highlights/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": CSRF_TOKEN,
+          },
+          body: JSON.stringify({
+            session_id: {{ current_session.id }},
+            message_id: messageId,
+            text: text.trim()
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          if (data && data.limit_reached) {
+            alert("You've reached your daily highlight limit (3 for free users). Upgrade for unlimited!");
+          } else {
+            console.error("Highlight creation failed:", data);
+            alert("Failed to save highlight. Please try again.");
+          }
+          return null;
+        }
+
+        // store mapping (message_id -> highlight.id)
+        if (data && data.id != null) {
+          messageHighlightIdByMessageId.set(String(messageId), String(data.id));
+          messageHighlightedIds.add(String(messageId));
+        }
+
+        // keep in allHighlights for review panel
+        allHighlights.push(data);
+        return data;
+
+      } catch (e) {
+        console.error("Network error creating highlight:", e);
+        alert("Network error. Please check your connection.");
+        return null;
+      }
+    }
+
+    async function removeMessageHighlight(messageId) {
+      try {
+        const mid = String(messageId);
+        const highlightId = messageHighlightIdByMessageId.get(mid);
+        if (!highlightId) return false;
+
+        const res = await fetch(`/chat/api/highlights/${highlightId}/`, {
+          method: "DELETE",
+          headers: { "X-CSRFToken": CSRF_TOKEN },
+        });
+
+        if (!res.ok) {
+          console.error("Failed to delete highlight");
+          return false;
+        }
+
+        // update local state
+        messageHighlightIdByMessageId.delete(mid);
+        messageHighlightedIds.delete(mid);
+        allHighlights = allHighlights.filter(h => !(h && String(h.id) === String(highlightId)));
+
+        return true;
+      } catch (e) {
+        console.error("Error removing highlight:", e);
+        return false;
+      }
+    }
+
+    async function handleMessageHighlight(e) {
+      const btn = e.currentTarget;
+      const messageId = btn.getAttribute("data-message-id");
+      const container = btn.closest(".message-container");
+      const messageEl = container?.querySelector(".chat-message-text");
+
+      if (!messageId || !messageEl) return;
+
+      const text = messageEl.textContent.trim();
+      const isHighlighted = messageHighlightedIds.has(String(messageId));
+
+      if (isHighlighted) {
+        const success = await removeMessageHighlight(messageId);
+        if (success) {
+          btn.classList.remove("highlighted");
+        }
+      } else {
+        const created = await createMessageHighlight(messageId, text);
+        if (created) {
+          btn.classList.add("highlighted");
+        }
+      }
+
+      updateHighlightButtons();
+    }
+
+    // Attach to existing buttons
     document.querySelectorAll(".message-highlight-btn").forEach(btn => {
       btn.addEventListener("click", handleMessageHighlight);
     });
 
     /* =========================================================
-       Text selection highlights (original functionality)
+       Text selection highlights (kept separate)
        ========================================================= */
-    let chatHighlights = [];
-
-    async function fetchChatHighlights() {
-      try {
-        const res = await fetch("/chat/api/highlights/?session={{ current_session.id }}", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        chatHighlights = data || [];
-        applyAllChatHighlights();
-      } catch (e) {}
-    }
-
     async function createChatHighlight(text) {
       try {
         const res = await fetch("/chat/api/highlights/", {
@@ -1682,40 +1743,23 @@ async function fetchMessageHighlights() {
             "Content-Type": "application/json",
             "X-CSRFToken": CSRF_TOKEN,
           },
-          body: JSON.stringify({ text }),
+          body: JSON.stringify({
+            session_id: {{ current_session.id }},
+            text
+          }),
         });
+
         const data = await res.json();
         if (!res.ok) return null;
-        chatHighlights.push(data);
+
+        // keep in both arrays
+        allHighlights.push(data);
+        if (!data.message_id) selectionHighlights.push(data);
+
         return data;
       } catch (e) {
         return null;
       }
-    }
-
-    function applyAllChatHighlights() {
-      const messageEls = chatMessages.querySelectorAll(".chat-message-text");
-      messageEls.forEach((el) => applyHighlightsToElement(el));
-    }
-
-    function escapeRegExp(str) {
-      return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    }
-
-    function applyHighlightsToElement(el) {
-      const originalText = el.textContent;
-      if (!originalText) return;
-
-      let html = originalText;
-
-      chatHighlights.forEach((h) => {
-        if (!h.text) return;
-        const safe = escapeRegExp(h.text);
-        const re = new RegExp(safe, "g");
-        html = html.replace(re, '<span class="perm-highlight">$&</span>');
-      });
-
-      el.innerHTML = html;
     }
 
     document.addEventListener("keydown", async function (e) {
@@ -1784,11 +1828,12 @@ async function fetchMessageHighlights() {
     });
 
     /* =========================================================
-       Review Panel
+       Review Panel (uses allHighlights)
        ========================================================= */
     function renderHighlightCards() {
       highlightCardsEl.innerHTML = "";
-      if (!chatHighlights.length) {
+
+      if (!allHighlights.length) {
         const empty = document.createElement("div");
         empty.className = "chat-history-empty";
         empty.textContent = "No highlights yet. Click the ⭐ button on any AI response.";
@@ -1796,12 +1841,14 @@ async function fetchMessageHighlights() {
         return;
       }
 
-      chatHighlights.forEach((h, idx) => {
+      allHighlights.forEach((h, idx) => {
         const card = document.createElement("div");
         card.className = "highlight-card";
+        const prefix = h && h.message_id ? "★ " : "";
+        const text = (h && h.text) ? h.text : "";
         card.innerHTML = `
           <input type="checkbox" value="${idx}" />
-          <div class="highlight-card-text">${h.text}</div>
+          <div class="highlight-card-text">${prefix}${text}</div>
         `;
         highlightCardsEl.appendChild(card);
       });
@@ -1827,7 +1874,7 @@ async function fetchMessageHighlights() {
 
       const texts = checked.map((input) => {
         const idx = parseInt(input.value, 10);
-        return chatHighlights[idx].text;
+        return allHighlights[idx].text;
       });
 
       const combined = texts.map((t, i) => `${i + 1}. ${t}`).join("\n");
@@ -1925,8 +1972,7 @@ async function fetchMessageHighlights() {
     })();
 
     /* Init */
-    fetchChatHighlights();
-    fetchMessageHighlights(); // Fetch message-level highlights
+    fetchAllHighlights();
     loadChatHistoryCollapsed();
     loadTranslateMode();
   </script>

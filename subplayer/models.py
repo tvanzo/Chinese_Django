@@ -89,7 +89,13 @@ class Highlight(models.Model):
         null=True,
         blank=True
     )
-
+    chat_message = models.ForeignKey(
+        "accounts.ChatMessage",
+        on_delete=models.CASCADE,
+        related_name="highlights",
+        null=True,
+        blank=True,
+    )
     # ===== MEDIA-SPECIFIC FIELDS =====
     start_time = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     end_time = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
