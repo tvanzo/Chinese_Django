@@ -1617,40 +1617,52 @@ async function removeMessageHighlight(messageId) {
 async function fetchMessageHighlights() {
     try {
         const res = await fetch(`/chat/api/highlights/?session={{ current_session.id }}`);
-        if (!res.ok) return;
+        if (!res.ok) {
+            console.warn("Highlights fetch failed:", res.status);
+            return;
+        }
 
         const data = await res.json();
-        chatHighlights = data;
+        chatHighlights = data;  // Store full list
 
-        // Update which messages are highlighted
+        // Clear and rebuild the highlighted message IDs Set
         messageHighlights.clear();
         data.forEach(h => {
-            if (h.message_id) {
+            if (h.message_id) {  // Only if your backend now returns message_id (optional but good)
                 messageHighlights.add(h.message_id.toString());
+            } else {
+                // Fallback: if no message_id, you could match by text (less reliable)
+                // messageHighlights.add(h.text); // but avoid for now
             }
         });
 
+        // Force update all buttons on page
         updateHighlightButtons();
-        applyAllChatHighlights(); // optional, if you want visual spans
+
+        // Optional: re-apply text highlights too
+        applyAllChatHighlights();
+
+        console.log("Highlights loaded:", chatHighlights.length, "highlighted IDs:", Array.from(messageHighlights));
     } catch (e) {
         console.error("Error fetching message highlights:", e);
     }
 }
-
     function updateHighlightButtons() {
-      const allBtns = document.querySelectorAll(".message-highlight-btn");
-      allBtns.forEach(btn => {
+    const allBtns = document.querySelectorAll(".message-highlight-btn");
+    console.log("Updating", allBtns.length, "star buttons...");
+
+    allBtns.forEach(btn => {
         const msgId = btn.getAttribute("data-message-id");
         if (msgId && messageHighlights.has(msgId)) {
-          btn.classList.add("highlighted");
-          btn.setAttribute("title", "Remove highlight");
+            btn.classList.add("highlighted");
+            btn.setAttribute("title", "Remove highlight");
+            console.log("Filled star for msg", msgId);
         } else {
-          btn.classList.remove("highlighted");
-          btn.setAttribute("title", "Highlight this response");
+            btn.classList.remove("highlighted");
+            btn.setAttribute("title", "Highlight this response");
         }
-      });
-    }
-
+    });
+}
     // Attach event listeners to existing highlight buttons
     document.querySelectorAll(".message-highlight-btn").forEach(btn => {
       btn.addEventListener("click", handleMessageHighlight);
