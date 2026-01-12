@@ -228,112 +228,133 @@ def chat_api(request):
 # CHAT HIGHLIGHTS API
 # =========================
 @login_required
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["GET", "POST", "DELETE"])
 def chat_highlights(request: HttpRequest) -> JsonResponse:
     user = request.user
 
-    # ---------- GET ----------
-    if request.method == "GET":
-        session_id = request.GET.get("session")
-        qs = Highlight.objects.filter(user=user, source="chat")
+    # ── Resolve session from GET param (used mostly for GET) ──
+    session_id_from_get = request.GET.get("session")
 
-        if session_id:
-            qs = qs.filter(chat_session_id=session_id)
+    # ── GET: List highlights for a session ──
+    if request.method == "GET":
+        qs = Highlight.objects.filter(user=user, source="chat")
+        if session_id_from_get:
+            qs = qs.filter(chat_session_id=session_id_from_get)
 
         data = [
             {
                 "id": h.id,
                 "text": h.highlighted_text,
-                "message_id": h.chat_message_id,   # <-- key change
+                "message_id": h.chat_message_id if hasattr(h, 'chat_message') and h.chat_message else None,
             }
             for h in qs.order_by("created_at")
         ]
         return JsonResponse(data, safe=False)
 
-    # ---------- POST ----------
-    try:
-        payload = json.loads(request.body.decode("utf-8"))
-    except Exception:
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    # ── POST: Create highlight ──
+    if request.method == "POST":
+        try:
+            payload = json.loads(request.body.decode("utf-8"))
+        except Exception:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
 
-    text = (payload.get("text") or "").strip()
-    session_id = payload.get("session_id")
-    message_id = payload.get("message_id")
+        text = (payload.get("text") or "").strip()
+        message_id = payload.get("message_id")
+        session_id = payload.get("session_id")  # optional, fallback if no message_id
 
-    if not text:
-        return JsonResponse({"error": "Text is required"}, status=400)
+        if not text:
+            return JsonResponse({"error": "Text is required"}, status=400)
 
-    # Daily limit stays the same
-    subscription = Subscription.objects.filter(user=user).first()
-    if subscription and subscription.tier == "FREE":
-        today = timezone.now().date()
-        if Highlight.objects.filter(user=user, created_at__date=today).count() >= 3:
-            return JsonResponse(
-                {"error": "Daily highlight limit reached", "limit_reached": True},
-                status=403,
+        # Daily limit
+        subscription = Subscription.objects.filter(user=user).first()
+        if subscription and subscription.tier == "FREE":
+            today = timezone.now().date()
+            if Highlight.objects.filter(user=user, created_at__date=today).count() >= 3:
+                return JsonResponse(
+                    {"error": "Daily highlight limit reached", "limit_reached": True},
+                    status=403,
+                )
+
+        chat_message = None
+        session = None
+
+        # If message_id provided → use it to get session and enforce one per message
+        if message_id:
+            chat_message = get_object_or_404(
+                ChatMessage, id=message_id, session__user=user
             )
+            session = chat_message.session
 
-    # If message_id is provided, infer session from the message
-    chat_message = None
-    session = None
+            # Check if already highlighted (toggle behavior)
+            existing = Highlight.objects.filter(
+                user=user,
+                source="chat",
+                chat_message=chat_message
+            ).first()
+            if existing:
+                return JsonResponse(
+                    {
+                        "id": existing.id,
+                        "text": existing.highlighted_text,
+                        "message_id": existing.chat_message_id,
+                        "already_exists": True,
+                    },
+                    status=200,
+                )
 
-    if message_id:
-        chat_message = ChatMessage.objects.filter(
-            id=message_id,
-            session__user=user
-        ).select_related("session").first()
+        # Fallback for text-only highlights (Shift + select)
+        else:
+            if not session_id:
+                return JsonResponse({"error": "session_id required for text-only highlight"}, status=400)
+            session = get_object_or_404(ChatSession, id=session_id, user=user)
 
-        if not chat_message:
-            return JsonResponse({"error": "Message not found"}, status=404)
-
-        session = chat_message.session
-
-        # Enforce one highlight per message (toggle behavior)
-        existing = Highlight.objects.filter(
+        # Create
+        new_highlight = Highlight.objects.create(
             user=user,
             source="chat",
-            chat_message=chat_message
-        ).first()
-        if existing:
-            return JsonResponse(
-                {
-                    "id": existing.id,
-                    "text": existing.highlighted_text,
-                    "message_id": existing.chat_message_id,
-                    "already_exists": True,
-                },
-                status=200,
-            )
+            chat_session=session,
+            chat_message=chat_message,  # safe even if None
+            highlighted_text=text,
+        )
 
-    else:
-        # Text selection highlights must provide session_id
-        if not session_id:
-            return JsonResponse({"error": "session_id is required"}, status=400)
+        profile = user.profile
+        profile.total_highlights += 1
+        profile.save(update_fields=["total_highlights"])
 
-        session = ChatSession.objects.filter(user=user, pk=session_id).first()
-        if not session:
-            return JsonResponse({"error": "Session not found"}, status=404)
+        return JsonResponse(
+            {
+                "id": new_highlight.id,
+                "text": new_highlight.highlighted_text,
+                "message_id": new_highlight.chat_message_id if new_highlight.chat_message else None,
+            },
+            status=201,
+        )
 
-    new_highlight = Highlight.objects.create(
-        user=user,
-        source="chat",
-        chat_session=session,
-        chat_message=chat_message,     # <-- message-level if present
-        highlighted_text=text,
-    )
+    # ── DELETE: Remove highlight ──
+    if request.method == "DELETE":
+        try:
+            payload = json.loads(request.body.decode("utf-8")) if request.body else {}
+        except Exception:
+            payload = {}
 
-    profile = user.profile
-    profile.total_highlights += 1
-    profile.save(update_fields=["total_highlights"])
+        message_id = payload.get("message_id")
+        text = payload.get("text", "").strip()
 
-    return JsonResponse(
-        {
-            "id": new_highlight.id,
-            "text": new_highlight.highlighted_text,
-            "message_id": new_highlight.chat_message_id,
-        },
-        status=201,
-    )
+        qs = Highlight.objects.filter(user=user, source="chat")
+
+        if message_id:
+            qs = qs.filter(chat_message_id=message_id)
+        elif text:
+            qs = qs.filter(highlighted_text__exact=text)
+        else:
+            return JsonResponse({"error": "message_id or text required for delete"}, status=400)
+
+        deleted_count, _ = qs.delete()
+
+        if deleted_count == 0:
+            return JsonResponse({"error": "No matching highlight found"}, status=404)
+
+        return JsonResponse({"success": True, "deleted_count": deleted_count})
 @login_required
 @csrf_exempt
 @require_http_methods(["POST"])

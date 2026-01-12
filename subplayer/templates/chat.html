@@ -1673,33 +1673,25 @@
       }
     }
 
-    async function removeMessageHighlight(messageId) {
-      try {
-        const mid = String(messageId);
-        const highlightId = messageHighlightIdByMessageId.get(mid);
-        if (!highlightId) return false;
-
-        const res = await fetch(`/chat/api/highlights/${highlightId}/`, {
-          method: "DELETE",
-          headers: { "X-CSRFToken": CSRF_TOKEN },
+    async function removeMessageHighlight(messageId, text) {
+    try {
+        const res = await fetch("/chat/api/highlights/", {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": CSRF_TOKEN,
+            },
+            body: JSON.stringify({
+                message_id: messageId || null,
+                text: text || null
+            }),
         });
-
-        if (!res.ok) {
-          console.error("Failed to delete highlight");
-          return false;
-        }
-
-        // update local state
-        messageHighlightIdByMessageId.delete(mid);
-        messageHighlightedIds.delete(mid);
-        allHighlights = allHighlights.filter(h => !(h && String(h.id) === String(highlightId)));
-
-        return true;
-      } catch (e) {
-        console.error("Error removing highlight:", e);
+        return res.ok;
+    } catch (e) {
+        console.error("Remove failed:", e);
         return false;
-      }
     }
+}
 
     async function handleMessageHighlight(e) {
       const btn = e.currentTarget;
