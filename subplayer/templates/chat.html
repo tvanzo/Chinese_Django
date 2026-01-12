@@ -336,7 +336,7 @@
     }
 
     /* =========================================================
-       ⭐ NEW: Highlight button for each message
+       ⭐ Highlight button for each message
        ========================================================= */
     .message-highlight-btn {
       position: absolute;
@@ -380,9 +380,7 @@
 
     /* Mobile: always show highlight button */
     @media (max-width: 768px) {
-      .message-highlight-btn {
-        opacity: 1;
-      }
+      .message-highlight-btn { opacity: 1; }
     }
 
     .tip {
@@ -481,10 +479,7 @@
       cursor: not-allowed;
     }
 
-    .send-button svg {
-      width: 18px;
-      height: 18px;
-    }
+    .send-button svg { width: 18px; height: 18px; }
 
     .perm-highlight {
       background-color: rgba(255, 230, 0, 0.45);
@@ -654,18 +649,13 @@
     @media (max-width: 768px) {
       .chat-page-wrapper { margin-left: 0 !important; padding: 8px; }
       .chat-shell { border-radius: 14px; }
-
-      /* Hide desktop chat history column entirely on mobile */
       .chat-history { display: none !important; }
-
-      /* Show mobile-only elements */
       #siteSidenavOpenBtn { display: inline-flex; }
       #openMobileDrawerBtn { display: inline-flex; }
       .mobile-highlight-pill { display: inline-flex; }
     }
 
     @media (min-width: 769px) {
-      /* Desktop: hide the two mobile header buttons */
       #siteSidenavOpenBtn,
       #openMobileDrawerBtn {
         display: none !important;
@@ -883,14 +873,12 @@
             <div class="chat-history-title">Chats</div>
             <div style="display:flex; gap:8px; align-items:center;">
               <button class="round-btn" id="collapseChatHistoryBtn" aria-label="Collapse chat list" title="Collapse" type="button">
-                <!-- chevron-left -->
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M15 18l-6-6 6-6"></path>
                 </svg>
               </button>
 
               <button class="new-chat-btn" id="newChatBtn" type="button">
-                <!-- plus -->
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
                      viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -929,7 +917,6 @@
             <div class="chat-history-categories-top">
               <span class="chat-history-categories-label">Categories</span>
               <button type="button" class="chat-history-add-category-btn" id="addCategoryBtn" aria-label="Add category" title="Add category">
-                <!-- plus -->
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 5v14M5 12h14"></path>
                 </svg>
@@ -961,7 +948,6 @@
 
             <!-- ✅ Mobile: open SITEWIDE sidebar drawer -->
             <button class="round-btn" id="siteSidenavOpenBtn" aria-label="Open menu" title="Menu" type="button">
-              <!-- compass-ish -->
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <path d="M16 8l-2 8-8 2 2-8 8-2z"></path>
@@ -970,7 +956,6 @@
 
             <!-- ✅ Mobile: open CHAT HISTORY drawer -->
             <button class="round-btn" id="openMobileDrawerBtn" aria-label="Open chats" title="Chats" type="button">
-              <!-- hamburger -->
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                 <path d="M4 6h16M4 12h16M4 18h16"></path>
               </svg>
@@ -978,7 +963,6 @@
 
             <!-- ✅ Desktop: collapse/expand chat history -->
             <button class="round-btn" id="expandChatHistoryBtn" aria-label="Toggle chat list" title="Chats" type="button">
-              <!-- list -->
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                 <path d="M8 6h13M8 12h13M8 18h13"></path>
                 <path d="M3 6h.01M3 12h.01M3 18h.01"></path>
@@ -1012,7 +996,6 @@
                   </div>
                   {% if m.role != 'user' %}
                     <button class="message-highlight-btn" data-message-id="{{ m.id }}" aria-label="Highlight this response" title="Highlight this response" type="button">
-                      <!-- star icon -->
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                       </svg>
@@ -1032,11 +1015,11 @@
 
           <div class="tip">
             Press Enter to send • Shift+Enter for a new line • <strong>Click ⭐ to highlight a response</strong>
+            • <strong>Press Shift on a selection to highlight (or on a yellow highlight to remove)</strong>
           </div>
 
           <div class="highlight-review-toggle">
             <button id="reviewHighlightsBtn" class="review-btn" type="button">
-              <!-- marker -->
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9 11l6 6"></path>
                 <path d="M11 9l4 4"></path>
@@ -1390,8 +1373,8 @@
 
     /* =========================================================
        ✅ HIGHLIGHTS STATE (FIXED)
-       - allHighlights: everything from API (text + message highlights)
-       - selectionHighlights: only text snippets (no message_id)
+       - allHighlights: everything from API
+       - selectionHighlights: highlights with no message_id
        - messageHighlightIdByMessageId: message_id -> highlight.id
        ========================================================= */
     let allHighlights = [];
@@ -1414,18 +1397,17 @@
         const data = await res.json();
         allHighlights = Array.isArray(data) ? data : [];
 
-        // Reset message maps
         messageHighlightIdByMessageId.clear();
         messageHighlightedIds.clear();
-
-        // Split
         selectionHighlights = [];
+
         allHighlights.forEach(h => {
-          if (h && h.message_id) {
+          if (!h) return;
+          if (h.message_id) {
             const mid = String(h.message_id);
             messageHighlightedIds.add(mid);
             if (h.id != null) messageHighlightIdByMessageId.set(mid, String(h.id));
-          } else if (h && h.text) {
+          } else if (h.text) {
             selectionHighlights.push(h);
           }
         });
@@ -1438,7 +1420,7 @@
     }
 
     /* =========================================================
-       Apply selection highlights (yellow span)
+       Apply selection highlights (yellow span) WITH data-highlight-id
        ========================================================= */
     function escapeRegExp(str) {
       return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -1448,13 +1430,19 @@
       const originalText = el.textContent;
       if (!originalText) return;
 
+      // Sort by length desc to reduce partial-overlap weirdness
+      const sorted = [...selectionHighlights].sort((a, b) => (b.text || "").length - (a.text || "").length);
+
       let html = originalText;
 
-      selectionHighlights.forEach((h) => {
-        if (!h.text) return;
+      sorted.forEach((h) => {
+        if (!h.text || h.id == null) return;
         const safe = escapeRegExp(h.text);
         const re = new RegExp(safe, "g");
-        html = html.replace(re, '<span class="perm-highlight">$&</span>');
+        html = html.replace(
+          re,
+          `<span class="perm-highlight" data-highlight-id="${String(h.id)}">$&</span>`
+        );
       });
 
       el.innerHTML = html;
@@ -1509,10 +1497,8 @@
         `;
         container.appendChild(highlightBtn);
 
-        // Attach click handler
         highlightBtn.addEventListener("click", handleMessageHighlight);
 
-        // If already highlighted (rare but possible on reload logic), reflect UI
         if (messageId && messageHighlightedIds.has(String(messageId))) {
           highlightBtn.classList.add("highlighted");
         }
@@ -1613,7 +1599,8 @@
     userInput.focus();
 
     /* =========================================================
-       ⭐ Message-level highlight (FIXED mapping)
+       ⭐ Message-level highlight (FIXED)
+       DELETE must be /chat/api/highlights/<highlight_id>/
        ========================================================= */
     function updateHighlightButtons() {
       const allBtns = document.querySelectorAll(".message-highlight-btn");
@@ -1640,7 +1627,7 @@
           body: JSON.stringify({
             session_id: {{ current_session.id }},
             message_id: messageId,
-            text: text.trim()
+            text: (text || "").trim()
           }),
         });
 
@@ -1656,7 +1643,6 @@
           return null;
         }
 
-        // store mapping (message_id -> highlight.id)
         if (data && data.id != null) {
           messageHighlightIdByMessageId.set(String(messageId), String(data.id));
           messageHighlightedIds.add(String(messageId));
@@ -1673,47 +1659,44 @@
       }
     }
 
-    async function removeMessageHighlight(messageId, text) {
-    try {
-        const res = await fetch("/chat/api/highlights/", {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": CSRF_TOKEN,
-            },
-            body: JSON.stringify({
-                message_id: messageId || null,
-                text: text || null
-            }),
+    async function removeMessageHighlight(messageId) {
+      try {
+        const hid = messageHighlightIdByMessageId.get(String(messageId));
+        if (!hid) return false;
+
+        const res = await fetch(`/chat/api/highlights/${hid}/`, {
+          method: "DELETE",
+          headers: { "X-CSRFToken": CSRF_TOKEN },
         });
-        return res.ok;
-    } catch (e) {
-        console.error("Remove failed:", e);
+
+        if (!res.ok) return false;
+
+        messageHighlightIdByMessageId.delete(String(messageId));
+        messageHighlightedIds.delete(String(messageId));
+        allHighlights = allHighlights.filter(h => String(h.id) !== String(hid));
+        return true;
+      } catch (e) {
+        console.error("Remove message highlight failed:", e);
         return false;
+      }
     }
-}
 
     async function handleMessageHighlight(e) {
       const btn = e.currentTarget;
       const messageId = btn.getAttribute("data-message-id");
       const container = btn.closest(".message-container");
       const messageEl = container?.querySelector(".chat-message-text");
-
       if (!messageId || !messageEl) return;
 
-      const text = messageEl.textContent.trim();
       const isHighlighted = messageHighlightedIds.has(String(messageId));
 
       if (isHighlighted) {
         const success = await removeMessageHighlight(messageId);
-        if (success) {
-          btn.classList.remove("highlighted");
-        }
+        if (success) btn.classList.remove("highlighted");
       } else {
+        const text = messageEl.textContent.trim();
         const created = await createMessageHighlight(messageId, text);
-        if (created) {
-          btn.classList.add("highlighted");
-        }
+        if (created) btn.classList.add("highlighted");
       }
 
       updateHighlightButtons();
@@ -1725,7 +1708,9 @@
     });
 
     /* =========================================================
-       Text selection highlights (kept separate)
+       Text selection highlights
+       - Shift on a plain selection => CREATE highlight
+       - Shift while cursor/selection is inside a .perm-highlight => DELETE that highlight
        ========================================================= */
     async function createChatHighlight(text) {
       try {
@@ -1742,46 +1727,52 @@
         });
 
         const data = await res.json();
-        if (!res.ok) return null;
+        if (!res.ok) {
+          if (data && data.limit_reached) {
+            alert("You've reached your daily highlight limit (3 for free users). Upgrade for unlimited!");
+          }
+          return null;
+        }
 
-        // keep in both arrays
         allHighlights.push(data);
         if (!data.message_id) selectionHighlights.push(data);
-
         return data;
       } catch (e) {
+        console.error("Create selection highlight failed:", e);
         return null;
       }
     }
 
-    document.addEventListener("keydown", async function (e) {
-      if (e.key !== "Shift") return;
+    async function deleteHighlightById(highlightId) {
+      try {
+        const res = await fetch(`/chat/api/highlights/${highlightId}/`, {
+          method: "DELETE",
+          headers: { "X-CSRFToken": CSRF_TOKEN },
+        });
+        if (!res.ok) return false;
 
-      const selection = window.getSelection();
-      if (!selection || !selection.rangeCount) return;
+        // refresh all highlights and re-apply spans safely
+        await fetchAllHighlights();
+        return true;
+      } catch (e) {
+        console.error("Delete highlight failed:", e);
+        return false;
+      }
+    }
 
-      const range = selection.getRangeAt(0);
-      if (!range || !selection.toString().trim()) return;
+    function findNearestHighlightSpan(node) {
+      if (!node) return null;
+      let el = (node.nodeType === Node.ELEMENT_NODE) ? node : node.parentElement;
+      while (el && el !== document.body) {
+        if (el.classList && el.classList.contains("perm-highlight") && el.dataset.highlightId) {
+          return el;
+        }
+        el = el.parentElement;
+      }
+      return null;
+    }
 
-      if (!chatMessages.contains(range.commonAncestorContainer)) return;
-
-      const selectedText = selection.toString().trim();
-      if (!selectedText) return;
-
-      const saved = await createChatHighlight(selectedText);
-      if (!saved) return;
-
-      const span = document.createElement("span");
-      span.className = "perm-highlight";
-      span.textContent = selectedText;
-
-      range.deleteContents();
-      range.insertNode(span);
-
-      selection.removeAllRanges();
-    });
-
-    async function highlightCurrentSelection() {
+    async function highlightSelectionCreate() {
       const selection = window.getSelection();
       if (!selection || !selection.rangeCount) return;
 
@@ -1794,22 +1785,61 @@
       const saved = await createChatHighlight(text);
       if (!saved) return;
 
+      // best-effort DOM insert (if range is sane)
       const span = document.createElement("span");
       span.className = "perm-highlight";
+      span.setAttribute("data-highlight-id", String(saved.id));
       span.textContent = text;
 
       try {
         range.deleteContents();
         range.insertNode(span);
       } catch (e) {
+        // if DOM is messy, just re-render highlights
         applyAllChatHighlights();
       }
 
       selection.removeAllRanges();
     }
 
+    async function highlightSelectionRemoveIfInside() {
+      const selection = window.getSelection();
+      if (!selection || !selection.rangeCount) return false;
+
+      const range = selection.getRangeAt(0);
+      if (!range) return false;
+
+      const anchorNode = selection.anchorNode;
+      if (!chatMessages.contains(anchorNode)) return false;
+
+      const span = findNearestHighlightSpan(anchorNode);
+      if (!span) return false;
+
+      const hid = span.dataset.highlightId;
+      if (!hid) return false;
+
+      // clear selection to avoid weirdness
+      try { selection.removeAllRanges(); } catch (e) {}
+
+      const ok = await deleteHighlightById(hid);
+      return ok;
+    }
+
+    // SHIFT shortcut: remove if inside highlight, else create highlight
+    document.addEventListener("keydown", async function (e) {
+      if (e.key !== "Shift") return;
+
+      // If inside a perm-highlight span => delete
+      const removed = await highlightSelectionRemoveIfInside();
+      if (removed) return;
+
+      // Otherwise create from current selection (if any)
+      await highlightSelectionCreate();
+    });
+
+    // Mobile pill: create from selection only
     if (highlightSelectionPill) {
-      highlightSelectionPill.addEventListener("click", highlightCurrentSelection);
+      highlightSelectionPill.addEventListener("click", highlightSelectionCreate);
     }
 
     chatMessages.addEventListener("mousedown", () => {
@@ -1828,7 +1858,7 @@
       if (!allHighlights.length) {
         const empty = document.createElement("div");
         empty.className = "chat-history-empty";
-        empty.textContent = "No highlights yet. Click the ⭐ button on any AI response.";
+        empty.textContent = "No highlights yet. Click the ⭐ button on any AI response, or select text and press Shift.";
         highlightCardsEl.appendChild(empty);
         return;
       }
@@ -1877,7 +1907,6 @@
         "\n\nPlease help me REVIEW them: create a short quiz, example sentences, and quick explanations with characters, pinyin, and brief English.";
 
       reviewPanel.style.display = "none";
-
       sendMessageWithCustomPayload(prompt, "review");
     });
 
