@@ -103,10 +103,10 @@ path("api/article-highlight/", subplayer_views.api_article_highlight, name="api_
     # READ feature
     path('read/', subplayer_views.read_list, name='read_list'),
     path('read/<slug:slug>/', subplayer_views.read_detail, name='read_detail'),
+    path('read/<slug:slug>/highlights/', subplayer_views.read_article_highlights, name='read_article_highlights'),
 
     # Chat app
     path("chat/", include(("chat.urls", "chat"), namespace="chat")),
-    path('read/<slug:slug>/', subplayer_views.read_detail, name='read_detail'),
 
 ]
 

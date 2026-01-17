@@ -211,6 +211,87 @@
       .section-title { font-size: 1.5rem; }
       .container-fluid { padding: 1rem; }
     }
+    /* =========================================================
+   Soft UI Sidebar Fix — Read page
+   Paste at END of <style>
+   ========================================================= */
+
+/* 1) Let Soft UI own layout spacing (your container is fine) */
+body.g-sidenav-show .main-content {
+  transition: margin-left 0.2s ease;
+}
+
+/* Expanded sidenav (default Soft UI) */
+body.g-sidenav-show:not(.g-sidenav-hidden) .main-content {
+  margin-left: 18rem !important; /* matches default expanded sidenav width */
+}
+
+/* Collapsed/mini sidenav */
+body.g-sidenav-show.g-sidenav-pinned .main-content,
+body.g-sidenav-show.g-sidenav-hidden .main-content,
+body.g-sidenav-show.navbar-vertical-collapsed .main-content {
+  margin-left: 6.5rem !important; /* matches mini sidenav feel */
+}
+
+/* 2) Restore the "white card" sidenav look */
+#sidenav-main,
+.sidenav.navbar-vertical {
+  background: #ffffff !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08) !important;
+  border-radius: 16px !important;
+
+  /* key: give it breathing room from the viewport like other pages */
+  margin: 16px !important;
+  height: calc(100vh - 32px) !important;
+  overflow: hidden !important;
+}
+
+/* 3) Prevent your page gradient from making the sidebar look tinted */
+body {
+  background-attachment: fixed;
+}
+#sidenav-main * {
+  background-color: transparent;
+}
+
+/* 4) Make the inner scroll area behave nicely */
+#sidenav-scrollbar {
+  height: 100% !important;
+}
+#sidenav-main .navbar-collapse {
+  height: calc(100% - 72px) !important; /* leaves room for logo/top area */
+  overflow-y: auto !important;
+}
+
+/* 5) When collapsed, keep it clean (no weird spacing) */
+body.g-sidenav-pinned #sidenav-main,
+body.navbar-vertical-collapsed #sidenav-main {
+  width: 5.5rem !important;
+}
+
+/* Optional: hide large logo text in collapsed mode (icon still ok) */
+body.g-sidenav-pinned #sidenav-main .navbar-brand span,
+body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
+  opacity: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+}
+
+/* 6) Mobile: sidenav should overlay, not push content */
+@media (max-width: 991.98px) {
+  body.g-sidenav-show .main-content {
+    margin-left: 0 !important;
+  }
+
+  #sidenav-main,
+  .sidenav.navbar-vertical {
+    margin: 0 !important;
+    border-radius: 0 !important;
+    height: 100vh !important;
+  }
+}
+
   </style>
 </head>
 <body class="g-sidenav-show bg-gray-100">

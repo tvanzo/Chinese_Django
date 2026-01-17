@@ -1030,7 +1030,7 @@
                 <select id="sourceFilter" class="filter-dropdown">
                   <option value="all">All Types</option>
                   <option value="media">Video</option>
-                  <option value="article">Article</option>
+                  <option value="web">Article</option>
                   <option value="chat">Chat</option>
                 </select>
                 <i class="fas fa-filter select-icon"></i>
@@ -1066,7 +1066,7 @@
             </div>
             <div class="stat-pill">
               <span class="stat-label">Articles</span>
-              <span class="stat-value">{{ stats.article }}</span>
+              <span class="stat-value">{{ stats.web }}</span>
             </div>
             <div class="stat-pill">
               <span class="stat-label">Chats</span>
@@ -1085,14 +1085,14 @@
               <span class="highlight-source
                 {% if highlight.source == 'media' %}
                   highlight-source-media
-                {% elif highlight.source == 'article' %}
+                {% elif highlight.source == 'web' %}
                   highlight-source-article
                 {% else %}
                   highlight-source-chat
                 {% endif %}">
                 {% if highlight.source == 'media' %}
                   🎥 Video
-                {% elif highlight.source == 'article' %}
+                {% elif highlight.source == 'web' %}
                   📄 Article
                 {% else %}
                   💬 Chat
@@ -1103,7 +1103,7 @@
                 <span class="video-title-badge" title="{{ highlight.media.title }}">
                   {{ highlight.media.title }}
                 </span>
-              {% elif highlight.source == 'article' %}
+              {% elif highlight.source == 'web' %}
                 <span class="video-title-badge" title="{{ highlight.page_title|default:highlight.page_url }}">
                   {{ highlight.page_title|default:highlight.page_url }}
                 </span>
@@ -1117,7 +1117,7 @@
             <div class="highlight-content">
               {% if highlight.source == 'media' and highlight.media %}
                 From video <strong>{{ highlight.media.title }}</strong>
-              {% elif highlight.source == 'article' %}
+              {% elif highlight.source == 'web' %}
                 From article <strong>{{ highlight.page_title|default:highlight.page_url }}</strong>
               {% else %}
                 From chat conversation
@@ -1136,7 +1136,7 @@
                      title="Open video">
                     <i class="fas fa-external-link-alt"></i>
                   </a>
-                {% elif highlight.source == 'article' and highlight.page_url %}
+                {% elif highlight.source == 'web' and highlight.page_url %}
                   <a href="{{ highlight.page_url }}"
                      class="action-btn"
                      target="_blank"
