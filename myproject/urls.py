@@ -27,7 +27,8 @@ urlpatterns = [
     path('watch/', subplayer_views.media_list, name='media_list'),
     path('add_media/', subplayer_views.add_media, name='add_media'),
     path('search/', subplayer_views.search, name='search'),
-    path('channel/<int:channel_id>/', subplayer_views.channel_view, name='channel_view'),
+    path('channel/<str:channel_id>/', subplayer_views.channel_view, name='channel_view'),
+
     path('channels/', subplayer_views.channels_list, name='channels_list'),
     path('intro/', subplayer_views.intro_view, name='intro'),
 

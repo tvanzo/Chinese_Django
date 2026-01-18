@@ -10,7 +10,7 @@
   <title>Chinese Log</title>
 
   <!-- Fonts and icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link id="pagestyle" href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet" />
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
   <link id="pagestyle" href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet" />
@@ -18,67 +18,231 @@
 
   <style>
     :root {
-      --primary-color: #3a9fff;
-      --accent-color: #d00c9c;
-      --text-dark: #2c3e50;
-      --text-light: #7f8c8d;
-      --bg-light: #f8f9fa;
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --accent: #ec4899;
+      --surface: #ffffff;
+      --background: #f8fafc;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --radius-sm: 0.5rem;
+      --radius-md: 0.75rem;
+      --radius-lg: 1rem;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
-      background-color: var(--bg-light);
-      color: var(--text-dark);
-      font-family: 'Open Sans', sans-serif;
+      background-color: var(--background);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
     }
 
     .main-content {
-      padding: 20px;
+      padding: 0;
     }
 
-    h2 {
-      color: var(--text-dark);
-      font-weight: 700;
+    .container-fluid {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Header */
+    .page-header {
       margin-bottom: 2rem;
-      position: relative;
       text-align: center;
-      padding-bottom: 0.5rem;
     }
 
-    h2::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 3px;
-      background-color: var(--primary-color);
+    .page-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.025em;
+    }
+
+    .page-subtitle {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    /* Content Tabs */
+    .content-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      background: var(--surface);
+      padding: 0.375rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .tab-button {
+      background: transparent;
+      border: none;
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      color: var(--text-secondary);
+      position: relative;
+    }
+
+    .tab-button:hover {
+      color: var(--text-primary);
+    }
+
+    .tab-button.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: var(--shadow-sm);
     }
 
     /* Category Filter */
+    .category-section {
+      margin-bottom: 2rem;
+    }
+
     .category-filter {
       display: flex;
-      gap: 8px;
-      margin: 2rem 0;
+      gap: 0.5rem;
       flex-wrap: wrap;
       justify-content: center;
+      align-items: center;
     }
 
     .category-item {
-      background: white;
-      border: 1px solid #e9ecef;
-      padding: 8px 20px;
-      border-radius: 24px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
       font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-primary);
       cursor: pointer;
-      transition: all 0.2s ease;
-      user-select: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+    }
+
+    .category-item:hover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.04);
+      transform: translateY(-1px);
     }
 
     .category-item.active {
-      background: var(--primary-color);
+      background: var(--primary);
       color: white;
-      border-color: var(--primary-color);
+      border-color: var(--primary);
+      box-shadow: 0 4px 6px -1px rgb(99 102 241 / 0.2);
+    }
+
+    .add-custom-url {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      padding: 0;
+      background: var(--primary);
+      color: white;
+      border: none;
+    }
+
+    .add-custom-url:hover {
+      background: var(--primary-dark);
+      transform: scale(1.05);
+    }
+
+    /* Custom URL Input */
+    .custom-url-input {
+      margin: 0 auto 2rem;
+      max-width: 600px;
+    }
+
+    .url-input-container {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: 1.5rem;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .url-input {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      background: var(--background);
+      padding: 0.75rem 1rem;
+      font-size: 0.9375rem;
+      color: var(--text-primary);
+      outline: none;
+      border-radius: var(--radius-md);
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .url-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .url-input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .submit-button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1.25rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .submit-button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .disclaimer {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: #fef3c7;
+      border-left: 3px solid var(--warning);
+      color: #92400e;
+      font-size: 0.8125rem;
+      border-radius: var(--radius-sm);
+      line-height: 1.5;
     }
 
     /* Video Grid */
@@ -86,415 +250,35 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 1.5rem;
-      padding: 1rem;
     }
 
     /* Video Card */
     .video-card {
-      background: white;
-      border-radius: 16px;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
       overflow: hidden;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      position: relative;
-    }
-
-    .video-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    .image-container {
-      position: relative;
-      padding-top: 56.25%; /* 16:9 aspect ratio */
-      background: #f0f2f5;
-    }
-
-    .card-img-top {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 16px 16px 0 0;
-    }
-
-    .overlay-info {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-      right: 10px;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .badge {
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      backdrop-filter: blur(4px);
-    }
-
-    .badge-highlight {
-      background: rgba(208, 12, 156, 0.9);
-      color: white;
-    }
-
-    .badge-length {
-      background: rgba(44, 62, 80, 0.9);
-      color: white;
-    }
-
-    .badge-subscription {
-      background: rgba(0, 179, 122, 0.9);
-      color: white;
-    }
-
-    .card-body {
-      padding: 1rem 1.25rem 1.5rem;
-      position: relative;
-    }
-
-    .card-title {
-      font-size: 1rem;
-      font-weight: 600;
-      line-height: 1.4;
-      margin-top: 0.75rem;
-      margin-bottom: 0.5rem;
-      padding: 0 0.5rem;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      color: var(--text-dark);
-    }
-
-    .card-text {
-      font-size: 0.875rem;
-      color: var(--text-light);
-      line-height: 1.5;
-      margin-bottom: 0.5rem;
-    }
-
-    .channel-info {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 0.5rem 0.5rem 0.75rem;
-      margin-top: 0.5rem;
-      border-top: 1px solid #f0f2f5;
-    }
-
-    .channel-meta {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      flex-grow: 1;
-      min-width: 0;
-      padding-right: 8px;
-    }
-
-    .channel-name {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--primary-color);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      padding: 0 0.5rem;
-    }
-
-    .time-ago {
-      font-size: 0.75rem;
-      color: var(--text-light);
-      white-space: nowrap;
-      margin-left: 8px;
-    }
-
-    .toggle-log {
-      background: #f0f2f5;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      flex-shrink: 0;
-      position: static;
-      margin-left: auto;
-    }
-
-    .toggle-log:hover {
-      background: var(--primary-color);
-      color: white;
-    }
-
-    .toggle-log.active {
-      background: var(--primary-color);
-      color: white;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .video-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      }
-
-      .category-filter {
-        justify-content: flex-start;
-        overflow-x: auto;
-        padding-bottom: 8px;
-      }
-
-      .toggle-log {
-        right: 0.5rem;
-      }
-
-      .channel-name {
-        margin-right: 2rem;
-      }
-
-      .content-tabs {
-        flex-direction: column;
-      }
-
-      .tab-button {
-        margin-bottom: 8px;
-      }
-    }
-
-    /* Loading State */
-    .skeleton-loader {
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: 8px;
-    }
-
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-
-    .text-warning { color: #dcb234; }
-    .text-success { color: #3c763d; }
-
-    .title-container {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      height: 50px;
-    }
-
-    .title-container p {
-      margin: 0;
-      line-height: 1.1;
-      text-align: center;
-      white-space: pre-line;
-      font-size: 0.75rem;
-    }
-
-    .nav-link.active .icon svg {
-      fill: #FFD700 !important;
-      color: #FFD700 !important;
-    }
-
-    .xp-points-bar {
-      background-color: #f8f9fa;
-      padding: 10px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      text-align: center;
-    }
-
-    .xp-points-bar h2 {
-      margin: 0;
-      font-size: 24px;
-      font-weight: normal;
-    }
-
-    .xp-points-bar #xp-points {
-      font-size: 20px;
-      font-weight: bold;
-      color: #007bff;
-    }
-
-    .xp-circle {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background-color: #ffc40c;
-      color: #ffffff;
-      font-weight: bold;
-      font-size: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #xp-points {
-      font-size: 14px;
-      font-weight: bold;
-      color: #ffffff;
-    }
-
-    .btn-purple {
-      background-color: #d00c9c;
-      color: #ffffff;
-      border-color: #6f42c1;
-    }
-
-    .compact-btn {
-      padding: 0.25rem 0.5rem;
-    }
-
-    #unique-xp-display {
-      background-color: #d00c9c;
-      color: white;
-      padding: 3px 8px;
-      border-radius: 8px;
-    }
-
-    #unique-xp-display .unique-xp-circle {
-      background-color: #ffc40c;
-      color: white;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 5px;
-    }
-
-    #unique-xp-points {
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    #sidenav-main {
-      background-color: #ffffff;
-      border-radius: 12px;
-      padding: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
-      max-height: calc(100vh - 40px);
-      overflow-y: auto;
-    }
-
-    @media (max-width: 1200px) {
-      #sidenav-main {
-        display: none;
-      }
-      #top-nav {
-        display: block;
-      }
-    }
-
-    @media (min-width: 1201px) {
-      #top-nav {
-        display: none;
-      }
-    }
-
-    #welcome-banner {
-      background-color: #e9ecef;
-      border-radius: 0 0 10px 10px;
-      padding: 15px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      text-align: left;
-      width: 100%;
-    }
-
-    #welcome-banner .alert-heading {
-      font-weight: 700;
-      color: #28a745;
-    }
-
-    #welcome-banner button.btn-close {
-      background: transparent;
-      border: none;
-      color: #6c757d;
-    }
-
-    #welcome-banner button.btn-close:hover {
-      color: #343a40;
-    }
-
-    .sidenav-header {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100px;
-    }
-
-    .custom-logo-size {
-      height: 50px !important;
-    }
-
-    #welcome-banner {
-      background-color: #f8f9fa;
-      color: #344767;
-      border: none;
-      border-bottom: 2px solid #e9ecef;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-      padding: 10px 15px;
-      font-size: 14px;
-      width: 100%;
-      text-align: left;
-    }
-
-    #welcome-banner .close {
-      background: transparent;
-      border: none;
-      color: #6c757d;
-      padding: 0;
-      font-size: 20px;
-      line-height: 1;
-      opacity: 0.5;
-      transition: opacity 0.15s ease-in-out;
-    }
-
-    #welcome-banner .close:hover {
-      opacity: 1;
-    }
-
-    #welcome-banner .close:focus {
-      outline: none;
-      box-shadow: none;
-    }
-
-    /* Video Grid and Card Styles */
-    .video-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.5rem;
-      padding: 1.5rem;
-    }
-
-    .video-card {
-      background: #FFFFFF;
-      border-radius: 1rem;
-      overflow: hidden;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      position: relative;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
     }
 
     .video-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      box-shadow: var(--shadow-lg);
+      border-color: transparent;
+    }
+
+    .card-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
     }
 
     .image-container {
       position: relative;
       padding-top: 56.25%;
-      background: #f8f9fa;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      overflow: hidden;
     }
 
     .card-img-top {
@@ -504,6 +288,11 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .video-card:hover .card-img-top {
+      transform: scale(1.05);
     }
 
     .overlay-info {
@@ -513,51 +302,57 @@
       right: 0.75rem;
       display: flex;
       justify-content: space-between;
-      z-index: 1;
+      gap: 0.5rem;
+      z-index: 2;
     }
 
     .badge {
-      padding: 0.5rem 0.75rem;
+      padding: 0.375rem 0.75rem;
       border-radius: 0.5rem;
       font-size: 0.75rem;
       font-weight: 600;
       display: inline-flex;
       align-items: center;
       gap: 0.375rem;
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
     .badge-highlight {
-      background: rgba(58, 159, 255, 0.9);
+      background: rgba(236, 72, 153, 0.95);
       color: white;
     }
 
     .badge-length {
-      background: rgba(26, 31, 54, 0.9);
+      background: rgba(15, 23, 42, 0.95);
+      color: white;
+    }
+
+    .badge-subscription {
+      background: rgba(16, 185, 129, 0.95);
       color: white;
     }
 
     .card-body {
       padding: 1.25rem;
-      position: relative;
     }
 
     .card-title {
-      font-size: 1rem;
+      font-size: 0.9375rem;
       font-weight: 600;
       line-height: 1.4;
-      margin-bottom: 0.75rem;
-      color: #344767;
+      margin-bottom: 0.625rem;
+      color: var(--text-primary);
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      min-height: 2.8em;
     }
 
     .card-text {
-      font-size: 0.875rem;
-      color: #7f8c8d;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
       line-height: 1.5;
       margin-bottom: 1rem;
       display: -webkit-box;
@@ -570,299 +365,87 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding-top: 0.75rem;
-      border-top: 1px solid #f0f2f5;
+      padding-top: 0.875rem;
+      border-top: 1px solid var(--border);
+      gap: 0.75rem;
     }
 
     .channel-meta {
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .channel-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: inherit;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .channel-profile-pic {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
     }
 
     .channel-name {
-      font-size: 0.875rem;
+      font-size: 0.8125rem;
       font-weight: 600;
-      color: #3a9fff;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .channel-link:hover .channel-name {
+      color: var(--primary);
     }
 
     .time-ago {
       font-size: 0.75rem;
-      color: #7f8c8d;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .toggle-log {
-      width: 2rem;
-      height: 2rem;
+      width: 2.25rem;
+      height: 2.25rem;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f8f9fa;
-      transition: all 0.2s ease;
+      background: var(--background);
+      transition: all 0.2s;
       cursor: pointer;
+      flex-shrink: 0;
+      border: 1.5px solid var(--border);
     }
 
     .toggle-log:hover {
-      background: #3a9fff;
+      background: var(--primary);
+      border-color: var(--primary);
       color: white;
-    }
-
-    /* Category Filter */
-    .category-filter {
-      display: flex;
-      gap: 0.75rem;
-      margin: 2rem 1.5rem;
-      flex-wrap: wrap;
-    }
-
-    .category-item {
-      background: white;
-      border: 1px solid #e9ecef;
-      padding: 0.5rem 1rem;
-      border-radius: 1rem;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #344767;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .category-item.active {
-      background: #3a9fff;
-      color: white;
-      border-color: #3a9fff;
-    }
-
-    .category-item:hover:not(.active) {
-      background: #f8f9fa;
-      border-color: #3a9fff;
-      color: #3a9fff;
-    }
-
-    .add-media-button {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      background-color: var(--primary-color);
-      color: white;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      transition: transform 0.2s ease;
-      border: none;
-      font-size: 24px;
-    }
-
-    .add-media-button:hover {
       transform: scale(1.1);
     }
 
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal-content {
-      background-color: white;
-      padding: 2rem;
-      border-radius: 16px;
-      width: 90%;
-      max-width: 500px;
-      position: relative;
-    }
-
-    .close-modal {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: var(--text-light);
-    }
-
-    .url-form {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .url-input {
-      padding: 0.75rem 1rem;
-      border: 1px solid #e9ecef;
-      border-radius: 8px;
-      font-size: 1rem;
-      width: 100%;
-    }
-
-    .submit-button {
-      background-color: var(--primary-color);
+    .toggle-log.active,
+    .toggle-log.active svg {
+      background: var(--primary);
+      border-color: var(--primary);
       color: white;
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
     }
 
-    .submit-button:hover {
-      background-color: #2b8ae6;
-    }
-
-    .custom-url-input {
-      margin: 20px auto;
-      max-width: 600px;
-      padding: 0 20px;
-    }
-
-    .url-input-container {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      padding: 20px;
-    }
-
-    .search-box {
-      display: flex;
-      align-items: center;
-      background: #f3f4f6;
-      border-radius: 8px;
-      padding: 4px;
-      transition: all 0.3s ease;
-    }
-
-    .search-box:focus-within {
-      box-shadow: 0 0 0 2px #6366f1;
-    }
-
-    .url-input {
-      flex: 1;
-      border: none;
-      background: transparent;
-      padding: 12px 16px;
-      font-size: 16px;
-      color: #374151;
-      outline: none;
-    }
-
-    .url-input::placeholder {
-      color: #9ca3af;
-    }
-
-    .submit-button {
-      background: #6366f1;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    .submit-button:hover {
-      background: #4f46e5;
-    }
-
-    .disclaimer {
-      margin-top: 12px;
-      padding: 8px 12px;
-      background: #fff7ed;
-      border-left: 4px solid #f97316;
-      color: #9a3412;
-      font-size: 14px;
-      border-radius: 4px;
-    }
-
-    /* Tooltip container */
-    .add-custom-url {
-      position: relative;
-      display: inline-block;
-    }
-
-    /* Tooltip text */
-    .add-custom-url::after {
-      content: "Add YouTube Video";
-      position: absolute;
-      bottom: 125%;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: rgba(0, 0, 0, 0.75);
-      color: white;
-      padding: 6px 10px;
-      border-radius: 5px;
-      font-size: 12px;
-      white-space: nowrap;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.2s ease-in-out;
-    }
-
-    /* Show tooltip on hover */
-    .add-custom-url:hover::after {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .channel-profile-pic {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-right: 8px;
-      vertical-align: middle;
-    }
-
-    /* New Styles for Content Tabs */
-    .content-tabs {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin: 1rem 0 2rem;
-    }
-
-    .tab-button {
-      background: white;
-      border: 2px solid #e9ecef;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      color: var(--text-dark);
-    }
-
-    .tab-button.active {
-      background: var(--primary-color);
-      color: white;
-      border-color: var(--primary-color);
-    }
-
-    .tab-button:hover:not(.active) {
-      border-color: var(--primary-color);
-      color: var(--primary-color);
-    }
-
+    /* Content Section */
     .content-section {
       display: none;
     }
@@ -871,101 +454,236 @@
       display: block;
     }
 
+    /* Subscriptions Header */
     .subscriptions-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin: 0 1.5rem 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .subscriptions-header h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
     }
 
     .manage-subscriptions {
       font-size: 0.875rem;
-      color: var(--primary-color);
+      color: var(--primary);
       text-decoration: none;
       display: flex;
       align-items: center;
-      gap: 0.25rem;
+      gap: 0.375rem;
+      font-weight: 600;
+      padding: 0.5rem 0.875rem;
+      border-radius: var(--radius-md);
+      transition: all 0.2s;
     }
 
     .manage-subscriptions:hover {
+      background: rgba(99, 102, 241, 0.08);
+    }
+
+    /* No Results */
+    .no-results {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--text-secondary);
+    }
+
+    .no-results p {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .no-results a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .no-results a:hover {
       text-decoration: underline;
     }
 
-    .subscription-indicator {
-      position: absolute;
-      top: 0.75rem;
-      right: 0.75rem;
-      background: var(--accent-color);
-      color: white;
-      font-size: 0.75rem;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.5rem;
-      z-index: 2;
+    /* Tooltip */
+    .add-custom-url {
+      position: relative;
     }
-    /* Adjust container-fluid to allow full width for navbar */
-.container-fluid {
-  max-width: 1200px; /* Keep for content below navbar */
-  padding: 2rem 1rem; /* Keep for content below navbar */
-}
 
-/* Target only the navbar’s container-fluid */
-.navbar-main .container-fluid {
-  max-width: none; /* Remove width constraint for navbar */
-  padding-right: 0; /* Remove right padding for navbar */
-}
+    .add-custom-url::after {
+      content: "Add YouTube Video";
+      position: absolute;
+      bottom: calc(100% + 0.5rem);
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(15, 23, 42, 0.95);
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s;
+      pointer-events: none;
+      font-weight: 500;
+    }
 
+    .add-custom-url:hover::after {
+      opacity: 1;
+      visibility: visible;
+    }
 
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container-fluid {
+        padding: 1.5rem 1rem;
+      }
 
+      .page-title {
+        font-size: 1.5rem;
+      }
+
+      .video-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+      }
+
+      .category-filter {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+        scrollbar-width: none;
+      }
+
+      .category-filter::-webkit-scrollbar {
+        display: none;
+      }
+
+      .content-tabs {
+        width: 100%;
+      }
+
+      .subscriptions-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .video-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .video-card {
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    /* Loading State */
+    .skeleton-loader {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: var(--radius-md);
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: -200% 0;
+      }
+      100% {
+        background-position: 200% 0;
+      }
+    }
   </style>
 </head>
 <body class="g-sidenav-show bg-gray-100">
   {% include 'accounts/navbar.html' %}
   {% include 'accounts/sidebar.html' %}
+
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
-    <div class="container-fluid py-4">
-      <h2>Explore Videos</h2>
+    <div class="container-fluid">
+      <!-- Page Header -->
+      <div class="page-header">
+        <h1 class="page-title">Explore Videos</h1>
+        <p class="page-subtitle">Discover and learn with curated Chinese content</p>
+      </div>
 
       <!-- Content Tabs -->
       <div class="content-tabs">
-        <button class="tab-button active" data-target="explore-section">Explore</button>
-        <button class="tab-button" data-target="subscriptions-section">Subscriptions</button>
+        <button class="tab-button active" data-target="explore-section">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; margin-right: 0.375rem; vertical-align: middle;">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+          Explore
+        </button>
+        <button class="tab-button" data-target="subscriptions-section">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; margin-right: 0.375rem; vertical-align: middle;">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          Subscriptions
+        </button>
       </div>
 
       <!-- Explore Section -->
       <div id="explore-section" class="content-section active">
         <!-- Category Filter -->
-        <div class="category-filter">
-          <div class="category-item {% if selected_category == 'all' %}active{% endif %}"
-               data-category="all"
-               onclick="filterByCategory('all', this)">All</div>
-          {% for category in categories %}
-            <div class="category-item {% if selected_category == category.name|lower %}active{% endif %}"
-                 data-category="{{ category.name|lower }}"
-                 onclick="filterByCategory('{{ category.name|lower }}', this)">
-              {{ category.name }}
-            </div>
-          {% endfor %}
-          <div class="category-item add-custom-url" title="Add YouTube Video">+</div>
+        <div class="category-section">
+          <div class="category-filter">
+            <div class="category-item {% if selected_category == 'all' %}active{% endif %}"
+                 data-category="all"
+                 onclick="filterByCategory('all', this)">All</div>
+            {% for category in categories %}
+              <div class="category-item {% if selected_category == category.name|lower %}active{% endif %}"
+                   data-category="{{ category.name|lower }}"
+                   onclick="filterByCategory('{{ category.name|lower }}', this)">
+                {{ category.name }}
+              </div>
+            {% endfor %}
+            <button class="category-item add-custom-url" title="Add YouTube Video">+</button>
+          </div>
         </div>
 
-        <!-- Custom URL Input (Initially Hidden) -->
+        <!-- Custom URL Input -->
         <div class="custom-url-input" style="display: none;">
           <div class="url-input-container">
             <div class="search-box">
-              <input type="url" class="url-input" placeholder="Add YouTube URL" required>
+              <input type="url" class="url-input" placeholder="Paste YouTube URL here..." required>
               <button type="submit" class="submit-button">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M5 12h14m-7-7v14"/>
                 </svg>
+                Add
               </button>
             </div>
             <div class="disclaimer">
-              Note: Video must have Chinese subtitles available to be added successfully
+              <strong>Note:</strong> Video must have Chinese subtitles available to be added successfully
             </div>
           </div>
         </div>
 
-        <!-- Video Grid for Explore -->
+        <!-- Video Grid -->
         <div class="video-grid">
           {% for video in media %}
             <div class="video-card"
@@ -975,12 +693,18 @@
                   <img src="{{ video.thumbnail_url }}" class="card-img-top" alt="{{ video.title }}">
                   <div class="overlay-info">
                     <div class="badge badge-highlight">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                       </svg>
                       {{ video.user_highlights_count }}
                     </div>
-                    <div class="badge badge-length">{{ video.formatted_video_length }}</div>
+                    <div class="badge badge-length">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                      </svg>
+                      {{ video.formatted_video_length }}
+                    </div>
                   </div>
                 </div>
                 <div class="card-body">
@@ -990,15 +714,15 @@
                     <div class="channel-meta">
                       <a href="{% url 'channel_view' video.channel.id %}" class="channel-link">
                         <img src="{{ video.channel.profile_pic_url|default:'{% static "accounts/img/default_profile_pic.png" %}' }}"
-                             class="channel-profile-pic" alt="{{ video.channel.name }} profile picture">
+                             class="channel-profile-pic" alt="{{ video.channel.name }}">
                         <span class="channel-name">{{ video.channel.name }}</span>
                       </a>
                       <span class="time-ago">{{ video.time_ago }}</span>
                     </div>
-                    <a href="#" class="toggle-log" data-id="{{ video.id }}"
+                    <a href="#" class="toggle-log {% if video.is_in_log %}active{% endif %}"
+                       data-id="{{ video.id }}"
                        data-action="{% if video.is_in_log %}remove{% else %}add{% endif %}">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                           class="{% if video.is_in_log %}active{% endif %}">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path d="{% if video.is_in_log %}M5 12h14{% else %}M12 5v14M5 12h14{% endif %}"/>
                       </svg>
                     </a>
@@ -1007,7 +731,11 @@
               </a>
             </div>
           {% empty %}
-            <div class="no-results text-center py-5">
+            <div class="no-results">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 1rem; opacity: 0.3;">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
               <p>No videos found matching your criteria</p>
             </div>
           {% endfor %}
@@ -1017,9 +745,9 @@
       <!-- Subscriptions Section -->
       <div id="subscriptions-section" class="content-section">
         <div class="subscriptions-header">
-          <h3>Content from channels you subscribe to</h3>
+          <h3>Your Subscriptions</h3>
           <a href="{% url 'channels_list' %}" class="manage-subscriptions">
-            Manage
+            Manage Channels
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 5l7 7-7 7"/>
             </svg>
@@ -1035,12 +763,18 @@
                   <img src="{{ video.thumbnail_url }}" class="card-img-top" alt="{{ video.title }}">
                   <div class="overlay-info">
                     <div class="badge badge-subscription">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 8l-7 6-7-6"/>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                       </svg>
                       Subscribed
                     </div>
-                    <div class="badge badge-length">{{ video.formatted_video_length }}</div>
+                    <div class="badge badge-length">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                      </svg>
+                      {{ video.formatted_video_length }}
+                    </div>
                   </div>
                 </div>
                 <div class="card-body">
@@ -1050,15 +784,15 @@
                     <div class="channel-meta">
                       <a href="{% url 'channel_view' video.channel.id %}" class="channel-link">
                         <img src="{{ video.channel.profile_pic_url|default:'{% static "accounts/img/default_profile_pic.png" %}' }}"
-                             class="channel-profile-pic" alt="{{ video.channel.name }} profile picture">
+                             class="channel-profile-pic" alt="{{ video.channel.name }}">
                         <span class="channel-name">{{ video.channel.name }}</span>
                       </a>
                       <span class="time-ago">{{ video.time_ago }}</span>
                     </div>
-                    <a href="#" class="toggle-log" data-id="{{ video.id }}"
+                    <a href="#" class="toggle-log {% if video.is_in_log %}active{% endif %}"
+                       data-id="{{ video.id }}"
                        data-action="{% if video.is_in_log %}remove{% else %}add{% endif %}">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                           class="{% if video.is_in_log %}active{% endif %}">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path d="{% if video.is_in_log %}M5 12h14{% else %}M12 5v14M5 12h14{% endif %}"/>
                       </svg>
                     </a>
@@ -1067,10 +801,15 @@
               </a>
             </div>
           {% empty %}
-            <div class="no-results text-center py-5">
-              <p>You haven't subscribed to any channels yet.
-                <a href="{% url 'channels_list' %}">Browse Channels</a>
-              </p>
+            <div class="no-results">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 1rem; opacity: 0.3;">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              <p>You haven't subscribed to any channels yet.</p>
+              <a href="{% url 'channels_list' %}">Browse Channels →</a>
             </div>
           {% endfor %}
         </div>
@@ -1080,7 +819,7 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Tab switching functionality
+      // Tab switching
       const tabButtons = document.querySelectorAll('.tab-button');
       const contentSections = document.querySelectorAll('.content-section');
 
@@ -1095,50 +834,30 @@
         });
       });
 
-      // URL input functionality
-      const categoryItems = document.querySelectorAll('.category-item');
+      // URL input toggle
       const addButton = document.querySelector('.add-custom-url');
       const urlInputContainer = document.querySelector('.custom-url-input');
       let isUrlInputVisible = false;
 
-      function toggleUrlInput() {
-        isUrlInputVisible = !isUrlInputVisible;
-        urlInputContainer.style.display = isUrlInputVisible ? 'block' : 'none';
-      }
-
       if (addButton) {
-        addButton.addEventListener('click', function(event) {
-          event.stopPropagation();
-          toggleUrlInput();
+        addButton.addEventListener('click', function(e) {
+          e.stopPropagation();
+          isUrlInputVisible = !isUrlInputVisible;
+          urlInputContainer.style.display = isUrlInputVisible ? 'block' : 'none';
         });
       }
 
-      categoryItems.forEach(item => {
-        if (!item.classList.contains('add-custom-url')) {
-          item.addEventListener('click', function() {
-            isUrlInputVisible = false;
-            urlInputContainer.style.display = 'none';
-          });
-        }
-      });
-
-      if (urlInputContainer) {
-        urlInputContainer.addEventListener('click', function(event) {
-          event.stopPropagation();
-        });
-      }
-
-      document.addEventListener('click', function(event) {
-        if (urlInputContainer && !urlInputContainer.contains(event.target) && event.target !== addButton) {
+      document.addEventListener('click', function(e) {
+        if (urlInputContainer && !urlInputContainer.contains(e.target) && e.target !== addButton) {
           isUrlInputVisible = false;
           urlInputContainer.style.display = 'none';
         }
       });
 
-      // Category filtering with server-side fetch
+      // Category filtering
       window.filterByCategory = function(category, element) {
         window.history.pushState({}, '', `?category=${category}`);
-        categoryItems.forEach(i => i.classList.remove('active'));
+        document.querySelectorAll('.category-item:not(.add-custom-url)').forEach(i => i.classList.remove('active'));
         element.classList.add('active');
 
         fetch(`/watch/?category=${category}`, { credentials: 'include' })
@@ -1150,10 +869,10 @@
             document.querySelector('#explore-section .video-grid').innerHTML = newVideoGrid.innerHTML;
             reattachToggleListeners();
           })
-          .catch(error => console.error('Error fetching filtered content:', error));
+          .catch(error => console.error('Error:', error));
       };
 
-      // Reattach toggle listeners
+      // Toggle log functionality
       function reattachToggleListeners() {
         document.querySelectorAll('.toggle-log').forEach(button => {
           button.addEventListener('click', function(e) {
@@ -1173,11 +892,9 @@
             .then(data => {
               if (data.success) {
                 this.dataset.action = action === 'add' ? 'remove' : 'add';
-                const svg = this.querySelector('svg');
-                svg.innerHTML = action === 'add' ? '<path d="M5 12h14"></path>' : '<path d="M12 5v14M5 12h14"></path>';
-                svg.classList.toggle('active');
-              } else {
-                console.error('Error:', data.error);
+                this.classList.toggle('active');
+                const svg = this.querySelector('svg path');
+                svg.setAttribute('d', action === 'add' ? 'M5 12h14' : 'M12 5v14M5 12h14');
               }
             })
             .catch(error => console.error('Error:', error));
@@ -1185,20 +902,9 @@
         });
       }
 
-      // Initial toggle listeners
       reattachToggleListeners();
 
-      // Hover effects (moved to CSS, but kept here for compatibility)
-      document.querySelectorAll('.video-card').forEach(card => {
-        card.addEventListener('mouseenter', function() {
-          this.style.transform = 'translateY(-5px)';
-        });
-        card.addEventListener('mouseleave', function() {
-          this.style.transform = 'translateY(0)';
-        });
-      });
-
-      // Get CSRF token
+      // CSRF token helper
       function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -1215,7 +921,5 @@
       }
     });
   </script>
-
-  <div id="plus-one-animation" class="plus-one">+1</div>
 </body>
 </html>
