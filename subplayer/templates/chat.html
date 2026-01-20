@@ -3,17 +3,18 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+  <!-- (Optional) keep consistent with your other pages -->
   <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
   <title>AI Tutor Chat</title>
 
-  <!-- Fonts & Icons -->
+  <!-- Fonts & Icons (match the “good” template) -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
-  <link href="{% static 'accounts/css/nucleo-icons.css' %}?v=20260118" rel="stylesheet" />
+  <link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet" />
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-  <link href="{% static 'accounts/css/nucleo-svg.css' %}?v=20260118" rel="stylesheet" />
-  <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}?v=20260118" rel="stylesheet" />
+  <link href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet" />
+  <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet" />
 
   <style>
     * { box-sizing: border-box; }
@@ -22,90 +23,14 @@
       font-family: "Open Sans", sans-serif;
       background-color: #f8fafc;
       color: #111827;
-      margin: 0;
     }
 
     /* =========================================================
-       ✅ MOBILE SAFARI SVG FIX (THIS IS THE KEY)
-       - Prevent Soft UI / global css from shrinking SVGs
-       - Force stroke + size so they don't become "dots"
-       ========================================================= */
-    .round-btn,
-    .message-highlight-btn,
-    .review-btn,
-    .new-chat-btn,
-    .mobile-highlight-pill {
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .round-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      min-width: 36px;
-      min-height: 36px;
-      border-radius: 999px;
-      border: 1px solid #e5e7eb;
-      background: #ffffff;
-      cursor: pointer;
-      color: #111827 !important;
-
-      /* critical */
-      padding: 0 !important;
-      line-height: 0 !important;
-      font-size: 16px !important;
-      flex-shrink: 0;
-      overflow: visible !important;
-      transition: background 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    .round-btn:hover {
-      background: #f3f4f6;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
-    }
-
-    /* harden ONLY the svg icons inside your round buttons */
-    .round-btn svg {
-      width: 18px !important;
-      height: 18px !important;
-      min-width: 18px !important;
-      min-height: 18px !important;
-      display: block !important;
-      flex: 0 0 18px !important;
-      overflow: visible !important;
-      max-width: none !important;
-      max-height: none !important;
-    }
-
-    .round-btn svg,
-    .round-btn svg * {
-      fill: none !important;
-      stroke: currentColor !important;
-      stroke-width: 2 !important;
-      stroke-linecap: round !important;
-      stroke-linejoin: round !important;
-      opacity: 1 !important;
-      vector-effect: non-scaling-stroke;
-    }
-
-    .round-btn.active {
-      border-color: #93c5fd;
-      box-shadow: 0 0 0 4px rgba(59,130,246,0.18);
-    }
-
-    .message-highlight-btn svg,
-    .review-btn svg {
-      display: block !important;
-      max-width: none !important;
-      max-height: none !important;
-    }
-
-    /* =========================================================
-       ✅ Chat page forces: mini sidebar + NO logo (desktop)
+       ✅ Chat page forces: mini sidebar + NO logo (sidebar + top nav)
+       This is usually what causes “logo still shows”
        ========================================================= */
     @media (min-width: 769px) {
+      /* force mini width */
       body.chat-page #sidenav-main {
         width: 72px !important;
         max-width: 72px !important;
@@ -115,6 +40,7 @@
         margin-left: 90px !important;
       }
 
+      /* hide the sidenav brand/logo area completely */
       body.chat-page #sidenav-main .navbar-brand,
       body.chat-page #sidenav-main .navbar-brand-img,
       body.chat-page #sidenav-main .navbar-brand span,
@@ -122,12 +48,14 @@
         display: none !important;
       }
 
+      /* hide the “toggle” button that can expand sidebar (if you have one) */
       body.chat-page #sidebar-toggle-btn,
       body.chat-page .sidenav-toggler {
         display: none !important;
       }
     }
 
+    /* If your TOP navbar has a logo you also want hidden on chat page */
     body.chat-page nav.navbar-main .navbar-brand,
     body.chat-page nav.navbar-main .navbar-brand-img,
     body.chat-page nav.navbar-main .navbar-brand span {
@@ -295,6 +223,31 @@
       white-space: nowrap;
     }
 
+    .round-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      cursor: pointer;
+      color: #111827;
+      transition: background 0.15s ease, box-shadow 0.15s ease;
+      flex-shrink: 0;
+    }
+    .round-btn:hover {
+      background: #f3f4f6;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+    }
+    .round-btn svg { width: 18px; height: 18px; display: block; }
+
+    .round-btn.active {
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 4px rgba(59,130,246,0.18);
+    }
+
     /* Only show ONE desktop chat-history toggle */
     body:not(.chat-history-collapsed) #expandChatHistoryBtn { display: none !important; }
     body.chat-history-collapsed #collapseChatHistoryBtn { display: none !important; }
@@ -367,11 +320,6 @@
       transition: all 0.2s ease;
       opacity: 0;
       box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
-
-      /* harden */
-      padding: 0 !important;
-      line-height: 0 !important;
-      overflow: visible !important;
     }
 
     .message-highlight-btn:hover {
@@ -389,13 +337,7 @@
       border-color: #fbbf24;
     }
 
-    .message-highlight-btn svg {
-      width: 16px !important;
-      height: 16px !important;
-      display: block !important;
-      max-width: none !important;
-      max-height: none !important;
-    }
+    .message-highlight-btn svg { width: 16px; height: 16px; display: block; }
 
     @media (max-width: 768px) { .message-highlight-btn { opacity: 1; } }
 
@@ -865,7 +807,7 @@
     .chat-category-btn-primary:hover { background: #2563eb; }
 
     /* =========================================================
-       Sitewide sidebar mobile overlay helpers
+       Sitewide sidebar mobile overlay helpers (if your sidebar.html uses these)
        ========================================================= */
     .site-sidenav-backdrop,
     .site-sidenav-righttap { display: none; }
@@ -893,6 +835,7 @@
     }
 
     @media (max-width: 768px) {
+      /* On mobile, keep sidebar off-canvas unless opened */
       #sidenav-main {
         transform: translateX(-110%) !important;
         transition: transform 0.22s ease !important;
@@ -902,37 +845,97 @@
         transform: translateX(0) !important;
       }
     }
-
     /* =========================================================
-       Chat page: make Soft UI sidebar look like other pages
-       ========================================================= */
-    body.chat-page #sidenav-main {
-      background: #ffffff !important;
-      border: 1px solid rgba(0, 0, 0, 0.08) !important;
-      border-radius: 16px !important;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08) !important;
-      margin: 12px 0 12px 12px !important;
-    }
+   Chat page: make Soft UI sidebar look like other pages
+   (white card, border, shadow) + keep mini width on desktop
+   Copy/paste this whole block into your chat template <style>
+   ========================================================= */
 
-    body.chat-page .sidenav,
-    body.chat-page aside,
-    body.chat-page #sidenav-main.sidenav {
-      background: transparent;
-    }
+/* --- 1) Restore the Soft UI “card” look on the site sidebar --- */
+body.chat-page #sidenav-main {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08) !important;
 
-    body.chat-page #sidenav-main.fixed-start {
-      top: 0 !important;
-      height: calc(100vh - 24px) !important;
-    }
+  /* mimic Soft UI spacing (my-3 ms-3) */
+  margin: 12px 0 12px 12px !important;
+}
 
-    @media (max-width: 768px) {
-      body.chat-page #sidenav-main {
-        margin: 0 !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
-        border: none !important;
-      }
-    }
+/* Make sure no global/other rules force transparent backgrounds */
+body.chat-page .sidenav,
+body.chat-page aside,
+body.chat-page #sidenav-main.sidenav {
+  background: transparent;
+}
+
+/* Optional: if your sidenav is “fixed-start”, ensure it stays visible */
+body.chat-page #sidenav-main.fixed-start {
+  top: 0 !important;
+  height: calc(100vh - 24px) !important; /* account for 12px top/bottom margin */
+}
+
+/* --- 2) Keep chat page sidebar collapsed on desktop (mini mode) --- */
+@media (min-width: 769px) {
+  body.chat-page #sidenav-main {
+    width: 72px !important;
+    min-width: 72px !important;
+    max-width: 72px !important;
+  }
+
+  /* Keep main content aligned with mini sidebar */
+  body.chat-page .main-content {
+    margin-left: 90px !important;
+  }
+
+  /* Hide the collapse toggle so users can’t expand it on chat page */
+  body.chat-page #sidebar-toggle-btn {
+    display: none !important;
+  }
+
+  /* If Soft UI shows brand/logo block inside sidenav, hide it */
+  body.chat-page #sidenav-main .navbar-brand,
+  body.chat-page #sidenav-main .sidenav-header,
+  body.chat-page #sidenav-main .brand-logo,
+  body.chat-page #sidenav-main .navbar-brand-img,
+  body.chat-page #sidenav-main .navbar-brand span {
+    display: none !important;
+  }
+
+  /* Center nav icons nicely in mini mode */
+  body.chat-page #sidenav-main .navbar-nav .nav-link {
+    justify-content: center !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  /* Hide link text in mini mode */
+  body.chat-page #sidenav-main .nav-link-text,
+  body.chat-page #sidenav-main .sidenav-normal,
+  body.chat-page #sidenav-main .sidenav-mini-icon + span {
+    display: none !important;
+  }
+
+  /* Give icons a consistent size/feel */
+  body.chat-page #sidenav-main .icon {
+    margin-right: 0 !important;
+  }
+}
+
+/* --- 3) Mobile behavior: use your drawer, don’t force mini card styles --- */
+@media (max-width: 768px) {
+  body.chat-page #sidenav-main {
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+
+/* =========================================================
+   END Chat page sidebar fixes
+   ========================================================= */
+
   </style>
 </head>
 
@@ -950,15 +953,17 @@
             <div class="chat-history-title">Chats</div>
             <div style="display:flex; gap:8px; align-items:center;">
               <button class="round-btn" id="collapseChatHistoryBtn" aria-label="Collapse chat list" title="Collapse" type="button">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M15 18l-6-6 6-6"></path>
                 </svg>
               </button>
 
               <button class="new-chat-btn" id="newChatBtn" type="button">
-                <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-                  <path d="M12 5v14"></path>
-                  <path d="M5 12h14"></path>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
                 New chat
               </button>
@@ -992,9 +997,8 @@
             <div class="chat-history-categories-top">
               <span class="chat-history-categories-label">Categories</span>
               <button type="button" class="chat-history-add-category-btn" id="addCategoryBtn" aria-label="Add category" title="Add category">
-                <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-                  <path d="M12 5v14"></path>
-                  <path d="M5 12h14"></path>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 5v14M5 12h14"></path>
                 </svg>
                 <span>Add</span>
               </button>
@@ -1023,32 +1027,24 @@
           <div class="chat-header">
             <!-- Mobile: open SITEWIDE sidebar drawer -->
             <button class="round-btn" id="siteSidenavOpenBtn" aria-label="Open menu" title="Menu" type="button">
-              <!-- IMPORTANT: replaced your “circle icon” with a real hamburger (no more “dot”) -->
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 6h16"></path>
-                <path d="M4 12h16"></path>
-                <path d="M4 18h16"></path>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M16 8l-2 8-8 2 2-8 8-2z"></path>
               </svg>
             </button>
 
             <!-- Mobile: open CHAT HISTORY drawer -->
             <button class="round-btn" id="openMobileDrawerBtn" aria-label="Open chats" title="Chats" type="button">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 6h16"></path>
-                <path d="M4 12h16"></path>
-                <path d="M4 18h16"></path>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M4 6h16M4 12h16M4 18h16"></path>
               </svg>
             </button>
 
             <!-- Desktop: collapse/expand chat history -->
             <button class="round-btn" id="expandChatHistoryBtn" aria-label="Toggle chat list" title="Chats" type="button">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M8 6h13"></path>
-                <path d="M8 12h13"></path>
-                <path d="M8 18h13"></path>
-                <path d="M3 6h.01"></path>
-                <path d="M3 12h.01"></path>
-                <path d="M3 18h.01"></path>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M8 6h13M8 12h13M8 18h13"></path>
+                <path d="M3 6h.01M3 12h.01M3 18h.01"></path>
               </svg>
             </button>
 
@@ -1058,7 +1054,7 @@
 
             <!-- Translate toggle -->
             <button class="round-btn" id="toggleTranslateBtn" aria-label="Toggle translate mode" title="Translate mode" type="button">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                 <path d="M4 19h6"></path>
                 <path d="M7 19V5h3"></path>
                 <path d="M14 7h6"></path>
@@ -1079,7 +1075,7 @@
                   </div>
                   {% if m.role != 'user' %}
                     <button class="message-highlight-btn" data-message-id="{{ m.id }}" aria-label="Highlight this response" title="Highlight this response" type="button">
-                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                       </svg>
                     </button>
@@ -1103,7 +1099,7 @@
 
           <div class="highlight-review-toggle">
             <button id="reviewHighlightsBtn" class="review-btn" type="button">
-              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9 11l6 6"></path>
                 <path d="M11 9l4 4"></path>
                 <path d="M3 21l3-3"></path>
@@ -1181,9 +1177,11 @@
     <div class="chat-history-header" style="border-bottom: 1px solid #e5e5e5;">
       <div class="chat-history-title">Chats</div>
       <button class="new-chat-btn" id="newChatBtnMobile" type="button">
-        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-          <path d="M12 5v14"></path>
-          <path d="M5 12h14"></path>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
         New chat
       </button>
@@ -1215,9 +1213,8 @@
       <div class="chat-history-categories-top">
         <span class="chat-history-categories-label">Categories</span>
         <button type="button" class="chat-history-add-category-btn" id="addCategoryBtnMobile" aria-label="Add category" title="Add category">
-          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-            <path d="M12 5v14"></path>
-            <path d="M5 12h14"></path>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14M5 12h14"></path>
           </svg>
           <span>Add</span>
         </button>
@@ -1247,14 +1244,17 @@
   <div class="site-sidenav-backdrop" id="siteSidenavBackdrop" aria-hidden="true"></div>
   <div class="site-sidenav-righttap" id="siteSidenavRightTap" aria-hidden="true"></div>
 
-  <!-- Soft UI JS -->
+  <!-- =========================================================
+       ✅ Soft UI JS (THIS IS IMPORTANT to match your “good” template)
+       ========================================================= -->
   <script src="{% static 'accounts/js/core/popper.min.js' %}"></script>
   <script src="{% static 'accounts/js/core/bootstrap.min.js' %}"></script>
   <script src="{% static 'accounts/js/plugins/perfect-scrollbar.min.js' %}"></script>
   <script src="{% static 'accounts/js/plugins/smooth-scrollbar.min.js' %}"></script>
-  <script src="{% static 'accounts/js/soft-ui-dashboard.min.js' %}?v=20260118"></script>
+  <script src="{% static 'accounts/js/soft-ui-dashboard.min.js?v=1.0.7' %}"></script>
 
   <script>
+    // Soft UI scrollbar init (same pattern as your good page)
     (function () {
       var win = navigator.platform.indexOf('Win') > -1;
       if (win && document.querySelector('#sidenav-scrollbar')) {
@@ -1264,7 +1264,6 @@
     })();
   </script>
 
-  <!-- ================= YOUR ORIGINAL JS (UNCHANGED) ================= -->
   <script>
     const chatMessages = document.getElementById("chatMessages");
     const userInput = document.getElementById("userInput");
@@ -1558,7 +1557,7 @@
         highlightBtn.setAttribute("title", "Highlight this response");
         if (messageId) highlightBtn.setAttribute("data-message-id", messageId);
         highlightBtn.innerHTML = `
-          <svg viewBox="0 0 24 24" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
           </svg>
         `;

@@ -66,20 +66,22 @@ class UserMediaStatus(models.Model):
 
 class Highlight(models.Model):
     SOURCE_CHOICES = (
-        ('media', 'Media'),
-        ('chat', 'Chat'),
-        ('web', 'Web'),
+        ("media", "Media"),
+        ("chat", "Chat"),
+        ("web", "Web"),
+        ("read", "Read"),  # ✅ ADD THIS (your read API already uses source='read')
     )
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='highlights')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="highlights")
     source = models.CharField(max_length=10, choices=SOURCE_CHOICES)
 
+    # Existing relations (keep)
     media = models.ForeignKey(
-        Media,
+        "subplayer.Media",
         on_delete=models.CASCADE,
-        related_name='highlights',
+        related_name="highlights",
         null=True,
-        blank=True
+        blank=True,
     )
 
     chat_session = models.ForeignKey(
@@ -87,7 +89,7 @@ class Highlight(models.Model):
         on_delete=models.CASCADE,
         related_name="chat_highlights",
         null=True,
-        blank=True
+        blank=True,
     )
     chat_message = models.ForeignKey(
         "accounts.ChatMessage",
@@ -96,6 +98,16 @@ class Highlight(models.Model):
         null=True,
         blank=True,
     )
+
+    # ✅ NEW: link highlight to an Article (this removes fragile URL matching forever)
+    article = models.ForeignKey(
+        "subplayer.Article",
+        on_delete=models.CASCADE,
+        related_name="highlights",
+        null=True,
+        blank=True,
+    )
+
     # ===== MEDIA-SPECIFIC FIELDS =====
     start_time = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     end_time = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
@@ -111,23 +123,37 @@ class Highlight(models.Model):
     page_title = models.CharField(max_length=500, blank=True, null=True)
     created_at = models.DateTimeField(default=timezone.now)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "source", "created_at"]),
+            models.Index(fields=["user", "page_url"]),
+            models.Index(fields=["user", "article"]),
+        ]
 
     def __str__(self):
-        if self.source == 'media' and self.media:
-            return f'[{self.source}] {self.media.title}: {self.highlighted_text[:50]}'
-        return f'[{self.source}] {self.highlighted_text[:50]}'
-# subplayer/models.py
+        if self.source == "media" and self.media:
+            return f"[{self.source}] {self.media.title}: {self.highlighted_text[:50]}"
+        return f"[{self.source}] {self.highlighted_text[:50]}"
+
 class Article(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, max_length=255)
 
-    # Re-add legacy columns with permissive settings
+    # Legacy columns you already have (keep)
     level = models.CharField(max_length=50, blank=True, null=True, default="")
     description = models.TextField(blank=True, null=True, default="")
+
+    # ✅ Full extracted content (plain text)
     content = models.TextField(blank=True, null=True, default="")
 
+    # ✅ Optional: store cleaned HTML for nicer rendering in your reader
+    content_html = models.TextField(blank=True, null=True, default="")
+
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # For web-saved pages, you use this as a stable unique key
     source_url = models.URLField(blank=True, null=True, unique=True)
+
     created_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True, related_name="articles"
     )

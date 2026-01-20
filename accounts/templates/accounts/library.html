@@ -2,609 +2,574 @@
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
   <title>Chinese Log</title>
+
   <!-- Fonts and Icons -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
-  <!-- Nucleo Icons -->
   <link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet" />
-  <!-- Font Awesome Icons -->
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
   <link href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet" />
-  <!-- CSS Files -->
+
+  <!-- Soft UI -->
   <link href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet" />
 
   <style>
-    :root {
-      --primary-color: #3a9fff;
-      --accent-color: #cb0ba0;
-      --dark-color: #1e293b;
-      --light-color: #f8fafc;
-      --border-radius: 16px;
-      --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-      --hover-transform: translateY(-8px);
+    /* =========================================================
+      Modern + Minimal theme (keeps your structure, simplifies visuals)
+      - less gradients, less shadows, more whitespace
+      - crisp chips + buttons
+      - cards become clean “tiles”
+    ========================================================= */
+
+    :root{
+      --bg: #f7f8fb;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: rgba(15, 23, 42, 0.08);
+
+      --primary: #3a9fff;
+      --primary-weak: rgba(58, 159, 255, 0.12);
+      --accent: #cb0ba0;
+      --accent-weak: rgba(203, 11, 160, 0.12);
+
+      --radius: 14px;
+      --radius-sm: 10px;
+
+      --shadow-sm: 0 6px 18px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 12px 28px rgba(15, 23, 42, 0.10);
+
+      --ring: 0 0 0 4px rgba(58, 159, 255, 0.18);
     }
 
-    body {
-      font-family: 'Open Sans', sans-serif;
-      background-color: var(--light-color);
-      color: var(--dark-color);
-      transition: padding-top 0.3s ease-in-out;
+    body{
+      font-family: "Open Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
     }
 
-    .container-fluid {
+    .container-fluid{
       max-width: 1200px;
-      padding: 2rem 1rem;
+      padding: 1.5rem 1rem;
     }
 
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
+    /* Header row */
+    .page-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
     }
 
-    .page-title {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--dark-color);
-      margin: 0;
+    /* Filter chips */
+    .filter-group{
+      display:flex;
+      gap: .5rem;
+      padding: .35rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      flex-wrap: wrap;
     }
 
-    .filter-group {
-      display: flex;
-      gap: 0.75rem;
-      background: white;
-      padding: 0.5rem;
-      border-radius: var(--border-radius);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
-
-    .btn-filter {
-      padding: 0.75rem 1.25rem;
-      border-radius: 10px;
-      border: none;
+    .btn-filter{
+      border: 1px solid transparent;
       background: transparent;
-      color: #64748b;
+      color: var(--muted);
+      padding: .55rem .8rem;
+      border-radius: 999px;
       font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
+      font-size: .875rem;
+      display:flex;
+      align-items:center;
+      gap: .5rem;
+      cursor:pointer;
+      transition: background .18s ease, color .18s ease, border-color .18s ease;
+      user-select: none;
     }
 
-    .btn-filter.active {
-      background: var(--primary-color);
-      color: white;
+    .btn-filter:hover{
+      background: rgba(15, 23, 42, 0.04);
+      color: var(--text);
     }
 
-    .btn-count {
-      min-width: 20px;
-      height: 20px;
-      padding: 0 6px;
-      border-radius: 10px;
-      background: rgba(0, 0, 0, 0.1);
-      font-size: 0.75rem;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    .btn-filter.active{
+      background: var(--primary-weak);
+      color: var(--text);
+      border-color: rgba(58, 159, 255, 0.25);
     }
 
-    .btn-filter.active .btn-count {
-      background: rgba(255, 255, 255, 0.25);
+    .btn-count{
+      min-width: 22px;
+      height: 22px;
+      padding: 0 7px;
+      border-radius: 999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size: .75rem;
+      font-weight: 700;
+      background: rgba(15, 23, 42, 0.06);
+      color: var(--muted);
     }
 
-    .action-buttons {
-      display: flex;
-      gap: 10px;
-      margin-left: 15px;
+    .btn-filter.active .btn-count{
+      background: rgba(58, 159, 255, 0.20);
+      color: #0b1b3a;
     }
 
-    .btn-download {
-      padding: 0.6rem 1.2rem;
-      border-radius: 10px;
-      border: none;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 0.875rem;
+    /* Actions */
+    .action-buttons{
+      display:flex;
+      gap: .6rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn-download{
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      padding: .65rem .9rem;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: .875rem;
+      display:flex;
+      align-items:center;
+      gap:.55rem;
+      cursor:pointer;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
+      box-shadow: var(--shadow-sm);
       white-space: nowrap;
     }
 
-    .btn-download svg {
+    .btn-download svg{
       width: 18px;
       height: 18px;
     }
 
-    .btn-download.primary {
-      background: var(--primary-color);
-      color: white;
-      box-shadow: 0 4px 15px rgba(58, 159, 255, 0.3);
+    .btn-download:hover{
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+      border-color: rgba(15, 23, 42, 0.14);
     }
 
-    .btn-download.secondary {
-      background: var(--accent-color);
-      color: white;
-      box-shadow: 0 4px 15px rgba(203, 11, 160, 0.3);
+    .btn-download.primary{
+      background: var(--primary);
+      border-color: rgba(58, 159, 255, 0.55);
+      color: #fff;
+      box-shadow: 0 10px 25px rgba(58,159,255,.22);
     }
 
-    .btn-download:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    .btn-download.primary:hover{ box-shadow: 0 14px 30px rgba(58,159,255,.28); }
+
+    .btn-download.secondary{
+      background: #fff;
+      color: var(--text);
     }
 
-    .video-grid {
-      display: grid;
+    .btn-download.secondary:focus-visible{
+      outline: none;
+      box-shadow: var(--ring), var(--shadow-sm);
+    }
+
+    /* Grid */
+    .video-grid{
+      display:grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 2rem;
+      gap: 1.25rem;
     }
 
-    .achievement-badge {
-      position: relative;
-      background: linear-gradient(145deg, #ffffff, #f5f7fa);
-      border-radius: var(--border-radius);
-      box-shadow: var(--card-shadow);
+    /* Card */
+    .achievement-badge{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
       overflow: hidden;
-      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      box-shadow: var(--shadow-sm);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
       height: 100%;
     }
 
-    .achievement-badge:hover {
-      transform: var(--hover-transform);
-      box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.2);
+    .achievement-badge:hover{
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: rgba(15, 23, 42, 0.14);
     }
 
-    .badge-link {
-      text-decoration: none;
+    .badge-link{
+      text-decoration:none;
       color: inherit;
-      display: block;
-      height: 100%;
+      display:block;
+      height:100%;
     }
 
-    .badge-banner {
-      position: relative;
-      height: 140px;
-      overflow: hidden;
-      border-radius: var(--border-radius) var(--border-radius) 0 0;
+    /* Banner */
+    .badge-banner{
+      position:relative;
+      height: 150px;
+      overflow:hidden;
+      background: #0b1220;
     }
 
-    .badge-img {
-      width: 100%;
-      height: 100%;
+    .badge-img{
+      width:100%;
+      height:100%;
       object-fit: cover;
-      transition: transform 0.5s ease;
-      filter: brightness(0.85);
+      transform: scale(1.02);
+      transition: transform .25s ease;
+      filter: saturate(1.02) contrast(1.02);
     }
 
-    .achievement-badge:hover .badge-img {
-      transform: scale(1.1);
+    .achievement-badge:hover .badge-img{ transform: scale(1.06); }
+
+    .badge-overlay{
+      position:absolute;
+      inset:0;
+      background: linear-gradient(to top, rgba(0,0,0,.58), rgba(0,0,0,.10) 55%, rgba(0,0,0,0));
+      pointer-events:none;
     }
 
-    .badge-overlay {
-      position: absolute;
-      top: 0;
+    /* Center icon becomes simpler */
+    .badge-icon{
+      position:absolute;
+      left: .9rem;
+      top: .9rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(255,255,255,.35);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 24px rgba(0,0,0,.18);
+      z-index: 2;
+    }
+    .badge-icon svg{ width: 22px; height: 22px; }
+    .badge-icon svg path{ fill: var(--text); }
+
+    /* Stats chips bottom */
+    .badge-stats{
+      position:absolute;
+      bottom: .8rem;
+      left: .8rem;
+      right: .8rem;
+      display:flex;
+      justify-content: space-between;
+      gap: .5rem;
+      z-index: 2;
+      color: #fff;
+    }
+
+    .stat{
+      display:inline-flex;
+      align-items:center;
+      gap:.35rem;
+      padding: .38rem .55rem;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: .75rem;
+      background: rgba(255,255,255,.16);
+      border: 1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(8px);
+      line-height: 1;
+    }
+
+    .stat svg{
+      width: 14px;
+      height: 14px;
+      fill: #fff;
+      opacity: .95;
+    }
+
+    /* Content */
+    .badge-content{
+      padding: 1rem 1rem 1.05rem;
+      display:flex;
+      flex-direction: column;
+      height: calc(100% - 150px);
+      gap: .55rem;
+    }
+
+    .badge-title{
+      font-size: 1rem;
+      font-weight: 800;
+      margin: 0;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .badge-description{
+      margin: 0;
+      color: var(--muted);
+      font-size: .875rem;
+      line-height: 1.55;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+    }
+
+    /* Progress */
+    .badge-progress{
+      width:100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.06);
+      overflow:hidden;
+      margin-top: .1rem;
+    }
+
+    .progress-bar{
+      height:100%;
+      border-radius: 999px;
+      background: var(--primary);
+      transition: width .35s ease;
+    }
+
+    /* Footer */
+    .badge-footer{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: .65rem;
+      border-top: 1px solid rgba(15, 23, 42, 0.06);
+      gap: .75rem;
+    }
+
+    .badge-channel{
+      font-size: .825rem;
+      color: var(--muted);
+      font-weight: 700;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 60%;
+    }
+
+    .status-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:.35rem;
+      padding: .35rem .6rem;
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 800;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .status-badge.in-progress{
+      background: var(--primary-weak);
+      border-color: rgba(58, 159, 255, 0.20);
+      color: #0b1b3a;
+    }
+
+    .status-badge.completed{
+      background: var(--accent-weak);
+      border-color: rgba(203, 11, 160, 0.18);
+      color: #3a0030;
+    }
+
+    /* Remove the old "Completed" corner badge (optional) */
+    .completed-badge{ display:none; }
+
+    /* =========================================================
+      Study Guide Popup - minimal
+    ========================================================= */
+    #study-guide-overlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+      z-index: 999;
+    }
+    #study-guide-overlay.active{
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #study-guide-popup{
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(.98);
+      width: min(420px, calc(100% - 32px));
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow-md);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+      z-index: 1000;
+      padding: 18px;
+    }
+
+    #study-guide-popup.active{
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .popup-header{
+      display:flex;
+      align-items:center;
+      gap: .65rem;
+      justify-content:flex-start;
+      margin-bottom: .5rem;
+    }
+    .popup-title{
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 900;
+      color: var(--text);
+    }
+    .popup-message{
+      margin: .35rem 0 1rem;
+      color: var(--muted);
+      font-size: .9rem;
+      line-height: 1.55;
+      text-align:left;
+    }
+    .button-container{
+      display:flex;
+      gap: .6rem;
+      justify-content:flex-end;
+    }
+
+    .upgrade-button,
+    .close-button{
+      border-radius: 999px;
+      padding: .6rem .85rem;
+      font-weight: 800;
+      font-size: .875rem;
+      cursor:pointer;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .upgrade-button{
+      background: var(--primary);
+      color: #fff;
+      border-color: rgba(58,159,255,.55);
+      box-shadow: 0 10px 25px rgba(58,159,255,.22);
+    }
+    .upgrade-button:hover{ transform: translateY(-1px); box-shadow: 0 14px 30px rgba(58,159,255,.28); }
+    .close-button:hover{ background: rgba(15,23,42,.04); transform: translateY(-1px); }
+
+    .warning-icon svg{
+      width: 20px;
+      height: 20px;
+      color: var(--muted);
+    }
+
+    /* Download notification (keep but make cleaner) */
+    #download-notification{
+      background: rgba(255,255,255,.92);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(10px);
+      padding: 10px 14px;
+      font-size: 14px;
+      width: calc(100% - 24px);
+      margin: 12px auto 0;
       left: 0;
       right: 0;
-      bottom: 0;
-      background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 50%);
-      z-index: 1;
-    }
-
-    .badge-icon {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: var(--primary-color);
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
-      z-index: 2;
-      border: 4px solid white;
-      transition: all 0.3s ease;
-    }
-
-    .achievement-badge:hover .badge-icon {
-      transform: translate(-50%, -50%) scale(1.1);
-    }
-
-    .badge-stats {
-      position: absolute;
-      bottom: 0.75rem;
-      left: 0.75rem;
-      right: 0.75rem;
-      display: flex;
-      justify-content: space-between;
-      z-index: 2;
-      color: white;
-    }
-
-    .stat {
-      display: flex;
-      align-items: center;
-      gap: 0.375rem;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(8px);
-      padding: 0.5rem 0.75rem;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 0.75rem;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      transition: transform 0.3s ease;
-    }
-
-    .stat.highlights {
-      background: rgba(203, 11, 160, 0.8);
-    }
-
-    .stat.duration {
-      background: rgba(58, 159, 255, 0.8);
-    }
-
-    .achievement-badge:hover .stat {
-      transform: scale(1.05);
-    }
-
-    .stat svg {
-      width: 16px;
-      height: 16px;
-      fill: white;
-    }
-
-    .badge-content {
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      height: calc(100% - 140px);
-    }
-
-    .badge-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin: 0 0 0.5rem;
-      color: var(--dark-color);
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      line-height: 1.4;
-    }
-
-    .badge-description {
-      color: #64748b;
-      font-size: 0.875rem;
-      margin-bottom: 1rem;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      line-height: 1.6;
-    }
-
-    .badge-progress {
-      width: 100%;
-      height: 6px;
-      background: #e2e8f0;
-      border-radius: 3px;
-      overflow: hidden;
-      margin: 0.75rem 0;
-    }
-
-    .progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
-      border-radius: 3px;
-      transition: width 0.5s ease;
-    }
-
-    .completed-badge {
-      position: absolute;
-      top: 0.75rem;
-      right: 0.75rem;
-      background: var(--accent-color);
-      color: white;
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 0.35rem 0.75rem;
-      border-radius: 10px;
-      z-index: 10;
-      box-shadow: 0 4px 10px rgba(203, 11, 160, 0.3);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    .badge-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: auto;
-      padding-top: 0.75rem;
-      border-top: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    .badge-channel {
-      font-size: 0.875rem;
-      color: #64748b;
-      font-weight: 600;
-    }
-
-    .status-badge {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      border-radius: 10px;
-      padding: 0.35rem 0.6rem;
-    }
-
-    .status-badge.in-progress {
-      background: rgba(58, 159, 255, 0.1);
-      color: var(--primary-color);
-    }
-
-    .status-badge.completed {
-      background: rgba(203, 11, 160, 0.1);
-      color: var(--accent-color);
-    }
-
-    /* Study Guide Popup Styles */
-    #study-guide-popup {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0.9);
-      background-color: white;
-      width: 90%;
-      max-width: 400px;
       border-radius: 12px;
-      z-index: 1000;
-      opacity: 0;
-      transition: all 0.3s ease;
-      pointer-events: none;
-      padding: 20px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    #study-guide-popup.active {
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1);
-      pointer-events: auto;
-    }
-
-    #study-guide-overlay {
       position: fixed;
       top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 999;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      pointer-events: none;
-    }
-
-    #study-guide-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .popup-content {
-      text-align: center;
-    }
-
-    .popup-header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 15px;
-    }
-
-    .popup-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin: 0;
-      color: #344767;
-    }
-
-    .popup-message {
-      font-size: 14px;
-      color: #67748e;
-      margin-bottom: 20px;
-    }
-
-    .button-container {
-      display: flex;
-      justify-content: space-around;
-    }
-
-    .upgrade-button, .close-button {
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    .upgrade-button {
-      background-color: #2F88FF;
-      color: white;
-      border: none;
-    }
-
-    .upgrade-button:hover {
-      background-color: #1a73e8;
-    }
-
-    .close-button {
-      background-color: #e9ecef;
-      color: #344767;
-      border: none;
-    }
-
-    .close-button:hover {
-      background-color: #d3d8de;
-    }
-
-    .warning-icon svg {
-      color: #f1c40f;
-      margin-right: 10px;
-    }
-
-    #download-notification {
-      background-color: #f8f9fa;
-      color: #344767;
-      border: none;
-      border-bottom: 2px solid #e9ecef;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-      padding: 10px 15px;
-      font-size: 14px;
-      width: 100%;
-      text-align: center;
-      position: fixed;
-      top: 0;
-      left: 0;
       z-index: 1060;
       opacity: 0;
-      transition: opacity 0.3s ease-in-out;
+      transition: opacity .2s ease;
       display: none;
+      text-align:center;
+      color: var(--text);
     }
-
-    #download-notification.show {
+    #download-notification.show{
       opacity: 1;
       display: block;
     }
 
-    @media (max-width: 768px) {
-      .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-      }
-      .filter-group {
-        width: 100%;
-        flex-wrap: wrap;
-      }
-      .action-buttons {
-        width: 100%;
-        margin-left: 0;
-        margin-top: 10px;
-        justify-content: space-between;
-      }
-      .btn-download {
-        flex: 1;
-        justify-content: center;
-        padding: 0.6rem 0.8rem;
-      }
-      .video-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1.5rem;
-      }
-      .badge-banner {
-        height: 120px;
-      }
-      .badge-icon {
-        width: 50px;
-        height: 50px;
-      }
-      .badge-content {
-        padding: 1.25rem;
+    /* =========================================================
+      Soft UI Sidebar Fix — keep yours (slightly tightened)
+    ========================================================= */
+    body.g-sidenav-show .main-content{ transition: margin-left .2s ease; }
+    body.g-sidenav-show:not(.g-sidenav-hidden) .main-content{ margin-left: 18rem !important; }
+    body.g-sidenav-show.g-sidenav-pinned .main-content,
+    body.g-sidenav-show.g-sidenav-hidden .main-content,
+    body.g-sidenav-show.navbar-vertical-collapsed .main-content{ margin-left: 6.5rem !important; }
+
+    #sidenav-main,
+    .sidenav.navbar-vertical{
+      background: #fff !important;
+      border: 1px solid var(--border) !important;
+      box-shadow: var(--shadow-sm) !important;
+      border-radius: 16px !important;
+      margin: 16px !important;
+      height: calc(100vh - 32px) !important;
+      overflow: hidden !important;
+    }
+    #sidenav-scrollbar{ height: 100% !important; }
+    #sidenav-main .navbar-collapse{
+      height: calc(100% - 72px) !important;
+      overflow-y: auto !important;
+    }
+    body.g-sidenav-pinned #sidenav-main,
+    body.navbar-vertical-collapsed #sidenav-main{ width: 5.5rem !important; }
+
+    body.g-sidenav-pinned #sidenav-main .navbar-brand span,
+    body.navbar-vertical-collapsed #sidenav-main .navbar-brand span{
+      opacity: 0 !important;
+      width: 0 !important;
+      overflow: hidden !important;
+    }
+
+    @media (max-width: 991.98px){
+      body.g-sidenav-show .main-content{ margin-left: 0 !important; }
+      #sidenav-main,
+      .sidenav.navbar-vertical{
+        margin: 0 !important;
+        border-radius: 0 !important;
+        height: 100vh !important;
       }
     }
-    /* =========================================================
-   Soft UI Sidebar Fix — Read page
-   Paste at END of <style>
-   ========================================================= */
 
-/* 1) Let Soft UI own layout spacing (your container is fine) */
-body.g-sidenav-show .main-content {
-  transition: margin-left 0.2s ease;
-}
-
-/* Expanded sidenav (default Soft UI) */
-body.g-sidenav-show:not(.g-sidenav-hidden) .main-content {
-  margin-left: 18rem !important; /* matches default expanded sidenav width */
-}
-
-/* Collapsed/mini sidenav */
-body.g-sidenav-show.g-sidenav-pinned .main-content,
-body.g-sidenav-show.g-sidenav-hidden .main-content,
-body.g-sidenav-show.navbar-vertical-collapsed .main-content {
-  margin-left: 6.5rem !important; /* matches mini sidenav feel */
-}
-
-/* 2) Restore the "white card" sidenav look */
-#sidenav-main,
-.sidenav.navbar-vertical {
-  background: #ffffff !important;
-  border: 1px solid rgba(226, 232, 240, 0.9) !important;
-  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08) !important;
-  border-radius: 16px !important;
-
-  /* key: give it breathing room from the viewport like other pages */
-  margin: 16px !important;
-  height: calc(100vh - 32px) !important;
-  overflow: hidden !important;
-}
-
-/* 3) Prevent your page gradient from making the sidebar look tinted */
-body {
-  background-attachment: fixed;
-}
-#sidenav-main * {
-  background-color: transparent;
-}
-
-/* 4) Make the inner scroll area behave nicely */
-#sidenav-scrollbar {
-  height: 100% !important;
-}
-#sidenav-main .navbar-collapse {
-  height: calc(100% - 72px) !important; /* leaves room for logo/top area */
-  overflow-y: auto !important;
-}
-
-/* 5) When collapsed, keep it clean (no weird spacing) */
-body.g-sidenav-pinned #sidenav-main,
-body.navbar-vertical-collapsed #sidenav-main {
-  width: 5.5rem !important;
-}
-
-/* Optional: hide large logo text in collapsed mode (icon still ok) */
-body.g-sidenav-pinned #sidenav-main .navbar-brand span,
-body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
-  opacity: 0 !important;
-  width: 0 !important;
-  overflow: hidden !important;
-}
-
-/* 6) Mobile: sidenav should overlay, not push content */
-@media (max-width: 991.98px) {
-  body.g-sidenav-show .main-content {
-    margin-left: 0 !important;
-  }
-
-  #sidenav-main,
-  .sidenav.navbar-vertical {
-    margin: 0 !important;
-    border-radius: 0 !important;
-    height: 100vh !important;
-  }
-}
-
+    /* Mobile header layout */
+    @media (max-width: 768px){
+      .page-header{
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .action-buttons{
+        justify-content: stretch;
+      }
+      .btn-download{
+        flex: 1;
+        justify-content: center;
+      }
+      .video-grid{ gap: 1rem; }
+      .badge-banner{ height: 140px; }
+      .badge-content{ padding: .95rem; }
+    }
   </style>
 </head>
 
@@ -613,19 +578,15 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
   {% include 'accounts/sidebar.html' %}
 
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
-    <div id="download-notification" class="alert alert-light fade fixed-top" role="alert">
-      <div class="container-fluid py-2">
-        <div class="d-flex align-items-center justify-content-center">
-          <span>Your study guide is downloading. This may take a couple of minutes...</span>
-        </div>
-      </div>
+    <div id="download-notification" role="alert">
+      <span>Your study guide is downloading. This may take a couple of minutes...</span>
     </div>
 
     <div class="container-fluid py-4">
       <div class="page-header">
         <div class="filter-group">
           <button class="btn-filter active" onclick="filterVideos('all', this)">
-            <span>All Videos</span>
+            <span>All</span>
             <span class="btn-count">{{ all_media_count }}</span>
           </button>
           <button class="btn-filter" onclick="filterVideos('in_progress', this)">
@@ -645,8 +606,9 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            <span>Download Subtitles</span>
+            <span>Subtitles</span>
           </button>
+
           <button class="btn-download secondary" id="study-guide-btn">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -668,7 +630,8 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
               <div class="badge-banner">
                 <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}" class="badge-img">
                 <div class="badge-overlay"></div>
-                <div class="badge-icon">
+
+                <div class="badge-icon" aria-hidden="true">
                   {% if video.status == 'completed' %}
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                       <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
@@ -676,19 +639,20 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
                   {% else %}
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path fill-rule="evenodd" clip-rule="evenodd"
-                            d="M10.9965 4.00001C11.4368 3.99846 11.8263 4.28508 11.9558 4.70591L15.1231 14.9997L18.0715 7.62861C18.1964 7.31651 18.4697 7.08801 18.7989 7.02042C19.1282 6.95284 19.4694 7.0552 19.7071 7.29289L22.7071 10.2929C23.0976 10.6834 23.0976 11.3166 22.7071 11.7071C22.3166 12.0976 21.6834 12.0976 21.2929 11.7071L19.3652 9.77946L15.9285 18.3714C15.771 18.765 15.3826 19.0165 14.959 18.9992C14.5355 18.9818 14.1689 18.6992 14.0442 18.2941L11.0121 8.43973L8.95782 15.2873C8.84938 15.6488 8.54667 15.9185 8.17511 15.9845C7.80355 16.0506 7.42643 15.9019 7.2 15.6L5 12.6667L2.8 15.6C2.46863 16.0418 1.84183 16.1314 1.4 15.8C0.95817 15.4686 0.868627 14.8418 1.2 14.4L4.2 10.4C4.38885 10.1482 4.68524 10 5 10C5.31475 10 5.61114 10.1482 5.8 10.4L7.6114 12.8152L10.0422 4.71265C10.1687 4.29092 10.5562 4.00156 10.9965 4.00001Z"
-                            fill="white"/>
+                        d="M10.9965 4.00001C11.4368 3.99846 11.8263 4.28508 11.9558 4.70591L15.1231 14.9997L18.0715 7.62861C18.1964 7.31651 18.4697 7.08801 18.7989 7.02042C19.1282 6.95284 19.4694 7.0552 19.7071 7.29289L22.7071 10.2929C23.0976 10.6834 23.0976 11.3166 22.7071 11.7071C22.3166 12.0976 21.6834 12.0976 21.2929 11.7071L19.3652 9.77946L15.9285 18.3714C15.771 18.765 15.3826 19.0165 14.959 18.9992C14.5355 18.9818 14.1689 18.6992 14.0442 18.2941L11.0121 8.43973L8.95782 15.2873C8.84938 15.6488 8.54667 15.9185 8.17511 15.9845C7.80355 16.0506 7.42643 15.9019 7.2 15.6L5 12.6667L2.8 15.6C2.46863 16.0418 1.84183 16.1314 1.4 15.8C0.95817 15.4686 0.868627 14.8418 1.2 14.4L4.2 10.4C4.38885 10.1482 4.68524 10 5 10C5.31475 10 5.61114 10.1482 5.8 10.4L7.6114 12.8152L10.0422 4.71265C10.1687 4.29092 10.5562 4.00156 10.9965 4.00001Z"
+                        fill="none" stroke="currentColor" stroke-width="2"/>
                     </svg>
                   {% endif %}
                 </div>
+
                 <div class="badge-stats">
-                  <span class="stat highlights">
+                  <span class="stat">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                       <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
                     </svg>
                     {{ video.user_highlights_count }}
                   </span>
-                  <span class="stat duration">
+                  <span class="stat">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                       <circle cx="12" cy="12" r="10"/>
                       <polyline points="12 6 12 12 16 14"/>
@@ -697,12 +661,15 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
                   </span>
                 </div>
               </div>
+
               <div class="badge-content">
                 <h3 class="badge-title">{{ video.title }}</h3>
                 <p class="badge-description">{{ video.description|truncatechars:100 }}</p>
-                <div class="badge-progress">
+
+                <div class="badge-progress" aria-hidden="true">
                   <div class="progress-bar" style="width: {{ video.progress_percent }}%;"></div>
                 </div>
+
                 <div class="badge-footer">
                   <span class="badge-channel">{{ video.channel.name }}</span>
                   <span class="status-badge {{ video.status|default:'in-progress' }}">
@@ -714,8 +681,8 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
                     {% else %}
                       <svg viewBox="0 0 24 24" width="12" height="12" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" clip-rule="evenodd"
-                              d="M10.9965 4.00001C11.4368 3.99846 11.8263 4.28508 11.9558 4.70591L15.1231 14.9997L18.0715 7.62861C18.1964 7.31651 18.4697 7.08801 18.7989 7.02042C19.1282 6.95284 19.4694 7.0552 19.7071 7.29289L22.7071 10.2929C23.0976 10.6834 23.0976 11.3166 22.7071 11.7071C22.3166 12.0976 21.6834 12.0976 21.2929 11.7071L19.3652 9.77946L15.9285 18.3714C15.771 18.765 15.3826 19.0165 14.959 18.9992C14.5355 18.9818 14.1689 18.6992 14.0442 18.2941L11.0121 8.43973L8.95782 15.2873C8.84938 15.6488 8.54667 15.9185 8.17511 15.9845C7.80355 16.0506 7.42643 15.9019 7.2 15.6L5 12.6667L2.8 15.6C2.46863 16.0418 1.84183 16.1314 1.4 15.8C0.95817 15.4686 0.868627 14.8418 1.2 14.4L4.2 10.4C4.38885 10.1482 4.68524 10 5 10C5.31475 10 5.61114 10.1482 5.8 10.4L7.6114 12.8152L10.0422 4.71265C10.1687 4.29092 10.5562 4.00156 10.9965 4.00001Z"
-                              fill="none" stroke="var(--primary-color)" stroke-width="2"/>
+                          d="M10.9965 4.00001C11.4368 3.99846 11.8263 4.28508 11.9558 4.70591L15.1231 14.9997L18.0715 7.62861C18.1964 7.31651 18.4697 7.08801 18.7989 7.02042C19.1282 6.95284 19.4694 7.0552 19.7071 7.29289L22.7071 10.2929C23.0976 10.6834 23.0976 11.3166 22.7071 11.7071C22.3166 12.0976 21.6834 12.0976 21.2929 11.7071L19.3652 9.77946L15.9285 18.3714C15.771 18.765 15.3826 19.0165 14.959 18.9992C14.5355 18.9818 14.1689 18.6992 14.0442 18.2941L11.0121 8.43973L8.95782 15.2873C8.84938 15.6488 8.54667 15.9185 8.17511 15.9845C7.80355 16.0506 7.42643 15.9019 7.2 15.6L5 12.6667L2.8 15.6C2.46863 16.0418 1.84183 16.1314 1.4 15.8C0.95817 15.4686 0.868627 14.8418 1.2 14.4L4.2 10.4C4.38885 10.1482 4.68524 10 5 10C5.31475 10 5.61114 10.1482 5.8 10.4L7.6114 12.8152L10.0422 4.71265C10.1687 4.29092 10.5562 4.00156 10.9965 4.00001Z"
+                          fill="none" stroke="currentColor" stroke-width="2"/>
                       </svg>
                       In Progress
                     {% endif %}
@@ -734,22 +701,22 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
     </div>
 
     <!-- Study Guide Popup -->
-    <div id="study-guide-popup" class="limit-popup">
+    <div id="study-guide-popup" class="limit-popup" role="dialog" aria-modal="true">
       <div class="popup-content">
         <div class="popup-header">
-          <div class="warning-icon">
-            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <div class="warning-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
               <line x1="12" y1="9" x2="12" y2="13"></line>
               <line x1="12" y1="17" x2="12" y2="17"></line>
             </svg>
           </div>
-          <h3 class="popup-title">Want to download your study guide?</h3>
+          <h3 class="popup-title">Download your study guide</h3>
         </div>
-        <p class="popup-message">Click the button below to download your study guide.</p>
+        <p class="popup-message">We’ll generate a PDF from all your highlights and start the download.</p>
         <div class="button-container">
-          <button class="upgrade-button" onclick="downloadStudyGuide()">Download Now</button>
-          <button class="close-button" onclick="hideStudyGuidePopup()">Close</button>
+          <button class="upgrade-button" onclick="downloadStudyGuide()">Download</button>
+          <button class="close-button" onclick="hideStudyGuidePopup()">Cancel</button>
         </div>
       </div>
     </div>
@@ -763,7 +730,6 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
   <script src="{% static 'accounts/js/plugins/smooth-scrollbar.min.js' %}"></script>
   <script src="{% static 'accounts/js/soft-ui-dashboard.min.js?v=1.0.7' %}"></script>
 
-  <!-- Add CSRF token for POST requests -->
   {% csrf_token %}
 
   <script>
@@ -807,9 +773,7 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
         }
       })
       .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok: ' + response.statusText);
-        }
+        if (!response.ok) throw new Error('Network response was not ok: ' + response.statusText);
         return response.blob();
       })
       .then(blob => {
@@ -828,19 +792,14 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
       });
     }
 
-    // Popup Functions
     function showStudyGuidePopup() {
-      const popup = document.getElementById('study-guide-popup');
-      const overlay = document.getElementById('study-guide-overlay');
-      popup.classList.add('active');
-      overlay.classList.add('active');
+      document.getElementById('study-guide-popup').classList.add('active');
+      document.getElementById('study-guide-overlay').classList.add('active');
     }
 
     function hideStudyGuidePopup() {
-      const popup = document.getElementById('study-guide-popup');
-      const overlay = document.getElementById('study-guide-overlay');
-      popup.classList.remove('active');
-      overlay.classList.remove('active');
+      document.getElementById('study-guide-popup').classList.remove('active');
+      document.getElementById('study-guide-overlay').classList.remove('active');
     }
 
     function downloadStudyGuide() {
@@ -848,27 +807,22 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
       notification.style.display = 'block';
       notification.classList.add('show');
 
-      generateAllHighlightsStudyGuide(); // Trigger the actual download
+      generateAllHighlightsStudyGuide();
 
       setTimeout(() => {
         notification.classList.remove('show');
-        setTimeout(() => {
-          notification.style.display = 'none';
-        }, 300);
-      }, 3000);
+        setTimeout(() => { notification.style.display = 'none'; }, 200);
+      }, 2500);
 
       hideStudyGuidePopup();
     }
 
-    // Event Listener for Study Guide Button
     document.getElementById('study-guide-btn').addEventListener('click', function(event) {
       event.preventDefault();
       showStudyGuidePopup();
     });
 
-    // Close Popup on Overlay Click
     document.getElementById('study-guide-overlay').addEventListener('click', hideStudyGuidePopup);
   </script>
 </body>
-
 </html>
