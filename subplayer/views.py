@@ -1488,6 +1488,7 @@ def chat_highlights(request):
 
 @csrf_exempt
 @login_required
+
 def web_highlight(request):
     if request.method != "POST":
         return JsonResponse({"error": "Only POST allowed"}, status=405)
@@ -1498,84 +1499,71 @@ def web_highlight(request):
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
     text = (data.get("text") or "").strip()
-    page_url = (data.get("page_url") or "").strip()
-    page_title = (data.get("page_title") or "").strip()
+    page_url = (data.get("page_url") or data.get("url") or "").strip()
+    page_title = (data.get("page_title") or data.get("title") or "").strip()
+    article_text = (data.get("article_text") or "").strip()   # ✅ NEW
 
     if not text or not page_url:
         return JsonResponse({"error": "Text and page_url are required"}, status=400)
 
     user = request.user
 
-    # === 1. Always create the highlight immediately (your original behavior) ===
-    highlight = Highlight.objects.create(
-        user=user,
-        source='web',
-        highlighted_text=text,
-        page_url=page_url,
-        page_title=page_title,
-    )
+    # Daily limit (reuse your existing logic if you have it)
+    try:
+        subscription = Subscription.objects.get(user=user)
+    except Subscription.DoesNotExist:
+        subscription = None
 
-    # Update points
-    profile = user.profile
-    profile.total_highlights += 1
-    profile.save()
+    if subscription and subscription.tier == 'FREE':
+        today = timezone.now().date()
+        highlights_today = Highlight.objects.filter(user=user, created_at__date=today).count()
+        if highlights_today >= 3:
+            return JsonResponse({
+                "error": "You have reached the daily limit of 3 highlights. Upgrade to create more.",
+                "limit_reached": True,
+            }, status=403)
 
-    # === 2. NEW: If this is the VERY FIRST highlight from this URL → fetch article ===
-    first_highlight_from_this_page = not Highlight.objects.filter(
-        user=user,
-        source='web',
-        page_url=page_url
-    ).exclude(id=highlight.id).exists()   # exclude the one we just created
+    with transaction.atomic():
+        # 1) create highlight
+        highlight = Highlight.objects.create(
+            user=user,
+            source='web',
+            highlighted_text=text,
+            page_url=page_url,
+            page_title=page_title,
+        )
 
-    article = None
-    if first_highlight_from_this_page:
-        # Try to get existing Article (in case it was created another way)
-        try:
-            article = Article.objects.get(source_url=page_url, created_by=user)
-        except Article.DoesNotExist:
-            # Scrape the page (fire-and-forget style – user doesn’t wait)
-            try:
-                headers = {"User-Agent": "Mozilla/5.0 (compatible; ChineseLogBot/1.0)"}
-                resp = requests.get(page_url, headers=headers, timeout=12)
-                resp.raise_for_status()
-                soup = BeautifulSoup(resp.text, 'html.parser')
+        # 2) create or update article
+        article = Article.objects.filter(source_url=page_url, created_by=user).first()
+        if not article:
+            slug_val = slugify(page_title or page_url)[:50] or uuid.uuid4().hex[:8]
+            article = Article.objects.create(
+                title=(page_title or "Untitled Web Article")[:255],
+                slug=f"{slug_val}-{uuid.uuid4().hex[:4]}",
+                content=article_text or "",   # ✅ Save full text
+                source_url=page_url,
+                created_by=user,
+            )
+        else:
+            # Only overwrite content if extension provided it
+            if article_text:
+                article.content = article_text
+            if page_title and (not article.title or article.title.startswith("Untitled")):
+                article.title = page_title[:255]
+            article.save()
 
-                # Aggressive cleanup
-                for trash in soup(["script", "style", "nav", "header", "footer", "aside", "advert"]):
-                    trash.decompose()
-
-                # Best guess for main content
-                main = soup.find("article") or soup.find("main") or soup.find("div", class_=re.compile(r"content|post|article|story", re.I)) or soup.body
-
-                clean_text = main.get_text(separator="\n", strip=True) if main else ""
-
-                article = Article.objects.create(
-                    title=page_title[:255] or "Untitled Web Article",
-                    slug=slugify(page_title or page_url.split("/")[-1])[:40] + "-" + str(int(timezone.now().timestamp()))[-4:],
-                    content=clean_text[:1_000_000],  # safety cap
-                    source_url=page_url,
-                    created_by=user,
-                )
-            except Exception as e:
-                # If scraping fails → we still have the highlight! Just no full article.
-                logger.warning(f"Failed to scrape {page_url}: {e}")
-                article = None
-
-        # Optional: link ALL existing highlights from this page to the article
-        if article:
-            Highlight.objects.filter(
-                user=user,
-                source='web',
-                page_url=page_url
-            ).update(page_title=article.title)  # nice cleanup
+        # profile counter (keep your original behavior)
+        profile = user.profile
+        profile.total_highlights += 1
+        profile.save()
 
     return JsonResponse({
         "id": highlight.id,
         "text": highlight.highlighted_text,
         "page_url": page_url,
         "page_title": page_title,
-        "article_saved": bool(article),        # ← new, for future use if you want
-        "article_slug": article.slug if article else None,
+        "article_saved": bool(article.content),
+        "article_slug": article.slug,
     }, status=201)
 
 # subplayer/views.py
@@ -1642,7 +1630,6 @@ def _unique_slug(base_slug: str) -> str:
     # keep it short enough for your slug field length
     base = slugify(base_slug or "untitled")[:45] or "item"
     return f"{base}-{uuid.uuid4().hex[:6]}"
-
 @csrf_exempt
 @login_required
 def api_article_highlight(request):
@@ -1650,21 +1637,29 @@ def api_article_highlight(request):
         return JsonResponse({"error": "POST only"}, status=405)
 
     try:
-        data = json.loads(request.body.decode("utf-8"))
-        page_url   = data.get("page_url") or data.get("url")
-        page_title = data.get("page_title") or data.get("title")
-        text       = data.get("text") or data.get("highlighted_text")
+        data = json.loads(request.body.decode("utf-8") or "{}")
+
+        page_url   = (data.get("page_url") or data.get("url") or "").strip()
+        page_title = (data.get("page_title") or data.get("title") or "").strip()
+        text       = (data.get("text") or data.get("highlighted_text") or "").strip()
+
+        # ✅ NEW: accept full article content (your extension already sends these)
+        content      = (data.get("content") or data.get("article_text") or "").strip()
+        content_html = (data.get("content_html") or data.get("article_html") or "").strip()
 
         if not page_url or not text:
             return JsonResponse({"error": "page_url and text are required"}, status=400)
+
+        # ✅ IMPORTANT: normalize URL so lookups match consistently
+        page_url = page_url.rstrip("/")
 
         # Make a stable-ish slug from title/url
         base_for_slug = (page_title or page_url)
         slug_val = slugify(base_for_slug)[:60] or _unique_slug(base_for_slug)
 
         with transaction.atomic():
-            # IMPORTANT: provide legacy defaults so old NOT NULL columns are satisfied
-            article, _ = Article.objects.get_or_create(
+            # Create OR get the Article
+            article, created = Article.objects.get_or_create(
                 source_url=page_url,
                 defaults={
                     "title": page_title or "Untitled",
@@ -1673,10 +1668,34 @@ def api_article_highlight(request):
                     # legacy columns still on prod DB
                     "level": "",          # satisfies NOT NULL on level
                     "description": "",    # if column exists
-                    "content": "",        # if column exists
+                    "content": content or "",   # ✅ NEW: save content on create
+                    # If you have a DB field like content_html, you can set it here too:
+                    # "content_html": content_html or "",
                 },
             )
 
+            # ✅ KEY FIX: if article already exists, UPDATE content (defaults don't run)
+            changed = False
+
+            if page_title and article.title != page_title:
+                article.title = page_title
+                changed = True
+
+            # Fill content if missing/too short (prevents overwriting real stored articles)
+            if content and (not getattr(article, "content", "") or len(article.content or "") < 50):
+                article.content = content
+                changed = True
+
+            # Optional: store HTML if your Article model has a field for it
+            if content_html and hasattr(article, "content_html"):
+                if (not getattr(article, "content_html", "") or len(article.content_html or "") < 50):
+                    article.content_html = content_html
+                    changed = True
+
+            if changed:
+                article.save()
+
+            # Create highlight (normalize URL here too)
             h = Highlight.objects.create(
                 user=request.user,
                 source="web",
@@ -1685,11 +1704,19 @@ def api_article_highlight(request):
                 page_title=page_title,
             )
 
-        return JsonResponse({"ok": True, "highlight_id": h.id, "article_id": article.id}, status=201)
+        return JsonResponse(
+            {
+                "ok": True,
+                "highlight_id": h.id,
+                "article_id": article.id,
+                "article_created": created,
+                "article_content_len": len(article.content or ""),
+            },
+            status=201
+        )
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-
 # --- Article highlights (curated + web) ---
 from django.views.decorators.http import require_http_methods
 
