@@ -96,6 +96,30 @@
 
     .article-source i { font-size: 0.8rem; }
 
+    /* ✅ NEW: article content card (matches highlights style) */
+    .article-content {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .article-body {
+      font-size: 1.05rem;
+      line-height: 1.9;
+      color: var(--text-primary);
+      word-break: break-word;
+    }
+    .article-body p { margin-bottom: 1rem; }
+    .article-body img { max-width: 100%; border-radius: 12px; margin: 1rem 0; }
+
+    mark.user-hl {
+      background: var(--highlight-bg);
+      border-radius: 4px;
+      padding: .08em .12em;
+    }
+
     .highlights-section {
       background: var(--card-bg);
       border-radius: 16px;
@@ -197,245 +221,61 @@
       .article-header { padding: 1.5rem; }
       .article-title { font-size: 1.5rem; }
       .highlights-section { padding: 1.5rem; }
+      .article-content { padding: 1.5rem; }
       .section-title { font-size: 1.25rem; }
       .highlight-card { padding: 1rem; }
       .highlight-text { font-size: 1rem; padding-left: 0.5rem; }
       .highlight-meta { padding-left: 0.5rem; }
     }
+
     /* =========================================================
-   Soft UI Sidebar Fix — Read page
-   Paste at END of <style>
-   ========================================================= */
+       Soft UI Sidebar Fix — Read page
+       ========================================================= */
+    body.g-sidenav-show .main-content { transition: margin-left 0.2s ease; }
+    body.g-sidenav-show:not(.g-sidenav-hidden) .main-content { margin-left: 18rem !important; }
+    body.g-sidenav-show.g-sidenav-pinned .main-content,
+    body.g-sidenav-show.g-sidenav-hidden .main-content,
+    body.g-sidenav-show.navbar-vertical-collapsed .main-content { margin-left: 6.5rem !important; }
 
-/* 1) Let Soft UI own layout spacing (your container is fine) */
-body.g-sidenav-show .main-content {
-  transition: margin-left 0.2s ease;
-}
+    #sidenav-main, .sidenav.navbar-vertical {
+      background: #ffffff !important;
+      border: 1px solid rgba(226, 232, 240, 0.9) !important;
+      box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08) !important;
+      border-radius: 16px !important;
+      margin: 16px !important;
+      height: calc(100vh - 32px) !important;
+      overflow: hidden !important;
+    }
 
-/* Expanded sidenav (default Soft UI) */
-body.g-sidenav-show:not(.g-sidenav-hidden) .main-content {
-  margin-left: 18rem !important; /* matches default expanded sidenav width */
-}
+    body { background-attachment: fixed; }
+    #sidenav-main * { background-color: transparent; }
 
-/* Collapsed/mini sidenav */
-body.g-sidenav-show.g-sidenav-pinned .main-content,
-body.g-sidenav-show.g-sidenav-hidden .main-content,
-body.g-sidenav-show.navbar-vertical-collapsed .main-content {
-  margin-left: 6.5rem !important; /* matches mini sidenav feel */
-}
+    #sidenav-scrollbar { height: 100% !important; }
+    #sidenav-main .navbar-collapse {
+      height: calc(100% - 72px) !important;
+      overflow-y: auto !important;
+    }
 
-/* 2) Restore the "white card" sidenav look */
-#sidenav-main,
-.sidenav.navbar-vertical {
-  background: #ffffff !important;
-  border: 1px solid rgba(226, 232, 240, 0.9) !important;
-  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08) !important;
-  border-radius: 16px !important;
+    body.g-sidenav-pinned #sidenav-main,
+    body.navbar-vertical-collapsed #sidenav-main { width: 5.5rem !important; }
 
-  /* key: give it breathing room from the viewport like other pages */
-  margin: 16px !important;
-  height: calc(100vh - 32px) !important;
-  overflow: hidden !important;
-}
+    body.g-sidenav-pinned #sidenav-main .navbar-brand span,
+    body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
+      opacity: 0 !important;
+      width: 0 !important;
+      overflow: hidden !important;
+    }
 
-/* 3) Prevent your page gradient from making the sidebar look tinted */
-body {
-  background-attachment: fixed;
-}
-#sidenav-main * {
-  background-color: transparent;
-}
-
-/* 4) Make the inner scroll area behave nicely */
-#sidenav-scrollbar {
-  height: 100% !important;
-}
-#sidenav-main .navbar-collapse {
-  height: calc(100% - 72px) !important; /* leaves room for logo/top area */
-  overflow-y: auto !important;
-}
-
-/* 5) When collapsed, keep it clean (no weird spacing) */
-body.g-sidenav-pinned #sidenav-main,
-body.navbar-vertical-collapsed #sidenav-main {
-  width: 5.5rem !important;
-}
-
-/* Optional: hide large logo text in collapsed mode (icon still ok) */
-body.g-sidenav-pinned #sidenav-main .navbar-brand span,
-body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
-  opacity: 0 !important;
-  width: 0 !important;
-  overflow: hidden !important;
-}
-
-/* 6) Mobile: sidenav should overlay, not push content */
-@media (max-width: 991.98px) {
-  body.g-sidenav-show .main-content {
-    margin-left: 0 !important;
-  }
-
-  #sidenav-main,
-  .sidenav.navbar-vertical {
-    margin: 0 !important;
-    border-radius: 0 !important;
-    height: 100vh !important;
-  }
-}
-
+    @media (max-width: 991.98px) {
+      body.g-sidenav-show .main-content { margin-left: 0 !important; }
+      #sidenav-main, .sidenav.navbar-vertical {
+        margin: 0 !important;
+        border-radius: 0 !important;
+        height: 100vh !important;
+      }
+    }
   </style>
 </head>
-<script>
-  // === Reuse identical helpers from BusPlayer (popup, csrf) ===
-  function getCSRF(){
-    const m = document.cookie.match(/csrftoken=([^;]+)/);
-    return m?m[1]:'';
-  }
-
-  function showLimitPopup() {
-    if (document.querySelector('.limit-popup')) return;
-
-    const overlay = document.createElement('div');
-    overlay.className = 'overlay active';
-
-    const popup = document.createElement('div');
-    popup.className = 'limit-popup';
-    popup.innerHTML = `
-      <div class="popup-content">
-        <div class="popup-header">
-          <div class="warning-icon">⚠️</div>
-          <h3 class="popup-title">Highlight Limit Reached</h3>
-        </div>
-        <p class="popup-message">You've reached your daily limit of 3 highlights. Upgrade your account to unlock unlimited highlights and more features.</p>
-        <div class="button-container">
-          <button class="upgrade-button" onclick="window.location.href='/join/'">Upgrade Now</button>
-          <button class="close-button" onclick="(function(){
-            const p=document.querySelector('.limit-popup'); const o=document.querySelector('.overlay');
-            if(p) p.remove(); if(o) o.remove();
-          })()">Maybe Later</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-    document.body.appendChild(popup);
-    setTimeout(()=>{ overlay.classList.add('active'); popup.classList.add('active'); },10);
-  }
-
-  // === Article highlighting ===
-  const articleBody = document.getElementById('article-body');
-  const articleSlug = articleBody?.dataset?.articleSlug || "{{ article.slug }}";
-
-  // Optional: a small side list just like BusPlayer
-  function ensureSidebarList() {
-    let side = document.getElementById('highlight-list');
-    if (!side) {
-      const holder = document.createElement('div');
-      holder.id = 'read-sidebar';
-      holder.style.marginTop = '1rem';
-      holder.innerHTML = `
-        <div class="cardx" style="margin-top:1rem">
-          <h3 style="font-size:1rem;margin:0 0 .5rem">My Highlights</h3>
-          <ul id="highlight-list" style="list-style:none;padding-left:0;margin:0;display:flex;flex-direction:column;gap:.5rem"></ul>
-        </div>`;
-      document.querySelector('.wrap')?.appendChild(holder);
-    }
-  }
-
-  function addToSidebar(text, id) {
-    ensureSidebarList();
-    const ul = document.getElementById('highlight-list');
-    const li = document.createElement('li');
-    li.innerHTML = `
-      <div class="highlight-container" style="display:flex;justify-content:space-between;gap:.5rem;align-items:center">
-        <a href="#" style="flex:1 1 auto;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${text}</a>
-        <button data-id="${id}" class="del-hl btnx" style="padding:.2rem .5rem">Delete</button>
-      </div>`;
-    ul.prepend(li);
-
-    li.querySelector('.del-hl').addEventListener('click', async (e) => {
-      e.preventDefault();
-      const hid = e.currentTarget.dataset.id;
-      try {
-        const r = await fetch(`/api/user/delete_highlight/${hid}/`, {
-          method: 'POST',
-          headers: {'Content-Type':'application/json','X-CSRFToken':getCSRF()},
-          body: JSON.stringify({ highlight_id: hid }),
-        });
-        if (r.ok) li.remove();
-      } catch(err){ console.error(err); }
-    });
-  }
-
-  // Load existing highlights for this article (GET)
-  async function loadArticleHighlights() {
-    try {
-      const r = await fetch(`{% url 'read_article_highlights' article.slug %}`, { headers: {'X-Requested-With':'fetch'} });
-      if (!r.ok) return;
-      const data = await r.json(); // [{id, text}]
-      if (Array.isArray(data) && data.length) {
-        data.forEach(h => addToSidebar(h.text, h.id));
-      }
-    } catch(e){ console.error(e); }
-  }
-
-  // Inline create (mouseup -> wrap -> POST), same feel as BusPlayer
-  function wrapSelection(range) {
-    const mark = document.createElement('mark');
-    mark.className = 'user-hl';
-    try {
-      range.surroundContents(mark);
-    } catch(e) {
-      // fallback: insert clone (for multi-node selections)
-      const frag = range.cloneContents();
-      mark.appendChild(frag);
-      range.deleteContents();
-      range.insertNode(mark);
-    }
-  }
-
-  async function saveHighlight(text) {
-    const payload = { text };
-    const r = await fetch(`{% url 'read_article_highlights' article.slug %}`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json','X-CSRFToken':getCSRF()},
-      body: JSON.stringify(payload),
-    });
-
-    if (r.status === 403) {
-      const j = await r.json().catch(()=>({}));
-      if (j.limit_reached) showLimitPopup();
-      throw new Error('limit');
-    }
-    if (!r.ok) throw new Error('save failed');
-
-    return r.json(); // {id, text}
-  }
-
-  articleBody?.addEventListener('mouseup', async () => {
-    const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) return;
-    const range = sel.getRangeAt(0);
-    if (!articleBody.contains(range.commonAncestorContainer)) return;
-
-    const text = sel.toString().trim();
-    if (!text) return;
-
-    // Visual
-    wrapSelection(range);
-    sel.removeAllRanges();
-
-    // Persist (same flow as BusPlayer: POST -> handle limit -> add to sidebar)
-    try {
-      const saved = await saveHighlight(text);
-      addToSidebar(saved.text, saved.id);
-    } catch(e) {
-      if (e.message !== 'limit') console.error(e);
-    }
-  });
-
-  // Boot
-  document.addEventListener('DOMContentLoaded', loadArticleHighlights);
-</script>
 
 <body class="g-sidenav-show bg-gray-100">
   {% include 'accounts/navbar.html' %}
@@ -444,8 +284,7 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
     <div class="container-fluid py-4">
 
-      <!-- ==== YOUR ORIGINAL CONTENT STARTS HERE (unchanged) ==== -->
-      <div class="detail-container">
+      <div class="detail-container" id="detail-container">
         <a href="{% url 'read_list' %}" class="back-link">
           <i class="fas fa-arrow-left"></i>
           Back to articles
@@ -460,6 +299,26 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
               <i class="fas fa-external-link-alt"></i>
             </a>
           {% endif %}
+        </div>
+
+        <!-- ✅ NEW: ARTICLE CONTENT RENDER -->
+        <div class="article-content">
+          <div class="section-header" style="margin-bottom: 1.25rem;">
+            <h2 class="section-title" style="margin:0;">
+              <i class="fas fa-file-alt" style="color: var(--primary-color);"></i>
+              Article
+            </h2>
+          </div>
+
+          <div id="article-body" class="article-body" data-article-slug="{{ article.slug }}">
+            {% if article.content_html %}
+              {{ article.content_html|safe }}
+            {% elif article.content %}
+              {{ article.content|linebreaksbr }}
+            {% else %}
+              <p><em>No article content saved for this page yet.</em></p>
+            {% endif %}
+          </div>
         </div>
 
         <div class="highlights-section">
@@ -491,7 +350,6 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
           {% endif %}
         </div>
       </div>
-      <!-- ==== YOUR ORIGINAL CONTENT ENDS HERE ==== -->
 
     </div>
   </main>
@@ -507,6 +365,154 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
     if (win && document.querySelector('#sidenav-scrollbar')) {
       Scrollbar.init(document.querySelector('#sidenav-scrollbar'), { damping: '0.5' });
     }
+  </script>
+
+  <!-- ✅ FIXED: highlight JS MUST be AFTER article-body exists -->
+  <script>
+    // === Helpers ===
+    function getCSRF(){
+      const m = document.cookie.match(/csrftoken=([^;]+)/);
+      return m ? m[1] : '';
+    }
+
+    function showLimitPopup() {
+      if (document.querySelector('.limit-popup')) return;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay active';
+
+      const popup = document.createElement('div');
+      popup.className = 'limit-popup';
+      popup.innerHTML = `
+        <div class="popup-content">
+          <div class="popup-header">
+            <div class="warning-icon">⚠️</div>
+            <h3 class="popup-title">Highlight Limit Reached</h3>
+          </div>
+          <p class="popup-message">You've reached your daily limit of 3 highlights. Upgrade your account to unlock unlimited highlights and more features.</p>
+          <div class="button-container">
+            <button class="upgrade-button" onclick="window.location.href='/join/'">Upgrade Now</button>
+            <button class="close-button" onclick="(function(){
+              const p=document.querySelector('.limit-popup'); const o=document.querySelector('.overlay');
+              if(p) p.remove(); if(o) o.remove();
+            })()">Maybe Later</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      document.body.appendChild(popup);
+      setTimeout(()=>{ overlay.classList.add('active'); popup.classList.add('active'); },10);
+    }
+
+    const articleBody = document.getElementById('article-body');
+    const articleSlug = articleBody?.dataset?.articleSlug || "{{ article.slug }}";
+
+    // Sidebar list attaches to the real container (not .wrap which doesn't exist here)
+    function ensureSidebarList() {
+      let side = document.getElementById('highlight-list');
+      if (!side) {
+        const holder = document.createElement('div');
+        holder.id = 'read-sidebar';
+        holder.style.marginTop = '1rem';
+        holder.innerHTML = `
+          <div class="article-content" style="padding:1.25rem;margin-top:1rem;">
+            <h3 style="font-size:1rem;margin:0 0 .75rem;font-weight:700;color:#1e293b;">My Highlights</h3>
+            <ul id="highlight-list" style="list-style:none;padding-left:0;margin:0;display:flex;flex-direction:column;gap:.5rem"></ul>
+          </div>`;
+        document.getElementById('detail-container')?.appendChild(holder);
+      }
+    }
+
+    function addToSidebar(text, id) {
+      ensureSidebarList();
+      const ul = document.getElementById('highlight-list');
+      if (!ul) return;
+
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <div style="display:flex;justify-content:space-between;gap:.5rem;align-items:center">
+          <span style="flex:1 1 auto;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${text}</span>
+          <button data-id="${id}" class="del-hl btn btn-sm btn-outline-dark" style="padding:.2rem .5rem;border-radius:.5rem;">Delete</button>
+        </div>`;
+
+      ul.prepend(li);
+
+      li.querySelector('.del-hl').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const hid = e.currentTarget.dataset.id;
+        try {
+          const r = await fetch(`/api/user/delete_highlight/${hid}/`, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','X-CSRFToken':getCSRF()},
+            body: JSON.stringify({ highlight_id: hid }),
+          });
+          if (r.ok) li.remove();
+        } catch(err){ console.error(err); }
+      });
+    }
+
+    async function loadArticleHighlights() {
+      try {
+        const r = await fetch(`{% url 'read_article_highlights' article.slug %}`, { headers: {'X-Requested-With':'fetch'} });
+        if (!r.ok) return;
+        const data = await r.json();
+        if (Array.isArray(data) && data.length) {
+          data.forEach(h => addToSidebar(h.text, h.id));
+        }
+      } catch(e){ console.error(e); }
+    }
+
+    function wrapSelection(range) {
+      const mark = document.createElement('mark');
+      mark.className = 'user-hl';
+      try {
+        range.surroundContents(mark);
+      } catch(e) {
+        const frag = range.cloneContents();
+        mark.appendChild(frag);
+        range.deleteContents();
+        range.insertNode(mark);
+      }
+    }
+
+    async function saveHighlight(text) {
+      const r = await fetch(`{% url 'read_article_highlights' article.slug %}`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','X-CSRFToken':getCSRF()},
+        body: JSON.stringify({ text }),
+      });
+
+      if (r.status === 403) {
+        const j = await r.json().catch(()=>({}));
+        if (j.limit_reached) showLimitPopup();
+        throw new Error('limit');
+      }
+      if (!r.ok) throw new Error('save failed');
+      return r.json();
+    }
+
+    articleBody?.addEventListener('mouseup', async () => {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+
+      const range = sel.getRangeAt(0);
+      if (!articleBody.contains(range.commonAncestorContainer)) return;
+
+      const text = sel.toString().trim();
+      if (!text) return;
+
+      wrapSelection(range);
+      sel.removeAllRanges();
+
+      try {
+        const saved = await saveHighlight(text);
+        addToSidebar(saved.text, saved.id);
+      } catch(e) {
+        if (e.message !== 'limit') console.error(e);
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', loadArticleHighlights);
   </script>
 </body>
 </html>
