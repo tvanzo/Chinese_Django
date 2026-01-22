@@ -2,517 +2,706 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
-  <title>Article – {{ article.title }}</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
+    <title>Article – {{ article.title }}</title>
 
-  <!-- Fonts & Icons -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet"/>
-  <link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet"/>
-  <link href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet"/>
-  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-  <!-- Soft UI -->
-  <link href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet"/>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet"/>
+    <link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet"/>
+    <link href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet"/>
+    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
 
-  <style>
-    :root {
-      --primary-color: #3b82f6;
-      --primary-light: #dbeafe;
-      --primary-dark: #2563eb;
-      --text-primary: #1e293b;
-      --text-secondary: #64748b;
-      --text-muted: #94a3b8;
-      --border-color: #e2e8f0;
-      --card-bg: #ffffff;
-      --highlight-bg: #fef3c7;
-      --highlight-border: #f59e0b;
-    }
+    <!-- Soft UI -->
+    <link href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet"/>
 
-    .detail-container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 2rem 1rem;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #f0f9ff 0%, #fef3f2 100%);
-    }
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --primary-light: #dbeafe;
+            --primary-dark: #2563eb;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --card-bg: #ffffff;
+            --highlight-bg: #fef3c7;
+            --highlight-border: #f59e0b;
+        }
 
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--primary-color);
-      text-decoration: none;
-      font-size: 0.95rem;
-      font-weight: 500;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      transition: all 0.2s ease;
-      margin-bottom: 2rem;
-    }
-    .back-link:hover {
-      background: var(--primary-light);
-      transform: translateX(-4px);
-    }
+        .detail-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f0f9ff 0%, #fef3f2 100%);
+        }
 
-    .back-link i { font-size: 0.85rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            margin-bottom: 2rem;
+        }
 
-    .article-header {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 2rem;
-      margin-bottom: 2rem;
-      border: 1px solid var(--border-color);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
+        .back-link:hover {
+            background: var(--primary-light);
+            transform: translateX(-4px);
+        }
 
-    .article-title {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 1rem;
-      line-height: 1.3;
-    }
+        .back-link i { font-size: 0.85rem; }
 
-    .article-source {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--primary-color);
-      text-decoration: none;
-      font-size: 0.9rem;
-      padding: 0.5rem 1rem;
-      border: 1px solid var(--primary-color);
-      border-radius: 8px;
-      transition: all 0.2s ease;
-      background: white;
-    }
-    .article-source:hover {
-      background: var(--primary-color);
-      color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    }
+        .article-header {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
 
-    .article-source i { font-size: 0.8rem; }
+        .article-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
 
-    /* ✅ NEW: article content card (matches highlights style) */
-    .article-content {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 2rem;
-      margin-bottom: 2rem;
-      border: 1px solid var(--border-color);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
-    .article-body {
-      font-size: 1.05rem;
-      line-height: 1.9;
-      color: var(--text-primary);
-      word-break: break-word;
-    }
-    .article-body p { margin-bottom: 1rem; }
-    .article-body img { max-width: 100%; border-radius: 12px; margin: 1rem 0; }
+        .article-source {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--primary-color);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            background: white;
+        }
 
-    mark.user-hl {
-      background: var(--highlight-bg);
-      border-radius: 4px;
-      padding: .08em .12em;
-    }
+        .article-source:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
 
-    .highlights-section {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 2rem;
-      border: 1px solid var(--border-color);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
+        .article-source i { font-size: 0.8rem; }
 
-    .section-header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 2px solid var(--border-color);
-    }
+        .article-content {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
 
-    .section-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    .section-title i { color: var(--highlight-border); font-size: 1.3rem; }
+        .article-body {
+            font-size: 1.05rem;
+            line-height: 1.9;
+            color: var(--text-primary);
+            word-break: break-word;
+        }
 
-    .highlight-count {
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-      color: white;
-      padding: 0.4rem 1rem;
-      border-radius: 20px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-    }
+        .article-body p { margin-bottom: 1rem; }
 
-    .highlight-card {
-      background: linear-gradient(to right, var(--highlight-bg) 0%, #fffbeb 100%);
-      border-left: 4px solid var(--highlight-border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      position: relative;
-      transition: all 0.2s ease;
-      border: 1px solid rgba(245, 158, 11, 0.2);
-    }
-    .highlight-card:hover {
-      transform: translateX(4px);
-      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15);
-    }
+        .article-body img {
+            max-width: 100%;
+            border-radius: 12px;
+            margin: 1rem 0;
+        }
 
-    .highlight-card::before {
-      content: '"';
-      position: absolute;
-      top: 0.5rem;
-      left: 0.75rem;
-      font-size: 3rem;
-      color: var(--highlight-border);
-      opacity: 0.2;
-      font-family: Georgia, serif;
-      line-height: 1;
-    }
+        .content-wrapper {
+            position: relative;
+        }
 
-    .highlight-text {
-      font-size: 1.05rem;
-      line-height: 1.7;
-      color: var(--text-primary);
-      margin-bottom: 1rem;
-      font-weight: 500;
-      position: relative;
-      z-index: 1;
-      padding-left: 1.5rem;
-    }
+        .content-preview {
+            max-height: 300px;           /* ← adjust this value to show more/less preview */
+            overflow: hidden;
+            position: relative;
+        }
 
-    .highlight-meta {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      padding-left: 1.5rem;
-    }
-    .highlight-meta i { font-size: 0.75rem; color: var(--highlight-border); }
+        .content-preview::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: linear-gradient(to bottom, transparent, var(--card-bg));
+            pointer-events: none;
+        }
 
-    .empty-state {
-      text-align: center;
-      padding: 4rem 2rem;
-      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-      border-radius: 12px;
-      border: 2px dashed var(--border-color);
-    }
-    .empty-state i { font-size: 3.5rem; color: var(--text-muted); opacity: 0.5; margin-bottom: 1.5rem; }
-    .empty-state p { color: var(--text-secondary); font-size: 1rem; margin: 0; }
+        .read-more-btn {
+            display: block;
+            margin: 1rem auto 0;
+            padding: 0.6rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
 
-    @media (max-width: 768px) {
-      .detail-container { padding: 1rem; }
-      .article-header { padding: 1.5rem; }
-      .article-title { font-size: 1.5rem; }
-      .highlights-section { padding: 1.5rem; }
-      .article-content { padding: 1.5rem; }
-      .section-title { font-size: 1.25rem; }
-      .highlight-card { padding: 1rem; }
-      .highlight-text { font-size: 1rem; padding-left: 0.5rem; }
-      .highlight-meta { padding-left: 0.5rem; }
-    }
+        .read-more-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
 
-    /* =========================================================
-       Soft UI Sidebar Fix — Read page
-       ========================================================= */
-    body.g-sidenav-show .main-content { transition: margin-left 0.2s ease; }
-    body.g-sidenav-show:not(.g-sidenav-hidden) .main-content { margin-left: 18rem !important; }
-    body.g-sidenav-show.g-sidenav-pinned .main-content,
-    body.g-sidenav-show.g-sidenav-hidden .main-content,
-    body.g-sidenav-show.navbar-vertical-collapsed .main-content { margin-left: 6.5rem !important; }
+        .read-more-btn.show-less {
+            background: #64748b;
+        }
 
-    #sidenav-main, .sidenav.navbar-vertical {
-      background: #ffffff !important;
-      border: 1px solid rgba(226, 232, 240, 0.9) !important;
-      box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08) !important;
-      border-radius: 16px !important;
-      margin: 16px !important;
-      height: calc(100vh - 32px) !important;
-      overflow: hidden !important;
-    }
+        .read-more-btn.show-less:hover {
+            background: #475569;
+        }
 
-    body { background-attachment: fixed; }
-    #sidenav-main * { background-color: transparent; }
+        mark.user-hl {
+            background: var(--highlight-bg);
+            border-radius: 4px;
+            padding: .08em .12em;
+            transition: all 0.15s ease;
+        }
 
-    #sidenav-scrollbar { height: 100% !important; }
-    #sidenav-main .navbar-collapse {
-      height: calc(100% - 72px) !important;
-      overflow-y: auto !important;
-    }
+        mark.user-hl:hover {
+            filter: brightness(0.92);
+            cursor: pointer;
+        }
 
-    body.g-sidenav-pinned #sidenav-main,
-    body.navbar-vertical-collapsed #sidenav-main { width: 5.5rem !important; }
+        .highlights-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
 
-    body.g-sidenav-pinned #sidenav-main .navbar-brand span,
-    body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
-      opacity: 0 !important;
-      width: 0 !important;
-      overflow: hidden !important;
-    }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
 
-    @media (max-width: 991.98px) {
-      body.g-sidenav-show .main-content { margin-left: 0 !important; }
-      #sidenav-main, .sidenav.navbar-vertical {
-        margin: 0 !important;
-        border-radius: 0 !important;
-        height: 100vh !important;
-      }
-    }
-  </style>
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            color: var(--highlight-border);
+            font-size: 1.3rem;
+        }
+
+        .highlight-count {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .highlight-card {
+            background: linear-gradient(to right, var(--highlight-bg) 0%, #fffbeb 100%);
+            border-left: 4px solid var(--highlight-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .highlight-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15);
+        }
+
+        .highlight-card::before {
+            content: '"';
+            position: absolute;
+            top: 0.5rem;
+            left: 0.75rem;
+            font-size: 3rem;
+            color: var(--highlight-border);
+            opacity: 0.2;
+            font-family: Georgia, serif;
+            line-height: 1;
+        }
+
+        .highlight-text {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+            padding-left: 1.5rem;
+        }
+
+        .highlight-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            padding-left: 1.5rem;
+        }
+
+        .highlight-meta i {
+            font-size: 0.75rem;
+            color: var(--highlight-border);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 12px;
+            border: 2px dashed var(--border-color);
+        }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            color: var(--text-muted);
+            opacity: 0.5;
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-state p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .detail-container { padding: 1rem; }
+            .article-header { padding: 1.5rem; }
+            .article-title { font-size: 1.5rem; }
+            .highlights-section { padding: 1.5rem; }
+            .article-content { padding: 1.5rem; }
+            .section-title { font-size: 1.25rem; }
+            .highlight-card { padding: 1rem; }
+            .highlight-text { font-size: 1rem; padding-left: 0.5rem; }
+            .highlight-meta { padding-left: 0.5rem; }
+            .content-preview { max-height: 220px; }
+        }
+
+        /* Soft UI Sidebar Fix */
+        body.g-sidenav-show .main-content { transition: margin-left 0.2s ease; }
+        body.g-sidenav-show:not(.g-sidenav-hidden) .main-content { margin-left: 18rem !important; }
+        body.g-sidenav-show.g-sidenav-pinned .main-content,
+        body.g-sidenav-show.g-sidenav-hidden .main-content,
+        body.g-sidenav-show.navbar-vertical-collapsed .main-content {
+            margin-left: 6.5rem !important;
+        }
+        #sidenav-main, .sidenav.navbar-vertical {
+            background: #ffffff !important;
+            border: 1px solid rgba(226, 232, 240, 0.9) !important;
+            box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08) !important;
+            border-radius: 16px !important;
+            margin: 16px !important;
+            height: calc(100vh - 32px) !important;
+            overflow: hidden !important;
+        }
+        body { background-attachment: fixed; }
+        #sidenav-main * { background-color: transparent; }
+        #sidenav-scrollbar { height: 100% !important; }
+        #sidenav-main .navbar-collapse {
+            height: calc(100% - 72px) !important;
+            overflow-y: auto !important;
+        }
+        body.g-sidenav-pinned #sidenav-main,
+        body.navbar-vertical-collapsed #sidenav-main {
+            width: 5.5rem !important;
+        }
+        body.g-sidenav-pinned #sidenav-main .navbar-brand span,
+        body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
+            opacity: 0 !important;
+            width: 0 !important;
+            overflow: hidden !important;
+        }
+        @media (max-width: 991.98px) {
+            body.g-sidenav-show .main-content { margin-left: 0 !important; }
+            #sidenav-main, .sidenav.navbar-vertical {
+                margin: 0 !important;
+                border-radius: 0 !important;
+                height: 100vh !important;
+            }
+        }
+    </style>
 </head>
-
 <body class="g-sidenav-show bg-gray-100">
-  {% include 'accounts/navbar.html' %}
-  {% include 'accounts/sidebar.html' %}
 
-  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+{% include 'accounts/navbar.html' %}
+{% include 'accounts/sidebar.html' %}
+
+<main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
     <div class="container-fluid py-4">
+        <div class="detail-container" id="detail-container">
 
-      <div class="detail-container" id="detail-container">
-        <a href="{% url 'read_list' %}" class="back-link">
-          <i class="fas fa-arrow-left"></i>
-          Back to articles
-        </a>
-
-        <div class="article-header">
-          <h1 class="article-title">{{ article.title }}</h1>
-
-          {% if article.source_url %}
-            <a href="{{ article.source_url }}" target="_blank" class="article-source">
-              <span>Open original page</span>
-              <i class="fas fa-external-link-alt"></i>
+            <a href="{% url 'read_list' %}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to articles
             </a>
-          {% endif %}
-        </div>
 
-        <!-- ✅ NEW: ARTICLE CONTENT RENDER -->
-        <div class="article-content">
-          <div class="section-header" style="margin-bottom: 1.25rem;">
-            <h2 class="section-title" style="margin:0;">
-              <i class="fas fa-file-alt" style="color: var(--primary-color);"></i>
-              Article
-            </h2>
-          </div>
-
-          <div id="article-body" class="article-body" data-article-slug="{{ article.slug }}">
-            {% if article.content_html %}
-              {{ article.content_html|safe }}
-            {% elif article.content %}
-              {{ article.content|linebreaksbr }}
-            {% else %}
-              <p><em>No article content saved for this page yet.</em></p>
-            {% endif %}
-          </div>
-        </div>
-
-        <div class="highlights-section">
-          <div class="section-header">
-            <h2 class="section-title">
-              <i class="fas fa-highlighter"></i>
-              Your Highlights
-            </h2>
-            {% if highlights %}
-              <span class="highlight-count">{{ highlights|length }}</span>
-            {% endif %}
-          </div>
-
-          {% if highlights %}
-            {% for h in highlights %}
-              <div class="highlight-card">
-                <div class="highlight-text">{{ h.highlighted_text }}</div>
-                <div class="highlight-meta">
-                  <i class="fas fa-clock"></i>
-                  <span>{{ h.created_at|date:"M d, Y" }} at {{ h.created_at|date:"g:i A" }}</span>
-                </div>
-              </div>
-            {% endfor %}
-          {% else %}
-            <div class="empty-state">
-              <i class="fas fa-highlighter"></i>
-              <p>No highlights yet for this page</p>
+            <div class="article-header">
+                <h1 class="article-title">{{ article.title }}</h1>
+                {% if article.source_url %}
+                <a href="{{ article.source_url }}" target="_blank" class="article-source">
+                    <span>Open original page</span>
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+                {% endif %}
             </div>
-          {% endif %}
+
+            <!-- ARTICLE CONTENT – now collapsible -->
+            <div class="article-content">
+                <div class="section-header" style="margin-bottom: 1.25rem;">
+                    <h2 class="section-title" style="margin:0;">
+                        <i class="fas fa-file-alt" style="color: var(--primary-color);"></i> Article
+                    </h2>
+                </div>
+
+                <div class="content-wrapper">
+                    <div id="content-preview" class="article-body content-preview">
+                        {% if article.content_html %}
+                            {{ article.content_html|safe }}
+                        {% elif article.content %}
+                            {{ article.content|linebreaksbr }}
+                        {% else %}
+                            <p><em>No article content saved for this page yet.</em></p>
+                        {% endif %}
+                    </div>
+
+                    <button id="read-more-btn" class="read-more-btn">
+                        Read more
+                    </button>
+                </div>
+            </div>
+
+            <div class="highlights-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-highlighter"></i> Your Highlights
+                    </h2>
+                    {% if highlights %}
+                        <span class="highlight-count">{{ highlights|length }}</span>
+                    {% endif %}
+                </div>
+
+                {% if highlights %}
+                    {% for h in highlights %}
+                    <div class="highlight-card">
+                        <div class="highlight-text">{{ h.highlighted_text }}</div>
+                        <div class="highlight-meta">
+                            <i class="fas fa-clock"></i>
+                            <span>{{ h.created_at|date:"M d, Y" }} at {{ h.created_at|date:"g:i A" }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-highlighter"></i>
+                        <p>No highlights yet for this page</p>
+                    </div>
+                {% endif %}
+            </div>
+
         </div>
-      </div>
-
     </div>
-  </main>
+</main>
 
-  <!-- Core JS -->
-  <script src="{% static 'accounts/js/core/popper.min.js' %}"></script>
-  <script src="{% static 'accounts/js/core/bootstrap.min.js' %}"></script>
-  <script src="{% static 'accounts/js/plugins/perfect-scrollbar.min.js' %}"></script>
-  <script src="{% static 'accounts/js/plugins/smooth-scrollbar.min.js' %}"></script>
-  <script src="{% static 'accounts/js/soft-ui-dashboard.min.js?v=1.0.7' %}"></script>
-  <script>
+<!-- Core JS -->
+<script src="{% static 'accounts/js/core/popper.min.js' %}"></script>
+<script src="{% static 'accounts/js/core/bootstrap.min.js' %}"></script>
+<script src="{% static 'accounts/js/plugins/perfect-scrollbar.min.js' %}"></script>
+<script src="{% static 'accounts/js/plugins/smooth-scrollbar.min.js' %}"></script>
+<script src="{% static 'accounts/js/soft-ui-dashboard.min.js?v=1.0.7' %}"></script>
+
+<script>
     var win = navigator.platform.indexOf('Win') > -1;
     if (win && document.querySelector('#sidenav-scrollbar')) {
-      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), { damping: '0.5' });
+        Scrollbar.init(document.querySelector('#sidenav-scrollbar'), { damping: '0.5' });
     }
-  </script>
+</script>
 
-  <!-- ✅ FIXED: highlight JS MUST be AFTER article-body exists -->
-  <script>
-    // === Helpers ===
-    function getCSRF(){
-      const m = document.cookie.match(/csrftoken=([^;]+)/);
-      return m ? m[1] : '';
+<!-- Highlighting + Collapsible content logic -->
+<script>
+    // ────────────────────────────────────────────────
+    //   Collapsible article content
+    // ────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        const preview = document.getElementById('content-preview');
+        const btn = document.getElementById('read-more-btn');
+
+        if (!preview || !btn) return;
+
+        // Check if content is short enough that no collapse is needed
+        const contentHeight = preview.scrollHeight;
+        const maxPreview = 300; // matches CSS max-height
+
+        if (contentHeight <= maxPreview + 50) { // small buffer
+            btn.style.display = 'none';
+            preview.style.maxHeight = 'none';
+            preview.style.overflow = 'visible';
+            return;
+        }
+
+        btn.addEventListener('click', () => {
+            if (preview.classList.contains('expanded')) {
+                preview.classList.remove('expanded');
+                preview.style.maxHeight = '300px';
+                btn.textContent = 'Read more';
+                btn.classList.remove('show-less');
+            } else {
+                preview.classList.add('expanded');
+                preview.style.maxHeight = 'none';
+                btn.textContent = 'Show less';
+                btn.classList.add('show-less');
+            }
+        });
+    });
+
+    // ────────────────────────────────────────────────
+    //   Highlighting logic (toggle create / remove)
+    // ────────────────────────────────────────────────
+
+    function getCSRF() {
+        const m = document.cookie.match(/csrftoken=([^;]+)/);
+        return m ? m[1] : '';
     }
 
     function showLimitPopup() {
-      if (document.querySelector('.limit-popup')) return;
-
-      const overlay = document.createElement('div');
-      overlay.className = 'overlay active';
-
-      const popup = document.createElement('div');
-      popup.className = 'limit-popup';
-      popup.innerHTML = `
-        <div class="popup-content">
-          <div class="popup-header">
-            <div class="warning-icon">⚠️</div>
-            <h3 class="popup-title">Highlight Limit Reached</h3>
-          </div>
-          <p class="popup-message">You've reached your daily limit of 3 highlights. Upgrade your account to unlock unlimited highlights and more features.</p>
-          <div class="button-container">
-            <button class="upgrade-button" onclick="window.location.href='/join/'">Upgrade Now</button>
-            <button class="close-button" onclick="(function(){
-              const p=document.querySelector('.limit-popup'); const o=document.querySelector('.overlay');
-              if(p) p.remove(); if(o) o.remove();
-            })()">Maybe Later</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(overlay);
-      document.body.appendChild(popup);
-      setTimeout(()=>{ overlay.classList.add('active'); popup.classList.add('active'); },10);
+        if (document.querySelector('.limit-popup')) return;
+        const overlay = document.createElement('div');
+        overlay.className = 'overlay active';
+        const popup = document.createElement('div');
+        popup.className = 'limit-popup';
+        popup.innerHTML = `
+            <div class="popup-content">
+                <div class="popup-header">
+                    <div class="warning-icon">⚠️</div>
+                    <h3 class="popup-title">Highlight Limit Reached</h3>
+                </div>
+                <p class="popup-message">You've reached your daily limit of 3 highlights. Upgrade your account to unlock unlimited highlights and more features.</p>
+                <div class="button-container">
+                    <button class="upgrade-button" onclick="window.location.href='/join/'">Upgrade Now</button>
+                    <button class="close-button" onclick="(function(){ const p=document.querySelector('.limit-popup'); const o=document.querySelector('.overlay'); if(p) p.remove(); if(o) o.remove(); })()">Maybe Later</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        document.body.appendChild(popup);
+        setTimeout(() => { overlay.classList.add('active'); popup.classList.add('active'); }, 10);
     }
 
-    const articleBody = document.getElementById('article-body');
+    const articleBody = document.getElementById('content-preview'); // now targeting preview container
     const articleSlug = articleBody?.dataset?.articleSlug || "{{ article.slug }}";
 
-    // Sidebar list attaches to the real container (not .wrap which doesn't exist here)
     function ensureSidebarList() {
-      let side = document.getElementById('highlight-list');
-      if (!side) {
-        const holder = document.createElement('div');
-        holder.id = 'read-sidebar';
-        holder.style.marginTop = '1rem';
-        holder.innerHTML = `
-          <div class="article-content" style="padding:1.25rem;margin-top:1rem;">
-            <h3 style="font-size:1rem;margin:0 0 .75rem;font-weight:700;color:#1e293b;">My Highlights</h3>
-            <ul id="highlight-list" style="list-style:none;padding-left:0;margin:0;display:flex;flex-direction:column;gap:.5rem"></ul>
-          </div>`;
-        document.getElementById('detail-container')?.appendChild(holder);
-      }
+        let side = document.getElementById('highlight-list');
+        if (!side) {
+            const holder = document.createElement('div');
+            holder.id = 'read-sidebar';
+            holder.style.marginTop = '1rem';
+            holder.innerHTML = `
+                <div class="article-content" style="padding:1.25rem;margin-top:1rem;">
+                    <h3 style="font-size:1rem;margin:0 0 .75rem;font-weight:700;color:#1e293b;">My Highlights</h3>
+                    <ul id="highlight-list" style="list-style:none;padding-left:0;margin:0;display:flex;flex-direction:column;gap:.5rem"></ul>
+                </div>`;
+            document.getElementById('detail-container')?.appendChild(holder);
+        }
     }
 
     function addToSidebar(text, id) {
-      ensureSidebarList();
-      const ul = document.getElementById('highlight-list');
-      if (!ul) return;
+        ensureSidebarList();
+        const ul = document.getElementById('highlight-list');
+        if (!ul) return;
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <div style="display:flex;justify-content:space-between;gap:.5rem;align-items:center">
+                <span style="flex:1 1 auto;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${text}</span>
+                <button data-id="${id}" class="del-hl btn btn-sm btn-outline-dark" style="padding:.2rem .5rem;border-radius:.5rem;">Delete</button>
+            </div>`;
+        ul.prepend(li);
 
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <div style="display:flex;justify-content:space-between;gap:.5rem;align-items:center">
-          <span style="flex:1 1 auto;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${text}</span>
-          <button data-id="${id}" class="del-hl btn btn-sm btn-outline-dark" style="padding:.2rem .5rem;border-radius:.5rem;">Delete</button>
-        </div>`;
-
-      ul.prepend(li);
-
-      li.querySelector('.del-hl').addEventListener('click', async (e) => {
-        e.preventDefault();
-        const hid = e.currentTarget.dataset.id;
-        try {
-          const r = await fetch(`/api/user/delete_highlight/${hid}/`, {
-            method: 'POST',
-            headers: {'Content-Type':'application/json','X-CSRFToken':getCSRF()},
-            body: JSON.stringify({ highlight_id: hid }),
-          });
-          if (r.ok) li.remove();
-        } catch(err){ console.error(err); }
-      });
+        li.querySelector('.del-hl').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const hid = e.currentTarget.dataset.id;
+            try {
+                const r = await fetch(`/api/user/delete_highlight/${hid}/`, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json','X-CSRFToken':getCSRF()},
+                    body: JSON.stringify({ highlight_id: hid }),
+                });
+                if (r.ok) {
+                    li.remove();
+                    const mark = document.querySelector(`mark.user-hl[data-highlight-id="${hid}"]`);
+                    if (mark) unwrapMark(mark);
+                }
+            } catch(err) {
+                console.error(err);
+            }
+        });
     }
 
     async function loadArticleHighlights() {
-      try {
-        const r = await fetch(`{% url 'read_article_highlights' article.slug %}`, { headers: {'X-Requested-With':'fetch'} });
-        if (!r.ok) return;
-        const data = await r.json();
-        if (Array.isArray(data) && data.length) {
-          data.forEach(h => addToSidebar(h.text, h.id));
+        try {
+            const r = await fetch(`{% url 'read_article_highlights' article.slug %}`, {
+                headers: {'X-Requested-With':'fetch'}
+            });
+            if (!r.ok) return;
+            const data = await r.json();
+            if (Array.isArray(data) && data.length) {
+                data.forEach(h => addToSidebar(h.text, h.id));
+            }
+        } catch(e) {
+            console.error(e);
         }
-      } catch(e){ console.error(e); }
     }
 
     function wrapSelection(range) {
-      const mark = document.createElement('mark');
-      mark.className = 'user-hl';
-      try {
-        range.surroundContents(mark);
-      } catch(e) {
-        const frag = range.cloneContents();
-        mark.appendChild(frag);
-        range.deleteContents();
-        range.insertNode(mark);
-      }
+        const mark = document.createElement('mark');
+        mark.className = 'user-hl';
+        try {
+            range.surroundContents(mark);
+        } catch(e) {
+            const frag = range.extractContents();
+            mark.appendChild(frag);
+            range.insertNode(mark);
+        }
+        return mark;
+    }
+
+    function unwrapMark(mark) {
+        if (!mark || !mark.parentNode) return;
+        const parent = mark.parentNode;
+        while (mark.firstChild) {
+            parent.insertBefore(mark.firstChild, mark);
+        }
+        parent.removeChild(mark);
+        parent.normalize();
     }
 
     async function saveHighlight(text) {
-      const r = await fetch(`{% url 'read_article_highlights' article.slug %}`, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json','X-CSRFToken':getCSRF()},
-        body: JSON.stringify({ text }),
-      });
-
-      if (r.status === 403) {
-        const j = await r.json().catch(()=>({}));
-        if (j.limit_reached) showLimitPopup();
-        throw new Error('limit');
-      }
-      if (!r.ok) throw new Error('save failed');
-      return r.json();
+        const r = await fetch(`{% url 'read_article_highlights' article.slug %}`, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','X-CSRFToken':getCSRF()},
+            body: JSON.stringify({ text }),
+        });
+        if (r.status === 403) {
+            const j = await r.json().catch(()=>({}));
+            if (j.limit_reached) showLimitPopup();
+            throw new Error('limit');
+        }
+        if (!r.ok) throw new Error('save failed');
+        return r.json();
     }
 
     articleBody?.addEventListener('mouseup', async () => {
-      const sel = window.getSelection();
-      if (!sel || sel.rangeCount === 0) return;
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
 
-      const range = sel.getRangeAt(0);
-      if (!articleBody.contains(range.commonAncestorContainer)) return;
+        const range = sel.getRangeAt(0);
+        if (!articleBody.contains(range.commonAncestorContainer)) return;
 
-      const text = sel.toString().trim();
-      if (!text) return;
+        const selectedText = sel.toString().trim();
+        if (!selectedText) return;
 
-      wrapSelection(range);
-      sel.removeAllRanges();
+        let existingMark = null;
+        let container = range.commonAncestorContainer;
+        if (container.nodeType === Node.TEXT_NODE) {
+            container = container.parentElement;
+        }
 
-      try {
-        const saved = await saveHighlight(text);
-        addToSidebar(saved.text, saved.id);
-      } catch(e) {
-        if (e.message !== 'limit') console.error(e);
-      }
+        if (
+            container?.tagName === 'MARK' &&
+            container.classList.contains('user-hl') &&
+            range.startContainer.parentElement === container &&
+            range.endContainer.parentElement === container
+        ) {
+            existingMark = container;
+        }
+
+        if (!existingMark) {
+            const marks = Array.from(articleBody.querySelectorAll('mark.user-hl'));
+            const containingMarks = marks.filter(mark => {
+                const markRange = document.createRange();
+                markRange.selectNodeContents(mark);
+                return (
+                    range.compareBoundaryPoints(Range.START_TO_START, markRange) >= 0 &&
+                    range.compareBoundaryPoints(Range.END_TO_END, markRange) <= 0
+                );
+            });
+            if (containingMarks.length === 1) existingMark = containingMarks[0];
+        }
+
+        if (existingMark) {
+            const highlightId = existingMark.dataset.highlightId;
+            if (highlightId) {
+                try {
+                    const resp = await fetch(`/api/user/delete_highlight/${highlightId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCSRF(),
+                        },
+                        body: JSON.stringify({ highlight_id: highlightId }),
+                    });
+                    if (resp.ok) {
+                        unwrapMark(existingMark);
+                        const sidebarItem = document.querySelector(`button[data-id="${highlightId}"]`)?.closest('li');
+                        if (sidebarItem) sidebarItem.remove();
+                    }
+                } catch (err) {
+                    console.error("Delete failed", err);
+                }
+            } else {
+                unwrapMark(existingMark);
+            }
+            sel.removeAllRanges();
+            return;
+        }
+
+        const newMark = wrapSelection(range);
+        sel.removeAllRanges();
+
+        try {
+            const saved = await saveHighlight(selectedText);
+            newMark.dataset.highlightId = saved.id;
+            addToSidebar(saved.text, saved.id);
+        } catch (err) {
+            if (err.message !== 'limit') console.error(err);
+            unwrapMark(newMark);
+        }
     });
 
     document.addEventListener('DOMContentLoaded', loadArticleHighlights);
-  </script>
+</script>
+
 </body>
 </html>
