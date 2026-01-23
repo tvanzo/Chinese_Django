@@ -14,6 +14,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.serializers import serialize
 from datetime import datetime, timedelta, date
 import json
+from subplayer.models import Article  # make sure your Article model lives in subplayer.models
+from django.db.models.functions import TruncDay
+from django.db.models import Count, Sum, Max, Subquery, OuterRef, Q
+from datetime import timedelta
+import json
+
 import time
 import logging
 from django.contrib.auth import authenticate, login
@@ -645,153 +651,250 @@ import os
 
 @login_required
 @login_required
-@login_required
+
 def stats_view(request):
     user = request.user
     profile = user.profile
+
     end_date = timezone.now().date()
     registration_date = user.date_joined.date()
-    total_days_registered = (end_date - registration_date).days
+    total_days_registered = max(0, (end_date - registration_date).days)
 
-    # Determine interval for "all time"
-    interval_days = 1 if total_days_registered <= 10 else total_days_registered // 10
+    # Compress all-time to ~10 points max (same spirit as your old logic)
+    interval_days = 1 if total_days_registered <= 10 else max(1, total_days_registered // 10)
 
     data_ranges = {
-        'week': timezone.timedelta(days=7),
-        'month': timezone.timedelta(days=30),
-        'all_time': timezone.timedelta(days=total_days_registered)
+        "week": timezone.timedelta(days=7),
+        "month": timezone.timedelta(days=30),
+        "all_time": timezone.timedelta(days=total_days_registered),
     }
 
-    results = {}
-    totals = {}
-    media_info = []
+    def build_date_str_list(start_date, end_date, step_days):
+        num_days = max(0, (end_date - start_date).days)
+        steps = max(0, num_days // step_days)
+        date_list = [start_date + timezone.timedelta(days=i * step_days) for i in range(steps + 1)]
+        return [d.strftime("%Y-%m-%d") for d in date_list]
 
-    # Get all dates with highlights or media progress
-    highlight_dates = Highlight.objects.filter(user=user).dates('created_at', 'day')
-    media_dates = MediaProgress.objects.filter(profile=profile).dates('date', 'day')
-    active_dates = sorted(set(highlight_dates) | set(media_dates))
-
-    # Streak Calculation
+    # ---- Streak (any activity: watched minutes OR any highlight)
     streak = 0
-    today = end_date
+    d = end_date
     while True:
-        minutes = MediaProgress.objects.filter(profile=profile, date=today).aggregate(
-            total=Sum('minutes_watched')
-        )['total'] or 0
-        highlights = Highlight.objects.filter(user=user, created_at__date=today).count()
-
-        print(f"📅 {today} -> Minutes Watched: {minutes}, Highlights: {highlights}")
-
-        if minutes >= 1 or highlights > 0:
-            streak += 1
-            today -= timedelta(days=1)
-        else:
-            break  # Streak ends
-
-    # Time Range Stats Calculation
-    for key, delta in data_ranges.items():
-        start_date = registration_date if key == 'all_time' else end_date - delta
-        num_days = (end_date - start_date).days
-        interval_count = num_days // interval_days if key == 'all_time' else num_days
-        date_list = [start_date + timezone.timedelta(days=i * interval_days) for i in range(interval_count + 1)]
-        date_str_list = [d.strftime('%Y-%m-%d') for d in date_list]
-
-        highlights_data = {date: 0 for date in date_str_list}
-        minutes_data = {date: 0 for date in date_str_list}
-
-        # Get daily highlights count
-        daily_highlights = Highlight.objects.filter(
-            user=user,
-            created_at__date__range=[start_date, end_date]
-        ).annotate(day=TruncDay('created_at')).values('day').annotate(total=Count('id'))
-
-        for highlight in daily_highlights:
-            day_str = highlight['day'].strftime('%Y-%m-%d')
-            highlights_data[day_str] = highlight['total']
-
-        # Get daily watch minutes
-        daily_minutes = MediaProgress.objects.filter(
-            profile=profile,
-            date__range=[start_date, end_date]
-        ).annotate(day=TruncDay('date')).values('day').annotate(total_minutes=Sum('minutes_watched'))
-
-        for minute in daily_minutes:
-            print(f"🕒 {minute['day']} - Total Minutes: {minute['total_minutes']}")
-            day_str = minute['day'].strftime('%Y-%m-%d')
-            minutes_data[day_str] = round(minute['total_minutes'], 2)
-
-        # Yesterday Debugging
-        yesterday = end_date - timezone.timedelta(days=1)
-        daily_minutes_yesterday = MediaProgress.objects.filter(profile=profile, date=yesterday).values('media_id').annotate(
-            total_minutes=Max('minutes_watched')
+        mins = (
+            MediaProgress.objects.filter(profile=profile, date=d)
+            .aggregate(total=Sum("minutes_watched"))["total"]
+            or 0
         )
+        hl = Highlight.objects.filter(user=user, created_at__date=d).count()
+        if mins >= 1 or hl > 0:
+            streak += 1
+            d -= timedelta(days=1)
+        else:
+            break
 
-        total_yesterday = sum(entry['total_minutes'] for entry in daily_minutes_yesterday)
+    results = {"video": {}, "reading": {}}
+    totals = {"video": {}, "reading": {}}
 
-        print(f"📊 Debugging Yesterday's Watch Time ({yesterday}):")
-        for entry in daily_minutes_yesterday:
-            print(f"🎥 Media ID: {entry['media_id']}, Minutes Watched: {entry['total_minutes']}")
-        print(f"📊 Total Calculated Minutes for Yesterday: {total_yesterday}")
+    # =========================
+    # VIDEO (media) chart series
+    # =========================
+    for key, delta in data_ranges.items():
+        start_date = registration_date if key == "all_time" else (end_date - delta)
+        step_days = interval_days if key == "all_time" else 1
+        dates = build_date_str_list(start_date, end_date, step_days)
 
-        results[key] = {
-            'dates': date_str_list,
-            'highlights': list(highlights_data.values()),
-            'minutes': list(minutes_data.values()),
+        highlights_data = {ds: 0 for ds in dates}
+        minutes_data = {ds: 0 for ds in dates}
+
+        # video highlights/day
+        daily_video_highlights = (
+            Highlight.objects.filter(
+                user=user,
+                source__in=["media", "", None],
+                created_at__date__range=[start_date, end_date],
+            )
+            .annotate(day=TruncDay("created_at"))
+            .values("day")
+            .annotate(total=Count("id"))
+            .order_by("day")
+        )
+        for row in daily_video_highlights:
+            ds = row["day"].strftime("%Y-%m-%d")
+            if ds in highlights_data:
+                highlights_data[ds] = row["total"]
+
+        # watch minutes/day
+        daily_minutes = (
+            MediaProgress.objects.filter(
+                profile=profile,
+                date__range=[start_date, end_date],
+            )
+            .annotate(day=TruncDay("date"))
+            .values("day")
+            .annotate(total_minutes=Sum("minutes_watched"))
+            .order_by("day")
+        )
+        for row in daily_minutes:
+            ds = row["day"].strftime("%Y-%m-%d")
+            if ds in minutes_data:
+                minutes_data[ds] = round(float(row["total_minutes"] or 0), 2)
+
+        highlights_series = [int(highlights_data[ds]) for ds in dates]
+        minutes_series = [round(float(minutes_data[ds]), 2) for ds in dates]
+
+        results["video"][key] = {
+            "dates": dates,
+            "highlights": highlights_series,
+            "minutes": minutes_series,
         }
 
-        totals[key] = {
-            'total_highlights': sum(highlights_data.values()),
-            'total_minutes': round(sum(minutes_data.values())),
-            'total_videos': MediaProgress.objects.filter(profile=profile, date__range=[start_date, end_date]).values(
-                'media_id'
-            ).distinct().count(),
-            'streak': streak if key == 'week' else 0  # Streak applies only to "week"
+        totals["video"][key] = {
+            "total_highlights": int(sum(highlights_series)),
+            "total_minutes": int(round(sum(minutes_series))),  # keep existing UI
+            "total_videos": (
+                MediaProgress.objects.filter(profile=profile, date__range=[start_date, end_date])
+                .values("media_id")
+                .distinct()
+                .count()
+            ),
+            "streak": streak if key == "week" else 0,
         }
 
-    # Media Status Tracking
-    media_statuses = UserMediaStatus.objects.filter(
-        user=user, status__in=['in_progress', 'completed']
-    ).select_related('media__channel').annotate(
-        total_highlights=Count('media__highlights', filter=Q(media__highlights__user=user)),
-        latest_time_stopped=Subquery(
-            MediaProgress.objects.filter(profile=profile, media=OuterRef('media')).order_by('-date').values('time_stopped')[:1]
+    # =========================
+    # READING chart series
+    # =========================
+    # Reading highlights: Highlight.source in ["web", "read"]
+    # Articles count: Article.created_by=user
+    for key, delta in data_ranges.items():
+        start_date = registration_date if key == "all_time" else (end_date - delta)
+        step_days = interval_days if key == "all_time" else 1
+        dates = build_date_str_list(start_date, end_date, step_days)
+
+        highlights_data = {ds: 0 for ds in dates}
+        articles_data = {ds: 0 for ds in dates}
+
+        # reading highlights/day
+        daily_reading_highlights = (
+            Highlight.objects.filter(
+                user=user,
+                source__in=["web", "read"],
+                created_at__date__range=[start_date, end_date],
+            )
+            .annotate(day=TruncDay("created_at"))
+            .values("day")
+            .annotate(total=Count("id"))
+            .order_by("day")
+        )
+        for row in daily_reading_highlights:
+            ds = row["day"].strftime("%Y-%m-%d")
+            if ds in highlights_data:
+                highlights_data[ds] = row["total"]
+
+        # articles saved/day
+        daily_articles = (
+            Article.objects.filter(
+                created_by=user,
+                created_at__date__range=[start_date, end_date],
+            )
+            .annotate(day=TruncDay("created_at"))
+            .values("day")
+            .annotate(total=Count("id"))
+            .order_by("day")
+        )
+        for row in daily_articles:
+            ds = row["day"].strftime("%Y-%m-%d")
+            if ds in articles_data:
+                articles_data[ds] = row["total"]
+
+        highlights_series = [int(highlights_data[ds]) for ds in dates]
+        articles_series = [int(articles_data[ds]) for ds in dates]
+
+        # For reading, we reuse the existing "minutes" slot to drive the line chart,
+        # but it represents "Articles saved" so we can keep your chart JS unchanged.
+        results["reading"][key] = {
+            "dates": dates,
+            "highlights": highlights_series,
+            "minutes": articles_series,  # <- displayed as "Articles" in UI via labels
+        }
+
+        totals["reading"][key] = {
+            "total_highlights": int(sum(highlights_series)),
+            "total_minutes": int(sum(articles_series)),  # <- shown as Total Articles in UI via label swap
+            "total_videos": int(sum(articles_series)),   # <- we relabel this too
+            "streak": streak if key == "week" else 0,
+        }
+
+    # =========================
+    # VIDEO table (your existing My Log)
+    # =========================
+    media_info = []
+    media_statuses = (
+        UserMediaStatus.objects.filter(user=user, status__in=["in_progress", "completed"])
+        .select_related("media__channel")
+        .annotate(
+            total_highlights=Count("media__highlights", filter=Q(media__highlights__user=user)),
+            latest_time_stopped=Subquery(
+                MediaProgress.objects.filter(profile=profile, media=OuterRef("media"))
+                .order_by("-date")
+                .values("time_stopped")[:1]
+            ),
         )
     )
 
     for status in media_statuses:
-        video_length = status.media.video_length
+        video_length = status.media.video_length or 0
         latest_time_stopped = status.latest_time_stopped or 0
-        progress_percent = 100 if status.status == 'completed' else (
+        progress_percent = 100 if status.status == "completed" else (
             round((latest_time_stopped / video_length * 100), 0) if video_length > 0 else 0
         )
 
         media_info.append({
-            'media_id': status.media.media_id,
-            'title': status.media.title,
-            'total_highlights': status.total_highlights,
-            'length': f"{video_length // 60}:{video_length % 60:02d}",
-            'status': status.status,
-            'progress_percent': progress_percent,
-            'profile_image_url': status.media.channel.profile_pic_url
+            "media_id": status.media.media_id,
+            "title": status.media.title,
+            "total_highlights": status.total_highlights,
+            "length": f"{video_length // 60}:{video_length % 60:02d}",
+            "status": status.status,
+            "progress_percent": progress_percent,
+            "profile_image_url": getattr(status.media.channel, "profile_pic_url", None),
         })
 
-    # Context for Template
+    # =========================
+    # READING table: Title + # highlights ONLY
+    # =========================
+    reading_info = list(
+        Highlight.objects.filter(
+            user=user,
+            source__in=["web", "read"],
+        )
+        .values("page_title", "page_url")
+        .annotate(
+            total_highlights=Count("id"),
+            latest=Max("created_at"),
+        )
+        .order_by("-latest")
+    )
+
+    # Clean up titles (avoid None)
+    for r in reading_info:
+        r["page_title"] = r.get("page_title") or "Untitled"
+        r["page_url"] = r.get("page_url") or ""
+
     context = {
-        'highlight_data_json': json.dumps(results),
-        'totals_json': json.dumps(totals),
-        'media_info': media_info,
-        'streak': streak,
-        'default_image_url': static('accounts/img/small-logos/logo-xd.svg'),
-        'total_minutes': profile.total_minutes / 60,  # Keep if needed elsewhere
+        "highlight_data_json": json.dumps(results),
+        "totals_json": json.dumps(totals),
+
+        "media_info": media_info,
+        "reading_info": reading_info,
+
+        "streak": streak,
+        "default_image_url": static("accounts/img/small-logos/logo-xd.svg"),
     }
 
-    # Clear Messages After Displaying
+    # Clear messages after displaying
     storage = messages.get_messages(request)
-    for message in storage:
-        pass  # Clears messages
+    for _ in storage:
+        pass
 
-    return render(request, 'accounts/stats.html', context)
-
+    return render(request, "accounts/stats.html", context)
 @login_required
 def update_progress(request):
     if request.method != 'POST':

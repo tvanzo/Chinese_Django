@@ -1,22 +1,13 @@
-<!--
-=========================================================
+<!-- =========================================================
 * Soft UI Dashboard - v1.0.7
 =========================================================
-
 * Product Page: https://www.creative-tim.com/product/soft-ui-dashboard
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://www.creative-tim.com/license)
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
--->
+* Copyright 2023 Creative Tim
+* Licensed under MIT
+========================================================= -->
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -36,11 +27,7 @@
   <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
 
   <style>
-    html, body {
-      width: 100%;
-      overflow-x: hidden;
-    }
-
+    html, body { width: 100%; overflow-x: hidden; }
     body { transition: padding-top 0.3s ease-in-out; }
 
     .text-warning { color: #dcb234; }
@@ -90,7 +77,11 @@
 
     #xp-points { font-size: 14px; font-weight: bold; color: #ffffff; }
 
-    .btn-purple { background-color: #d00c9c; color: #ffffff; border-color: #6f42c1; }
+    .btn-purple {
+      background-color: #d00c9c;
+      color: #ffffff;
+      border-color: #6f42c1;
+    }
     .compact-btn { padding: 0.25rem 0.5rem; }
 
     #unique-xp-display {
@@ -154,25 +145,57 @@
     }
     .custom-logo-size { height: 50px !important; }
 
+    /* =========================
+       ✅ Tabs: make active style fill entire pill
+       ========================= */
+    .log-tabs {
+      background: #f8f9fa;
+      padding: 4px;
+      border-radius: 12px;
+      gap: 4px;
+      flex-wrap: nowrap;
+    }
+    .log-tabs .nav-item { flex: 1 1 auto; }
+    .log-tabs .nav-link {
+      width: 100%;
+      border-radius: 10px;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #344767;
+      background: transparent;
+      border: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: background-color .15s ease, box-shadow .15s ease, color .15s ease;
+    }
+    .log-tabs .nav-link i { font-size: 0.9rem; }
+    .log-tabs .nav-link:hover {
+      background: rgba(0,0,0,0.03);
+    }
+    .log-tabs .nav-link.active {
+      background: #ffffff !important;
+      color: #344767 !important;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+    .log-tabs .nav-link:focus { box-shadow: none; }
+    .log-tabs .nav-link.active:focus { box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+
     @media (max-width: 991.98px) {
-      .main-content,
-      .g-sidenav-show .main-content {
+      .main-content, .g-sidenav-show .main-content {
         margin-left: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
       }
+      .container-fluid, .card, .card-body, .table-responsive { max-width: 100%; }
+      .table-responsive { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+      table { min-width: 700px; }
+      .log-tabs { width: 100%; }
 
-      .container-fluid, .card, .card-body, .table-responsive {
-        max-width: 100%;
-      }
-
-      .table-responsive {
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch;
-      }
-      table {
-        min-width: 700px;
-      }
+      /* Reading table only has 2 cols, don't force wide min width */
+      #panel-reading table { min-width: 0; }
     }
   </style>
 </head>
@@ -184,9 +207,7 @@
     <div class="container-fluid py-2">
       <div class="d-flex align-items-center justify-content-between">
         {% for message in messages %}
-          {% if forloop.last %}
-            {{ message }}
-          {% endif %}
+          {% if forloop.last %} {{ message }} {% endif %}
         {% endfor %}
         <button type="button" class="close" data-bs-dismiss="alert" aria-label="Close">
           <span aria-hidden="true">×</span>
@@ -202,6 +223,7 @@
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
     <div class="container-fluid py-4">
       <div class="row">
+
         <!-- Total Highlights -->
         <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
           <div class="card">
@@ -233,7 +255,7 @@
               <div class="row">
                 <div class="col-8">
                   <div class="numbers">
-                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Minutes</p>
+                    <p class="text-sm mb-0 text-capitalize font-weight-bold" id="minutes-label">Total Minutes</p>
                     <h5 class="font-weight-bolder mb-0" id="total-minutes">Loading...</h5>
                   </div>
                 </div>
@@ -272,14 +294,14 @@
           </div>
         </div>
 
-        <!-- Total Videos -->
+        <!-- Total Items (Videos / Articles) -->
         <div class="col-xl-3 col-sm-6">
           <div class="card">
             <div class="card-body p-3">
               <div class="row">
                 <div class="col-8">
                   <div class="numbers">
-                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Videos</p>
+                    <p class="text-sm mb-0 text-capitalize font-weight-bold" id="total-items-label">Total Videos</p>
                     <h5 class="font-weight-bolder mb-0" id="total-videos">Loading...</h5>
                   </div>
                 </div>
@@ -307,10 +329,11 @@
                   <canvas id="highlightBarChart" class="chart-canvas" height="170"></canvas>
                 </div>
               </div>
+
               <h6 class="ms-2 mt-4 mb-0">Progress Tracker</h6>
+
               <div class="container border-radius-lg">
                 <div class="row">
-
                   <div class="col-4 py-3 ps-0">
                     <div class="d-flex mb-2">
                       <div class="icon icon-shape icon-xxs shadow border-radius-sm bg-gradient-primary text-center me-2 d-flex align-items-center justify-content-center"></div>
@@ -333,7 +356,7 @@
                         <p class="text-xs mt-1 mb-0 font-weight-bold">Consumed</p>
                       </div>
                     </div>
-                    <h4 class="font-weight-bolder" id="total-words">43</h4>
+                    <h4 class="font-weight-bolder" id="total-words">0</h4>
                     <div class="progress w-75">
                       <div class="progress-bar bg-dark w-50" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
@@ -341,6 +364,7 @@
 
                 </div><!-- /.row -->
               </div><!-- /.container -->
+
             </div>
           </div>
         </div>
@@ -348,11 +372,11 @@
         <div class="col-lg-7">
           <div class="card z-index-2">
             <div class="card-header pb-0">
-              <h6>Minutes Consumed</h6>
+              <h6 id="minutes-chart-title">Minutes Consumed</h6>
               <div class="btn-group" role="group" aria-label="Basic example">
-                <button type="button" class="btn btn-outline-primary" onclick="updateChartData('week'); updateStatsData('week')">Last Week</button>
-                <button type="button" class="btn btn-outline-primary" onclick="updateChartData('month'); updateStatsData('month')">Last Month</button>
-                <button type="button" class="btn btn-outline-primary" onclick="updateChartData('all_time'); updateStatsData('all_time')">All Time</button>
+                <button type="button" class="btn btn-outline-primary" onclick="updateChartData('week')">Last Week</button>
+                <button type="button" class="btn btn-outline-primary" onclick="updateChartData('month')">Last Month</button>
+                <button type="button" class="btn btn-outline-primary" onclick="updateChartData('all_time')">All Time</button>
               </div>
             </div>
             <div class="card-body p-3">
@@ -364,6 +388,11 @@
         </div>
       </div><!-- /.row -->
 
+      <!-- IMPORTANT:
+           Expect new shape in these JSON blobs:
+           highlight_data_json: { video: {week:{dates,minutes,highlights,items}}, reading: {...} }
+           totals_json:         { video: {week:{total_highlights,total_minutes,total_items,streak}}, reading: {...} }
+      -->
       <div id="highlight-data" style="display: none;">{{ highlight_data_json|safe }}</div>
       <div id="totals-data" style="display: none;">{{ totals_json|safe }}</div>
 
@@ -374,77 +403,158 @@
         <div class="row">
           <div class="col-12">
             <div class="card mb-4">
-              <div class="card-header pb-0">
-                <h6>My Log</h6>
+
+              <!-- ✅ Header with Tabs (Videos / Reading) -->
+              <div class="card-header pb-0 d-flex align-items-center justify-content-between">
+                <h6 class="mb-0">My Log</h6>
+
+                <ul class="nav nav-pills log-tabs" id="myLogTabs" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="tab-videos" data-bs-toggle="tab" data-bs-target="#panel-videos" type="button" role="tab" aria-controls="panel-videos" aria-selected="true">
+                      <i class="fas fa-play"></i>
+                      <span>Videos</span>
+                    </button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-reading" data-bs-toggle="tab" data-bs-target="#panel-reading" type="button" role="tab" aria-controls="panel-reading" aria-selected="false">
+                      <i class="fas fa-book"></i>
+                      <span>Reading</span>
+                    </button>
+                  </li>
+                </ul>
               </div>
+
               <div class="card-body px-0 pt-0 pb-2">
-                <div class="table-responsive p-0">
-                  <table class="table align-items-center mb-0">
-                    <thead>
-                      <tr>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Title</th>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-center"># Highlights</th>
-                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Length</th>
-                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
-                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Progress</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for media in media_info %}
-                      <tr>
-                        <td>
-                          <div class="d-flex px-2 py-1">
-                            <div>
-                              <img src="{{ media.profile_image_url|default:default_image_url }}" class="avatar avatar-sm me-3" alt="media logo">
-                            </div>
-                            <div class="d-flex flex-column justify-content-center">
-                              <h6 class="mb-0 text-sm">
-                                <a href="{% url 'video_detail' media.media_id %}">
-                                  {{ media.title|slice:":45" }}{% if media.title|length > 25 %}...{% endif %}
-                                </a>
-                              </h6>
-                            </div>
-                          </div>
-                        </td>
-                        <td class="align-middle text-center">
-                          <a href="{% url 'highlights_detail' media.media_id %}" class="text-xs font-weight-bold mb-0">{{ media.total_highlights }}</a>
-                        </td>
-                        <td class="align-middle text-center">
-                          <p class="text-xs font-weight-bold mb-0">{{ media.length }}</p>
-                        </td>
-                        <td class="align-middle text-center">
-                          {% if media.status == 'in_progress' %}
-                            <span class="badge badge-sm bg-gradient-warning">In Progress</span>
-                          {% elif media.status == 'completed' %}
-                            <span class="badge badge-sm bg-gradient-success">Completed</span>
-                          {% else %}
-                            <span class="badge badge-sm bg-gradient-secondary">{{ media.status|capfirst }}</span>
-                          {% endif %}
-                        </td>
-                        <td class="align-middle">
-                          <div class="progress-wrapper w-75 mx-auto">
-                            <div class="progress-info">
-                              <div class="progress-percentage">
-                                <span class="text-xs font-weight-bold">{{ media.progress_percent }}%</span>
+                <div class="tab-content" id="myLogTabsContent">
+
+                  <!-- VIDEOS -->
+                  <div class="tab-pane fade show active" id="panel-videos" role="tabpanel" aria-labelledby="tab-videos">
+                    <div class="table-responsive p-0">
+                      <table class="table align-items-center mb-0">
+                        <thead>
+                          <tr>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Title</th>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-center"># Highlights</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Length</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Progress</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for media in media_info %}
+                          <tr>
+                            <td>
+                              <div class="d-flex px-2 py-1">
+                                <div>
+                                  <img src="{{ media.profile_image_url|default:default_image_url }}" class="avatar avatar-sm me-3" alt="media logo">
+                                </div>
+                                <div class="d-flex flex-column justify-content-center">
+                                  <h6 class="mb-0 text-sm">
+                                    <a href="{% url 'video_detail' media.media_id %}">
+                                      {{ media.title|slice:":45" }}{% if media.title|length > 25 %}...{% endif %}
+                                    </a>
+                                  </h6>
+                                </div>
                               </div>
-                            </div>
-                            <div class="progress">
-                              <div class="progress-bar bg-gradient-info" style="width: {{ media.progress_percent }}%" role="progressbar" aria-valuenow="{{ media.progress_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                            </td>
+
+                            <td class="align-middle text-center">
+                              <a href="{% url 'highlights_detail' media.media_id %}" class="text-xs font-weight-bold mb-0">{{ media.total_highlights }}</a>
+                            </td>
+
+                            <td class="align-middle text-center">
+                              <p class="text-xs font-weight-bold mb-0">{{ media.length }}</p>
+                            </td>
+
+                            <td class="align-middle text-center">
+                              {% if media.status == 'in_progress' %}
+                                <span class="badge badge-sm bg-gradient-warning">In Progress</span>
+                              {% elif media.status == 'completed' %}
+                                <span class="badge badge-sm bg-gradient-success">Completed</span>
+                              {% else %}
+                                <span class="badge badge-sm bg-gradient-secondary">{{ media.status|capfirst }}</span>
+                              {% endif %}
+                            </td>
+
+                            <td class="align-middle">
+                              <div class="progress-wrapper w-75 mx-auto">
+                                <div class="progress-info">
+                                  <div class="progress-percentage">
+                                    <span class="text-xs font-weight-bold">{{ media.progress_percent }}%</span>
+                                  </div>
+                                </div>
+                                <div class="progress">
+                                  <div class="progress-bar bg-gradient-info" style="width: {{ media.progress_percent }}%" role="progressbar" aria-valuenow="{{ media.progress_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                          {% empty %}
+                          <tr>
+                            <td colspan="5" class="text-center py-4">
+                              <span class="text-sm text-secondary">No videos yet.</span>
+                            </td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <!-- READING (simple: Title + # Highlights only) -->
+                  <div class="tab-pane fade" id="panel-reading" role="tabpanel" aria-labelledby="tab-reading">
+                    <div class="table-responsive p-0">
+                      <table class="table align-items-center mb-0">
+                        <thead>
+                          <tr>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Title</th>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-center"># Highlights</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for item in reading_info %}
+                          <tr>
+                            <td>
+                              <div class="d-flex px-2 py-1">
+                                <div class="d-flex flex-column justify-content-center">
+                                  <h6 class="mb-0 text-sm">
+                                    {% if item.source_url %}
+                                      <a href="{{ item.source_url }}" target="_blank" rel="noopener">
+                                        {{ item.title|default:"Untitled"|slice:":80" }}{% if item.title|length > 80 %}...{% endif %}
+                                      </a>
+                                    {% else %}
+                                      {{ item.title|default:"Untitled"|slice:":80" }}{% if item.title|length > 80 %}...{% endif %}
+                                    {% endif %}
+                                  </h6>
+                                </div>
+                              </div>
+                            </td>
+
+                            <td class="align-middle text-center">
+                              <span class="text-xs font-weight-bold mb-0">{{ item.total_highlights|default:0 }}</span>
+                            </td>
+                          </tr>
+                          {% empty %}
+                          <tr>
+                            <td colspan="2" class="text-center py-4">
+                              <span class="text-sm text-secondary">No reading items yet.</span>
+                            </td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                </div><!-- /.tab-content -->
+              </div><!-- /.card-body -->
+
             </div>
           </div>
         </div>
-      </div>
+      </div><!-- /.container-fluid -->
 
-    </div><!-- /.container-fluid -->
+    </div>
   </main>
 
   <!-- Core JS Files -->
@@ -455,7 +565,6 @@
   <script src="{% static 'accounts/js/plugins/chartjs.min.js' %}"></script>
 
   <script async defer src="https://buttons.github.io/buttons.js"></script>
-
   <script src="{% static 'accounts/js/soft-ui-dashboard.min.js?v=1.0.7' %}"></script>
 
   <script>
@@ -463,32 +572,50 @@
       const sidenav = document.getElementById('sidenav-main');
       const iconSidenav = document.getElementById('iconSidenav');
       if (!sidenav || !iconSidenav) return;
+
       iconSidenav.addEventListener('click', function (e) {
         e.preventDefault();
         sidenav.classList.toggle('d-none');
       });
     });
 
+    // ----------------------------
+    // Charts + Stats (Video vs Reading)
+    // ----------------------------
     let cumulativeMinutesChart;
     let barChart;
+
+    let currentMode = 'video';      // 'video' | 'reading'
+    let currentRange = 'week';      // 'week' | 'month' | 'all_time'
+
+    function getHighlightPayload() {
+      const el = document.getElementById('highlight-data');
+      return el ? JSON.parse(el.textContent) : null;
+    }
+
+    function getTotalsPayload() {
+      const el = document.getElementById('totals-data');
+      return el ? JSON.parse(el.textContent) : null;
+    }
 
     function createLineChart(data) {
       const canvasLine = document.getElementById('cumulativeMinutesChart');
       if (!canvasLine) return;
-
       const ctxLine = canvasLine.getContext('2d');
+
       if (cumulativeMinutesChart) cumulativeMinutesChart.destroy();
 
-      const maxMinutes = Math.max(...data.minutes);
+      const minutes = data.minutes || [];
+      const maxMinutes = minutes.length ? Math.max(...minutes) : 0;
       const suggestedMax = maxMinutes < 5 ? 5 : Math.ceil(maxMinutes * 1.5);
 
       cumulativeMinutesChart = new Chart(ctxLine, {
         type: 'line',
         data: {
-          labels: data.dates.map(date => new Date(date).toLocaleDateString('en-us', { month: 'short', day: 'numeric' })),
+          labels: (data.dates || []).map(date => new Date(date).toLocaleDateString('en-us', { month: 'short', day: 'numeric' })),
           datasets: [{
-            label: 'Cumulative Minutes Watched',
-            data: data.minutes,
+            label: currentMode === 'reading' ? 'Estimated Minutes Read' : 'Minutes Watched',
+            data: minutes,
             borderColor: 'rgb(75, 192, 192)',
             backgroundColor: 'rgba(75, 192, 192, 0.5)',
             fill: true,
@@ -522,14 +649,17 @@
     function createBarChart(data) {
       const canvas = document.getElementById('highlightBarChart');
       if (!canvas) return;
-
       const ctxBar = canvas.getContext('2d');
+
       if (barChart) barChart.destroy();
+
+      const highlights = data.highlights || [];
+      const maxHL = highlights.length ? Math.max(...highlights) : 0;
 
       barChart = new Chart(ctxBar, {
         type: 'bar',
         data: {
-          labels: data.dates.map(date => new Date(date).toLocaleDateString('en-us', { month: 'short', day: 'numeric' })),
+          labels: (data.dates || []).map(date => new Date(date).toLocaleDateString('en-us', { month: 'short', day: 'numeric' })),
           datasets: [{
             label: 'Highlights Count',
             tension: 0.4,
@@ -537,7 +667,7 @@
             borderRadius: 4,
             borderSkipped: false,
             backgroundColor: '#fff',
-            data: data.highlights,
+            data: highlights,
             maxBarThickness: 6
           }]
         },
@@ -560,7 +690,7 @@
               grid: { drawBorder: false, display: false, drawOnChartArea: false, drawTicks: false },
               ticks: {
                 suggestedMin: 0,
-                suggestedMax: Math.max(...data.highlights) * 1.2,
+                suggestedMax: maxHL ? (maxHL * 1.2) : 5,
                 beginAtZero: true,
                 padding: 15,
                 font: { size: 14, family: "Open Sans", style: 'normal', lineHeight: 2 },
@@ -576,24 +706,12 @@
       });
     }
 
-    function updateChartData(timeSpan) {
-      const el = document.getElementById('highlight-data');
-      if (!el) return;
-
-      const data = JSON.parse(el.textContent);
-      if (!data[timeSpan]) return;
-
-      createLineChart({ dates: data[timeSpan].dates, minutes: data[timeSpan].minutes });
-      createBarChart({ dates: data[timeSpan].dates, highlights: data[timeSpan].highlights });
-      updateStatsData(timeSpan);
-    }
-
     function updateStatsData(timeSpan) {
-      const el = document.getElementById('totals-data');
-      if (!el) return;
+      const totalsPayload = getTotalsPayload();
+      if (!totalsPayload) return;
 
-      const statsData = JSON.parse(el.textContent);
-      if (!statsData[timeSpan]) return;
+      const rangeStats = (totalsPayload[currentMode] && totalsPayload[currentMode][timeSpan]) ? totalsPayload[currentMode][timeSpan] : null;
+      if (!rangeStats) return;
 
       const th = document.getElementById('total-highlights');
       const tm = document.getElementById('total-minutes');
@@ -601,22 +719,82 @@
       const tv = document.getElementById('total-videos');
       const tw = document.getElementById('total-words');
 
-      if (th) th.innerText = statsData[timeSpan].total_highlights || '0';
-      if (tm) tm.innerText = statsData[timeSpan].total_minutes || '0';
-      if (st) st.innerText = statsData[timeSpan].streak || '0';
-      if (tv) tv.innerText = statsData[timeSpan].total_videos || '0';
-      if (tw) tw.innerText = statsData[timeSpan].total_words || '0';
+      if (th) th.innerText = rangeStats.total_highlights ?? '0';
+      if (tm) tm.innerText = rangeStats.total_minutes ?? '0';
+      if (st) st.innerText = rangeStats.streak ?? '0';
+
+      // NOTE: your updated view should fill total_items for both modes.
+      // We keep the old element id (total-videos) to avoid template refactors.
+      if (tv) tv.innerText = rangeStats.total_items ?? (rangeStats.total_videos ?? '0');
+
+      // If you don't provide total_words anymore, keep it stable at 0.
+      if (tw) tw.innerText = rangeStats.total_words ?? '0';
+    }
+
+    function updateChartData(timeSpan) {
+      currentRange = timeSpan;
+
+      const highlightPayload = getHighlightPayload();
+      if (!highlightPayload) return;
+
+      const rangeData = (highlightPayload[currentMode] && highlightPayload[currentMode][timeSpan]) ? highlightPayload[currentMode][timeSpan] : null;
+      if (!rangeData) return;
+
+      createLineChart({ dates: rangeData.dates, minutes: rangeData.minutes });
+      createBarChart({ dates: rangeData.dates, highlights: rangeData.highlights });
+      updateStatsData(timeSpan);
+    }
+
+    function applyModeUI(mode) {
+      // Card labels
+      const itemsLabel = document.getElementById('total-items-label');
+      const minutesLabel = document.getElementById('minutes-label');
+      const minutesChartTitle = document.getElementById('minutes-chart-title');
+
+      if (mode === 'reading') {
+        if (itemsLabel) itemsLabel.innerText = 'Total Articles';
+        if (minutesLabel) minutesLabel.innerText = 'Total Minutes (Est.)';
+        if (minutesChartTitle) minutesChartTitle.innerText = 'Estimated Minutes Read';
+      } else {
+        if (itemsLabel) itemsLabel.innerText = 'Total Videos';
+        if (minutesLabel) minutesLabel.innerText = 'Total Minutes';
+        if (minutesChartTitle) minutesChartTitle.innerText = 'Minutes Consumed';
+      }
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+      // Default load
+      currentMode = 'video';
+      applyModeUI(currentMode);
       updateChartData('week');
 
+      // Sync charts/stats when user switches table tab
+      const readingBtn = document.getElementById('tab-reading');
+      const videosBtn = document.getElementById('tab-videos');
+
+      if (videosBtn) {
+        videosBtn.addEventListener('shown.bs.tab', function () {
+          currentMode = 'video';
+          applyModeUI(currentMode);
+          updateChartData(currentRange);
+        });
+      }
+      if (readingBtn) {
+        readingBtn.addEventListener('shown.bs.tab', function () {
+          currentMode = 'reading';
+          applyModeUI(currentMode);
+          updateChartData(currentRange);
+        });
+      }
+
+      // Tooltips (if you have any)
       const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
       tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
       });
     });
 
+    // Welcome banner padding
     document.addEventListener('DOMContentLoaded', function () {
       const banner = document.getElementById('welcome-banner');
       const body = document.body;
