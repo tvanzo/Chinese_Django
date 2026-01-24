@@ -1,5 +1,4 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,12 +10,16 @@
 
   <!-- Fonts and icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link id="pagestyle" href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet" />
+  <link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet" />
+  <link href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet" />
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-  <link id="pagestyle" href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet" />
+
+  <!-- Soft UI main CSS (ONLY this one gets id="pagestyle") -->
   <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet" />
 
   <style>
+    html, body { width: 100%; overflow-x: hidden; }
+
     :root {
       --primary: #6366f1;
       --primary-dark: #4f46e5;
@@ -36,9 +39,7 @@
       --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       background-color: var(--background);
@@ -47,11 +48,40 @@
       line-height: 1.6;
     }
 
-    .main-content {
-      padding: 0;
+    /* ✅ Make sidebar match your “good” template */
+    #sidenav-main {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+    }
+    .sidenav-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100px;
+    }
+    .custom-logo-size { height: 50px !important; }
+
+    /* ✅ Ensure main content sits correctly beside sidenav on desktop */
+    @media (min-width: 1200px) {
+      .g-sidenav-show .main-content {
+        margin-left: 17.125rem; /* Soft UI default */
+      }
+    }
+    @media (max-width: 1199.98px) {
+      .g-sidenav-show .main-content {
+        margin-left: 0 !important;
+      }
     }
 
-    .container-fluid {
+    .main-content { padding: 0; }
+
+    /* ✅ IMPORTANT: do NOT globally override .container-fluid (breaks sidebar/navbar) */
+    .main-content .container-fluid {
       max-width: 1400px;
       margin: 0 auto;
       padding: 2rem 1.5rem;
@@ -62,7 +92,6 @@
       margin-bottom: 2rem;
       text-align: center;
     }
-
     .page-title {
       font-size: 2rem;
       font-weight: 700;
@@ -70,7 +99,6 @@
       margin: 0 0 0.5rem;
       letter-spacing: -0.025em;
     }
-
     .page-subtitle {
       font-size: 1rem;
       color: var(--text-secondary);
@@ -91,7 +119,6 @@
       margin-left: auto;
       margin-right: auto;
     }
-
     .tab-button {
       background: transparent;
       border: none;
@@ -104,11 +131,7 @@
       color: var(--text-secondary);
       position: relative;
     }
-
-    .tab-button:hover {
-      color: var(--text-primary);
-    }
-
+    .tab-button:hover { color: var(--text-primary); }
     .tab-button.active {
       background: var(--primary);
       color: white;
@@ -116,10 +139,7 @@
     }
 
     /* Category Filter */
-    .category-section {
-      margin-bottom: 2rem;
-    }
-
+    .category-section { margin-bottom: 2rem; }
     .category-filter {
       display: flex;
       gap: 0.5rem;
@@ -127,7 +147,6 @@
       justify-content: center;
       align-items: center;
     }
-
     .category-item {
       background: var(--surface);
       border: 1.5px solid var(--border);
@@ -140,13 +159,11 @@
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       white-space: nowrap;
     }
-
     .category-item:hover {
       border-color: var(--primary);
       background: rgba(99, 102, 241, 0.04);
       transform: translateY(-1px);
     }
-
     .category-item.active {
       background: var(--primary);
       color: white;
@@ -166,32 +183,41 @@
       background: var(--primary);
       color: white;
       border: none;
+      position: relative;
     }
-
     .add-custom-url:hover {
       background: var(--primary-dark);
       transform: scale(1.05);
     }
+    .add-custom-url::after {
+      content: "Add YouTube Video";
+      position: absolute;
+      bottom: calc(100% + 0.5rem);
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(15, 23, 42, 0.95);
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s;
+      pointer-events: none;
+      font-weight: 500;
+    }
+    .add-custom-url:hover::after { opacity: 1; visibility: visible; }
 
     /* Custom URL Input */
-    .custom-url-input {
-      margin: 0 auto 2rem;
-      max-width: 600px;
-    }
-
+    .custom-url-input { margin: 0 auto 2rem; max-width: 600px; }
     .url-input-container {
       background: var(--surface);
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-md);
       padding: 1.5rem;
     }
-
-    .search-box {
-      display: flex;
-      gap: 0.75rem;
-      align-items: center;
-    }
-
+    .search-box { display: flex; gap: 0.75rem; align-items: center; }
     .url-input {
       flex: 1;
       border: 1.5px solid var(--border);
@@ -204,15 +230,11 @@
       transition: all 0.2s;
       font-family: inherit;
     }
-
     .url-input:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
     }
-
-    .url-input::placeholder {
-      color: var(--text-secondary);
-    }
+    .url-input::placeholder { color: var(--text-secondary); }
 
     .submit-button {
       background: var(--primary);
@@ -226,8 +248,8 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      white-space: nowrap;
     }
-
     .submit-button:hover {
       background: var(--primary-dark);
       transform: translateY(-1px);
@@ -260,19 +282,14 @@
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       box-shadow: var(--shadow-sm);
       border: 1px solid var(--border);
+      animation: fadeIn 0.3s ease-out;
     }
-
     .video-card:hover {
       transform: translateY(-4px);
       box-shadow: var(--shadow-lg);
       border-color: transparent;
     }
-
-    .card-link {
-      text-decoration: none;
-      color: inherit;
-      display: block;
-    }
+    .card-link { text-decoration: none; color: inherit; display: block; }
 
     .image-container {
       position: relative;
@@ -280,32 +297,22 @@
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       overflow: hidden;
     }
-
     .card-img-top {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
       object-fit: cover;
       transition: transform 0.3s ease;
     }
-
-    .video-card:hover .card-img-top {
-      transform: scale(1.05);
-    }
+    .video-card:hover .card-img-top { transform: scale(1.05); }
 
     .overlay-info {
       position: absolute;
-      bottom: 0.75rem;
-      left: 0.75rem;
-      right: 0.75rem;
+      bottom: 0.75rem; left: 0.75rem; right: 0.75rem;
       display: flex;
       justify-content: space-between;
       gap: 0.5rem;
       z-index: 2;
     }
-
     .badge {
       padding: 0.375rem 0.75rem;
       border-radius: 0.5rem;
@@ -315,28 +322,13 @@
       align-items: center;
       gap: 0.375rem;
       backdrop-filter: blur(12px);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
+    .badge-highlight { background: rgba(236, 72, 153, 0.95); color: white; }
+    .badge-length    { background: rgba(15, 23, 42, 0.95); color: white; }
+    .badge-subscription { background: rgba(16, 185, 129, 0.95); color: white; }
 
-    .badge-highlight {
-      background: rgba(236, 72, 153, 0.95);
-      color: white;
-    }
-
-    .badge-length {
-      background: rgba(15, 23, 42, 0.95);
-      color: white;
-    }
-
-    .badge-subscription {
-      background: rgba(16, 185, 129, 0.95);
-      color: white;
-    }
-
-    .card-body {
-      padding: 1.25rem;
-    }
-
+    .card-body { padding: 1.25rem; }
     .card-title {
       font-size: 0.9375rem;
       font-weight: 600;
@@ -349,7 +341,6 @@
       overflow: hidden;
       min-height: 2.8em;
     }
-
     .card-text {
       font-size: 0.8125rem;
       color: var(--text-secondary);
@@ -369,7 +360,6 @@
       border-top: 1px solid var(--border);
       gap: 0.75rem;
     }
-
     .channel-meta {
       display: flex;
       align-items: center;
@@ -377,7 +367,6 @@
       flex: 1;
       min-width: 0;
     }
-
     .channel-link {
       display: flex;
       align-items: center;
@@ -387,7 +376,6 @@
       min-width: 0;
       flex: 1;
     }
-
     .channel-profile-pic {
       width: 2rem;
       height: 2rem;
@@ -396,7 +384,6 @@
       border: 2px solid var(--border);
       flex-shrink: 0;
     }
-
     .channel-name {
       font-size: 0.8125rem;
       font-weight: 600;
@@ -405,11 +392,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
-    .channel-link:hover .channel-name {
-      color: var(--primary);
-    }
-
+    .channel-link:hover .channel-name { color: var(--primary); }
     .time-ago {
       font-size: 0.75rem;
       color: var(--text-secondary);
@@ -430,14 +413,12 @@
       flex-shrink: 0;
       border: 1.5px solid var(--border);
     }
-
     .toggle-log:hover {
       background: var(--primary);
       border-color: var(--primary);
       color: white;
       transform: scale(1.1);
     }
-
     .toggle-log.active,
     .toggle-log.active svg {
       background: var(--primary);
@@ -445,14 +426,9 @@
       color: white;
     }
 
-    /* Content Section */
-    .content-section {
-      display: none;
-    }
-
-    .content-section.active {
-      display: block;
-    }
+    /* Content Sections */
+    .content-section { display: none; }
+    .content-section.active { display: block; }
 
     /* Subscriptions Header */
     .subscriptions-header {
@@ -460,15 +436,14 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 1.5rem;
+      gap: 1rem;
     }
-
     .subscriptions-header h3 {
       font-size: 1.25rem;
       font-weight: 600;
       color: var(--text-primary);
       margin: 0;
     }
-
     .manage-subscriptions {
       font-size: 0.875rem;
       color: var(--primary);
@@ -480,11 +455,9 @@
       padding: 0.5rem 0.875rem;
       border-radius: var(--radius-md);
       transition: all 0.2s;
+      white-space: nowrap;
     }
-
-    .manage-subscriptions:hover {
-      background: rgba(99, 102, 241, 0.08);
-    }
+    .manage-subscriptions:hover { background: rgba(99, 102, 241, 0.08); }
 
     /* No Results */
     .no-results {
@@ -492,128 +465,40 @@
       padding: 4rem 1rem;
       color: var(--text-secondary);
     }
-
-    .no-results p {
-      font-size: 1rem;
-      margin-bottom: 1rem;
-    }
-
+    .no-results p { font-size: 1rem; margin-bottom: 1rem; }
     .no-results a {
       color: var(--primary);
       text-decoration: none;
       font-weight: 600;
     }
+    .no-results a:hover { text-decoration: underline; }
 
-    .no-results a:hover {
-      text-decoration: underline;
-    }
-
-    /* Tooltip */
-    .add-custom-url {
-      position: relative;
-    }
-
-    .add-custom-url::after {
-      content: "Add YouTube Video";
-      position: absolute;
-      bottom: calc(100% + 0.5rem);
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: rgba(15, 23, 42, 0.95);
-      color: white;
-      padding: 0.5rem 0.75rem;
-      border-radius: var(--radius-sm);
-      font-size: 0.75rem;
-      white-space: nowrap;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.2s;
-      pointer-events: none;
-      font-weight: 500;
-    }
-
-    .add-custom-url:hover::after {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    /* Responsive Design */
+    /* Responsive */
     @media (max-width: 768px) {
-      .container-fluid {
-        padding: 1.5rem 1rem;
-      }
-
-      .page-title {
-        font-size: 1.5rem;
-      }
-
-      .video-grid {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 1rem;
-      }
-
+      .main-content .container-fluid { padding: 1.5rem 1rem; }
+      .page-title { font-size: 1.5rem; }
+      .video-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
       .category-filter {
         justify-content: flex-start;
         overflow-x: auto;
         padding-bottom: 0.5rem;
         scrollbar-width: none;
       }
-
-      .category-filter::-webkit-scrollbar {
-        display: none;
-      }
-
-      .content-tabs {
-        width: 100%;
-      }
-
-      .subscriptions-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-      }
+      .category-filter::-webkit-scrollbar { display: none; }
+      .content-tabs { width: 100%; }
+      .subscriptions-header { flex-direction: column; align-items: flex-start; }
     }
-
     @media (max-width: 480px) {
-      .video-grid {
-        grid-template-columns: 1fr;
-      }
+      .video-grid { grid-template-columns: 1fr; }
     }
 
-    /* Animations */
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .video-card {
-      animation: fadeIn 0.3s ease-out;
-    }
-
-    /* Loading State */
-    .skeleton-loader {
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: var(--radius-md);
-    }
-
-    @keyframes shimmer {
-      0% {
-        background-position: -200% 0;
-      }
-      100% {
-        background-position: 200% 0;
-      }
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
+
 <body class="g-sidenav-show bg-gray-100">
   {% include 'accounts/navbar.html' %}
   {% include 'accounts/sidebar.html' %}
@@ -629,14 +514,14 @@
       <!-- Content Tabs -->
       <div class="content-tabs">
         <button class="tab-button active" data-target="explore-section">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; margin-right: 0.375rem; vertical-align: middle;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:.375rem;vertical-align:middle;">
             <circle cx="11" cy="11" r="8"></circle>
             <path d="m21 21-4.35-4.35"></path>
           </svg>
           Explore
         </button>
         <button class="tab-button" data-target="subscriptions-section">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; margin-right: 0.375rem; vertical-align: middle;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:.375rem;vertical-align:middle;">
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
             <circle cx="9" cy="7" r="4"></circle>
             <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -654,6 +539,7 @@
             <div class="category-item {% if selected_category == 'all' %}active{% endif %}"
                  data-category="all"
                  onclick="filterByCategory('all', this)">All</div>
+
             {% for category in categories %}
               <div class="category-item {% if selected_category == category.name|lower %}active{% endif %}"
                    data-category="{{ category.name|lower }}"
@@ -661,6 +547,7 @@
                 {{ category.name }}
               </div>
             {% endfor %}
+
             <button class="category-item add-custom-url" title="Add YouTube Video">+</button>
           </div>
         </div>
@@ -707,9 +594,11 @@
                     </div>
                   </div>
                 </div>
+
                 <div class="card-body">
                   <h5 class="card-title">{{ video.title }}</h5>
                   <p class="card-text">{{ video.description|truncatechars:100 }}</p>
+
                   <div class="channel-info">
                     <div class="channel-meta">
                       <a href="{% url 'channel_view' video.channel.id %}" class="channel-link">
@@ -719,6 +608,7 @@
                       </a>
                       <span class="time-ago">{{ video.time_ago }}</span>
                     </div>
+
                     <a href="#" class="toggle-log {% if video.is_in_log %}active{% endif %}"
                        data-id="{{ video.id }}"
                        data-action="{% if video.is_in_log %}remove{% else %}add{% endif %}">
@@ -732,7 +622,7 @@
             </div>
           {% empty %}
             <div class="no-results">
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 1rem; opacity: 0.3;">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 1rem; opacity:.3;">
                 <circle cx="11" cy="11" r="8"></circle>
                 <path d="m21 21-4.35-4.35"></path>
               </svg>
@@ -754,7 +644,6 @@
           </a>
         </div>
 
-        <!-- Video Grid for Subscriptions -->
         <div class="video-grid">
           {% for video in subscribed_media %}
             <div class="video-card">
@@ -777,9 +666,11 @@
                     </div>
                   </div>
                 </div>
+
                 <div class="card-body">
                   <h5 class="card-title">{{ video.title }}</h5>
                   <p class="card-text">{{ video.description|truncatechars:100 }}</p>
+
                   <div class="channel-info">
                     <div class="channel-meta">
                       <a href="{% url 'channel_view' video.channel.id %}" class="channel-link">
@@ -789,6 +680,7 @@
                       </a>
                       <span class="time-ago">{{ video.time_ago }}</span>
                     </div>
+
                     <a href="#" class="toggle-log {% if video.is_in_log %}active{% endif %}"
                        data-id="{{ video.id }}"
                        data-action="{% if video.is_in_log %}remove{% else %}add{% endif %}">
@@ -802,7 +694,7 @@
             </div>
           {% empty %}
             <div class="no-results">
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 1rem; opacity: 0.3;">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 1rem; opacity:.3;">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
                 <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -830,7 +722,7 @@
 
           this.classList.add('active');
           const targetSection = document.getElementById(this.dataset.target);
-          targetSection.classList.add('active');
+          if (targetSection) targetSection.classList.add('active');
         });
       });
 
@@ -839,22 +731,22 @@
       const urlInputContainer = document.querySelector('.custom-url-input');
       let isUrlInputVisible = false;
 
-      if (addButton) {
+      if (addButton && urlInputContainer) {
         addButton.addEventListener('click', function(e) {
           e.stopPropagation();
           isUrlInputVisible = !isUrlInputVisible;
           urlInputContainer.style.display = isUrlInputVisible ? 'block' : 'none';
         });
+
+        document.addEventListener('click', function(e) {
+          if (!urlInputContainer.contains(e.target) && e.target !== addButton) {
+            isUrlInputVisible = false;
+            urlInputContainer.style.display = 'none';
+          }
+        });
       }
 
-      document.addEventListener('click', function(e) {
-        if (urlInputContainer && !urlInputContainer.contains(e.target) && e.target !== addButton) {
-          isUrlInputVisible = false;
-          urlInputContainer.style.display = 'none';
-        }
-      });
-
-      // Category filtering
+      // Category filtering (fetch same page, swap grid)
       window.filterByCategory = function(category, element) {
         window.history.pushState({}, '', `?category=${category}`);
         document.querySelectorAll('.category-item:not(.add-custom-url)').forEach(i => i.classList.remove('active'));
@@ -866,8 +758,11 @@
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
             const newVideoGrid = doc.querySelector('#explore-section .video-grid');
-            document.querySelector('#explore-section .video-grid').innerHTML = newVideoGrid.innerHTML;
-            reattachToggleListeners();
+            const currentGrid = document.querySelector('#explore-section .video-grid');
+            if (newVideoGrid && currentGrid) {
+              currentGrid.innerHTML = newVideoGrid.innerHTML;
+              reattachToggleListeners();
+            }
           })
           .catch(error => console.error('Error:', error));
       };
@@ -894,11 +789,13 @@
                 this.dataset.action = action === 'add' ? 'remove' : 'add';
                 this.classList.toggle('active');
                 const svg = this.querySelector('svg path');
-                svg.setAttribute('d', action === 'add' ? 'M5 12h14' : 'M12 5v14M5 12h14');
+                if (svg) {
+                  svg.setAttribute('d', action === 'add' ? 'M5 12h14' : 'M12 5v14M5 12h14');
+                }
               }
             })
             .catch(error => console.error('Error:', error));
-          });
+          }, { once: true });
         });
       }
 
@@ -921,5 +818,14 @@
       }
     });
   </script>
+
+  <!-- Core JS Files -->
+  <script src="{% static 'accounts/js/core/popper.min.js' %}"></script>
+  <script src="{% static 'accounts/js/core/bootstrap.min.js' %}"></script>
+  <script src="{% static 'accounts/js/plugins/perfect-scrollbar.min.js' %}"></script>
+  <script src="{% static 'accounts/js/plugins/smooth-scrollbar.min.js' %}"></script>
+
+  <!-- Soft UI Dashboard -->
+  <script src="{% static 'accounts/js/soft-ui-dashboard.min.js?v=1.0.7' %}"></script>
 </body>
 </html>

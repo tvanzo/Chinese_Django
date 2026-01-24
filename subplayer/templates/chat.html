@@ -5,11 +5,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <!-- (Optional) keep consistent with your other pages -->
   <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
   <title>AI Tutor Chat</title>
 
-  <!-- Fonts & Icons (match the “good” template) -->
+  <!-- Fonts & Icons (match your “good” template) -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
   <link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet" />
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
@@ -26,11 +25,9 @@
     }
 
     /* =========================================================
-       ✅ Chat page forces: mini sidebar + NO logo (sidebar + top nav)
-       This is usually what causes “logo still shows”
-       ========================================================= */
+      ✅ Chat page forces: mini sidebar + NO logo (sidebar + top nav)
+    ========================================================= */
     @media (min-width: 769px) {
-      /* force mini width */
       body.chat-page #sidenav-main {
         width: 72px !important;
         max-width: 72px !important;
@@ -39,23 +36,18 @@
       body.chat-page .main-content {
         margin-left: 90px !important;
       }
-
-      /* hide the sidenav brand/logo area completely */
       body.chat-page #sidenav-main .navbar-brand,
       body.chat-page #sidenav-main .navbar-brand-img,
       body.chat-page #sidenav-main .navbar-brand span,
       body.chat-page #sidenav-main .sidenav-header {
         display: none !important;
       }
-
-      /* hide the “toggle” button that can expand sidebar (if you have one) */
       body.chat-page #sidebar-toggle-btn,
       body.chat-page .sidenav-toggler {
         display: none !important;
       }
     }
 
-    /* If your TOP navbar has a logo you also want hidden on chat page */
     body.chat-page nav.navbar-main .navbar-brand,
     body.chat-page nav.navbar-main .navbar-brand-img,
     body.chat-page nav.navbar-main .navbar-brand span {
@@ -63,8 +55,8 @@
     }
 
     /* =========================================================
-       Chat Layout
-       ========================================================= */
+      Chat Layout
+    ========================================================= */
     .chat-page-wrapper {
       max-width: 1200px;
       margin: 0 auto;
@@ -87,8 +79,8 @@
     }
 
     /* =========================================================
-       Desktop Chat History (left column)
-       ========================================================= */
+      Desktop Chat History (left column)
+    ========================================================= */
     .chat-history {
       width: 290px;
       border-right: 1px solid #e5e7eb;
@@ -190,8 +182,8 @@
     }
 
     /* =========================================================
-       Chat Main
-       ========================================================= */
+      Chat Main
+    ========================================================= */
     .chat-main {
       flex: 1;
       display: flex;
@@ -237,10 +229,12 @@
       transition: background 0.15s ease, box-shadow 0.15s ease;
       flex-shrink: 0;
     }
+
     .round-btn:hover {
       background: #f3f4f6;
       box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
     }
+
     .round-btn svg { width: 18px; height: 18px; display: block; }
 
     .round-btn.active {
@@ -248,7 +242,6 @@
       box-shadow: 0 0 0 4px rgba(59,130,246,0.18);
     }
 
-    /* Only show ONE desktop chat-history toggle */
     body:not(.chat-history-collapsed) #expandChatHistoryBtn { display: none !important; }
     body.chat-history-collapsed #collapseChatHistoryBtn { display: none !important; }
 
@@ -267,7 +260,6 @@
       border-bottom: 1px solid #f1f1f1;
       position: relative;
     }
-
     .message-container:hover .message-highlight-btn { opacity: 1; }
 
     .user-message-container { background-color: #ffffff; }
@@ -287,7 +279,6 @@
       flex-shrink: 0;
       font-size: 12px;
     }
-
     .user-avatar { background-color: #3b82f6; }
 
     .message {
@@ -301,8 +292,8 @@
     }
 
     /* =========================================================
-       ⭐ Highlight button for each message
-       ========================================================= */
+      ⭐ Highlight button for each message
+    ========================================================= */
     .message-highlight-btn {
       position: absolute;
       top: 12px;
@@ -431,12 +422,10 @@
       justify-content: center;
       border-radius: 10px;
     }
-
     .send-button:disabled {
       color: #a0aec0;
       cursor: not-allowed;
     }
-
     .send-button svg { width: 18px; height: 18px; }
 
     .perm-highlight {
@@ -458,8 +447,8 @@
     }
 
     /* =========================================================
-       Highlight Review Panel (desktop floating)
-       ========================================================= */
+      Highlight Review Panel (desktop floating)
+    ========================================================= */
     .highlight-review-panel {
       position: fixed;
       right: 24px;
@@ -534,8 +523,8 @@
     .start-review-btn:hover { background: #2563eb; }
 
     /* =========================================================
-       Mobile: Chat history drawer
-       ========================================================= */
+      Mobile: Chat history drawer
+    ========================================================= */
     .drawer-backdrop {
       position: fixed;
       inset: 0;
@@ -589,8 +578,8 @@
     }
 
     /* =========================================================
-       Responsive rules
-       ========================================================= */
+      Responsive rules
+    ========================================================= */
     @media (max-width: 992px) {
       .chat-page-wrapper { padding: 10px 8px 12px; height: auto; }
       .highlight-review-panel { right: 8px; left: 8px; width: auto; }
@@ -613,8 +602,8 @@
     }
 
     /* =========================================================
-       Categories footer + modal
-       ========================================================= */
+      Categories footer + modal
+    ========================================================= */
     .chat-history-categories-footer {
       border-top: 1px solid #e5e5e5;
       padding: 10px 10px 12px;
@@ -807,8 +796,8 @@
     .chat-category-btn-primary:hover { background: #2563eb; }
 
     /* =========================================================
-       Sitewide sidebar mobile overlay helpers (if your sidebar.html uses these)
-       ========================================================= */
+      Sitewide sidebar mobile overlay helpers
+    ========================================================= */
     .site-sidenav-backdrop,
     .site-sidenav-righttap { display: none; }
 
@@ -835,7 +824,6 @@
     }
 
     @media (max-width: 768px) {
-      /* On mobile, keep sidebar off-canvas unless opened */
       #sidenav-main {
         transform: translateX(-110%) !important;
         transition: transform 0.22s ease !important;
@@ -845,96 +833,177 @@
         transform: translateX(0) !important;
       }
     }
+
     /* =========================================================
-   Chat page: make Soft UI sidebar look like other pages
-   (white card, border, shadow) + keep mini width on desktop
-   Copy/paste this whole block into your chat template <style>
-   ========================================================= */
+      Chat page: make Soft UI sidebar look like other pages
+    ========================================================= */
+    body.chat-page #sidenav-main {
+      background: #ffffff !important;
+      border: 1px solid rgba(0, 0, 0, 0.08) !important;
+      border-radius: 16px !important;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08) !important;
+      margin: 12px 0 12px 12px !important;
+    }
 
-/* --- 1) Restore the Soft UI “card” look on the site sidebar --- */
-body.chat-page #sidenav-main {
-  background: #ffffff !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  border-radius: 16px !important;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08) !important;
+    body.chat-page .sidenav,
+    body.chat-page aside,
+    body.chat-page #sidenav-main.sidenav {
+      background: transparent;
+    }
 
-  /* mimic Soft UI spacing (my-3 ms-3) */
-  margin: 12px 0 12px 12px !important;
+    body.chat-page #sidenav-main.fixed-start {
+      top: 0 !important;
+      height: calc(100vh - 24px) !important;
+    }
+
+    @media (min-width: 769px) {
+      body.chat-page #sidenav-main {
+        width: 72px !important;
+        min-width: 72px !important;
+        max-width: 72px !important;
+      }
+      body.chat-page .main-content {
+        margin-left: 90px !important;
+      }
+      body.chat-page #sidebar-toggle-btn {
+        display: none !important;
+      }
+      body.chat-page #sidenav-main .navbar-brand,
+      body.chat-page #sidenav-main .sidenav-header,
+      body.chat-page #sidenav-main .brand-logo,
+      body.chat-page #sidenav-main .navbar-brand-img,
+      body.chat-page #sidenav-main .navbar-brand span {
+        display: none !important;
+      }
+      body.chat-page #sidenav-main .navbar-nav .nav-link {
+        justify-content: center !important;
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+      }
+      body.chat-page #sidenav-main .nav-link-text,
+      body.chat-page #sidenav-main .sidenav-normal,
+      body.chat-page #sidenav-main .sidenav-mini-icon + span {
+        display: none !important;
+      }
+      body.chat-page #sidenav-main .icon {
+        margin-right: 0 !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body.chat-page #sidenav-main {
+        margin: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+    }
+
+    /* =========================================================
+      New Chat (ChatGPT/Poe style): centered composer
+    ========================================================= */
+    .chat-main { position: relative; }
+
+    .chat-main.new-chat-mode {
+      background: #f7f7f8;
+    }
+
+    .chat-main.new-chat-mode .chat-messages,
+    .chat-main.new-chat-mode .tip,
+    .chat-main.new-chat-mode .highlight-review-toggle {
+      display: none !important;
+    }
+
+    .chat-main.new-chat-mode .chat-header {
+      background: transparent;
+      border-bottom: none;
+    }
+
+    .chat-main.new-chat-mode .input-container {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      transform: translateY(-45%);
+      border-top: none;
+      background: transparent;
+      padding: 0 14px;
+    }
+
+    .chat-main.new-chat-mode .input-inner {
+      max-width: 760px;
+    }
+
+    .newchat-hero {
+      text-align: center;
+      margin-bottom: 14px;
+      padding: 0 6px;
+    }
+
+    .newchat-title {
+      font-size: 28px;
+      font-weight: 900;
+      color: #111827;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+
+    .newchat-subtitle {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #6b7280;
+      font-weight: 650;
+    }
+
+    .newchat-suggestions {
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .suggestion-chip {
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 900;
+      color: #111827;
+      cursor: pointer;
+      transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+    }
+
+    .suggestion-chip:hover {
+      background: #f3f4f6;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.10);
+      transform: translateY(-1px);
+    }
+
+    .chat-main.new-chat-mode .input-box {
+      border-radius: 16px;
+      padding: 12px 12px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.10);
+      border: 1px solid #e5e7eb;
+    }
+
+    .chat-main.new-chat-mode .chat-input {
+      font-size: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .chat-main.new-chat-mode .input-container {
+        top: 52%;
+        transform: translateY(-50%);
+        padding: 0 10px;
+      }
+      .newchat-title { font-size: 22px; }
+    }
+    /* Hide the new-chat prompt header once a conversation starts */
+.chat-main:not(.new-chat-mode) .newchat-hero {
+  display: none !important;
 }
-
-/* Make sure no global/other rules force transparent backgrounds */
-body.chat-page .sidenav,
-body.chat-page aside,
-body.chat-page #sidenav-main.sidenav {
-  background: transparent;
-}
-
-/* Optional: if your sidenav is “fixed-start”, ensure it stays visible */
-body.chat-page #sidenav-main.fixed-start {
-  top: 0 !important;
-  height: calc(100vh - 24px) !important; /* account for 12px top/bottom margin */
-}
-
-/* --- 2) Keep chat page sidebar collapsed on desktop (mini mode) --- */
-@media (min-width: 769px) {
-  body.chat-page #sidenav-main {
-    width: 72px !important;
-    min-width: 72px !important;
-    max-width: 72px !important;
-  }
-
-  /* Keep main content aligned with mini sidebar */
-  body.chat-page .main-content {
-    margin-left: 90px !important;
-  }
-
-  /* Hide the collapse toggle so users can’t expand it on chat page */
-  body.chat-page #sidebar-toggle-btn {
-    display: none !important;
-  }
-
-  /* If Soft UI shows brand/logo block inside sidenav, hide it */
-  body.chat-page #sidenav-main .navbar-brand,
-  body.chat-page #sidenav-main .sidenav-header,
-  body.chat-page #sidenav-main .brand-logo,
-  body.chat-page #sidenav-main .navbar-brand-img,
-  body.chat-page #sidenav-main .navbar-brand span {
-    display: none !important;
-  }
-
-  /* Center nav icons nicely in mini mode */
-  body.chat-page #sidenav-main .navbar-nav .nav-link {
-    justify-content: center !important;
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
-  }
-
-  /* Hide link text in mini mode */
-  body.chat-page #sidenav-main .nav-link-text,
-  body.chat-page #sidenav-main .sidenav-normal,
-  body.chat-page #sidenav-main .sidenav-mini-icon + span {
-    display: none !important;
-  }
-
-  /* Give icons a consistent size/feel */
-  body.chat-page #sidenav-main .icon {
-    margin-right: 0 !important;
-  }
-}
-
-/* --- 3) Mobile behavior: use your drawer, don’t force mini card styles --- */
-@media (max-width: 768px) {
-  body.chat-page #sidenav-main {
-    margin: 0 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    border: none !important;
-  }
-}
-
-/* =========================================================
-   END Chat page sidebar fixes
-   ========================================================= */
 
   </style>
 </head>
@@ -951,6 +1020,7 @@ body.chat-page #sidenav-main.fixed-start {
         <aside class="chat-history" id="chatHistory">
           <div class="chat-history-header">
             <div class="chat-history-title">Chats</div>
+
             <div style="display:flex; gap:8px; align-items:center;">
               <button class="round-btn" id="collapseChatHistoryBtn" aria-label="Collapse chat list" title="Collapse" type="button">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1023,7 +1093,7 @@ body.chat-page #sidenav-main.fixed-start {
         </aside>
 
         <!-- Chat Main -->
-        <section class="chat-main">
+        <section class="chat-main {% if not messages %}new-chat-mode{% endif %}" id="chatMain">
           <div class="chat-header">
             <!-- Mobile: open SITEWIDE sidebar drawer -->
             <button class="round-btn" id="siteSidenavOpenBtn" aria-label="Open menu" title="Menu" type="button">
@@ -1083,6 +1153,7 @@ body.chat-page #sidenav-main.fixed-start {
                 </div>
               {% endfor %}
             {% else %}
+              <!-- This will be hidden in new-chat-mode anyway -->
               <div class="message-container bot-message-container">
                 <div class="avatar">AI</div>
                 <div class="message bot-message chat-message-text">
@@ -1116,6 +1187,20 @@ body.chat-page #sidenav-main.fixed-start {
 
           <div class="input-container">
             <div class="input-inner">
+
+              <!-- New chat hero (centered like ChatGPT/Poe) -->
+              <div class="newchat-hero">
+                <div class="newchat-title">What do you want to learn today?</div>
+                <div class="newchat-subtitle">Ask anything — vocabulary, grammar, translation, or a quick quiz.</div>
+
+                <div class="newchat-suggestions">
+                  <button type="button" class="suggestion-chip" data-suggest="Explain this sentence in Chinese and give 3 similar examples: ">Explain + examples</button>
+                  <button type="button" class="suggestion-chip" data-suggest="Create a short quiz from this text (characters, pinyin, meaning): ">Make a quiz</button>
+                  <button type="button" class="suggestion-chip" data-suggest="Translate to English and keep it natural: ">Translate</button>
+                  <button type="button" class="suggestion-chip" data-suggest="Help me review my highlights with a mini test: ">Review highlights</button>
+                </div>
+              </div>
+
               <div class="input-box">
                 <textarea id="userInput"
                           class="chat-input"
@@ -1129,6 +1214,7 @@ body.chat-page #sidenav-main.fixed-start {
                   </svg>
                 </button>
               </div>
+
             </div>
           </div>
         </section>
@@ -1144,9 +1230,7 @@ body.chat-page #sidenav-main.fixed-start {
       <button id="closeReviewBtn" class="review-close-btn" type="button">&times;</button>
     </div>
     <div id="highlightCards" class="highlight-cards"></div>
-    <button id="startReviewBtn" class="start-review-btn" type="button">
-      Ask tutor about selected
-    </button>
+    <button id="startReviewBtn" class="start-review-btn" type="button">Ask tutor about selected</button>
   </div>
 
   <!-- Categories modal -->
@@ -1173,9 +1257,11 @@ body.chat-page #sidenav-main.fixed-start {
 
   <!-- Mobile Drawer (Chat history) -->
   <div id="drawerBackdrop" class="drawer-backdrop" aria-hidden="true"></div>
+
   <div id="drawerPanel" class="drawer-panel" aria-hidden="true">
     <div class="chat-history-header" style="border-bottom: 1px solid #e5e5e5;">
       <div class="chat-history-title">Chats</div>
+
       <button class="new-chat-btn" id="newChatBtnMobile" type="button">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
              viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -1244,9 +1330,7 @@ body.chat-page #sidenav-main.fixed-start {
   <div class="site-sidenav-backdrop" id="siteSidenavBackdrop" aria-hidden="true"></div>
   <div class="site-sidenav-righttap" id="siteSidenavRightTap" aria-hidden="true"></div>
 
-  <!-- =========================================================
-       ✅ Soft UI JS (THIS IS IMPORTANT to match your “good” template)
-       ========================================================= -->
+  <!-- ✅ Soft UI JS -->
   <script src="{% static 'accounts/js/core/popper.min.js' %}"></script>
   <script src="{% static 'accounts/js/core/bootstrap.min.js' %}"></script>
   <script src="{% static 'accounts/js/plugins/perfect-scrollbar.min.js' %}"></script>
@@ -1265,19 +1349,18 @@ body.chat-page #sidenav-main.fixed-start {
   </script>
 
   <script>
+    const SESSION_ID = {{ current_session.id|default:"null" }};
+
     const chatMessages = document.getElementById("chatMessages");
     const userInput = document.getElementById("userInput");
     const sendButton = document.getElementById("sendButton");
-
     const newChatBtn = document.getElementById("newChatBtn");
     const newChatBtnMobile = document.getElementById("newChatBtnMobile");
-
     const reviewHighlightsBtn = document.getElementById("reviewHighlightsBtn");
     const reviewPanel = document.getElementById("highlightReviewPanel");
     const closeReviewBtn = document.getElementById("closeReviewBtn");
     const highlightCardsEl = document.getElementById("highlightCards");
     const startReviewBtn = document.getElementById("startReviewBtn");
-
     const collapseChatHistoryBtn = document.getElementById("collapseChatHistoryBtn");
     const expandChatHistoryBtn = document.getElementById("expandChatHistoryBtn");
 
@@ -1299,14 +1382,18 @@ body.chat-page #sidenav-main.fixed-start {
     const toggleTranslateBtn = document.getElementById("toggleTranslateBtn");
     let translateMode = false;
 
+    /* New chat mode exit helper */
+    const chatMain = document.getElementById("chatMain");
+    function exitNewChatModeIfNeeded() {
+      if (chatMain && chatMain.classList.contains("new-chat-mode")) {
+        chatMain.classList.remove("new-chat-mode");
+      }
+    }
+
     function setTranslateMode(on) {
       translateMode = !!on;
       if (toggleTranslateBtn) toggleTranslateBtn.classList.toggle("active", translateMode);
-
-      userInput.placeholder = translateMode
-        ? "Translate: paste text here…"
-        : "Message your AI tutor...";
-
+      userInput.placeholder = translateMode ? "Translate: paste text here…" : "Message your AI tutor...";
       try { localStorage.setItem("translateMode", translateMode ? "1" : "0"); } catch (e) {}
     }
 
@@ -1413,7 +1500,6 @@ body.chat-page #sidenav-main.fixed-start {
     document.addEventListener("click", (e) => {
       if (!isMobile()) return;
       if (!document.body.classList.contains("site-sidenav-open")) return;
-
       const sidenav = document.getElementById("sidenav-main");
       const a = e.target.closest("a");
       if (a && sidenav && sidenav.contains(a)) closeSiteSidenav();
@@ -1456,26 +1542,35 @@ body.chat-page #sidenav-main.fixed-start {
 
     sendButton.addEventListener("click", sendMessage);
 
+    /* Suggestion chips -> fill input */
+    document.querySelectorAll(".suggestion-chip").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const t = btn.getAttribute("data-suggest") || "";
+        userInput.value = t;
+        userInput.dispatchEvent(new Event("input"));
+        userInput.focus();
+        try { userInput.setSelectionRange(userInput.value.length, userInput.value.length); } catch (e) {}
+      });
+    });
+
     /* =========================================================
-       ✅ HIGHLIGHTS STATE (FIXED)
-       ========================================================= */
+      ✅ HIGHLIGHTS STATE
+    ========================================================= */
     let allHighlights = [];
     let selectionHighlights = [];
-
     const messageHighlightIdByMessageId = new Map(); // msgId(string) -> highlightId(string)
-    const messageHighlightedIds = new Set();          // msgId(string)
+    const messageHighlightedIds = new Set(); // msgId(string)
 
     async function fetchAllHighlights() {
+      if (!SESSION_ID) return;
       try {
-        const res = await fetch("/chat/api/highlights/?session={{ current_session.id }}", {
+        const res = await fetch(`/chat/api/highlights/?session=${SESSION_ID}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
         if (!res.ok) return;
-
         const data = await res.json();
         allHighlights = Array.isArray(data) ? data : [];
-
         messageHighlightIdByMessageId.clear();
         messageHighlightedIds.clear();
         selectionHighlights = [];
@@ -1528,11 +1623,10 @@ body.chat-page #sidenav-main.fixed-start {
     }
 
     function appendMessage({ role, text, messageId }) {
-      const container = document.createElement("div");
-      container.className =
-        "message-container " +
-        (role === "user" ? "user-message-container" : "bot-message-container");
+      exitNewChatModeIfNeeded();
 
+      const container = document.createElement("div");
+      container.className = "message-container " + (role === "user" ? "user-message-container" : "bot-message-container");
       if (messageId) container.setAttribute("data-message-id", messageId);
 
       const avatar = document.createElement("div");
@@ -1540,10 +1634,7 @@ body.chat-page #sidenav-main.fixed-start {
       avatar.textContent = role === "user" ? "You" : "AI";
 
       const msg = document.createElement("div");
-      msg.className =
-        "message " +
-        (role === "user" ? "user-message" : "bot-message") +
-        " chat-message-text";
+      msg.className = "message " + (role === "user" ? "user-message" : "bot-message") + " chat-message-text";
       msg.textContent = text;
 
       container.appendChild(avatar);
@@ -1556,13 +1647,13 @@ body.chat-page #sidenav-main.fixed-start {
         highlightBtn.setAttribute("aria-label", "Highlight this response");
         highlightBtn.setAttribute("title", "Highlight this response");
         if (messageId) highlightBtn.setAttribute("data-message-id", messageId);
+
         highlightBtn.innerHTML = `
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
           </svg>
         `;
         container.appendChild(highlightBtn);
-
         highlightBtn.addEventListener("click", handleMessageHighlight);
 
         if (messageId && messageHighlightedIds.has(String(messageId))) {
@@ -1625,7 +1716,7 @@ body.chat-page #sidenav-main.fixed-start {
             message,
             mode: mode || (translateMode ? "translate" : "normal"),
             target: "english",
-            session_id: {{ current_session.id }},
+            session_id: SESSION_ID,
           }),
         });
 
@@ -1673,6 +1764,7 @@ body.chat-page #sidenav-main.fixed-start {
     }
 
     async function createMessageHighlight(messageId, text) {
+      if (!SESSION_ID) return null;
       try {
         const res = await fetch("/chat/api/highlights/", {
           method: "POST",
@@ -1681,7 +1773,7 @@ body.chat-page #sidenav-main.fixed-start {
             "X-CSRFToken": CSRF_TOKEN,
           },
           body: JSON.stringify({
-            session_id: {{ current_session.id }},
+            session_id: SESSION_ID,
             message_id: messageId,
             text: (text || "").trim()
           }),
@@ -1703,10 +1795,8 @@ body.chat-page #sidenav-main.fixed-start {
           messageHighlightIdByMessageId.set(String(messageId), String(data.id));
           messageHighlightedIds.add(String(messageId));
         }
-
         allHighlights.push(data);
         return data;
-
       } catch (e) {
         console.error("Network error creating highlight:", e);
         alert("Network error. Please check your connection.");
@@ -1744,7 +1834,6 @@ body.chat-page #sidenav-main.fixed-start {
       if (!messageId || !messageEl) return;
 
       const isHighlighted = messageHighlightedIds.has(String(messageId));
-
       if (isHighlighted) {
         const success = await removeMessageHighlight(messageId);
         if (success) btn.classList.remove("highlighted");
@@ -1753,7 +1842,6 @@ body.chat-page #sidenav-main.fixed-start {
         const created = await createMessageHighlight(messageId, text);
         if (created) btn.classList.add("highlighted");
       }
-
       updateHighlightButtons();
     }
 
@@ -1763,6 +1851,7 @@ body.chat-page #sidenav-main.fixed-start {
 
     /* Selection highlights */
     async function createChatHighlight(text) {
+      if (!SESSION_ID) return null;
       try {
         const res = await fetch("/chat/api/highlights/", {
           method: "POST",
@@ -1771,12 +1860,13 @@ body.chat-page #sidenav-main.fixed-start {
             "X-CSRFToken": CSRF_TOKEN,
           },
           body: JSON.stringify({
-            session_id: {{ current_session.id }},
+            session_id: SESSION_ID,
             text
           }),
         });
 
         const data = await res.json();
+
         if (!res.ok) {
           if (data && data.limit_reached) {
             alert("You've reached your daily highlight limit (3 for free users). Upgrade for unlimited!");
@@ -1800,7 +1890,6 @@ body.chat-page #sidenav-main.fixed-start {
           headers: { "X-CSRFToken": CSRF_TOKEN },
         });
         if (!res.ok) return false;
-
         await fetchAllHighlights();
         return true;
       } catch (e) {
@@ -1824,7 +1913,6 @@ body.chat-page #sidenav-main.fixed-start {
     async function highlightSelectionCreate() {
       const selection = window.getSelection();
       if (!selection || !selection.rangeCount) return;
-
       const text = selection.toString().trim();
       if (!text) return;
 
@@ -1852,7 +1940,6 @@ body.chat-page #sidenav-main.fixed-start {
     async function highlightSelectionRemoveIfInside() {
       const selection = window.getSelection();
       if (!selection || !selection.rangeCount) return false;
-
       const range = selection.getRangeAt(0);
       if (!range) return false;
 
@@ -1866,17 +1953,14 @@ body.chat-page #sidenav-main.fixed-start {
       if (!hid) return false;
 
       try { selection.removeAllRanges(); } catch (e) {}
-
       const ok = await deleteHighlightById(hid);
       return ok;
     }
 
     document.addEventListener("keydown", async function (e) {
       if (e.key !== "Shift") return;
-
       const removed = await highlightSelectionRemoveIfInside();
       if (removed) return;
-
       await highlightSelectionCreate();
     });
 
@@ -1887,6 +1971,7 @@ body.chat-page #sidenav-main.fixed-start {
     chatMessages.addEventListener("mousedown", () => {
       chatMessages.classList.add("highlight-mode");
     });
+
     document.addEventListener("mouseup", () => {
       chatMessages.classList.remove("highlight-mode");
     });
@@ -1894,7 +1979,6 @@ body.chat-page #sidenav-main.fixed-start {
     /* Review Panel */
     function renderHighlightCards() {
       highlightCardsEl.innerHTML = "";
-
       if (!allHighlights.length) {
         const empty = document.createElement("div");
         empty.className = "chat-history-empty";

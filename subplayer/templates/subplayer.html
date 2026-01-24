@@ -1,41 +1,32 @@
- {% block content %}
+{% block content %}
 {% load static %}
 
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en">
 <head>
-
 <meta charset="UTF-8">
-
-  <!-- Fonts and icons -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
-  <!-- Nucleo Icons -->
-  <link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet">
-  <link href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet">
-  <!-- Font Awesome Icons -->
-  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-
-  <!-- CSS Files -->
-  <link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
-
+<link rel="icon" type="image/svg+xml" href="{% static 'accounts/img/ele.png' %}">
 <title>Chinese Log</title>
+
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
+<link href="{% static 'accounts/css/nucleo-icons.css' %}" rel="stylesheet">
+<link href="{% static 'accounts/css/nucleo-svg.css' %}" rel="stylesheet">
+<script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+<link id="pagestyle" href="{% static 'accounts/css/soft-ui-dashboard.css' %}" rel="stylesheet">
+
+<meta name="csrf-token" content="{{ csrf_token }}">
 
 <style>
 body {
   margin: 0;
-  transition: padding-top 0.3s ease-in-out; /* For download notification bar */
+  transition: padding-top 0.3s ease-in-out;
 }
 
 .subplayer-page {
   background-color: #F9F8FA;
 }
 
-/* Ensure navbar stays above sidebars */
 .subplayer-page .navbar {
   z-index: 1001;
   position: fixed;
@@ -43,8 +34,6 @@ body {
   top: 0;
   left: 0;
 }
-
-/* ========== Subtitles / Highlights in player ========== */
 
 .subtitles-container span,
 #subtitles span {
@@ -76,7 +65,6 @@ body {
   color: #333;
 }
 
-/* Base subtitles container (will be refined later for modern look) */
 .subtitles-container {
   margin: 0 auto;
   max-height: 24vh;
@@ -91,8 +79,6 @@ body {
   box-sizing: border-box;
 }
 
-/* ========== Layout: dashboard / sidebars / media content (clean base) ========== */
-
 .dashboard {
   display: flex;
   flex-direction: row;
@@ -101,7 +87,6 @@ body {
   position: relative;
 }
 
-/* Base sidebar */
 .sidebar {
   height: 100vh;
   position: fixed;
@@ -113,14 +98,112 @@ body {
   transition: all 0.3s ease-in-out;
 }
 
-/* Left sidebar */
 .left-sidebar {
   left: 0;
-  width: 240px;
-  padding: 20px;
+  width: 250px;
+  background: white;
+  border-right: 1px solid #e9ecef;
+  box-shadow: 0 0 20px 0 rgba(0,0,0,.05);
+  transition: all 0.35s cubic-bezier(0.34, 1.61, 0.7, 1);
 }
 
-/* Right sidebar (modern look) */
+.left-sidebar .sidenav-header {
+  height: 90px;
+  padding: 1.5rem 1.5rem 0.5rem;
+  text-align: center;
+}
+
+.left-sidebar .navbar-brand img {
+  max-height: 50px;
+}
+
+.left-sidebar hr {
+  margin: 0.5rem 1rem;
+  border-color: rgba(0,0,0,.1);
+}
+
+.left-sidebar .navbar-nav {
+  padding: 0.5rem 0;
+}
+
+.left-sidebar .nav-item {
+  margin: 0.2rem 0;
+}
+
+.left-sidebar .nav-link {
+  padding: 0.675rem 1.625rem;
+  margin: 0 0.75rem;
+  border-radius: 0.5rem;
+  color: #8392ab;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+}
+
+.left-sidebar .nav-link i,
+.left-sidebar .nav-link svg {
+  margin-right: 0.875rem;
+  font-size: 1.25rem;
+  min-width: 24px;
+  text-align: center;
+}
+
+.left-sidebar .nav-link:hover {
+  background: rgba(203,12,159,0.08);
+  color: #cb0c9f;
+}
+
+.left-sidebar .nav-link.active {
+  background: linear-gradient(87deg, #cb0c9f 0%, #e91e63 100%);
+  color: white !important;
+  box-shadow: 0 4px 10px rgba(203,12,159,0.3);
+}
+
+.left-sidebar.collapsed {
+  width: 82px;
+}
+
+.left-sidebar.collapsed .nav-link span {
+  display: none;
+}
+
+.left-sidebar.collapsed .nav-link {
+  justify-content: center;
+  padding: 0.9rem;
+  margin: 0.3rem auto;
+  width: 60px;
+}
+
+.sidebar-toggle,
+.sidebar-expand {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sidebar-toggle:hover,
+.sidebar-expand:hover {
+  transform: translateX(-50%) scale(1.08);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.collapsed .sidebar-toggle { display: none; }
+.collapsed .sidebar-expand { display: flex; }
+
 .right-sidebar {
   right: 0;
   width: 240px;
@@ -137,21 +220,15 @@ body {
   transition: all 0.3s ease;
 }
 
-/* Media content in center (base) */
 .media-content {
   flex-grow: 1;
   padding: 20px;
   box-sizing: border-box;
-  margin-left: 260px;  /* 240 + 20 gap */
-  margin-right: 260px; /* 240 + 20 gap */
-  width: calc(100% - 520px);
-  transition:
-    margin-left 0.3s ease-in-out,
-    margin-right 0.3s ease-in-out,
-    width 0.3s ease-in-out;
+  margin-left: 270px;
+  margin-right: 260px;
+  width: calc(100% - 530px);
+  transition: margin-left 0.3s ease-in-out, margin-right 0.3s ease-in-out, width 0.3s ease-in-out;
 }
-
-/* ========== Video container (modern look) ========== */
 
 .video-container {
   margin: 0 auto;
@@ -161,8 +238,6 @@ body {
   width: 100%;
   max-width: calc(100% - 40px);
   box-sizing: border-box;
-
-  /* Modern styling */
   background-color: #020617;
   border-radius: 18px;
   box-shadow: 0 18px 35px rgba(15, 23, 42, 0.35);
@@ -172,16 +247,8 @@ iframe {
   width: 100%;
   height: 100%;
   border: none;
-}
-
-.video-container iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
   border-radius: 18px;
 }
-
-/* ========== Side nav (left) link states ========== */
 
 .nav-link {
   display: flex;
@@ -192,9 +259,7 @@ iframe {
   max-width: calc(100% - 8px);
   box-sizing: border-box;
   border-radius: 8px;
-  transition:
-    background-color 0.2s ease-in-out,
-    color 0.2s ease-in-out;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
 .nav-link .icon {
@@ -219,15 +284,13 @@ iframe {
   background-color: rgba(128, 128, 128, 0.1);
 }
 
-/* Slight right gap */
 .navbar-nav {
   padding-right: 8px;
 }
+
 .nav-item {
   margin-right: 8px;
 }
-
-/* ========== Sidebar toggles (left + right) ========== */
 
 .sidebar-header {
   position: relative;
@@ -237,76 +300,6 @@ iframe {
   justify-content: flex-start;
 }
 
-/* Generic toggle buttons */
-.sidebar-toggle,
-.sidebar-expand {
-  background-color: white;
-  border: 1px solid #e2e8f0;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  padding: 0;
-}
-
-/* Hover state */
-.sidebar-toggle:hover,
-.sidebar-expand:hover {
-  background-color: #f8fafc;
-  transform: scale(1.05);
-}
-
-.sidebar-toggle svg,
-.sidebar-expand svg {
-  width: 16px;
-  height: 16px;
-  stroke: #64748b;
-}
-
-/* Left sidebar toggle location (bottom-left) */
-.left-sidebar .sidebar-toggle,
-.left-sidebar .sidebar-expand {
-  position: absolute;
-  bottom: 20px;
-  left: 10px;
-}
-
-/* Right sidebar toggle location (top-right inside header) */
-.right-sidebar .sidebar-toggle {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-}
-
-/* Expand button for right sidebar fixed at top-right of viewport when collapsed */
-.right-sidebar .sidebar-expand {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  display: none;
-  z-index: 1001;
-}
-
-/* Visibility rules */
-.sidebar-expand {
-  display: none;
-}
-
-.collapsed .sidebar-toggle {
-  display: none;
-}
-
-.collapsed .sidebar-expand {
-  display: block;
-}
-
-/* ========== XP display + Study guide button (right sidebar header) ========== */
-
 .xp-container {
   display: flex;
   align-items: center;
@@ -314,7 +307,6 @@ iframe {
   width: 100%;
 }
 
-/* XP pill */
 #unique-xp-display {
   background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
   color: white;
@@ -343,7 +335,6 @@ iframe {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Study guide button */
 #create-study-sheet {
   background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
   color: white;
@@ -371,11 +362,11 @@ iframe {
   height: 22px;
   fill: white;
 }
+
 #create-study-sheet svg path {
   fill: white;
 }
 
-/* Tooltip specifically for study guide */
 .study-guide-tooltip {
   width: 80px;
   white-space: normal;
@@ -385,8 +376,6 @@ iframe {
   font-size: 12px;
   line-height: 1.4;
 }
-
-/* ========== Highlight list in right sidebar ========== */
 
 .highlight-list-container {
   flex-grow: 1;
@@ -456,8 +445,6 @@ iframe {
   border-left: 3px solid #3b82f6;
 }
 
-/* ========== Play-all button in right sidebar ========== */
-
 .bottom-buttons {
   margin-top: 20px;
   padding-bottom: 10px;
@@ -495,8 +482,6 @@ iframe {
   background: linear-gradient(135deg, #0056b3 0%, #007BFF 100%);
 }
 
-/* ========== Central buttons container under subtitles ========== */
-
 .buttons-container {
   display: flex;
   justify-content: center;
@@ -517,7 +502,6 @@ iframe {
   align-items: center;
 }
 
-/* Icon + dictionary buttons unified */
 .icon-button,
 .dictionary-button {
   width: 36px;
@@ -556,22 +540,18 @@ iframe {
 
 .icon-button:hover img,
 .dictionary-button:hover svg {
-  filter: brightness(0) saturate(100%) invert(40%) sepia(100%) saturate(2000%)
-          hue-rotate(200deg) brightness(90%) contrast(90%);
+  filter: brightness(0) saturate(100%) invert(40%) sepia(100%) saturate(2000%) hue-rotate(200deg) brightness(90%) contrast(90%);
 }
 
-/* Dictionary button active state */
 .dictionary-button.active {
   background-color: #eff6ff;
   border-color: #2563eb;
 }
+
 .dictionary-button.active svg {
   stroke: #2563eb;
 }
 
-/* ========== Loop button – modern look ========== */
-
-/* Override generic icon button for loop specifically */
 #loop-icon {
   width: 40px;
   height: 40px;
@@ -583,26 +563,19 @@ iframe {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    background 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   padding: 0;
 }
 
-/* Loop icon sizing */
 #loop-icon svg {
   width: 22px;
   height: 22px;
   max-width: 24px;
   max-height: 24px;
   fill: #0f172a;
-  transition:
-    transform 0.2s ease,
-    fill 0.2s ease;
+  transition: transform 0.2s ease, fill 0.2s ease;
 }
 
-/* Hover state */
 #loop-icon:hover {
   transform: translateY(-1px);
   box-shadow: 0 7px 16px rgba(15, 23, 42, 0.22);
@@ -612,7 +585,6 @@ iframe {
   transform: scale(1.05);
 }
 
-/* Loop active state (JS toggles .active) */
 .icon-button.active {
   background-color: #007BFF;
   border-color: #007BFF;
@@ -628,14 +600,12 @@ iframe {
   fill: #FFFFFF;
 }
 
-/* Highlight icon sizing */
 #highlight-icon svg {
   width: 20px;
   height: 20px;
   transition: all 0.3s ease;
 }
 
-/* Tooltip shared */
 .tooltip-text {
   visibility: hidden;
   width: 140px;
@@ -650,9 +620,7 @@ iframe {
   left: 50%;
   transform: translateX(-50%);
   opacity: 0;
-  transition:
-    opacity 0.3s,
-    visibility 0.3s;
+  transition: opacity 0.3s, visibility 0.3s;
   font-size: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
@@ -661,8 +629,6 @@ iframe {
   visibility: visible;
   opacity: 1;
 }
-
-/* ========== Limit popup / generic overlay ========== */
 
 .limit-popup {
   position: fixed;
@@ -758,8 +724,6 @@ iframe {
   background-color: #E5E7EB;
 }
 
-/* ========== Selection-required popup (for “select some text first”) ========== */
-
 .selection-required-popup {
   position: fixed;
   top: 50%;
@@ -830,13 +794,11 @@ iframe {
   background-color: #e5e7eb;
 }
 
-/* Generic overlay (used for limit + study guide + selection) */
 .overlay.active {
   opacity: 1;
   pointer-events: auto;
 }
 
-/* Study guide popup reuses .limit-popup styles */
 #study-guide-popup {
   position: fixed;
   top: 50%;
@@ -862,8 +824,6 @@ iframe {
   opacity: 1;
   pointer-events: auto;
 }
-
-/* ========== Zhongwen popup styles (dictionary) ========== */
 
 #zhongwen-window,
 #zhongwen-window * {
@@ -904,45 +864,54 @@ iframe {
   font-size: 32px;
   margin-right: 0.7em;
 }
+
 #zhongwen-window .w-pinyin {
   font-size: 18px;
 }
+
 #zhongwen-window .w-def {
   font-size: 16px;
 }
+
 #zhongwen-window .w-zhuyin {
   font-family: PMingLiU, 'Apple LiGothic', sans-serif;
   font-size: 16px;
 }
+
 #zhongwen-window .w-hanzi-small {
   font-size: 18px;
   margin-right: 0.7em;
 }
+
 #zhongwen-window .w-pinyin-small {
   font-size: 16px;
 }
+
 #zhongwen-window .w-def-small {
   font-size: 12px;
 }
+
 #zhongwen-window .w-zhuyin-small {
   font-family: PMingLiU, 'Apple LiGothic', sans-serif;
   font-size: 12px;
 }
+
 #zhongwen-window .grammar,
 #zhongwen-window .vocab {
   font-weight: bold;
 }
 
-/* Background color variants */
 #zhongwen-window.background-yellow,
 #zhongwen-window.background-yellow * {
   color: #000000;
   background: #ffffbf;
 }
+
 #zhongwen-window.background-yellow .w-hanzi,
 #zhongwen-window.background-yellow .w-hanzi-small {
   color: #7070e0;
 }
+
 #zhongwen-window.background-yellow .grammar,
 #zhongwen-window.background-yellow .vocab {
   color: #00008b;
@@ -953,14 +922,17 @@ iframe {
   color: #000000;
   background: #e6f4ff;
 }
+
 #zhongwen-window.background-lightblue .w-hanzi,
 #zhongwen-window.background-lightblue .w-hanzi-small {
   color: #3082bf;
 }
+
 #zhongwen-window.background-lightblue .w-pinyin,
 #zhongwen-window.background-lightblue .w-pinyin-small {
   color: #00b366;
 }
+
 #zhongwen-window.background-lightblue .grammar,
 #zhongwen-window.background-lightblue .vocab {
   color: #00008b;
@@ -971,14 +943,17 @@ iframe {
   color: #ffffff;
   background: #5c73b8;
 }
+
 #zhongwen-window.background-blue .w-hanzi,
 #zhongwen-window.background-blue .w-hanzi-small {
   color: #b7e7ff;
 }
+
 #zhongwen-window.background-blue .w-pinyin,
 #zhongwen-window.background-blue .w-pinyin-small {
   color: #c0ffc0;
 }
+
 #zhongwen-window.background-blue .grammar,
 #zhongwen-window.background-blue .vocab {
   color: #add8e6;
@@ -989,20 +964,22 @@ iframe {
   color: #ffffff;
   background: #000000;
 }
+
 #zhongwen-window.background-black .w-hanzi,
 #zhongwen-window.background-black .w-hanzi-small {
   color: #7070e0;
 }
+
 #zhongwen-window.background-black .w-pinyin,
 #zhongwen-window.background-black .w-pinyin-small {
   color: #20a020;
 }
+
 #zhongwen-window.background-black .grammar,
 #zhongwen-window.background-black .vocab {
   color: #add8e6;
 }
 
-/* Tone color schemes */
 #zhongwen-window.tonecolor-standard .tone1 { color: #ee363e; }
 #zhongwen-window.tonecolor-standard .tone2 { color: #f47c36; }
 #zhongwen-window.tonecolor-standard .tone3 { color: #73bb4f; }
@@ -1020,8 +997,6 @@ iframe {
 #zhongwen-window.tonecolor-hanping .tone3 { color: #f08000; }
 #zhongwen-window.tonecolor-hanping .tone4 { color: #d00020; }
 #zhongwen-window.tonecolor-hanping .tone5 { color: #a0a0a0; }
-
-/* ========== Top download notification bar ========== */
 
 #download-notification {
   background-color: #f8f9fa;
@@ -1045,22 +1020,22 @@ iframe {
   opacity: 1;
 }
 
-/* Scrollbar styling in right sidebar */
 .right-sidebar::-webkit-scrollbar {
   width: 6px;
 }
+
 .right-sidebar::-webkit-scrollbar-track {
   background: #f1f5f9;
 }
+
 .right-sidebar::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 3px;
 }
+
 .right-sidebar::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
-
-/* ========== Responsive breakpoints (base) ========== */
 
 @media (max-width: 992px) {
   .left-sidebar {
@@ -1092,196 +1067,8 @@ iframe {
     padding: 6px;
   }
 }
-
-/* =====================================================================
-   RESTORE ORIGINAL SIDEBAR / FULLSCREEN BEHAVIOR (OVERRIDES ABOVE)
-   ===================================================================== */
-
-/* Dashboard layout */
-.dashboard {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  min-height: 100vh;
-  position: relative;
-}
-
-/* Center media content with sidebars on both sides */
-.media-content {
-  flex-grow: 1;
-  padding: 20px;
-  margin-left: 260px;  /* 240px left + 20px gap */
-  margin-right: 260px; /* 240px right + 20px gap */
-  width: calc(100% - 520px);
-  transition:
-    margin-left 0.3s ease-in-out,
-    margin-right 0.3s ease-in-out,
-    width 0.3s ease-in-out;
-  box-sizing: border-box;
-}
-
-/* LEFT SIDEBAR base + collapsed width */
-.left-sidebar {
-  width: 240px; /* Default width */
-  transition: width 0.3s ease-in-out;
-}
-
-.left-sidebar.collapsed {
-  width: 40px;
-  overflow: hidden;
-}
-
-/* RIGHT SIDEBAR – base state (matching original) */
-.right-sidebar {
-  right: 0;
-  width: 240px;
-  height: 100vh;
-  position: fixed;
-  top: 0;
-  padding: 24px 16px;
-  overflow-y: auto;
-  background-color: #f8fafc;
-  box-sizing: border-box;
-  z-index: 1000;
-  transition: all 0.3s ease;
-  border-left: 1px solid #e2e8f0;
-  margin: 20px 20px 20px 0;
-  box-shadow: -4px 0 15px rgba(0, 0, 0, 0.05);
-}
-
-/* RIGHT SIDEBAR – collapsed (hide off-screen to the right) */
-.right-sidebar.collapsed {
-  transform: translateX(100%);
-  width: 0;
-  overflow: hidden;
-  padding: 0;
-  margin: 0;
-}
-
-/* When ONLY left sidebar is collapsed */
-.left-sidebar.collapsed:not(.right-sidebar.collapsed) ~ .media-content {
-  margin-left: 40px;   /* collapsed left */
-  margin-right: 250px; /* open right */
-  width: calc(100% - 290px);
-}
-
-/* When ONLY right sidebar is collapsed */
-.right-sidebar.collapsed ~ .media-content {
-  margin-right: 20px; /* keep left gap, no right sidebar */
-  width: calc(100% - 280px);
-}
-
-/* When BOTH sidebars are collapsed – maximize center area */
-.left-sidebar.collapsed + .right-sidebar.collapsed ~ .media-content {
-  margin-left: 60px; /* 40px collapsed + 20px gap */
-  margin-right: 20px; /* just gap on right */
-  width: calc(100% - 80px);
-}
-
-/* Video and subtitles sizing in normal mode (modern styling kept) */
-.video-container {
-  margin: 0 auto;
-  height: 70vh;
-  text-align: center;
-  overflow: hidden;
-  width: 100%;
-  max-width: calc(100% - 40px);
-  box-sizing: border-box;
-  background-color: #020617;
-  border-radius: 18px;
-  box-shadow: 0 18px 35px rgba(15, 23, 42, 0.35);
-}
-
-.subtitles-container {
-  margin: 16px auto 0;
-  max-height: 24vh;
-  text-align: center;
-  font-size: calc(1vw + 1vh);
-  overflow-y: auto;
-  padding: 12px 16px;
-  width: 100%;
-  max-width: calc(100% - 40px);
-  box-sizing: border-box;
-  background: #f9fafb;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
-}
-
-/* When BOTH sidebars collapsed – make video/subtitles larger */
-.left-sidebar.collapsed + .right-sidebar.collapsed ~ .media-content .video-container {
-  height: 85vh;
-  width: 100%;
-  max-width: calc(100% - 40px);
-  margin: 0 auto;
-}
-
-.left-sidebar.collapsed + .right-sidebar.collapsed ~ .media-content .subtitles-container {
-  max-height: 30vh;
-  width: 100%;
-  max-width: calc(100% - 40px);
-  margin: 12px auto 0;
-}
-
-/* When BOTH sidebars collapsed – vertical buttons bar on the right */
-.left-sidebar.collapsed + .right-sidebar.collapsed ~ .media-content .buttons-container {
-  position: fixed;
-  top: 50%;
-  right: 20px;
-  transform: translateY(-50%);
-  flex-direction: column;
-  width: auto;
-  max-width: 60px;
-  padding: 10px;
-  background-color: rgba(255, 255, 255, 0.9);
-  border-radius: 8px 0 0 8px;
-  box-shadow: -2px 0 4px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  margin: 0;
-}
-
-.left-sidebar.collapsed + .right-sidebar.collapsed ~ .media-content .buttons-container .button-group {
-  flex-direction: column;
-  align-items: center;
-  margin: 5px 0;
-}
-
-/* Responsive – original behavior override */
-@media (max-width: 992px) {
-  .left-sidebar {
-    display: none !important;
-  }
-  .media-content {
-    margin-left: 0 !important;
-  }
-}
-
-@media (max-width: 768px) {
-  .right-sidebar {
-    display: none !important;
-  }
-  .media-content {
-    margin-right: 0 !important;
-    margin-left: 0 !important;
-    width: 100% !important;
-  }
-}
-
-/* Hide left sidebar completely when collapsed (full-screen mode) */
-.left-sidebar.collapsed {
-  transform: translateX(-100%);
-  width: 0;
-  padding: 0;
-  margin: 0;
-  overflow: hidden;
-}
-
-
 </style>
-    <meta name="csrf-token" content="{{ csrf_token }}">
-
 </head>
-
 
 <body class="subplayer-page">
 <div id="download-notification" class="alert alert-light fade fixed-top" role="alert" style="z-index: 1060; display: none;">
@@ -1291,8 +1078,15 @@ iframe {
     </div>
   </div>
 </div>
+
 <div class="dashboard">
  <aside class="sidebar left-sidebar">
+    <div class="sidenav-header">
+      <a class="navbar-brand m-0" href="#">
+        <img src="{% static 'accounts/img/ele.png' %}" class="navbar-brand-img" alt="logo">
+      </a>
+    </div>
+    <hr class="horizontal dark mt-0">
     {% include 'accounts/sidebar.html' %}
  <button class="sidebar-toggle" onclick="toggleLeftSidebar('collapse')">
     <div class="toggle-button-inner">
@@ -1313,13 +1107,11 @@ iframe {
 <aside class="sidebar right-sidebar">
     <div class="sidebar-header">
         <div class="xp-container d-flex align-items-center">
-            <!-- XP Button -->
             <div class="btn btn-purple btn-sm mb-0 d-flex align-items-center compact-btn" id="unique-xp-display">
                 <div class="unique-xp-circle d-flex align-items-center justify-content-center me-2">XP</div>
                 <span id="unique-xp-points">{{ total_points }}</span>
             </div>
 
-            <!-- Study Guide Button -->
             <div class="button-group">
                 <button id="create-study-sheet" title="Create Study Guide">
                     <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
@@ -1337,7 +1129,6 @@ iframe {
         </div>
     </div>
 
-    <!-- Highlight List -->
     <div class="highlight-list-container">
         <ul id="highlight-list">
             {% for highlight in highlights %}
@@ -1360,15 +1151,12 @@ iframe {
         </ul>
     </div>
 
-    <!-- Play All Button -->
     <div class="bottom-buttons">
         <div class="button-xp-container">
             <button id="play-all-btn" class="play-all-button">Play All Highlights</button>
         </div>
     </div>
 </aside>
-
-
 
 <div class="media-content">
     <audio id="audiofile" controls="controls" type="audio/mp3"></audio>
@@ -1377,7 +1165,6 @@ iframe {
     </div>
     <div class="subtitles-container" id="subtitles"></div>
     <div class="buttons-container">
-    <!-- Status Button -->
    <div class="button-group">
     <button class="icon-button" id="status-icon">
         <img src="{% static 'subplayer/status.png' %}" alt="Set Status">
@@ -1385,7 +1172,6 @@ iframe {
     <span class="tooltip-text" id="status-tooltip">Set Status</span>
 </div>
 
-    <!-- Loop Button -->
     <div class="button-group">
     <div id="loop-icon" class="icon-button" title="Loop">
         <svg viewBox="0 0 17 17" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#000000">
@@ -1397,17 +1183,13 @@ iframe {
     <span class="tooltip-text">Loop Mode: Select Text, Turn on Loop Mode (CMD Key)</span>
 </div>
 
-    <!-- Highlight Button -->
     <div class="button-group">
         <button class="icon-button" id="highlight-icon">
    <svg viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>highlight-filled</title> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="drop" fill="#000000" transform="translate(64.000000, 44.956885)"> <path d="M405.333333,381.709781 L362.666667,424.376448 L85.3333333,424.376448 L128,381.709781 L405.333333,381.709781 Z M41.168,299.372 L103.67,361.874 L42.6666667,392.376448 L1.42108547e-14,403.043115 L10.6666667,360.376448 L41.168,299.372 Z M61.1,191.304 L212.137,342.341 L206.971557,347.655494 L201.097332,347.365048 L194.94444,347.269241 C184.457401,347.271762 172.809254,348.085275 160,349.709781 L151.970104,350.837434 L144.123951,352.129117 L136.61735,353.518237 L127.387,355.421 L48.9491375,276.983016 C50.507182,270.709588 52.0860762,262.939495 53.3333333,253.709781 C55.8645145,234.979019 56.7941068,216.011107 56.1221103,196.806047 L59.4284876,193.08414 L61.1,191.304 Z M282.327442,7.10542736e-15 L403.006999,120.679557 L384.970948,143.928809 L352.415716,185.42913 L333.317316,209.393653 L316.302987,230.396289 L304.909911,244.204529 L291.542704,260.023864 L282.884971,269.944627 L275.399527,278.199329 L269.086373,284.787971 L254.094195,299.615469 L227.035,327.069 L75.976,176.01 L78.5389897,173.389008 L116.39305,135.764502 L128.060065,124.568671 L141.033549,112.687653 L152.352994,102.689504 L164.50858,92.2528346 L177.500305,81.3776459 L191.328171,70.0639374 L205.992177,58.3117091 L229.55595,39.8611422 L246.310307,27.0126145 L263.900804,13.7255671 L282.327442,7.10542736e-15 Z" id="Combined-Shape"> </path> </g> </g> </g></svg>
-
-
 </button>
         <span class="tooltip-text">Highlight Mode: Select Text Then Click Shift</span>
     </div>
 
-    <!-- Dictionary Button -->
     <div class="button-group">
        <button id="toggleDictionary" class="dictionary-button" onclick="toggleDictionary()">
     <svg width="36" height="36" viewBox="6 6 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1425,7 +1207,6 @@ iframe {
         <span class="tooltip-text">Dictionary</span>
     </div>
 
-    <!-- Toggle Sidebar Button -->
     <div class="button-group">
         <button class="icon-button" onclick="toggleSidebar()">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1445,9 +1226,9 @@ iframe {
     <div id="viewed-media-container"></div>
     <div id="highlight-display"></div>
 </div>
+
 <div id="media-status" data-status="{{ media_status }}"></div>
 
-<!-- Study Guide Popup -->
 <div id="study-guide-popup" class="limit-popup">
     <div class="popup-content">
         <div class="popup-header">
@@ -1468,8 +1249,9 @@ iframe {
     </div>
 </div>
 <div id="study-guide-overlay" class="overlay"></div>
+
 <script>
-    let dictionaryEnabled = false; // Track if the dictionary is enabled
+    let dictionaryEnabled = false;
 
     var media = JSON.parse('{{ media_json|escapejs }}');
     var mediaId = media.media_id;
@@ -1487,7 +1269,6 @@ iframe {
         document.getElementById('audiofile').style.display = 'none';
     }
 
-    // Setup Highlight Links
     function setupHighlightLinks() {
         const highlights = document.querySelectorAll('#highlight-list a');
         highlights.forEach(highlight => {
@@ -1501,7 +1282,6 @@ iframe {
         });
     }
 
-    // Toggle Sidebar (Both)
     function toggleSidebar() {
         const leftSidebar = document.querySelector('.left-sidebar');
         const rightSidebar = document.querySelector('.right-sidebar');
@@ -1510,8 +1290,8 @@ iframe {
         leftSidebar.classList.toggle('collapsed');
         rightSidebar.classList.toggle('collapsed');
 
-        mediaContent.style.marginLeft = leftSidebar.classList.contains('collapsed') ? '40px' : '240px';
-        mediaContent.style.marginRight = rightSidebar.classList.contains('collapsed') ? '0' : '250px';
+        mediaContent.style.marginLeft = leftSidebar.classList.contains('collapsed') ? '102px' : '270px';
+        mediaContent.style.marginRight = rightSidebar.classList.contains('collapsed') ? '0' : '260px';
 
         const leftCollapseButton = document.querySelector('.left-sidebar .sidebar-toggle');
         const leftExpandButton = document.querySelector('.left-sidebar .sidebar-expand');
@@ -1521,7 +1301,6 @@ iframe {
         localStorage.setItem('bothSidebars', leftSidebar.classList.contains('collapsed') ? 'collapsed' : 'expanded');
     }
 
-    // Toggle Left Sidebar (Individual Control)
     function toggleLeftSidebar(action) {
         const leftSidebar = document.querySelector('.left-sidebar');
         const collapseButton = document.querySelector('.left-sidebar .sidebar-toggle');
@@ -1532,15 +1311,15 @@ iframe {
         if (action === 'collapse') {
             leftSidebar.classList.add('collapsed');
             collapseButton.style.display = 'none';
-            expandButton.style.display = 'block';
-            mediaContent.style.marginLeft = '60px';
-            mediaContent.style.width = rightSidebar.classList.contains('collapsed') ? 'calc(100% - 80px)' : 'calc(100% - 320px)';
+            expandButton.style.display = 'flex';
+            mediaContent.style.marginLeft = '102px';
+            mediaContent.style.width = rightSidebar.classList.contains('collapsed') ? 'calc(100% - 122px)' : 'calc(100% - 342px)';
         } else if (action === 'expand') {
             leftSidebar.classList.remove('collapsed');
-            collapseButton.style.display = 'block';
+            collapseButton.style.display = 'flex';
             expandButton.style.display = 'none';
-            mediaContent.style.marginLeft = '260px';
-            mediaContent.style.width = rightSidebar.classList.contains('collapsed') ? 'calc(100% - 280px)' : 'calc(100% - 520px)';
+            mediaContent.style.marginLeft = '270px';
+            mediaContent.style.width = rightSidebar.classList.contains('collapsed') ? 'calc(100% - 290px)' : 'calc(100% - 530px)';
         }
 
         mediaContent.style.marginRight = rightSidebar.classList.contains('collapsed') ? '20px' : '260px';
@@ -1553,7 +1332,6 @@ iframe {
         }
     }
 
-    // Play All Highlights
     document.getElementById('play-all-btn').addEventListener('click', playAllHighlights);
 
     async function playAllHighlights() {
@@ -1597,14 +1375,13 @@ iframe {
         activeElement.classList.add('played-highlight', 'active-highlight');
     }
 
-    // Delete Highlight
     async function deleteHighlight(highlightId) {
         try {
             const response = await fetch(`/api/user/delete_highlight/${highlightId}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken') // Assuming csrftoken2 was a typo
+                    'X-CSRFToken': getCookie('csrftoken')
                 },
                 body: JSON.stringify({ highlight_id: highlightId }),
             });
@@ -1621,23 +1398,22 @@ iframe {
         }
     }
 
-    // Highlight Mode Toggle
    function toggleHighlightMode() {
-    const highlightSvgGroup = document.querySelector('#highlight-icon g#drop'); // Target the group with fill
+    const highlightSvgGroup = document.querySelector('#highlight-icon g#drop');
 
     document.addEventListener('keydown', function(event) {
         if (event.key === "Shift") {
-            highlightSvgGroup.setAttribute('fill', '#FFD700'); // Yellow color
+            highlightSvgGroup.setAttribute('fill', '#FFD700');
         }
     });
 
     document.addEventListener('keyup', function(event) {
         if (event.key === "Shift") {
-            highlightSvgGroup.setAttribute('fill', '#000000'); // Black color
+            highlightSvgGroup.setAttribute('fill', '#000000');
         }
     });
 }
-    // Status Functions
+
     function initializeStatusUI() {
         console.log('Initializing status UI');
         const mediaStatusElement = document.getElementById('media-status');
@@ -1729,7 +1505,6 @@ iframe {
         statusIcon.dataset.status = status;
     }
 
-    // Dictionary Functions
     function toggleDictionary() {
         const dictionaryButton = document.getElementById('toggleDictionary');
         dictionaryButton.classList.toggle('active');
@@ -1770,16 +1545,13 @@ iframe {
     }
 
     async function fetchDefinition(word) {
-        // Mock API call - replace with your actual dictionary API
         return new Promise(resolve => {
             setTimeout(() => {
                 resolve(`Definition of ${word} (mocked)`);
             }, 500);
         });
-        // Example: await fetch(`/api/dictionary/${word}/`).then(res => res.json());
     }
 
-    // Utility Function
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -1795,14 +1567,12 @@ iframe {
         return cookieValue;
     }
 
-    // DOMContentLoaded Event Listener
     document.addEventListener('DOMContentLoaded', function() {
         const leftSidebar = document.querySelector('.left-sidebar');
         const rightSidebar = document.querySelector('.right-sidebar');
         const mediaContent = document.querySelector('.media-content');
         const highlightList = document.getElementById('highlight-list');
 
-        // Restore Sidebar States
         const bothSidebarsState = localStorage.getItem('bothSidebars');
         const leftSidebarState = localStorage.getItem('leftSidebar');
         const rightSidebarState = localStorage.getItem('rightSidebar');
@@ -1813,11 +1583,11 @@ iframe {
 
         if (leftSidebarState === 'collapsed') {
             leftSidebar.classList.add('collapsed');
-            mediaContent.style.marginLeft = '60px';
+            mediaContent.style.marginLeft = '102px';
             document.querySelector('.left-sidebar .sidebar-toggle').style.display = 'none';
-            document.querySelector('.left-sidebar .sidebar-expand').style.display = 'block';
+            document.querySelector('.left-sidebar .sidebar-expand').style.display = 'flex';
         } else {
-            mediaContent.style.marginLeft = '260px';
+            mediaContent.style.marginLeft = '270px';
         }
 
         if (rightSidebarState === 'collapsed') {
@@ -1827,9 +1597,9 @@ iframe {
             mediaContent.style.marginRight = '260px';
         }
 
-        mediaContent.style.width = (leftSidebarState === 'collapsed' && rightSidebarState === 'collapsed') ? 'calc(100% - 80px)' :
-                                   (leftSidebarState === 'collapsed') ? 'calc(100% - 320px)' :
-                                   (rightSidebarState === 'collapsed') ? 'calc(100% - 280px)' : 'calc(100% - 520px)';
+        mediaContent.style.width = (leftSidebarState === 'collapsed' && rightSidebarState === 'collapsed') ? 'calc(100% - 122px)' :
+                                   (leftSidebarState === 'collapsed') ? 'calc(100% - 342px)' :
+                                   (rightSidebarState === 'collapsed') ? 'calc(100% - 290px)' : 'calc(100% - 530px)';
 
         const playerIframe = document.querySelector('#player iframe');
         if (playerIframe) {
@@ -1837,7 +1607,6 @@ iframe {
             playerIframe.style.height = '100%';
         }
 
-        // Highlight Deletion
         highlightList.addEventListener('click', function(event) {
             let deleteBtn = event.target.closest('.delete-highlight');
             if (deleteBtn) {
@@ -1845,13 +1614,11 @@ iframe {
                 const highlightId = deleteBtn.getAttribute('data-highlight-id');
                 deleteHighlight(highlightId).then(() => {
                     deleteBtn.closest('li').remove();
-                    // Assuming checkHighlightExistence() exists elsewhere
                 });
             }
         });
 
-        // Dictionary Hover
-        const contentArea = document.querySelector('.media-content'); // Adjust to your text container
+        const contentArea = document.querySelector('.media-content');
         contentArea.addEventListener('click', async function(e) {
             if (!dictionaryEnabled) return;
 
@@ -1871,13 +1638,12 @@ iframe {
             }
         });
 
-        // Initialize Features
         setupHighlightLinks();
         toggleHighlightMode();
         initializeStatusUI();
         attachSingleStatusIconEventListener();
     });
-// Function to show the study guide popup
+
 function showStudyGuidePopup() {
     const popup = document.getElementById('study-guide-popup');
     const overlay = document.getElementById('study-guide-overlay');
@@ -1885,7 +1651,6 @@ function showStudyGuidePopup() {
     overlay.classList.add('active');
 }
 
-// Function to hide the study guide popup
 function hideStudyGuidePopup() {
     const popup = document.getElementById('study-guide-popup');
     const overlay = document.getElementById('study-guide-overlay');
@@ -1893,14 +1658,11 @@ function hideStudyGuidePopup() {
     overlay.classList.remove('active');
 }
 
-// Function to handle the download action
 function downloadStudyGuide() {
-    // Implement your download logic here
     console.log('Downloading study guide...');
     hideStudyGuidePopup();
 }
 
-// Attach event listener to the study guide button
 document.getElementById('create-study-sheet').addEventListener('click', function(event) {
     event.preventDefault();
     showStudyGuidePopup();
@@ -1915,7 +1677,6 @@ document.getElementById('create-study-sheet').addEventListener('click', function
 {% endif %}
 <script>var DICT_BASE_PATH = "{% static 'subplayer/pop_dic/' %}";</script>
 </body>
-
 </html>
 
 {% endblock %}

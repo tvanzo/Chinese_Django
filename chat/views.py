@@ -3,6 +3,7 @@ import json
 import os
 import logging
 import requests
+from typing import Optional, List, Dict, Any
 
 from django.conf import settings
 from django.http import JsonResponse, HttpRequest, HttpResponse
@@ -16,6 +17,138 @@ from accounts.models import Subscription, ChatSession, ChatMessage, ChatCategory
 from subplayer.models import Highlight  # unified highlight model
 
 logger = logging.getLogger(__name__)
+
+
+# =========================
+# Helpers
+# =========================
+def _get_deepseek_api_key() -> Optional[str]:
+    return getattr(settings, "DEEPSEEK_API_KEY", None) or os.getenv("DEEPSEEK_API_KEY")
+
+
+def _sanitize_title(raw: str) -> str:
+    raw = (raw or "").strip()
+    raw = raw.strip().strip('"').strip("'").strip()
+    raw = raw.replace("\n", " ").replace("\r", " ").strip()
+    # remove trailing punctuation-ish
+    while raw and raw[-1] in ".!?:;，。！？：；":
+        raw = raw[:-1].strip()
+    # cap length
+    if len(raw) > 80:
+        raw = raw[:80].rsplit(" ", 1)[0].strip()
+    return raw
+
+
+def generate_session_title(api_key: str, convo: List[Dict[str, str]]) -> Optional[str]:
+    """
+    Generate a short ChatGPT-style title using a few early conversation messages.
+    convo: [{"role": "user"/"assistant", "content": "..."}]
+    """
+    try:
+        title_prompt = [
+            {
+                "role": "system",
+                "content": (
+                    "You generate concise chat titles.\n"
+                    "Return ONE title only.\n"
+                    "Rules:\n"
+                    "- 3 to 8 words\n"
+                    "- No quotes\n"
+                    "- No emojis\n"
+                    "- No trailing punctuation\n"
+                    "- Plain English\n"
+                    "- Capture the main topic, not greetings"
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    "Create a short title for this conversation:\n\n"
+                    + "\n\n".join([f"{m['role'].upper()}: {m['content']}" for m in convo if m.get("content")])
+                ),
+            },
+        ]
+
+        r = requests.post(
+            "https://api.deepseek.com/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": "deepseek-chat",
+                "messages": title_prompt,
+                "temperature": 0.2,
+                "stream": False,
+                "max_tokens": 24,
+            },
+            timeout=15,
+        )
+        r.raise_for_status()
+        data = r.json()
+        raw = (data["choices"][0]["message"]["content"] or "").strip()
+        title = _sanitize_title(raw)
+        return title or None
+
+    except Exception:
+        logger.exception("Title generation failed")
+        return None
+
+
+def call_deepseek_chat(api_key: str, model_messages: List[Dict[str, str]], temperature: float) -> str:
+    """
+    Calls DeepSeek chat completions and returns assistant content.
+    """
+    response = requests.post(
+        "https://api.deepseek.com/chat/completions",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "model": "deepseek-chat",
+            "messages": model_messages,
+            "stream": False,
+            "temperature": temperature,
+        },
+        timeout=30,
+    )
+    response.raise_for_status()
+    data = response.json()
+    return data["choices"][0]["message"]["content"].strip()
+
+
+def build_system_prompt(mode: str) -> tuple[str, float]:
+    mode = (mode or "normal").lower().strip()
+    if mode == "translate":
+        return (
+            "You are a professional, precise translator. "
+            "Your ONLY task is to provide the translation. "
+            "Rules you MUST follow strictly:\n"
+            "- Output ONLY the translation — nothing else\n"
+            "- NO explanations, NO greetings, NO notes, NO pinyin, NO chit-chat\n"
+            "- If input contains Chinese characters → translate to natural English\n"
+            "- If input is English or other → translate to natural simplified Chinese\n"
+            "- Preserve tone, swearing, names, numbers, punctuation exactly\n"
+            "- Keep formatting (line breaks, quotes) if present",
+            0.3,
+        )
+
+    if mode == "review":
+        return (
+            "You are a patient, upbeat Chinese language tutor reviewing previously "
+            "highlighted Chinese snippets. Use simple explanations, give 1-2 natural "
+            "examples. Include pinyin when useful. Keep answers clear and encouraging.",
+            0.7,
+        )
+
+    return (
+        "You are a patient, upbeat, encouraging Chinese language tutor. "
+        "Use simple, clear explanations and give 1-2 good example sentences. "
+        "Include pinyin (with tone marks) and brief English glosses when helpful. "
+        "Be friendly and supportive. Keep most answers in Chinese when appropriate.",
+        0.7,
+    )
 
 
 # =========================
@@ -49,7 +182,7 @@ def chat(request: HttpRequest) -> HttpResponse:
         .annotate(
             highlight_count=Count(
                 "chat_highlights",
-                filter=Q(chat_highlights__source="chat")
+                filter=Q(chat_highlights__source="chat"),
             )
         )
     )
@@ -105,7 +238,7 @@ def chat_api(request: HttpRequest) -> JsonResponse:
         user.username,
         mode,
         session_id,
-        user_msg[:80]
+        user_msg[:80],
     )
 
     # Resolve session
@@ -116,70 +249,37 @@ def chat_api(request: HttpRequest) -> JsonResponse:
     else:
         session = ChatSession.objects.filter(user=user).order_by("-updated_at").first()
         if not session:
-            session = ChatSession.objects.create(user=user, title="New Chat")
+            session = ChatSession.objects.create(user=user, title="")
 
     # Save user message
     ChatMessage.objects.create(session=session, role="user", content=user_msg)
 
-    # Select system prompt
-    if mode == "translate":
-        system_prompt = (
-            "You are a professional, precise translator. "
-            "Your ONLY task is to provide the translation. "
-            "Rules you MUST follow strictly:\n"
-            "- Output ONLY the translation — nothing else\n"
-            "- NO explanations, NO greetings, NO notes, NO pinyin, NO chit-chat\n"
-            "- If input contains Chinese characters → translate to natural English\n"
-            "- If input is English or other → translate to natural simplified Chinese\n"
-            "- Preserve tone, swearing, names, numbers, punctuation exactly\n"
-            "- Keep formatting (line breaks, quotes) if present"
-        )
-        temperature = 0.3
-    elif mode == "review":
-        system_prompt = (
-            "You are a patient, upbeat Chinese language tutor reviewing previously "
-            "highlighted Chinese snippets. Use simple explanations, give 1-2 natural "
-            "examples. Include pinyin when useful. Keep answers clear and encouraging."
-        )
-        temperature = 0.7
-    else:
-        system_prompt = (
-            "You are a patient, upbeat, encouraging Chinese language tutor. "
-            "Use simple, clear explanations and give 1-2 good example sentences. "
-            "Include pinyin (with tone marks) and brief English glosses when helpful. "
-            "Be friendly and supportive. Keep most answers in Chinese when appropriate."
-        )
-        temperature = 0.7
+    # Build system prompt + temperature
+    system_prompt, temperature = build_system_prompt(mode)
 
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_msg},
-    ]
-
-    api_key = getattr(settings, "DEEPSEEK_API_KEY", None) or os.getenv("DEEPSEEK_API_KEY")
+    api_key = _get_deepseek_api_key()
     if not api_key:
         logger.error("DEEPSEEK_API_KEY not configured")
         return JsonResponse({"error": "Server configuration error"}, status=500)
 
-    try:
-        response = requests.post(
-            "https://api.deepseek.com/chat/completions",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "model": "deepseek-chat",
-                "messages": messages,
-                "stream": False,
-                "temperature": temperature,
-            },
-            timeout=30,
-        )
-        response.raise_for_status()
-        data = response.json()
-        reply = data["choices"][0]["message"]["content"].strip()
+    # ✅ Include short chat history so the AI behaves like a real chat
+    # Keep it reasonably small to avoid cost + latency.
+    history_qs = (
+        session.messages.order_by("created_at")
+        .values("role", "content")
+    )
+    # last 20 messages is usually enough
+    history = list(history_qs)[-20:]
 
+    model_messages: List[Dict[str, str]] = [{"role": "system", "content": system_prompt}]
+    for m in history:
+        role = (m.get("role") or "").strip()
+        content = (m.get("content") or "").strip()
+        if role and content:
+            model_messages.append({"role": role, "content": content})
+
+    try:
+        reply = call_deepseek_chat(api_key, model_messages, temperature)
     except requests.Timeout:
         logger.error("DeepSeek API timeout")
         return JsonResponse({"error": "Request timeout. Please try again."}, status=504)
@@ -190,19 +290,43 @@ def chat_api(request: HttpRequest) -> JsonResponse:
     # Save assistant reply (and return its id)
     assistant_msg = ChatMessage.objects.create(session=session, role="assistant", content=reply)
 
-    # Update session
-    update_fields = ["updated_at"]
+    # Update session timestamp + title (ChatGPT-style title)
     session.updated_at = timezone.now()
-    if not session.title or session.title == "New Chat":
-        session.title = user_msg[:60].strip() + "..." if len(user_msg) > 60 else user_msg
+    update_fields = ["updated_at"]
+
+    existing_title = (session.title or "").strip()
+    is_untitled = existing_title in ("", "New Chat")
+
+    # Title policy:
+    # - Generate once early, when untitled/generic
+    # - Use first few messages as context (user + assistant, maybe 2 turns)
+    if is_untitled:
+        early = list(
+            session.messages.order_by("created_at").values("role", "content")[:6]
+        )
+        convo_for_title = [
+            {"role": m["role"], "content": (m["content"] or "").strip()}
+            for m in early
+            if (m.get("content") or "").strip()
+        ]
+
+        title = generate_session_title(api_key, convo_for_title)
+        if title:
+            session.title = title
+        else:
+            # Fallback: your old behavior
+            session.title = user_msg[:60].strip() + ("..." if len(user_msg) > 60 else "")
         update_fields.append("title")
+
     session.save(update_fields=update_fields)
 
-    return JsonResponse({
-        "reply": reply,
-        "mode_used": mode,
-        "message_id": assistant_msg.id,
-    })
+    return JsonResponse(
+        {
+            "reply": reply,
+            "mode_used": mode,
+            "message_id": assistant_msg.id,
+        }
+    )
 
 
 # =========================
@@ -262,8 +386,7 @@ def chat_highlights(request: HttpRequest) -> JsonResponse:
     # ----- Message highlight (star) -----
     if message_id:
         chat_message = (
-            ChatMessage.objects
-            .filter(id=message_id, session__user=user)
+            ChatMessage.objects.filter(id=message_id, session__user=user)
             .select_related("session")
             .first()
         )
@@ -279,11 +402,10 @@ def chat_highlights(request: HttpRequest) -> JsonResponse:
         existing = Highlight.objects.filter(
             user=user,
             source="chat",
-            chat_message=chat_message
+            chat_message=chat_message,
         ).first()
 
         if existing:
-            # return existing (front-end can treat as already highlighted)
             return JsonResponse(
                 {
                     "id": existing.id,
