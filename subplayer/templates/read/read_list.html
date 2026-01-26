@@ -211,87 +211,6 @@
       .section-title { font-size: 1.5rem; }
       .container-fluid { padding: 1rem; }
     }
-    /* =========================================================
-   Soft UI Sidebar Fix — Read page
-   Paste at END of <style>
-   ========================================================= */
-
-/* 1) Let Soft UI own layout spacing (your container is fine) */
-body.g-sidenav-show .main-content {
-  transition: margin-left 0.2s ease;
-}
-
-/* Expanded sidenav (default Soft UI) */
-body.g-sidenav-show:not(.g-sidenav-hidden) .main-content {
-  margin-left: 18rem !important; /* matches default expanded sidenav width */
-}
-
-/* Collapsed/mini sidenav */
-body.g-sidenav-show.g-sidenav-pinned .main-content,
-body.g-sidenav-show.g-sidenav-hidden .main-content,
-body.g-sidenav-show.navbar-vertical-collapsed .main-content {
-  margin-left: 6.5rem !important; /* matches mini sidenav feel */
-}
-
-/* 2) Restore the "white card" sidenav look */
-#sidenav-main,
-.sidenav.navbar-vertical {
-  background: #ffffff !important;
-  border: 1px solid rgba(226, 232, 240, 0.9) !important;
-  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08) !important;
-  border-radius: 16px !important;
-
-  /* key: give it breathing room from the viewport like other pages */
-  margin: 16px !important;
-  height: calc(100vh - 32px) !important;
-  overflow: hidden !important;
-}
-
-/* 3) Prevent your page gradient from making the sidebar look tinted */
-body {
-  background-attachment: fixed;
-}
-#sidenav-main * {
-  background-color: transparent;
-}
-
-/* 4) Make the inner scroll area behave nicely */
-#sidenav-scrollbar {
-  height: 100% !important;
-}
-#sidenav-main .navbar-collapse {
-  height: calc(100% - 72px) !important; /* leaves room for logo/top area */
-  overflow-y: auto !important;
-}
-
-/* 5) When collapsed, keep it clean (no weird spacing) */
-body.g-sidenav-pinned #sidenav-main,
-body.navbar-vertical-collapsed #sidenav-main {
-  width: 5.5rem !important;
-}
-
-/* Optional: hide large logo text in collapsed mode (icon still ok) */
-body.g-sidenav-pinned #sidenav-main .navbar-brand span,
-body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
-  opacity: 0 !important;
-  width: 0 !important;
-  overflow: hidden !important;
-}
-
-/* 6) Mobile: sidenav should overlay, not push content */
-@media (max-width: 991.98px) {
-  body.g-sidenav-show .main-content {
-    margin-left: 0 !important;
-  }
-
-  #sidenav-main,
-  .sidenav.navbar-vertical {
-    margin: 0 !important;
-    border-radius: 0 !important;
-    height: 100vh !important;
-  }
-}
-
   </style>
 </head>
 <body class="g-sidenav-show bg-gray-100">
@@ -302,20 +221,20 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
 
     <div class="container-fluid">
 
-      <!-- ==================== CURATED CHINESE ARTICLES ==================== -->
+      <!-- ==================== CURATED ARTICLES ==================== -->
       <div class="section-header">
         <h1 class="section-title">
           <i class="fas fa-book-open"></i>
-          Chinese Articles
+          Explore Curated Articles
         </h1>
         <p class="section-subtitle">
           Browse short Chinese texts and save new words to your notebook
         </p>
       </div>
 
-      {% if articles %}
+      {% if curated_articles %}
         <div class="article-grid">
-          {% for article in articles %}
+          {% for article in curated_articles %}
             <a href="{% url 'read_detail' article.slug %}">
               <div class="article-card">
                 <div class="article-header">
@@ -339,6 +258,12 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
             </a>
           {% endfor %}
         </div>
+
+        <!-- Show more button to load additional curated articles -->
+        <div class="text-center">
+          <a href="#" class="btn btn-outline-primary">Show More Curated Articles</a>
+        </div>
+
       {% else %}
         <div class="empty-state">
           <i class="fas fa-book"></i>
@@ -346,14 +271,14 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
         </div>
       {% endif %}
 
-      <!-- ==================== MY WEB HIGHLIGHTS ==================== -->
+      <!-- ==================== SAVED ARTICLES ==================== -->
       <div class="section-header" style="margin-top: 3rem;">
         <h1 class="section-title">
-          <i class="fas fa-globe"></i>
-          Web Highlights
+          <i class="fas fa-bookmark"></i>
+          Saved Articles
         </h1>
         <p class="section-subtitle">
-          Pages you highlighted anywhere on the internet
+          These are articles you saved from the web.
         </p>
       </div>
 
@@ -390,7 +315,7 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
       {% else %}
         <div class="empty-state">
           <i class="fas fa-highlighter"></i>
-          <p>No web highlights yet — start selecting text anywhere!</p>
+          <p>No saved articles yet — start selecting text anywhere!</p>
         </div>
       {% endif %}
 
@@ -404,11 +329,5 @@ body.navbar-vertical-collapsed #sidenav-main .navbar-brand span {
   <script src="{% static 'accounts/js/plugins/perfect-scrollbar.min.js' %}"></script>
   <script src="{% static 'accounts/js/plugins/smooth-scrollbar.min.js' %}"></script>
   <script src="{% static 'accounts/js/soft-ui-dashboard.min.js?v=1.0.7' %}"></script>
-  <script>
-    var win = navigator.platform.indexOf('Win') > -1;
-    if (win && document.querySelector('#sidenav-scrollbar')) {
-      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), { damping: '0.5' });
-    }
-  </script>
 </body>
 </html>

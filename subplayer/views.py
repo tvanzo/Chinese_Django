@@ -1567,6 +1567,7 @@ def web_highlight(request):
     }, status=201)
 
 # subplayer/views.py
+
 @login_required
 def read_list(request):
     # 1. Curated Chinese articles (the ones you add in admin, no creator)
@@ -1580,21 +1581,20 @@ def read_list(request):
         source_url__isnull=False
     ).order_by('-created_at')
 
-    # Attach highlight count to each web article (simple & fast)
-    for article in web_articles:
-        article.highlight_count = Highlight.objects.filter(
-            user=request.user,
-            source='web',
-            page_url=article.source_url
-        ).count()
+    # Fetch highlights count for each web article
+    web_articles = web_articles.annotate(
+        highlight_count=Count('highlights', filter=Q(highlights__user=request.user, highlights__source='web'))
+    )
 
     context = {
-        'articles': curated_articles,   # top section
-        'web_articles': web_articles,   # bottom section
+        'curated_articles': curated_articles,   # top section
+        'web_articles': web_articles,           # bottom section
     }
     return render(request, 'read/read_list.html', context)
 
 # Same file — add or replace read_detail
+@login_required
+@login_required
 @login_required
 def read_detail(request, slug):
     article = get_object_or_404(Article, slug=slug)
@@ -1603,13 +1603,18 @@ def read_detail(request, slug):
     if article.source_url:
         highlights = Highlight.objects.filter(
             user=request.user,
-            source='web',
-            page_url=article.source_url
+            source='web',  # 'web' for web highlights or 'read' for curated articles
+            page_url=article.source_url  # Ensure highlights are tied to this article's source URL
         ).order_by('-created_at')
     else:
-        # For curated articles you can show something else, or nothing
-        highlights = Highlight.objects.none()
+        # For curated articles, if no URL, fetch highlights related to the article by its title or slug
+        highlights = Highlight.objects.filter(
+            user=request.user,
+            source='read',  # 'read' for curated highlights
+            page_url=f"read://{slug}"  # or any unique identifier for curated articles
+        ).order_by('-created_at')
 
+    # Pass the article and highlights to the template
     return render(request, 'read/read_detail.html', {
         'article': article,
         'highlights': highlights,

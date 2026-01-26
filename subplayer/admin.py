@@ -227,3 +227,14 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Category, CategoryAdmin)
+from .models import Article
+
+class ArticleAdmin(admin.ModelAdmin):
+    list_display = ('title', 'created_at', 'created_by')
+    list_editable = ['created_by']  # Only editable fields, do not include 'title' in list_editable
+    list_display_links = ['title']  # Make 'title' clickable (i.e., a link)
+    search_fields = ('title', 'description')
+    prepopulated_fields = {'slug': ('title',)}
+
+
+admin.site.register(Article, ArticleAdmin)
